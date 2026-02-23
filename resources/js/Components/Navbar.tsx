@@ -33,15 +33,15 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-10 text-lg font-medium">
-          <a href="#beranda" className="hover:text-black/70 transition">
+          <Link href={route('beranda')} className="hover:text-black/70 transition">
             Beranda
-          </a>
-          <a href="#tentang" className="hover:text-black/70 transition">
+          </Link>
+          <Link href={route('about')} className="hover:text-black/70 transition">
             Tentang Kami
-          </a>
-          <a href="#layanan" className="hover:text-black/70 transition">
+          </Link>
+          <Link href={route('services')} className="hover:text-black/70 transition">
             Layanan
-          </a>
+          </Link>
         </div>
 
         {/* Desktop Auth */}
@@ -82,12 +82,12 @@ const Navbar = () => {
           <a href="#beranda" onClick={() => setIsOpen(false)}>
             Beranda
           </a>
-          <a href="#tentang" onClick={() => setIsOpen(false)}>
+          <Link href={route('about')} onClick={() => setIsOpen(false)}>
             Tentang Kami
-          </a>
-          <a href="#layanan" onClick={() => setIsOpen(false)}>
+          </Link>
+          <Link href={route('services')} onClick={() => setIsOpen(false)}>
             Layanan
-          </a>
+          </Link>
 
           {canRegister && (
             <Link href="/register" onClick={() => setIsOpen(false)}>

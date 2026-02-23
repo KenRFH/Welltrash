@@ -140,7 +140,7 @@ export default function Register() {
 
              {/* Footer */}
             <div className="w-full max-w-[1000px] mt-8">
-                 <Link href="/" className="text-black font-semibold hover:underline flex items-center gap-1">
+                 <Link href={route('beranda')} className="text-black font-semibold hover:underline flex items-center gap-1">
                     Kembali ke <span className="text-green-600">Beranda</span>
                 </Link>
             </div>

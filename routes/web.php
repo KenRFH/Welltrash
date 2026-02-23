@@ -11,13 +11,27 @@ use App\Http\Controllers\ProfileController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
+Route::get('/beranda', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
 
     ]);
-});
+})->name('beranda');
+
+Route::get('/tentang-kami', function () {
+    return Inertia::render('About', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('about');
+
+Route::get('/layanan', function () {
+    return Inertia::render('Services', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('services');
 
 /*
 |--------------------------------------------------------------------------

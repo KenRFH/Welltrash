@@ -4,6 +4,7 @@ import React from "react";
 import Why from "@/Components/Why";
 import Mitra from "@/Components/Mitra";
 import WasteFlow from "@/Components/WasteFlow";
+import Footer from "@/Components/Footer";
 
 const Welcome = () => {
     return (
@@ -115,6 +116,7 @@ const Welcome = () => {
             <Why />
             <WasteFlow />
             <Mitra />
+            <Footer />
         </>
     );
 };
