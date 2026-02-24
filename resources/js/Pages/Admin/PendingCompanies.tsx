@@ -1,0 +1,150 @@
+import { Head, useForm, Link } from '@inertiajs/react';
+import React from 'react';
+
+interface Company {
+    id: number;
+    company_name: string;
+    subscription_plan: string;
+    payment_evidence_path: string | null;
+    signed_mou_path: string | null;
+    user: {
+        name: string;
+        email: string;
+    };
+}
+
+interface Props {
+    companies: Company[];
+}
+
+export default function PendingCompanies({ companies }: Props) {
+    const { patch, delete: destroy, processing } = useForm();
+
+    const handleApprove = (e: React.FormEvent, id: number) => {
+        e.preventDefault();
+        patch(route('admin.companies.approve', id));
+    };
+
+    const handleReject = (e: React.FormEvent, id: number) => {
+        e.preventDefault();
+        if (confirm('Apakah Anda yakin ingin menolak dan menghapus pendaftaran ini?')) {
+            destroy(route('admin.companies.reject', id));
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col font-sans">
+            <Head title="Persetujuan Perusahaan | Admin Portal" />
+
+            {/* Navbar */}
+            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sticky top-0 z-50">
+                <div className="flex items-center mb-4 sm:mb-0">
+                   <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 tracking-tight">
+                       WellMaggot <span className="text-xl font-medium text-gray-400 ml-2">| Portal Admin</span>
+                   </span>
+                </div>
+                <div className="flex space-x-6">
+                    <Link href={route('admin.dashboard')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dasbor</Link>
+                    <Link href={route('admin.companies.pending')} className="text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 pb-1">Menunggu Persetujuan</Link>
+                    <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Keluar</Link>
+                </div>
+            </nav>
+
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+                {/* Decorative Elements */}
+                <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-br from-indigo-100 to-blue-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                
+                <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between border-b border-gray-200 pb-5">
+                    <div>
+                        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">Perusahaan Menunggu Persetujuan</h2>
+                        <p className="text-base text-gray-500 max-w-2xl text-shadow-sm">
+                            Tinjau pendaftaran perusahaan baru, verifikasi pembayaran, dan setujui akses masuk ke sistem.
+                        </p>
+                    </div>
+                    <div className="mt-4 sm:mt-0 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm border border-indigo-100">
+                        {companies.length} Menunggu
+                    </div>
+                </div>
+
+                <div className="bg-white/80 backdrop-blur-sm shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-3xl border border-gray-100 relative overflow-hidden">
+                    {companies.length === 0 ? (
+                        <div className="p-16 flex flex-col items-center justify-center text-center">
+                            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                                <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-1">Tidak Ada Pendaftaran</h3>
+                            <p className="text-gray-500">Saat ini tidak ada perusahaan yang menunggu persetujuan Anda.</p>
+                        </div>
+                    ) : (
+                        <ul role="list" className="divide-y divide-gray-100">
+                            {companies.map((company) => (
+                                <li key={company.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <div className="px-6 py-6 flex flex-col lg:flex-row lg:items-center">
+                                        <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                                            
+                                            {/* Company & User Info */}
+                                            <div className="mb-4 lg:mb-0 lg:pr-6 max-w-md">
+                                                <div className="flex flex-col">
+                                                    <h3 className="text-lg font-bold text-gray-900 truncate">{company.company_name}</h3>
+                                                    <p className="text-sm font-medium text-gray-500 mt-1">
+                                                        Oleh: <span className="text-gray-700">{company.user.name}</span> <span className="text-gray-400 font-normal">({company.user.email})</span>
+                                                    </p>
+                                                </div>
+                                                <div className="mt-3">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold leading-5 bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                                        Paket: {company.subscription_plan}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Embedded Documents */}
+                                            <div className="mb-6 lg:mb-0 flex-shrink-0 lg:mx-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Dokumen Terlampir</h4>
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm font-medium">
+                                                    {company.payment_evidence_path ? (
+                                                        <a href={`/storage/${company.payment_evidence_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-blue-600 hover:text-blue-800 border border-blue-100 hover:border-blue-300 hover:shadow-sm rounded-xl transition-all">
+                                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                            Lihat Pembayaran
+                                                        </a>
+                                                    ) : (
+                                                        <span className="flex items-center px-4 py-2 bg-gray-50 text-gray-400 border border-dashed border-gray-200 rounded-xl">Belum Ada Pembayaran</span>
+                                                    )}
+
+                                                    {company.signed_mou_path ? (
+                                                        <a href={`/storage/${company.signed_mou_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-indigo-600 hover:text-indigo-800 border border-indigo-100 hover:border-indigo-300 hover:shadow-sm rounded-xl transition-all">
+                                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                                            Lihat MOU
+                                                        </a>
+                                                    ) : (
+                                                        <span className="flex items-center px-4 py-2 bg-gray-50 text-gray-400 border border-dashed border-gray-200 rounded-xl">Belum Ada MOU</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Action Buttons */}
+                                        <div className="flex-shrink-0 flex items-center gap-3 lg:border-l lg:border-gray-100 lg:pl-6">
+                                            <form onSubmit={(e) => handleReject(e, company.id)} className="w-full sm:w-auto">
+                                                <button type="submit" disabled={processing} className="w-full sm:w-auto px-4 py-2.5 text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl font-bold text-sm flex items-center justify-center transition-colors disabled:opacity-50" title="Tolak Pendaftaran">
+                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                    Tolak
+                                                </button>
+                                            </form>
+
+                                            <form onSubmit={(e) => handleApprove(e, company.id)} className="w-full sm:w-auto">
+                                                <button type="submit" disabled={processing} className="w-full sm:w-auto px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 border border-transparent rounded-xl font-bold text-sm flex items-center justify-center shadow-sm transition-colors disabled:opacity-50" title="Setujui Pendaftaran">
+                                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                                    Setujui
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </main>
+        </div>
+    );
+}

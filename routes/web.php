@@ -33,6 +33,8 @@ Route::get('/layanan', function () {
     ]);
 })->name('services');
 
+use App\Http\Controllers\AdminController;
+
 /*
 |--------------------------------------------------------------------------
 | Admin / Owner Routes
@@ -48,7 +50,13 @@ Route::middleware(['auth', 'role:admin'])
             return Inertia::render('Admin/Dashboard');
         })->name('dashboard');
 
+        Route::get('/companies/pending', [AdminController::class, 'pendingCompanies'])->name('companies.pending');
+        Route::patch('/companies/{company}/approve', [AdminController::class, 'approveCompany'])->name('companies.approve');
+        Route::delete('/companies/{company}/reject', [AdminController::class, 'rejectCompany'])->name('companies.reject');
+
     });
+
+use App\Http\Controllers\CompanyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,9 +69,9 @@ Route::middleware(['auth', 'role:company'])
     ->name('company.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return Inertia::render('Company/Dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [CompanyController::class, 'dashboard'])->name('dashboard');
+        Route::get('/register', [CompanyController::class, 'register'])->name('register');
+        Route::post('/register', [CompanyController::class, 'store'])->name('store');
 
     });
 
