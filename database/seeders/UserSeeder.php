@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
             ['email' => 'driver@welltrash.com'],
             [
                 'name' => 'Driver User',
-                'password' => Hash::make('password'),
+                'password' => 'driver123',
                 'role' => 'driver',
                 'email_verified_at' => now(),
             ]
@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
             ['email' => 'company@welltrash.com'],
             [
                 'name' => 'Company User',
-                'password' => Hash::make('password'),
+                'password' => 'company123',
                 'role' => 'company',
                 'email_verified_at' => now(),
             ]

@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { Fragment } from 'react';
 import React from 'react';
 
@@ -11,17 +11,32 @@ const PartnersIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="cur
 
 interface Props {
     company: {
+        id: number;
         company_name: string;
         subscription_plan: string;
+        subscription_status: string;
     };
     auth: {
         user: {
             name: string;
         }
-    }
+    };
+    statistics: {
+        total_organic: number;
+        total_anorganic: number;
+        total_residue: number;
+    };
 }
 
-export default function Dashboard({ auth, company }: Props) {
+export default function Dashboard({ auth, company, statistics }: Props) {
+    const { post, processing } = useForm();
+    
+    const handleUnsubscribe = () => {
+        if (confirm('Apakah Anda yakin ingin membatalkan berlangganan? Anda akan kehilangan akses ke layanan ini dan harus mendaftar ulang jika ingin kembali.')) {
+            post(route('company.unsubscribe'));
+        }
+    };
+
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
             <Head title="Dasbor Perusahaan | WellMaggot" />
@@ -120,13 +135,32 @@ export default function Dashboard({ auth, company }: Props) {
                             
                             <div className="relative z-10 mb-6 sm:mb-0">
                                 <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Halo Mitra! 👋</h2>
-                                <p className="text-indigo-100 text-sm sm:text-base font-medium">Selamat datang kembali di dasbor WellMaggot.</p>
+                                <p className="text-indigo-100 text-sm sm:text-base font-medium mb-4">Selamat datang kembali di dasbor WellMaggot.</p>
+                                
+                                {company.subscription_status === 'cancellation_requested' && (
+                                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-yellow-400/20 text-yellow-100 border border-yellow-400/30">
+                                        Menunggu Proses Pembatalan Layanan
+                                    </span>
+                                )}
                             </div>
                             
-                            <button className="relative z-10 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm">
-                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                Unduh Laporan
-                            </button>
+                            <div className="relative z-10 flex flex-col sm:flex-row gap-3">
+                                <button className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm">
+                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    Unduh Laporan
+                                </button>
+
+                                {company.subscription_status === 'active' && (
+                                    <button 
+                                        onClick={handleUnsubscribe}
+                                        disabled={processing}
+                                        className="px-6 py-3 bg-red-500/80 hover:bg-red-600 backdrop-blur-sm border border-red-500 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm group disabled:opacity-50"
+                                    >
+                                        <svg className="w-5 h-5 mr-2 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                        Batalkan Layanan
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         
                         {/* Date Card */}
@@ -141,34 +175,61 @@ export default function Dashboard({ auth, company }: Props) {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 relative z-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-10">
                          {/* Organic Card */}
-                         <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-amber-100/50 flex items-center justify-between relative overflow-hidden group">
+                         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-amber-100/50 flex flex-col justify-between relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-amber-100 transition-colors"></div>
-                            <div className="relative z-10">
-                                <p className="text-sm font-bold text-gray-500 mb-1">Total Sampah Organik</p>
-                                <div className="flex items-baseline space-x-2">
-                                    <span className="text-4xl sm:text-5xl font-black text-gray-900">200</span>
-                                    <span className="text-xl font-bold text-amber-500">Kg</span>
+                            
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-2xl shadow-inner border border-amber-100 relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-transform">
+                                    🍞
                                 </div>
                             </div>
-                            <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center text-4xl shadow-inner border border-amber-100 relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-transform">
-                                🍞
+                            
+                            <div className="relative z-10">
+                                <p className="text-sm font-bold text-gray-500 mb-1">Total Organik</p>
+                                <div className="flex items-baseline space-x-2">
+                                    <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_organic).toLocaleString('id-ID')}</span>
+                                    <span className="text-lg font-bold text-amber-500">Kg</span>
+                                </div>
                             </div>
                         </div>
 
                         {/* Anorganic Card */}
-                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-teal-100/50 flex items-center justify-between relative overflow-hidden group">
+                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-teal-100/50 flex flex-col justify-between relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-teal-100 transition-colors"></div>
-                            <div className="relative z-10">
-                                <p className="text-sm font-bold text-gray-500 mb-1">Total Sampah Anorganik</p>
-                                <div className="flex items-baseline space-x-2">
-                                    <span className="text-4xl sm:text-5xl font-black text-gray-900">194</span>
-                                    <span className="text-xl font-bold text-teal-500">Kg</span>
+                            
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center text-2xl shadow-inner border border-teal-100 relative z-10 group-hover:scale-110 group-hover:-rotate-12 transition-transform">
+                                    🛍️
                                 </div>
                             </div>
-                            <div className="w-20 h-20 bg-teal-50 rounded-full flex items-center justify-center text-4xl shadow-inner border border-teal-100 relative z-10 group-hover:scale-110 group-hover:-rotate-12 transition-transform">
-                                🛍️
+
+                            <div className="relative z-10">
+                                <p className="text-sm font-bold text-gray-500 mb-1">Total Anorganik</p>
+                                <div className="flex items-baseline space-x-2">
+                                    <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_anorganic).toLocaleString('id-ID')}</span>
+                                    <span className="text-lg font-bold text-teal-500">Kg</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Residue Card */}
+                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-200/50 flex flex-col justify-between relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-gray-100 transition-colors"></div>
+                            
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl shadow-inner border border-gray-200 relative z-10 group-hover:scale-110 transition-transform">
+                                    🗑️
+                                </div>
+                            </div>
+
+                            <div className="relative z-10">
+                                <p className="text-sm font-bold text-gray-500 mb-1">Total Residu</p>
+                                <div className="flex items-baseline space-x-2">
+                                    <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_residue).toLocaleString('id-ID')}</span>
+                                    <span className="text-lg font-bold text-gray-400">Kg</span>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -6,9 +6,20 @@ export default function Register() {
         address: '',
         phone: '',
         subscription_plan: 'Basic',
+        pickup_schedule: [] as string[],
         payment_evidence: null as File | null,
         signed_mou: null as File | null,
     });
+
+    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+    const handleDayToggle = (day: string) => {
+        if (data.pickup_schedule.includes(day)) {
+            setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
+        } else {
+            setData('pickup_schedule', [...data.pickup_schedule, day]);
+        }
+    };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -130,6 +141,32 @@ export default function Register() {
                                     </select>
                                     {errors.subscription_plan && <p className="text-sm text-red-500 mt-1">{errors.subscription_plan}</p>}
                                 </div>
+                            </div>                            {/* Pickup Schedule */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Pilih Hari Pengambilan Sampah
+                                </label>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {daysOfWeek.map((day) => (
+                                        <label
+                                            key={day}
+                                            className={`flex items-center justify-center px-4 py-2 border rounded-xl cursor-pointer transition-all ${
+                                                data.pickup_schedule.includes(day)
+                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only"
+                                                checked={data.pickup_schedule.includes(day)}
+                                                onChange={() => handleDayToggle(day)}
+                                            />
+                                            <span className="text-sm font-medium">{day}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {errors.pickup_schedule && <p className="text-sm text-red-500 mt-1">{errors.pickup_schedule}</p>}
                             </div>
                         </div>
 

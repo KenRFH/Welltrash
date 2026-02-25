@@ -15,7 +15,9 @@ export default function Dashboard() {
                 </div>
                 <div className="flex space-x-6">
                     <Link href={route('admin.dashboard')} className="text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 pb-1">Dasbor</Link>
+                    <Link href={route('admin.companies.index')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Semua Perusahaan</Link>
                     <Link href={route('admin.companies.pending')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Menunggu Persetujuan</Link>
+                    <Link href={route('admin.companies.cancellations')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Pembatalan</Link>
                     <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Keluar</Link>
                 </div>
             </nav>
@@ -56,13 +58,28 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Placeholder Card 1 */}
-                    <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-8 border border-dashed border-gray-200 relative overflow-hidden flex flex-col justify-center items-center text-center opacity-70">
-                        <div className="w-14 h-14 bg-gray-100 text-gray-400 rounded-2xl flex items-center justify-center mb-4">
-                            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 01-2 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    {/* Cancellations Card */}
+                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-red-100 relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(239,68,68,0.1)] transition-all">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-red-100 transition-colors"></div>
+                        
+                        <div className="relative z-10 flex flex-col h-full">
+                            <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-2">Permintaan Pembatalan</h3>
+                            <p className="text-sm text-gray-500 mb-8 flex-1 leading-relaxed">
+                                Tinjau daftar perusahaan yang ingin membatalkan layanan berlangganan mereka.
+                            </p>
+                            
+                            <Link 
+                                href={route('admin.companies.cancellations')} 
+                                className="inline-flex items-center justify-center w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all group-hover:shadow-[0_4px_14px_rgba(239,68,68,0.39)]"
+                            >
+                                Lihat Pembatalan
+                                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </Link>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Laporan & Statistik</h3>
-                        <p className="text-sm text-gray-400">Fitur ini sedang dalam pengembangan dan akan segera hadir.</p>
                     </div>
 
                     {/* Placeholder Card 2 */}

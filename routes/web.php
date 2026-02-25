@@ -11,7 +11,7 @@ use App\Http\Controllers\ProfileController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/beranda', function () {
+Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -50,9 +50,15 @@ Route::middleware(['auth', 'role:admin'])
             return Inertia::render('Admin/Dashboard');
         })->name('dashboard');
 
+        Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
         Route::get('/companies/pending', [AdminController::class, 'pendingCompanies'])->name('companies.pending');
         Route::patch('/companies/{company}/approve', [AdminController::class, 'approveCompany'])->name('companies.approve');
         Route::delete('/companies/{company}/reject', [AdminController::class, 'rejectCompany'])->name('companies.reject');
+        
+        Route::get('/companies/cancellations/requests', [AdminController::class, 'cancellationRequests'])->name('companies.cancellations');
+        Route::delete('/companies/{company}/cancellations/approve', [AdminController::class, 'approveCancellation'])->name('companies.cancellations.approve');
+
+        Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
 
     });
 
@@ -72,8 +78,15 @@ Route::middleware(['auth', 'role:company'])
         Route::get('/dashboard', [CompanyController::class, 'dashboard'])->name('dashboard');
         Route::get('/register', [CompanyController::class, 'register'])->name('register');
         Route::post('/register', [CompanyController::class, 'store'])->name('store');
+        
+        Route::get('/schedule', [CompanyController::class, 'schedule'])->name('schedule');
+        Route::post('/schedule', [CompanyController::class, 'updateSchedule'])->name('schedule.update');
+        
+        Route::post('/unsubscribe', [CompanyController::class, 'unsubscribeRequest'])->name('unsubscribe');
 
     });
+
+use App\Http\Controllers\DriverController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,9 +99,10 @@ Route::middleware(['auth', 'role:driver'])
     ->name('driver.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return Inertia::render('Driver/Dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [DriverController::class, 'dashboard'])->name('dashboard');
+        
+        Route::post('/pickup/{pickup}/status', [DriverController::class, 'updateStatus'])->name('pickup.status');
+        Route::post('/pickup/{pickup}/submit', [DriverController::class, 'submitPickup'])->name('pickup.submit');
 
     });
 

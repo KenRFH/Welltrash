@@ -20,10 +20,20 @@ class Company extends Model
         'subscription_status',
         'payment_evidence_path',
         'signed_mou_path',
+        'pickup_schedule',
+    ];
+
+    protected $casts = [
+        'pickup_schedule' => 'array',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function pickups()
+    {
+        return $this->hasMany(Pickup::class);
     }
 }
