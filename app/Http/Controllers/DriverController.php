@@ -123,4 +123,22 @@ class DriverController extends Controller
 
         return back()->with('success', 'Berhasil merekam pengambilan sampah!');
     }
+
+    /**
+     * Display the driver history of completed and failed pickups.
+     */
+    public function history(Request $request)
+    {
+        $driver = Auth::user();
+
+        $pickups = Pickup::with('company')
+            ->where('driver_id', $driver->id)
+            ->whereIn('status', ['completed', 'failed'])
+            ->orderBy('pickup_date', 'desc')
+            ->get();
+
+        return Inertia::render('Driver/History', [
+            'pickups' => $pickups
+        ]);
+    }
 }

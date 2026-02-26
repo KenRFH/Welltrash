@@ -25,9 +25,31 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
-        $totalOrganic = $company->pickups()->where('status', 'picked')->sum('organic_weight') ?? 0;
-        $totalAnorganic = $company->pickups()->where('status', 'picked')->sum('anorganic_weight') ?? 0;
-        $totalResidue = $company->pickups()->where('status', 'picked')->sum('residue_weight') ?? 0;
+        $totalOrganic = $company->pickups()->where('status', 'completed')->sum('organic_weight') ?? 0;
+        $totalAnorganic = $company->pickups()->where('status', 'completed')->sum('anorganic_weight') ?? 0;
+        $totalResidue = $company->pickups()->where('status', 'completed')->sum('residue_weight') ?? 0;
+
+        // Calculate Weekly Statistics for the current month
+        $currentMonthPickups = $company->pickups()
+            ->where('status', 'completed')
+            ->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
+            ->whereYear('pickup_date', \Carbon\Carbon::now()->year)
+            ->get();
+
+        $weeklyStatistics = [
+            ['week' => 'Mg 1', 'organic' => 0, 'anorganic' => 0],
+            ['week' => 'Mg 2', 'organic' => 0, 'anorganic' => 0],
+            ['week' => 'Mg 3', 'organic' => 0, 'anorganic' => 0],
+            ['week' => 'Mg 4', 'organic' => 0, 'anorganic' => 0],
+        ];
+
+        foreach ($currentMonthPickups as $pickup) {
+            $day = \Carbon\Carbon::parse($pickup->pickup_date)->day;
+            $weekIndex = min((int) ceil($day / 7) - 1, 3); // Group days 22-31 into week 4
+
+            $weeklyStatistics[$weekIndex]['organic'] += $pickup->organic_weight ?? 0;
+            $weeklyStatistics[$weekIndex]['anorganic'] += $pickup->anorganic_weight ?? 0;
+        }
 
         return Inertia::render('Company/Dashboard', [
             'company' => $company,
@@ -35,7 +57,8 @@ class CompanyController extends Controller
                 'total_organic' => $totalOrganic,
                 'total_anorganic' => $totalAnorganic,
                 'total_residue' => $totalResidue,
-            ]
+            ],
+            'weekly_statistics' => $weeklyStatistics,
         ]);
     }
 
@@ -49,13 +72,36 @@ class CompanyController extends Controller
         return Inertia::render('Company/Register');
     }
 
+    public function history()
+    {
+        $user = Auth::user();
+
+        if (!$user->company) {
+            return redirect()->route('company.register');
+        }
+
+        $company = $user->company;
+
+        $pickups = $company->pickups()->with('driver')
+            ->whereIn('status', ['completed', 'failed'])
+            ->orderBy('pickup_date', 'desc')
+            ->get();
+
+        return Inertia::render('Company/History', [
+            'company' => $company,
+            'pickups' => $pickups
+        ]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'company_name' => 'required|string|max:255',
+            'pic_name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'subscription_plan' => 'required|string|in:Basic,Premium,Enterprise',
+            'business_category' => 'nullable|string|max:255',
+            'subscription_plan' => 'required|string|in:Basic,Premium,Premium +',
             'payment_evidence' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
             'signed_mou' => 'required|file|mimes:pdf|max:10240',
             'pickup_schedule' => 'required|array|min:1',
@@ -70,8 +116,10 @@ class CompanyController extends Controller
         Company::create([
             'user_id' => $user->id,
             'company_name' => $request->company_name,
+            'pic_name' => $request->pic_name,
             'address' => $request->address,
             'phone' => $request->phone,
+            'business_category' => $request->business_category,
             'subscription_plan' => $request->subscription_plan,
             'subscription_status' => 'pending', 
             'payment_evidence_path' => $paymentEvidencePath,

@@ -76,6 +76,7 @@ Route::middleware(['auth', 'role:company'])
     ->group(function () {
 
         Route::get('/dashboard', [CompanyController::class, 'dashboard'])->name('dashboard');
+        Route::get('/history', [CompanyController::class, 'history'])->name('history');
         Route::get('/register', [CompanyController::class, 'register'])->name('register');
         Route::post('/register', [CompanyController::class, 'store'])->name('store');
         
@@ -100,6 +101,7 @@ Route::middleware(['auth', 'role:driver'])
     ->group(function () {
 
         Route::get('/dashboard', [DriverController::class, 'dashboard'])->name('dashboard');
+        Route::get('/history', [DriverController::class, 'history'])->name('history');
         
         Route::post('/pickup/{pickup}/status', [DriverController::class, 'updateStatus'])->name('pickup.status');
         Route::post('/pickup/{pickup}/submit', [DriverController::class, 'submitPickup'])->name('pickup.submit');

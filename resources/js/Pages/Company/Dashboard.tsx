@@ -1,13 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Fragment } from 'react';
 import React from 'react';
+import CompanySidebar from '@/Components/CompanySidebar';
 
-// Icons placeholder
-const HomeIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>;
-const HistoryIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
 const CalendarIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
-const BillingIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>;
-const PartnersIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>;
 
 interface Props {
     company: {
@@ -26,9 +21,14 @@ interface Props {
         total_anorganic: number;
         total_residue: number;
     };
+    weekly_statistics: Array<{
+        week: string;
+        organic: number;
+        anorganic: number;
+    }>;
 }
 
-export default function Dashboard({ auth, company, statistics }: Props) {
+export default function Dashboard({ auth, company, statistics, weekly_statistics }: Props) {
     const { post, processing } = useForm();
     
     const handleUnsubscribe = () => {
@@ -41,45 +41,8 @@ export default function Dashboard({ auth, company, statistics }: Props) {
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
             <Head title="Dasbor Perusahaan | WellMaggot" />
 
-            {/* Sidebar */}
-            <aside className="w-72 bg-white border-r border-gray-100 flex flex-col justify-between hidden md:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-                <div>
-                    <div className="h-24 flex items-center px-8 border-b border-gray-50">
-                        <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 tracking-tight">WellMaggot</span>
-                    </div>
-                    
-                    <nav className="mt-8 px-4 space-y-2">
-                        <div className="px-4 mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">Menu Utama</div>
-                        <Link href={route('company.dashboard')} className="flex items-center px-4 py-3 text-indigo-700 bg-indigo-50/80 rounded-2xl font-semibold transition-all">
-                            <HomeIcon /> Beranda
-                        </Link>
-                        <Link href="#" className="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-2xl font-medium transition-all group">
-                            <span className="group-hover:text-indigo-500 transition-colors"><HistoryIcon /></span> Riwayat
-                        </Link>
-                        <Link href="#" className="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-2xl font-medium transition-all group">
-                            <span className="group-hover:text-indigo-500 transition-colors"><CalendarIcon /></span> Jadwal
-                        </Link>
-                        <Link href="#" className="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-2xl font-medium transition-all group">
-                            <span className="group-hover:text-indigo-500 transition-colors"><BillingIcon /></span> Tagihan
-                        </Link>
-                        <Link href="#" className="flex items-center px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-2xl font-medium transition-all group">
-                            <span className="group-hover:text-indigo-500 transition-colors"><PartnersIcon /></span> Mitra
-                        </Link>
-                    </nav>
-                </div>
-
-                <div className="p-6 mb-2 border-t border-gray-50">
-                    <Link
-                        href={route('logout')}
-                        method="post"
-                        as="button"
-                        className="flex items-center justify-center w-full px-4 py-3 text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-red-600 rounded-2xl font-semibold transition-all shadow-sm"
-                    >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        Keluar
-                    </Link>
-                </div>
-            </aside>
+            {/* Sidebar Component */}
+            <CompanySidebar active="dashboard" theme="indigo" />
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -238,16 +201,17 @@ export default function Dashboard({ auth, company, statistics }: Props) {
                     <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 mb-12 relative z-10">
                         <div className="flex justify-between items-center mb-8">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan</h3>
+                                <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan Mingguan</h3>
                                 <p className="text-sm text-gray-500 mt-1">Bulan {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
                             </div>
-                            <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-2 rounded-xl transition-colors">
+                            <Link href={route('company.history')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-2 rounded-xl transition-colors">
                                 Lihat Detail
-                            </button>
+                            </Link>
                         </div>
 
-                        {/* Fake Bar Chart rendering for visual fidelity */}
+                        {/* Real Bar Chart rendering */}
                         <div className="relative h-64 border-l border-b border-gray-200 ml-4 pb-4 w-full flex items-end">
+                            {/* Grid lines */}
                             <div className="absolute inset-y-0 left-0 w-full flex flex-col justify-between pointer-events-none">
                                 <div className="border-t border-gray-100 w-full"></div>
                                 <div className="border-t border-gray-100 w-full"></div>
@@ -255,47 +219,60 @@ export default function Dashboard({ auth, company, statistics }: Props) {
                                 <div className="border-t border-gray-100 w-full"></div>
                             </div>
 
-                            <div className="absolute inset-0 flex justify-between px-4 sm:px-12 items-end bottom-0 pb-0 z-10">
-                                {/* Bar Group 1 */}
-                                <div className="flex flex-col items-center group">
-                                    <div className="flex items-end space-x-1.5">
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-amber-200 to-amber-100 h-48 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-teal-200 to-teal-100 h-36 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                    </div>
-                                    <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8">Mg 1</span>
-                                </div>
+                            <div className="absolute inset-0 flex justify-around px-4 sm:px-12 items-end bottom-0 pb-0 z-10 w-full">
+                                {(() => {
+                                    // Calculate maximum value for normalization to set bar heights correctly
+                                    const rawMax = Math.max(
+                                        ...weekly_statistics.flatMap(w => [Number(w.organic), Number(w.anorganic)])
+                                    );
+                                    // Ensure division by zero doesn't happen, set a min max of 100
+                                    const maxVal = Math.max(rawMax, 100);
 
-                                {/* Bar Group 2 */}
-                                <div className="flex flex-col items-center group">
-                                    <div className="flex items-end space-x-1.5">
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-amber-200 to-amber-100 h-40 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-teal-200 to-teal-100 h-28 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                    </div>
-                                    <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8">Mg 2</span>
-                                </div>
+                                    return weekly_statistics.map((stat, index) => {
+                                        // Calculate percentage height, capped at 100% just in case
+                                        let hOrg = (Number(stat.organic) / maxVal) * 100;
+                                        let hAno = (Number(stat.anorganic) / maxVal) * 100;
 
-                                {/* Bar Group 3 */}
-                                <div className="flex flex-col items-center group">
-                                    <div className="flex items-end space-x-1.5">
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-amber-200 to-amber-100 h-52 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-teal-200 to-teal-100 h-40 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                    </div>
-                                    <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8">Mg 3</span>
-                                </div>
+                                        // Ensure minimum height of 4% so bars are slightly visible even for 0 values to show the baseline exist
+                                        hOrg = Math.max(hOrg, 4);
+                                        hAno = Math.max(hAno, 4);
 
-                                {/* Bar Group 4 */}
-                                <div className="flex flex-col items-center group">
-                                    <div className="flex items-end space-x-1.5">
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-amber-200 to-amber-100 h-52 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                        <div className="w-6 sm:w-10 bg-gradient-to-t from-teal-200 to-teal-100 h-36 rounded-t-md group-hover:opacity-80 transition-opacity"></div>
-                                    </div>
-                                    <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8">Mg 4</span>
-                                </div>
+                                        return (
+                                            <div key={index} className="flex flex-col items-center group relative">
+                                                {/* Tooltip visible on group hover */}
+                                                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded-lg py-1.5 px-3 whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                                                    Org: {stat.organic}kg | Ano: {stat.anorganic}kg
+                                                </div>
+
+                                                <div className="flex items-end space-x-1.5 h-64">
+                                                    {/* Organic Bar */}
+                                                    <div 
+                                                        className="w-6 sm:w-12 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
+                                                        style={{ height: `${hOrg}%` }}
+                                                        title={`Organik: ${stat.organic} Kg`}
+                                                    >
+                                                        {hOrg > 15 && <span className="text-[10px] font-bold text-amber-700/80 -rotate-90 origin-bottom">{stat.organic > 0 ? stat.organic : ''}</span>}
+                                                    </div>
+                                                    
+                                                    {/* Anorganic Bar */}
+                                                    <div 
+                                                        className="w-6 sm:w-12 bg-gradient-to-t from-teal-200 to-teal-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
+                                                        style={{ height: `${hAno}%` }}
+                                                        title={`Anorganik: ${stat.anorganic} Kg`}
+                                                    >
+                                                        {hAno > 15 && <span className="text-[10px] font-bold text-teal-700/80 -rotate-90 origin-bottom">{stat.anorganic > 0 ? stat.anorganic : ''}</span>}
+                                                    </div>
+                                                </div>
+                                                <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8 whitespace-nowrap">{stat.week}</span>
+                                            </div>
+                                        );
+                                    });
+                                })()}
                             </div>
                         </div>
-                        <div className="mt-10 flex justify-center space-x-6 text-sm font-medium text-gray-600">
-                             <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-200 mr-2"></span> Organik</div>
-                             <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-teal-200 mr-2"></span> Anorganik</div>
+                        <div className="mt-12 flex justify-center space-x-6 text-sm font-medium text-gray-600">
+                             <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-200 mr-2"></span> Organik (Kg)</div>
+                             <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-teal-200 mr-2"></span> Anorganik (Kg)</div>
                         </div>
                     </div>
 

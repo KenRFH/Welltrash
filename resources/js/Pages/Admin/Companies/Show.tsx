@@ -4,8 +4,10 @@ import React from 'react';
 interface Company {
     id: number;
     company_name: string;
+    pic_name: string;
     address: string;
     phone: string;
+    business_category: string | null;
     subscription_plan: string;
     subscription_status: string;
     payment_evidence_path: string | null;
@@ -72,26 +74,36 @@ export default function Show({ company }: Props) {
 
                     <div className="p-8 sm:p-12 border-b border-gray-100 bg-gradient-to-r from-indigo-50/50 to-transparent">
                         <h3 className="text-3xl font-black text-gray-900 mb-2">{company.company_name}</h3>
-                        <p className="text-sm text-gray-500 font-medium">Penanggung Jawab: <span className="text-gray-900">{company.user.name}</span> ({company.user.email})</p>
+                        <p className="text-sm text-gray-500 font-medium">Akun Web: <span className="text-gray-900">{company.user.name}</span> ({company.user.email})</p>
                     </div>
 
                     <div className="p-8 sm:p-12 grid grid-cols-1 md:grid-cols-2 gap-10">
                         {/* Company Details */}
                         <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">PIC / Penanggung Jawab</h4>
+                                    <p className="text-base font-bold text-gray-900">{company.pic_name}</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Telepon / WA</h4>
+                                    <p className="text-base font-bold text-gray-900">{company.phone}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Kategori Bisnis</h4>
+                                <p className="text-base font-medium text-gray-900">{company.business_category || '-'}</p>
+                            </div>
+
                             <div>
                                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alamat</h4>
                                 <p className="text-base text-gray-900 bg-gray-50 p-4 rounded-2xl border border-gray-100">{company.address}</p>
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Telepon</h4>
-                                    <p className="text-base font-bold text-gray-900">{company.phone}</p>
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Paket Layanan</h4>
-                                    <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">{company.subscription_plan}</span>
-                                </div>
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Paket Layanan</h4>
+                                <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">{company.subscription_plan}</span>
                             </div>
 
                             <div>

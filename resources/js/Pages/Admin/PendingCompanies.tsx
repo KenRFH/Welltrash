@@ -4,6 +4,11 @@ import React from 'react';
 interface Company {
     id: number;
     company_name: string;
+    pic_name: string;
+    address: string;
+    phone: string;
+    business_category: string | null;
+    pickup_schedule: string[] | null;
     subscription_plan: string;
     payment_evidence_path: string | null;
     signed_mou_path: string | null;
@@ -84,15 +89,46 @@ export default function PendingCompanies({ companies }: Props) {
                                         <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                             
                                             {/* Company & User Info */}
-                                            <div className="mb-4 lg:mb-0 lg:pr-6 max-w-md">
+                                            <div className="mb-4 lg:mb-0 lg:pr-6 lg:w-1/2">
                                                 <div className="flex flex-col">
-                                                    <h3 className="text-lg font-bold text-gray-900 truncate">{company.company_name}</h3>
-                                                    <p className="text-sm font-medium text-gray-500 mt-1">
-                                                        Oleh: <span className="text-gray-700">{company.user.name}</span> <span className="text-gray-400 font-normal">({company.user.email})</span>
-                                                    </p>
+                                                    <h3 className="text-xl font-bold text-gray-900 truncate mb-2">{company.company_name}</h3>
+                                                    <div className="text-sm text-gray-600 space-y-1.5 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                        <p className="flex justify-between">
+                                                            <span className="font-semibold text-gray-500">PIC:</span>
+                                                            <span className="text-right text-gray-900">{company.pic_name} ({company.phone})</span>
+                                                        </p>
+                                                        <p className="flex justify-between">
+                                                            <span className="font-semibold text-gray-500">Akun:</span>
+                                                            <span className="text-right text-gray-900">{company.user.name} ({company.user.email})</span>
+                                                        </p>
+                                                        <p className="flex justify-between">
+                                                            <span className="font-semibold text-gray-500">Kategori:</span>
+                                                            <span className="text-right text-gray-900">{company.business_category || '-'}</span>
+                                                        </p>
+                                                        <div className="pt-2 mt-2 border-t border-gray-200">
+                                                            <p className="flex flex-col">
+                                                                <span className="font-semibold text-gray-500 mb-1">Alamat:</span>
+                                                                <span className="text-gray-900 leading-snug">{company.address}</span>
+                                                            </p>
+                                                        </div>
+                                                        <div className="pt-2 mt-2 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                            <span className="font-semibold text-gray-500 shrink-0">Jadwal:</span>
+                                                            <div className="flex flex-wrap gap-1.5 justify-end">
+                                                                {company.pickup_schedule && company.pickup_schedule.length > 0 ? (
+                                                                    company.pickup_schedule.map((day, index) => (
+                                                                        <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-wider">
+                                                                            {day}
+                                                                        </span>
+                                                                    ))
+                                                                ) : (
+                                                                    <span className="text-[10px] text-gray-400 italic">Belum diset</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="mt-3">
-                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold leading-5 bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                                <div className="mt-4">
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold leading-5 bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
                                                         Paket: {company.subscription_plan}
                                                     </span>
                                                 </div>
