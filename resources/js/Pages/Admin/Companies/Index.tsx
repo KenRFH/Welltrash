@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Company {
     id: number;
@@ -17,6 +17,8 @@ interface Props {
 }
 
 export default function Index({ companies }: Props) {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'active':
@@ -35,22 +37,47 @@ export default function Index({ companies }: Props) {
             <Head title="Daftar Perusahaan | Admin Portal" />
 
             {/* Navbar */}
-            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sticky top-0 z-50">
-                <div className="flex items-center mb-4 sm:mb-0">
+            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sm:items-center sticky top-0 z-50">
+                <div className="flex items-center justify-between w-full sm:w-auto">
                    <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 tracking-tight">
                        WellMaggot <span className="text-xl font-medium text-gray-400 ml-2">| Portal Admin</span>
                    </span>
+                   {/* Mobile Menu Button */}
+                   <button 
+                       onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                       className="sm:hidden p-2 text-gray-500 hover:text-gray-900 focus:outline-none"
+                   >
+                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           {isMobileMenuOpen ? (
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                           ) : (
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                           )}
+                       </svg>
+                   </button>
                 </div>
-                <div className="flex space-x-6">
+
+                {/* Desktop Links */}
+                <div className="hidden sm:flex space-x-6 mt-4 sm:mt-0">
                     <Link href={route('admin.dashboard')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dasbor</Link>
-                    <Link href={route('admin.companies.index')} className="text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 pb-1">Semua Perusahaan</Link>
+                    <Link href={route('admin.companies.index')} className="text-sm font-bold text-green-600 border-b-2 border-green-600 pb-1">Semua Perusahaan</Link>
                     <Link href={route('admin.companies.pending')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Menunggu Persetujuan</Link>
                     <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Keluar</Link>
                 </div>
+
+                {/* Mobile Dropdown */}
+                {isMobileMenuOpen && (
+                    <div className="sm:hidden w-full flex flex-col items-center space-y-4 mt-4 py-4 border-t border-gray-100 bg-white shadow-lg rounded-b-xl absolute top-full left-0">
+                        <Link href={route('admin.dashboard')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Dasbor</Link>
+                        <Link href={route('admin.companies.index')} className="text-sm font-bold text-green-600 w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Semua Perusahaan</Link>
+                        <Link href={route('admin.companies.pending')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Menunggu Persetujuan</Link>
+                        <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Keluar</Link>
+                    </div>
+                )}
             </nav>
 
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-                <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-br from-indigo-100 to-blue-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-br from-green-100 to-emerald-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
                 
                 <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between border-b border-gray-200 pb-5">
                     <div>
@@ -59,7 +86,7 @@ export default function Index({ companies }: Props) {
                             Kelola semua perusahaan yang terdaftar, lihat status dan detail layanan mereka.
                         </p>
                     </div>
-                    <div className="mt-4 sm:mt-0 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm border border-indigo-100">
+                    <div className="mt-4 sm:mt-0 bg-green-50 text-green-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm border border-green-100">
                         {companies.length} Total
                     </div>
                 </div>
@@ -97,7 +124,7 @@ export default function Index({ companies }: Props) {
                                                 {getStatusBadge(company.subscription_status)}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <Link href={route('admin.companies.show', company.id)} className="text-indigo-600 hover:text-indigo-900 font-bold bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                                                <Link href={route('admin.companies.show', company.id)} className="text-green-600 hover:text-green-900 font-bold bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors">
                                                     Detail
                                                 </Link>
                                             </td>

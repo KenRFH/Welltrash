@@ -1,8 +1,9 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import CompanySidebar from '@/Components/CompanySidebar';
 
 export default function Register({ auth }: any) {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const { data, setData, post, processing, errors } = useForm({
         company_name: '',
         pic_name: auth?.user?.name || '',
@@ -18,6 +19,12 @@ export default function Register({ auth }: any) {
     const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
     const predefinedCategories = ['Hotel', 'Restoran', 'Cafe', 'SPPG', 'Gudang'];
     const [isCustomCategory, setIsCustomCategory] = React.useState(false);
+
+    const planPrices = {
+        'Basic': 'Rp 899.000',
+        'Premium': 'Rp 1.129.000',
+        'Premium +': 'Rp 5.750.000'
+    };
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
@@ -48,16 +55,28 @@ export default function Register({ auth }: any) {
             <Head title="Pendaftaran Mitra | WellMaggot" />
 
             {/* Sidebar Component (Locked) */}
-            <CompanySidebar active="mitra" theme="green" isLocked={true} />
+            <CompanySidebar 
+                active="mitra" 
+                isLocked={true} 
+                isMobileOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col overflow-hidden relative">
                 
                 {/* Top Navbar */}
                 <header className="h-20 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    {/* Search Bar - Decorative for this view based on screenshot */}
-                    <div className="flex-1 max-w-md">
-                        <div className="relative">
+                    {/* Mobile Menu Toggle & Search Bar */}
+                    <div className="flex items-center gap-4 flex-1 max-w-md">
+                        {/* Mobile Menu Toggle */}
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 -ml-2 text-gray-500 hover:text-teal-600 md:hidden focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                        <div className="relative hidden sm:block w-full">
                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-300">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -80,7 +99,7 @@ export default function Register({ auth }: any) {
                         
                         {/* User Profile */}
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
+                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center overflow-hidden">
                                 <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth?.user?.name || 'User')}&background=e0e7ff&color=4f46e5`} alt="Profile" className="w-full h-full object-cover" />
                             </div>
                             <div className="hidden md:flex flex-col">
@@ -350,16 +369,47 @@ export default function Register({ auth }: any) {
 
                             <hr className="border-gray-100 my-8" />
                             
+                            {/* MoU Download Section */}
+                            <div className="bg-orange-50 border border-orange-100 rounded-xl p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div>
+                                    <h4 className="font-bold text-orange-800 mb-1">Template MoU (Memorandum of Understanding)</h4>
+                                    <p className="text-sm text-orange-700">
+                                        Silakan unduh, baca dengan seksama, tandatangani, dan unggah kembali dokumen MoU ini.
+                                    </p>
+                                </div>
+                                <a 
+                                    href="/downloads/mou_template.pdf" 
+                                    target="_blank" 
+                                    className="shrink-0 bg-white border border-orange-200 text-orange-600 hover:bg-orange-100 hover:border-orange-300 font-bold py-2 px-4 rounded-lg text-sm flex items-center transition-colors shadow-sm"
+                                >
+                                    <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    Unduh Template
+                                </a>
+                            </div>
+                            
+                            {/* Bank Transfer Information */}
+                            <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 mb-6">
+                                <h4 className="font-bold text-teal-800 mb-2">Informasi Pembayaran</h4>
+                                <p className="text-sm text-teal-700 mb-4">
+                                    Silakan transfer sesuai dengan nominal paket <strong>{data.subscription_plan}</strong> yang Anda pilih untuk mengaktifkan layanan armada kami.
+                                </p>
+                                <div className="bg-white rounded-lg p-4 border border-teal-100/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+                                    <div>
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Bank Mandiri</p>
+                                        <p className="font-bold text-gray-900 text-lg tracking-wide">123-456-789-0123</p>
+                                        <p className="text-sm text-gray-600">a.n. PT Welltrash Indonesia</p>
+                                    </div>
+                                    <div className="text-left sm:text-right border-t sm:border-t-0 sm:border-l border-gray-100 pt-3 sm:pt-0 sm:pl-6 w-full sm:w-auto">
+                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Nominal Transfer</p>
+                                        <p className="font-black text-teal-600 text-2xl">{planPrices[data.subscription_plan as keyof typeof planPrices]}</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* File Uploads for existing backend support */}
                             <div className="space-y-4">
                                 <div>
-                                    <div className="flex justify-between items-end mb-1.5">
-                                        <label className="block text-sm font-bold text-gray-700">MOU yang Telah Ditandatangani (PDF)</label>
-                                        <a href="/downloads/mou_template.pdf" target="_blank" className="text-xs text-teal-600 hover:text-teal-800 hover:underline flex items-center">
-                                            <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                            Unduh Template MoU
-                                        </a>
-                                    </div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">MOU yang Telah Ditandatangani (PDF)</label>
                                     <input
                                         type="file"
                                         accept="application/pdf"

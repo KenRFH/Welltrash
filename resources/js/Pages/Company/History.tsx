@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import CompanySidebar from '@/Components/CompanySidebar';
 
@@ -36,32 +36,45 @@ interface Props {
 }
 
 export default function History({ auth, company, pickups }: Props) {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
             <Head title="Riwayat | WellMaggot" />
 
             {/* Sidebar Component */}
-            <CompanySidebar active="history" theme="indigo" />
+            <CompanySidebar 
+                active="history" 
+                isMobileOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-indigo-50 to-blue-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
 
                 {/* Header Navbar */}
-                <header className="h-24 flex items-center justify-between px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex-1 max-w-xl">
-                        <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Riwayat Pengambilan</h2>
+                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-4 flex-1">
+                        {/* Mobile Menu Toggle */}
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                        <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Riwayat Pengambilan</h2>
                     </div>
                     
                     <div className="flex items-center space-x-6">
                         <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-100 to-blue-100 flex items-center justify-center p-0.5">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
                                 <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=4f46e5&bold=true`} alt="User avatar" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
-                                <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider leading-none">{company.company_name}</span>
+                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">{company.company_name}</span>
                             </div>
                         </div>
                     </div>
@@ -86,11 +99,11 @@ export default function History({ auth, company, pickups }: Props) {
                                 });
 
                                 return (
-                                    <div key={pickup.id} className={`bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border transition-all hover:shadow-md ${isCompleted ? 'border-gray-100 hover:border-indigo-100' : 'border-red-100'}`}>
+                                    <div key={pickup.id} className={`bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border transition-all hover:shadow-md ${isCompleted ? 'border-gray-100 hover:border-green-100' : 'border-red-100'}`}>
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-50 pb-6">
                                             <div>
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCompleted ? 'bg-indigo-50 text-indigo-600' : 'bg-red-50 text-red-600'}`}>
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isCompleted ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                                                         <CalendarIcon />
                                                     </div>
                                                     <div>

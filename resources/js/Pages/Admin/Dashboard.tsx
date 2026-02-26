@@ -1,30 +1,58 @@
 import { Head, Link } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function Dashboard() {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col font-sans">
             <Head title="Dasbor Admin | Portal Admin" />
 
             {/* Navbar */}
-            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sticky top-0 z-50">
-                <div className="flex items-center mb-4 sm:mb-0">
+            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sm:items-center sticky top-0 z-50">
+                <div className="flex items-center justify-between w-full sm:w-auto">
                    <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 tracking-tight">
                        WellMaggot <span className="text-xl font-medium text-gray-400 ml-2">| Portal Admin</span>
                    </span>
+                   {/* Mobile Menu Button */}
+                   <button 
+                       onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                       className="sm:hidden p-2 text-gray-500 hover:text-gray-900 focus:outline-none"
+                   >
+                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           {isMobileMenuOpen ? (
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                           ) : (
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                           )}
+                       </svg>
+                   </button>
                 </div>
-                <div className="flex space-x-6">
-                    <Link href={route('admin.dashboard')} className="text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 pb-1">Dasbor</Link>
+
+                {/* Desktop Links */}
+                <div className="hidden sm:flex space-x-6 mt-4 sm:mt-0">
+                    <Link href={route('admin.dashboard')} className="text-sm font-bold text-green-600 border-b-2 border-green-600 pb-1">Dasbor</Link>
                     <Link href={route('admin.companies.index')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Semua Perusahaan</Link>
                     <Link href={route('admin.companies.pending')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Menunggu Persetujuan</Link>
                     <Link href={route('admin.companies.cancellations')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Pembatalan</Link>
                     <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Keluar</Link>
                 </div>
+
+                {/* Mobile Dropdown */}
+                {isMobileMenuOpen && (
+                    <div className="sm:hidden w-full flex flex-col items-center space-y-4 mt-4 py-4 border-t border-gray-100 bg-white shadow-lg rounded-b-xl absolute top-full left-0">
+                        <Link href={route('admin.dashboard')} className="text-sm font-bold text-green-600 w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Dasbor</Link>
+                        <Link href={route('admin.companies.index')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Semua Perusahaan</Link>
+                        <Link href={route('admin.companies.pending')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Menunggu Persetujuan</Link>
+                        <Link href={route('admin.companies.cancellations')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Pembatalan</Link>
+                        <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Keluar</Link>
+                    </div>
+                )}
             </nav>
 
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
                 {/* Decorative Elements */}
-                <div className="absolute top-10 left-10 w-[500px] h-[500px] bg-gradient-to-br from-indigo-100 to-blue-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                <div className="absolute top-10 left-10 w-[500px] h-[500px] bg-gradient-to-br from-green-100 to-emerald-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
                 
                 <div className="mb-10 text-center sm:text-left">
                     <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">Dasbor Utama</h2>
@@ -35,11 +63,11 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {/* Management Card */}
-                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden group hover:shadow-[0_8px_30px_rgb(79,70,229,0.1)] transition-all">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-indigo-100 transition-colors"></div>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden group hover:shadow-[0_8px_30px_rgba(22,163,74,0.1)] transition-all">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-green-100 transition-colors"></div>
                         
                         <div className="relative z-10 flex flex-col h-full">
-                            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
                             </div>
                             
@@ -50,7 +78,7 @@ export default function Dashboard() {
                             
                             <Link 
                                 href={route('admin.companies.pending')} 
-                                className="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all group-hover:shadow-[0_4px_14px_rgba(79,70,229,0.39)]"
+                                className="inline-flex items-center justify-center w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all group-hover:shadow-[0_4px_14px_rgba(22,163,74,0.39)]"
                             >
                                 Lihat Permintaan Persetujuan
                                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>

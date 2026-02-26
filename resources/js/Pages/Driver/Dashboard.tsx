@@ -31,6 +31,7 @@ interface Props {
 
 export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday, pickups, auth }: Props) {
     const [activeModal, setActiveModal] = useState<number | null>(null);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // Form for status update
     const { post: postStatus, processing: processingStatus } = useForm();
@@ -73,7 +74,11 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
             <Head title="Driver Dashboard | WellMaggot" />
 
              {/* Sidebar Component */}
-             <DriverSidebar active="dashboard" />
+             <DriverSidebar 
+                 active="dashboard" 
+                 isMobileOpen={isSidebarOpen}
+                 onClose={() => setIsSidebarOpen(false)}
+             />
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -82,8 +87,15 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
 
                 {/* Header Navbar */}
                 <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex-1">
-                        <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Tugas Hari Ini</h2>
+                    <div className="flex items-center gap-4 flex-1">
+                        {/* Mobile Menu Toggle */}
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                        <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Tugas Hari Ini</h2>
                     </div>
                     
                     <div className="flex items-center space-x-6">
@@ -149,12 +161,12 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                 return (
                                     <div key={pickup.id} className={`bg-white rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all hover:shadow-lg border shadow-[0_4px_20px_rgb(0,0,0,0.03)] relative overflow-hidden group ${
                                         status === 'completed' ? 'border-green-100 bg-green-50/20' : 
-                                        status === 'on_the_way' ? 'border-blue-200 ring-2 ring-blue-100' : 'border-gray-100'
+                                        status === 'on_the_way' ? 'border-emerald-200 ring-2 ring-emerald-100' : 'border-gray-100'
                                     }`}>
                                         
                                         {/* Status Indicators background decor */}
                                         {status === 'completed' && <div className="absolute top-0 right-0 w-32 h-32 bg-green-100/40 rounded-full blur-2xl -mr-10 -mt-10"></div>}
-                                        {status === 'on_the_way' && <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-2xl -mr-10 -mt-10"></div>}
+                                        {status === 'on_the_way' && <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/40 rounded-full blur-2xl -mr-10 -mt-10"></div>}
 
                                         <div className="relative z-10 flex justify-between items-start mb-6 border-b border-gray-100 pb-5">
                                             <div>
@@ -175,7 +187,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                     <span className="inline-flex items-center bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">Terjadwal</span>
                                                 )}
                                                 {status === 'on_the_way' && (
-                                                    <span className="inline-flex items-center bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 animate-pulse">Menuju Lokasi</span>
+                                                    <span className="inline-flex items-center bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 animate-pulse">Menuju Lokasi</span>
                                                 )}
                                             </div>
                                         </div>

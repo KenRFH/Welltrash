@@ -7,16 +7,32 @@ const LogoutIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="curre
 
 interface Props {
     active: 'dashboard' | 'history';
+    isMobileOpen?: boolean;
+    onClose?: () => void;
 }
 
-export default function DriverSidebar({ active }: Props) {
+export default function DriverSidebar({ active, isMobileOpen = false, onClose }: Props) {
     return (
-        <aside className="w-72 bg-white border-r border-gray-100 flex flex-col justify-between hidden md:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 flex-shrink-0">
-            <div>
-                <div className="h-24 flex items-center px-8 border-b border-gray-50">
-                    <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">WellMaggot</span>
-                    <span className="ml-2 text-[10px] font-bold text-white bg-green-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Driver</span>
-                </div>
+        <>
+            {/* Mobile Overlay */}
+            {isMobileOpen && (
+                <div 
+                    className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 md:hidden transition-opacity"
+                    onClick={onClose}
+                ></div>
+            )}
+
+            <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col justify-between shadow-xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div>
+                    <div className="h-24 flex items-center justify-between px-8 border-b border-gray-50">
+                        <div className="flex items-center">
+                            <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">Welltrash</span>
+                            <span className="ml-2 text-[10px] font-bold text-white bg-green-500 px-2 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">Driver</span>
+                        </div>
+                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
                 
                 <nav className="mt-8 px-4 space-y-2">
                     <div className="px-4 mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">Aktivitas Utama</div>
@@ -42,5 +58,6 @@ export default function DriverSidebar({ active }: Props) {
                 </Link>
             </div>
         </aside>
+        </>
     );
 }

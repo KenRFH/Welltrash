@@ -1,5 +1,5 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Company {
     id: number;
@@ -24,6 +24,7 @@ interface Props {
 
 export default function PendingCompanies({ companies }: Props) {
     const { patch, delete: destroy, processing } = useForm();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleApprove = (e: React.FormEvent, id: number) => {
         e.preventDefault();
@@ -42,23 +43,48 @@ export default function PendingCompanies({ companies }: Props) {
             <Head title="Persetujuan Perusahaan | Admin Portal" />
 
             {/* Navbar */}
-            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sticky top-0 z-50">
-                <div className="flex items-center mb-4 sm:mb-0">
+            <nav className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 lg:px-12 py-4 flex flex-col sm:flex-row justify-between items-center sm:items-center sticky top-0 z-50">
+                <div className="flex items-center justify-between w-full sm:w-auto">
                    <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 tracking-tight">
                        WellMaggot <span className="text-xl font-medium text-gray-400 ml-2">| Portal Admin</span>
                    </span>
+                   {/* Mobile Menu Button */}
+                   <button 
+                       onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                       className="sm:hidden p-2 text-gray-500 hover:text-gray-900 focus:outline-none"
+                   >
+                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           {isMobileMenuOpen ? (
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                           ) : (
+                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                           )}
+                       </svg>
+                   </button>
                 </div>
-                <div className="flex space-x-6">
+
+                {/* Desktop Links */}
+                <div className="hidden sm:flex space-x-6 mt-4 sm:mt-0">
                     <Link href={route('admin.dashboard')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Dasbor</Link>
                     <Link href={route('admin.companies.index')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">Semua Perusahaan</Link>
-                    <Link href={route('admin.companies.pending')} className="text-sm font-bold text-indigo-600 border-b-2 border-indigo-600 pb-1">Menunggu Persetujuan</Link>
+                    <Link href={route('admin.companies.pending')} className="text-sm font-bold text-green-600 border-b-2 border-green-600 pb-1">Menunggu Persetujuan</Link>
                     <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">Keluar</Link>
                 </div>
+
+                {/* Mobile Dropdown */}
+                {isMobileMenuOpen && (
+                    <div className="sm:hidden w-full flex flex-col items-center space-y-4 mt-4 py-4 border-t border-gray-100 bg-white shadow-lg rounded-b-xl absolute top-full left-0">
+                        <Link href={route('admin.dashboard')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Dasbor</Link>
+                        <Link href={route('admin.companies.index')} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Semua Perusahaan</Link>
+                        <Link href={route('admin.companies.pending')} className="text-sm font-bold text-green-600 w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Menunggu Persetujuan</Link>
+                        <Link href={route('logout')} method="post" as="button" className="text-sm font-medium text-gray-500 hover:text-red-600 transition-colors w-full text-center py-2" onClick={() => setIsMobileMenuOpen(false)}>Keluar</Link>
+                    </div>
+                )}
             </nav>
 
             <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
                 {/* Decorative Elements */}
-                <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-br from-indigo-100 to-blue-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+                <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-gradient-to-br from-green-100 to-emerald-50 opacity-40 rounded-full blur-3xl pointer-events-none -z-10"></div>
                 
                 <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between border-b border-gray-200 pb-5">
                     <div>
@@ -67,7 +93,7 @@ export default function PendingCompanies({ companies }: Props) {
                             Tinjau pendaftaran perusahaan baru, verifikasi pembayaran, dan setujui akses masuk ke sistem.
                         </p>
                     </div>
-                    <div className="mt-4 sm:mt-0 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm border border-indigo-100">
+                    <div className="mt-4 sm:mt-0 bg-green-50 text-green-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm border border-green-100">
                         {companies.length} Menunggu
                     </div>
                 </div>
@@ -116,7 +142,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                             <div className="flex flex-wrap gap-1.5 justify-end">
                                                                 {company.pickup_schedule && company.pickup_schedule.length > 0 ? (
                                                                     company.pickup_schedule.map((day, index) => (
-                                                                        <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase tracking-wider">
+                                                                        <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wider">
                                                                             {day}
                                                                         </span>
                                                                     ))
@@ -128,7 +154,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                     </div>
                                                 </div>
                                                 <div className="mt-4">
-                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold leading-5 bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm">
+                                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold leading-5 bg-green-50 text-green-700 border border-green-100 shadow-sm">
                                                         Paket: {company.subscription_plan}
                                                     </span>
                                                 </div>
@@ -139,7 +165,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Dokumen Terlampir</h4>
                                                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm font-medium">
                                                     {company.payment_evidence_path ? (
-                                                        <a href={`/storage/${company.payment_evidence_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-blue-600 hover:text-blue-800 border border-blue-100 hover:border-blue-300 hover:shadow-sm rounded-xl transition-all">
+                                                        <a href={`/storage/${company.payment_evidence_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-emerald-600 hover:text-emerald-800 border border-emerald-100 hover:border-emerald-300 hover:shadow-sm rounded-xl transition-all">
                                                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                                             Lihat Pembayaran
                                                         </a>
@@ -148,7 +174,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                     )}
 
                                                     {company.signed_mou_path ? (
-                                                        <a href={`/storage/${company.signed_mou_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-indigo-600 hover:text-indigo-800 border border-indigo-100 hover:border-indigo-300 hover:shadow-sm rounded-xl transition-all">
+                                                        <a href={`/storage/${company.signed_mou_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-green-600 hover:text-green-800 border border-green-100 hover:border-green-300 hover:shadow-sm rounded-xl transition-all">
                                                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                                             Lihat MOU
                                                         </a>
@@ -169,7 +195,7 @@ export default function PendingCompanies({ companies }: Props) {
                                             </form>
 
                                             <form onSubmit={(e) => handleApprove(e, company.id)} className="w-full sm:w-auto">
-                                                <button type="submit" disabled={processing} className="w-full sm:w-auto px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 border border-transparent rounded-xl font-bold text-sm flex items-center justify-center shadow-sm transition-colors disabled:opacity-50" title="Setujui Pendaftaran">
+                                                <button type="submit" disabled={processing} className="w-full sm:w-auto px-6 py-2.5 text-white bg-green-600 hover:bg-green-700 border border-transparent rounded-xl font-bold text-sm flex items-center justify-center shadow-sm transition-colors disabled:opacity-50" title="Setujui Pendaftaran">
                                                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                                                     Setujui
                                                 </button>

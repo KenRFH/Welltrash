@@ -9,29 +9,42 @@ const PartnersIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="cur
 
 interface Props {
     active: 'dashboard' | 'history' | 'schedule' | 'billing' | 'mitra';
-    theme?: 'indigo' | 'green';
     isLocked?: boolean;
+    isMobileOpen?: boolean;
+    onClose?: () => void;
 }
 
-export default function CompanySidebar({ active, theme = 'indigo', isLocked = false }: Props) {
-    // Theme configurations
+export default function CompanySidebar({ active, isLocked = false, isMobileOpen = false, onClose }: Props) {
+    // Standard Green Theme configurations
     const t = {
-        title: theme === 'green' ? 'from-green-600 to-emerald-500' : 'from-indigo-600 to-blue-500',
-        activeText: theme === 'green' ? 'text-green-700' : 'text-indigo-700',
-        activeBg: theme === 'green' ? 'bg-green-50/80' : 'bg-indigo-50/80',
-        hoverText: theme === 'green' ? 'hover:text-green-600' : 'hover:text-gray-900',
-        groupHoverText: theme === 'green' ? 'group-hover:text-green-500' : 'group-hover:text-indigo-500',
-        logoutHoverBg: theme === 'green' ? 'hover:bg-red-50 hover:border-red-100' : 'hover:bg-gray-50',
+        title: 'from-green-600 to-emerald-500',
+        activeText: 'text-green-700',
+        activeBg: 'bg-green-50/80',
+        hoverText: 'hover:text-green-600',
+        groupHoverText: 'group-hover:text-green-500',
+        logoutHoverBg: 'hover:bg-red-50 hover:border-red-100',
     };
 
     return (
-        <aside className="w-72 bg-white border-r border-gray-100 flex flex-col justify-between hidden md:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10 flex-shrink-0">
-            <div>
-                <div className="h-24 flex items-center px-8 border-b border-gray-50">
-                    <span className={`text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r ${t.title} tracking-tight`}>
-                        WellMaggot
-                    </span>
-                </div>
+        <>
+            {/* Mobile Overlay */}
+            {isMobileOpen && (
+                <div 
+                    className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 md:hidden transition-opacity"
+                    onClick={onClose}
+                ></div>
+            )}
+
+            <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col justify-between shadow-xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div>
+                    <div className="h-24 flex items-center justify-between px-8 border-b border-gray-50">
+                        <span className={`text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r ${t.title} tracking-tight`}>
+                            Welltrash
+                        </span>
+                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
                 
                 <nav className="mt-8 px-4 space-y-2">
                     <div className="px-4 mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">Menu Utama</div>
@@ -92,5 +105,6 @@ export default function CompanySidebar({ active, theme = 'indigo', isLocked = fa
                 </Link>
             </div>
         </aside>
+        </>
     );
 }

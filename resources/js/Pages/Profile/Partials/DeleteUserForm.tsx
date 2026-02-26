@@ -1,9 +1,4 @@
-import DangerButton from '@/Components/DangerButton';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
 import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
-import TextInput from '@/Components/TextInput';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef, useState } from 'react';
 
@@ -64,9 +59,9 @@ export default function DeleteUserForm({
                 </p>
             </header>
 
-            <DangerButton onClick={confirmUserDeletion}>
+            <button onClick={confirmUserDeletion} className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500">
                 Delete Account
-            </DangerButton>
+            </button>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
                 <form onSubmit={deleteUser} className="p-6">
@@ -82,40 +77,32 @@ export default function DeleteUserForm({
                     </p>
 
                     <div className="mt-6">
-                        <InputLabel
-                            htmlFor="password"
-                            value="Password"
-                            className="sr-only"
-                        />
+                        <label htmlFor="password" className="sr-only">Password</label>
 
-                        <TextInput
+                        <input
                             id="password"
                             type="password"
                             name="password"
                             ref={passwordInput}
                             value={data.password}
-                            onChange={(e) =>
+                            onChange={(e: any) =>
                                 setData('password', e.target.value)
                             }
-                            className="mt-1 block w-3/4"
-                            isFocused
+                            className="mt-1 block w-3/4 border-gray-300 rounded-md shadow-sm"
                             placeholder="Password"
                         />
 
-                        <InputError
-                            message={errors.password}
-                            className="mt-2"
-                        />
+                        <div className="text-red-600 mt-2">{errors.password}</div>
                     </div>
 
-                    <div className="mt-6 flex justify-end">
-                        <SecondaryButton onClick={closeModal}>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button type="button" onClick={closeModal} className="bg-white border text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50">
                             Cancel
-                        </SecondaryButton>
+                        </button>
 
-                        <DangerButton className="ms-3" disabled={processing}>
+                        <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500" disabled={processing}>
                             Delete Account
-                        </DangerButton>
+                        </button>
                     </div>
                 </form>
             </Modal>

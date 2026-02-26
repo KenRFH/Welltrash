@@ -1,7 +1,3 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
@@ -63,70 +59,58 @@ export default function UpdatePasswordForm({
 
             <form onSubmit={updatePassword} className="mt-6 space-y-6">
                 <div>
-                    <InputLabel
-                        htmlFor="current_password"
-                        value="Current Password"
-                    />
+                    <label htmlFor="current_password" className="block font-medium text-sm text-gray-700">Current Password</label>
 
-                    <TextInput
+                    <input
                         id="current_password"
                         ref={currentPasswordInput}
                         value={data.current_password}
-                        onChange={(e) =>
+                        onChange={(e: any) =>
                             setData('current_password', e.target.value)
                         }
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         autoComplete="current-password"
                     />
 
-                    <InputError
-                        message={errors.current_password}
-                        className="mt-2"
-                    />
+                    <div className="text-red-600 mt-2">{errors.current_password}</div>
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="New Password" />
+                    <label htmlFor="password" className="block font-medium text-sm text-gray-700">New Password</label>
 
-                    <TextInput
+                    <input
                         id="password"
                         ref={passwordInput}
                         value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e: any) => setData('password', e.target.value)}
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         autoComplete="new-password"
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <div className="text-red-600 mt-2">{errors.password}</div>
                 </div>
 
                 <div>
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
+                    <label htmlFor="password_confirmation" className="block font-medium text-sm text-gray-700">Confirm Password</label>
 
-                    <TextInput
+                    <input
                         id="password_confirmation"
                         value={data.password_confirmation}
-                        onChange={(e) =>
+                        onChange={(e: any) =>
                             setData('password_confirmation', e.target.value)
                         }
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         autoComplete="new-password"
                     />
 
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                    <div className="text-red-600 mt-2">{errors.password_confirmation}</div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <button className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700" disabled={processing}>Save</button>
 
                     <Transition
                         show={recentlySuccessful}

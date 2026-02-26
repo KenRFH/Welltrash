@@ -78,7 +78,7 @@ const Mitra: React.FC = () => {
                     {doubledData.map((item, index) => (
                          <div
                             key={`row2-${index}`}
-                             className="flex-shrink-0 group relative overflow-hidden rounded-xl bg-gray-50 border border-gray-100 p-4 md:p-6 transition-all duration-300 hover:bg-white hover:border-blue-200 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] w-[120px] md:w-[180px] flex items-center justify-center grayscale hover:grayscale-0"
+                             className="flex-shrink-0 group relative overflow-hidden rounded-xl bg-gray-50 border border-gray-100 p-4 md:p-6 transition-all duration-300 hover:bg-white hover:border-emerald-200 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)] w-[120px] md:w-[180px] flex items-center justify-center grayscale hover:grayscale-0"
                         >
                             <img
                                 src={item.icon}

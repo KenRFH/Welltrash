@@ -2,7 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 
 export default function Pending() {
     return (
-        <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 p-4 font-sans">
+        <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4 font-sans">
             <Head title="Menunggu Persetujuan | WellMaggot" />
             
             <div className="max-w-md w-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-3xl p-10 text-center border border-gray-100 relative overflow-hidden">
@@ -25,7 +25,7 @@ export default function Pending() {
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="inline-flex items-center justify-center w-full px-6 py-3 bg-white border border-gray-200 rounded-xl font-semibold text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all"
+                        className="inline-flex items-center justify-center w-full px-6 py-3 bg-white border border-gray-200 rounded-xl font-semibold text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all"
                     >
                         Keluar dari Akun
                     </Link>

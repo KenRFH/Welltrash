@@ -50,8 +50,8 @@ const WasteFlow: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="text-center mb-16">
-                     <div className="inline-flex items-center space-x-2 bg-blue-50 rounded-full px-4 py-2 border border-blue-100 mb-4">
-                        <span className="text-sm font-medium text-blue-700">
+                     <div className="inline-flex items-center space-x-2 bg-emerald-50 rounded-full px-4 py-2 border border-emerald-100 mb-4">
+                        <span className="text-sm font-medium text-emerald-700">
                             Proses Kami
                         </span>
                     </div>

@@ -1,7 +1,3 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
@@ -34,65 +30,58 @@ export default function ResetPassword({
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <label htmlFor="email" className="block font-medium text-sm text-gray-700">Email</label>
 
-                    <TextInput
+                    <input
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e: any) => setData('email', e.target.value)}
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <div className="text-red-600 mt-2">{errors.email}</div>
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                    <label htmlFor="password" className="block font-medium text-sm text-gray-700">Password</label>
 
-                    <TextInput
+                    <input
                         id="password"
                         type="password"
                         name="password"
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         autoComplete="new-password"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e: any) => setData('password', e.target.value)}
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <div className="text-red-600 mt-2">{errors.password}</div>
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
+                    <label htmlFor="password_confirmation" className="block font-medium text-sm text-gray-700">Confirm Password</label>
 
-                    <TextInput
+                    <input
                         type="password"
                         name="password_confirmation"
                         value={data.password_confirmation}
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                         autoComplete="new-password"
-                        onChange={(e) =>
+                        onChange={(e: any) =>
                             setData('password_confirmation', e.target.value)
                         }
                     />
 
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                    <div className="text-red-600 mt-2">{errors.password_confirmation}</div>
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <button className="ms-4 bg-gray-800 text-white px-4 py-2 rounded-md" disabled={processing}>
                         Reset Password
-                    </PrimaryButton>
+                    </button>
                 </div>
             </form>
         </GuestLayout>

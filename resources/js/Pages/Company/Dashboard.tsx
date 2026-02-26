@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import CompanySidebar from '@/Components/CompanySidebar';
 
 const CalendarIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
@@ -30,6 +30,7 @@ interface Props {
 
 export default function Dashboard({ auth, company, statistics, weekly_statistics }: Props) {
     const { post, processing } = useForm();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
     const handleUnsubscribe = () => {
         if (confirm('Apakah Anda yakin ingin membatalkan berlangganan? Anda akan kehilangan akses ke layanan ini dan harus mendaftar ulang jika ingin kembali.')) {
@@ -42,32 +43,44 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
             <Head title="Dasbor Perusahaan | WellMaggot" />
 
             {/* Sidebar Component */}
-            <CompanySidebar active="dashboard" theme="indigo" />
+            <CompanySidebar 
+                active="dashboard" 
+                isMobileOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-indigo-50 to-blue-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
 
                 {/* Header Navbar */}
-                <header className="h-24 flex items-center justify-between px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex-1 max-w-xl">
-                        <div className="relative group">
+                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-4 flex-1 max-w-xl">
+                        {/* Mobile Menu Toggle */}
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        </button>
+                    
+                        <div className="relative group hidden sm:block w-full">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
                             <input 
                                 type="text" 
                                 placeholder="Cari data..." 
-                                className="w-full sm:w-80 pl-11 pr-4 py-2.5 rounded-2xl border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 focus:bg-white transition-all shadow-sm"
+                                className="w-full sm:w-80 pl-11 pr-4 py-2.5 rounded-2xl border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-100 focus:border-green-400 focus:bg-white transition-all shadow-sm"
                             />
                         </div>
                     </div>
                     
                     <div className="flex items-center space-x-6">
-                        <button className="relative text-gray-400 hover:text-indigo-600 transition-colors p-2 rounded-xl hover:bg-indigo-50">
+                        <button className="relative text-gray-400 hover:text-green-600 transition-colors p-2 rounded-xl hover:bg-green-50">
                             <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -75,12 +88,12 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                         </button>
 
                         <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-100 to-blue-100 flex items-center justify-center p-0.5">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
                                 <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=4f46e5&bold=true`} alt="User avatar" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
-                                <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider leading-none">{company.company_name}</span>
+                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">{company.company_name}</span>
                             </div>
                         </div>
                     </div>
@@ -91,14 +104,14 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-10">
                         
                         {/* Welcome Card */}
-                        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgb(79,70,229,0.2)] text-white relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                        <div className="lg:col-span-2 bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgba(22,163,74,0.2)] text-white relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center">
                             {/* Abstract shapes */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-10 -mt-20"></div>
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400 opacity-20 rounded-full blur-2xl -ml-10 -mb-10"></div>
+                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-green-400 opacity-20 rounded-full blur-2xl -ml-10 -mb-10"></div>
                             
                             <div className="relative z-10 mb-6 sm:mb-0">
                                 <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Halo Mitra! 👋</h2>
-                                <p className="text-indigo-100 text-sm sm:text-base font-medium mb-4">Selamat datang kembali di dasbor WellMaggot.</p>
+                                <p className="text-green-100 text-sm sm:text-base font-medium mb-4">Selamat datang kembali di dasbor WellMaggot.</p>
                                 
                                 {company.subscription_status === 'cancellation_requested' && (
                                     <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-yellow-400/20 text-yellow-100 border border-yellow-400/30">
@@ -127,8 +140,8 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                         </div>
                         
                         {/* Date Card */}
-                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex flex-col justify-center relative overflow-hidden group hover:border-indigo-100 transition-colors">
-                            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex flex-col justify-center relative overflow-hidden group hover:border-green-100 transition-colors">
+                            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <CalendarIcon />
                             </div>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Hari Ini</p>
@@ -204,7 +217,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                 <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan Mingguan</h3>
                                 <p className="text-sm text-gray-500 mt-1">Bulan {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
                             </div>
-                            <Link href={route('company.history')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-4 py-2 rounded-xl transition-colors">
+                            <Link href={route('company.history')} className="text-sm font-semibold text-green-600 hover:text-green-800 bg-green-50 px-4 py-2 rounded-xl transition-colors">
                                 Lihat Detail
                             </Link>
                         </div>
