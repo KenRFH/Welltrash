@@ -143,6 +143,134 @@ const About = () => {
                 </div>
             </section>
 
+            {/* Dokumentasi Aktivitas */}
+            <section className="py-16 lg:py-24 bg-white relative">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center space-x-2 bg-green-50 rounded-full px-4 py-2 border border-green-100 mb-4">
+                            <span className="text-sm font-medium text-green-700">Galeri Kami</span>
+                        </div>
+                        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                            Aksi Nyata untuk Lingkungan
+                        </h2>
+                        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                            Sekilas dokumentasi aktivitas kami di lapangan, menunjukkan dedikasi tim Welltrash dalam mengelola limbah secara profesional.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pb-10 lg:pb-24">
+                        {/* Column 1 */}
+                        <div className="space-y-6 lg:space-y-8">
+                            <div className="group relative overflow-hidden rounded-3xl aspect-[4/5] shadow-sm">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=800&auto=format&fit=crop" 
+                                    alt="Pengangkutan Terjadwal" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">Armada Logistik</h3>
+                                    <p className="text-slate-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        Proses pengangkutan terjadwal dari fasilitas mitra komersial menuju pusat pengolahan.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="group relative overflow-hidden rounded-3xl aspect-[4/3] shadow-sm">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1550989460-0adf9ea622e2?q=80&w=800&auto=format&fit=crop" 
+                                    alt="Edukasi Lingkungan" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <h3 className="text-xl font-bold text-white mb-2">Edukasi & Pelatihan</h3>
+                                    <p className="text-slate-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        Memberikan pendampingan tata kelola sampah kepada staf operasional mitra.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 2 */}
+                        <div className="space-y-6 lg:space-y-8 lg:translate-y-12">
+                            <div className="group relative overflow-hidden rounded-3xl aspect-[4/3] shadow-sm">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?q=80&w=800&auto=format&fit=crop" 
+                                    alt="Pemilahan Sampah" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <h3 className="text-xl font-bold text-white mb-2">Pemisahan Material</h3>
+                                    <p className="text-slate-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        Pekerja terampil kami menyortir sampah anorganik sesuai jenis dan nilainya.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="group relative overflow-hidden rounded-3xl aspect-[4/5] shadow-sm">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=800&auto=format&fit=crop" 
+                                    alt="Material Recovery" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">Material Recovery</h3>
+                                    <p className="text-slate-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        Mendistribusikan material daur ulang ke berbagai pabrik peleburan.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Column 3 */}
+                        <div className="space-y-6 lg:space-y-8 lg:translate-y-24">
+                            <div className="group relative overflow-hidden rounded-3xl aspect-[4/5] shadow-sm">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1528323273322-d81458248d40?q=80&w=800&auto=format&fit=crop" 
+                                    alt="Pengolahan Kompos" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <h3 className="text-2xl font-bold text-white mb-2">Pengolahan Organik</h3>
+                                    <p className="text-slate-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        Mengurai limbah makanan dan organik menjadi kompos bernutrisi tinggi.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="group relative overflow-hidden rounded-3xl aspect-[4/3] shadow-sm">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1516992654410-9309d4587e94?q=80&w=800&auto=format&fit=crop" 
+                                    alt="Sistem Monitoring" 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300"></div>
+                                <div className="absolute inset-0 flex flex-col justify-end p-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <h3 className="text-xl font-bold text-white mb-2">Integrasi Data</h3>
+                                    <p className="text-slate-200 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                                        Pencatatan volume sampah secara real-time untuk kebutuhan ESG report.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* CTA Section */}
             <section className="py-20 relative overflow-hidden rounded-t-[4rem]">
                 <div className="absolute inset-0 bg-slate-900"></div>
