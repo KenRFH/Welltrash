@@ -82,6 +82,10 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
+        if ($company->subscription_plan === 'Basic') {
+            return redirect()->route('company.dashboard')->with('error', 'Fitur ini hanya tersedia untuk paket Premium.');
+        }
+
         $pickups = $company->pickups()->with('driver')
             ->whereIn('status', ['completed', 'failed'])
             ->orderBy('pickup_date', 'desc')

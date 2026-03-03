@@ -28,6 +28,7 @@ interface Props {
     company: {
         id: number;
         company_name: string;
+        subscription_plan: string;
     };
     auth: {
         user: { name: string; email: string };
@@ -47,6 +48,7 @@ export default function History({ auth, company, pickups }: Props) {
                 active="history" 
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                plan={company.subscription_plan}
             />
 
             {/* Main Content */}

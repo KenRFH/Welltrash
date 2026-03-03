@@ -17,7 +17,7 @@ const whyData: WhyProps[] = [
         description: "Bersih, Pasti, Terjadwal",
     },
     {
-        name: "Murah",
+        name: "Terjangkau",
         icon: murah,
         description: "Harga Kompetitif & Transparan",
     },

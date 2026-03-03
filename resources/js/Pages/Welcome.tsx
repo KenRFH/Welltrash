@@ -5,6 +5,7 @@ import Why from "@/Components/Why";
 import Mitra from "@/Components/Mitra";
 import WasteFlow from "@/Components/WasteFlow";
 import Footer from "@/Components/Footer";
+import { Link } from "@inertiajs/react";
 
 const Welcome = () => {
     return (
@@ -38,7 +39,7 @@ const Welcome = () => {
                             </div>
 
                             <div className="flex flex-wrap gap-4">
-                                <button className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all shadow-lg shadow-green-600/30 flex items-center gap-2 group duration-500">
+                                <Link href={route('login')} className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all shadow-lg shadow-green-600/30 flex items-center gap-2 group duration-500">
                                     Mulai Berlangganan
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -54,11 +55,11 @@ const Welcome = () => {
                                             d="M17 8l4 4m0 0l-4 4m4-4H3"
                                         />
                                     </svg>
-                                </button>
+                                </Link>
 
-                                <button className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-full border border-gray-200 transition-all shadow-sm">
-                                    Lihat Detail
-                                </button>
+                                <Link href={route('about')} className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-full border border-gray-200 transition-all shadow-sm">
+                                    Tentang Kami
+                                </Link>
                             </div>
 
                             <div className="pt-8 flex items-center gap-4 text-sm text-gray-500">

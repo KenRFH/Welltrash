@@ -12,9 +12,10 @@ interface Props {
     isLocked?: boolean;
     isMobileOpen?: boolean;
     onClose?: () => void;
+    plan?: string;
 }
 
-export default function CompanySidebar({ active, isLocked = false, isMobileOpen = false, onClose }: Props) {
+export default function CompanySidebar({ active, isLocked = false, isMobileOpen = false, onClose, plan }: Props) {
     // Standard Green Theme configurations
     const t = {
         title: 'from-green-600 to-emerald-500',
@@ -24,6 +25,8 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
         groupHoverText: 'group-hover:text-green-500',
         logoutHoverBg: 'hover:bg-red-50 hover:border-red-100',
     };
+
+    const isBasic = plan === 'Basic';
 
     return (
         <>
@@ -73,9 +76,16 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                                 <span className={active !== 'dashboard' ? t.groupHoverText : ''}><HomeIcon /></span> Beranda
                             </Link>
                             
-                            <Link href={route('company.history')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'history' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
-                                <span className={active !== 'history' ? t.groupHoverText : ''}><HistoryIcon /></span> Riwayat
-                            </Link>
+                            {isBasic ? (
+                                <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group relative" title="Upgrade ke Premium untuk membuka fitur ini">
+                                    <span className=""><HistoryIcon /></span> Riwayat
+                                    <svg className="w-4 h-4 ml-auto text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                </div>
+                            ) : (
+                                <Link href={route('company.history')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'history' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
+                                    <span className={active !== 'history' ? t.groupHoverText : ''}><HistoryIcon /></span> Riwayat
+                                </Link>
+                            )}
                             
                             <Link href={route('company.schedule')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'schedule' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
                                 <span className={active !== 'schedule' ? t.groupHoverText : ''}><CalendarIcon /></span> Jadwal & Agenda

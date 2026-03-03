@@ -47,6 +47,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                 active="dashboard" 
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
+                plan={company.subscription_plan}
             />
 
             {/* Main Content */}
@@ -121,10 +122,12 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                             </div>
                             
                             <div className="relative z-10 flex flex-col sm:flex-row gap-3">
-                                <button className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm">
-                                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                    Unduh Laporan
-                                </button>
+                                {company.subscription_plan !== 'Basic' && (
+                                    <button className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm">
+                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        Unduh Laporan
+                                    </button>
+                                )}
 
                                 {company.subscription_status === 'active' && (
                                     <button 
@@ -151,143 +154,158 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-10">
-                         {/* Organic Card */}
-                         <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-amber-100/50 flex flex-col justify-between relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-amber-100 transition-colors"></div>
-                            
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-2xl shadow-inner border border-amber-100 relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-transform">
-                                    🍞
-                                </div>
+                    {company.subscription_plan === 'Basic' ? (
+                        <div className="bg-white rounded-3xl p-10 mt-6 text-center border border-dashed border-gray-300 relative z-10">
+                            <div className="w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                             </div>
-                            
-                            <div className="relative z-10">
-                                <p className="text-sm font-bold text-gray-500 mb-1">Total Organik</p>
-                                <div className="flex items-baseline space-x-2">
-                                    <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_organic).toLocaleString('id-ID')}</span>
-                                    <span className="text-lg font-bold text-amber-500">Kg</span>
-                                </div>
-                            </div>
+                            <h3 className="text-xl font-bold text-gray-900">Fitur Premium Dikunci</h3>
+                            <p className="text-gray-500 text-sm mt-2 max-w-md mx-auto mb-6">Tingkatkan paket layanan Anda ke Premium untuk melihat data pelacakan historis, metrik ESG, dan unduh laporan.</p>
+                            <a href="https://wa.me/628123456789" target="_blank" rel="noreferrer" className="inline-block bg-gradient-to-r from-green-500 to-green-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                                Hubungi Sales untuk Upgrade
+                            </a>
                         </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 relative z-10">
+                                 {/* Organic Card */}
+                                 <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-amber-100/50 flex flex-col justify-between relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-amber-100 transition-colors"></div>
+                                    
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-2xl shadow-inner border border-amber-100 relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-transform">
+                                            🍞
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="relative z-10">
+                                        <p className="text-sm font-bold text-gray-500 mb-1">Total Organik</p>
+                                        <div className="flex items-baseline space-x-2">
+                                            <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_organic).toLocaleString('id-ID')}</span>
+                                            <span className="text-lg font-bold text-amber-500">Kg</span>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        {/* Anorganic Card */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-teal-100/50 flex flex-col justify-between relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-teal-100 transition-colors"></div>
-                            
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center text-2xl shadow-inner border border-teal-100 relative z-10 group-hover:scale-110 group-hover:-rotate-12 transition-transform">
-                                    🛍️
+                                {/* Anorganic Card */}
+                                <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-teal-100/50 flex flex-col justify-between relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-teal-100 transition-colors"></div>
+                                    
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center text-2xl shadow-inner border border-teal-100 relative z-10 group-hover:scale-110 group-hover:-rotate-12 transition-transform">
+                                            🛍️
+                                        </div>
+                                    </div>
+
+                                    <div className="relative z-10">
+                                        <p className="text-sm font-bold text-gray-500 mb-1">Total Anorganik</p>
+                                        <div className="flex items-baseline space-x-2">
+                                            <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_anorganic).toLocaleString('id-ID')}</span>
+                                            <span className="text-lg font-bold text-teal-500">Kg</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Residue Card */}
+                                <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-200/50 flex flex-col justify-between relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-gray-100 transition-colors"></div>
+                                    
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl shadow-inner border border-gray-200 relative z-10 group-hover:scale-110 transition-transform">
+                                            🗑️
+                                        </div>
+                                    </div>
+
+                                    <div className="relative z-10">
+                                        <p className="text-sm font-bold text-gray-500 mb-1">Total Residu</p>
+                                        <div className="flex items-baseline space-x-2">
+                                            <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_residue).toLocaleString('id-ID')}</span>
+                                            <span className="text-lg font-bold text-gray-400">Kg</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="relative z-10">
-                                <p className="text-sm font-bold text-gray-500 mb-1">Total Anorganik</p>
-                                <div className="flex items-baseline space-x-2">
-                                    <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_anorganic).toLocaleString('id-ID')}</span>
-                                    <span className="text-lg font-bold text-teal-500">Kg</span>
+                            {/* Chart Container Placeholder */}
+                            <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 mb-12 relative z-10">
+                                <div className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan Mingguan</h3>
+                                        <p className="text-sm text-gray-500 mt-1">Bulan {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
+                                    </div>
+                                    <Link href={route('company.history')} className="text-sm font-semibold text-green-600 hover:text-green-800 bg-green-50 px-4 py-2 rounded-xl transition-colors">
+                                        Lihat Detail
+                                    </Link>
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* Residue Card */}
-                        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-200/50 flex flex-col justify-between relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-gray-50 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-gray-100 transition-colors"></div>
-                            
-                            <div className="flex justify-between items-start mb-4">
-                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl shadow-inner border border-gray-200 relative z-10 group-hover:scale-110 transition-transform">
-                                    🗑️
-                                </div>
-                            </div>
+                                {/* Real Bar Chart rendering */}
+                                <div className="relative h-64 border-l border-b border-gray-200 ml-4 pb-4 w-full flex items-end">
+                                    {/* Grid lines */}
+                                    <div className="absolute inset-y-0 left-0 w-full flex flex-col justify-between pointer-events-none">
+                                        <div className="border-t border-gray-100 w-full"></div>
+                                        <div className="border-t border-gray-100 w-full"></div>
+                                        <div className="border-t border-gray-100 w-full"></div>
+                                        <div className="border-t border-gray-100 w-full"></div>
+                                    </div>
 
-                            <div className="relative z-10">
-                                <p className="text-sm font-bold text-gray-500 mb-1">Total Residu</p>
-                                <div className="flex items-baseline space-x-2">
-                                    <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_residue).toLocaleString('id-ID')}</span>
-                                    <span className="text-lg font-bold text-gray-400">Kg</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                    <div className="absolute inset-0 flex justify-around px-4 sm:px-12 items-end bottom-0 pb-0 z-10 w-full">
+                                        {(() => {
+                                            // Calculate maximum value for normalization to set bar heights correctly
+                                            const rawMax = Math.max(
+                                                ...weekly_statistics.flatMap(w => [Number(w.organic), Number(w.anorganic)])
+                                            );
+                                            // Ensure division by zero doesn't happen, set a min max of 100
+                                            const maxVal = Math.max(rawMax, 100);
 
-                    {/* Chart Container Placeholder */}
-                    <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 mb-12 relative z-10">
-                        <div className="flex justify-between items-center mb-8">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan Mingguan</h3>
-                                <p className="text-sm text-gray-500 mt-1">Bulan {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
-                            </div>
-                            <Link href={route('company.history')} className="text-sm font-semibold text-green-600 hover:text-green-800 bg-green-50 px-4 py-2 rounded-xl transition-colors">
-                                Lihat Detail
-                            </Link>
-                        </div>
+                                            return weekly_statistics.map((stat, index) => {
+                                                // Calculate percentage height, capped at 100% just in case
+                                                let hOrg = (Number(stat.organic) / maxVal) * 100;
+                                                let hAno = (Number(stat.anorganic) / maxVal) * 100;
 
-                        {/* Real Bar Chart rendering */}
-                        <div className="relative h-64 border-l border-b border-gray-200 ml-4 pb-4 w-full flex items-end">
-                            {/* Grid lines */}
-                            <div className="absolute inset-y-0 left-0 w-full flex flex-col justify-between pointer-events-none">
-                                <div className="border-t border-gray-100 w-full"></div>
-                                <div className="border-t border-gray-100 w-full"></div>
-                                <div className="border-t border-gray-100 w-full"></div>
-                                <div className="border-t border-gray-100 w-full"></div>
-                            </div>
+                                                // Ensure minimum height of 4% so bars are slightly visible even for 0 values to show the baseline exist
+                                                hOrg = Math.max(hOrg, 4);
+                                                hAno = Math.max(hAno, 4);
 
-                            <div className="absolute inset-0 flex justify-around px-4 sm:px-12 items-end bottom-0 pb-0 z-10 w-full">
-                                {(() => {
-                                    // Calculate maximum value for normalization to set bar heights correctly
-                                    const rawMax = Math.max(
-                                        ...weekly_statistics.flatMap(w => [Number(w.organic), Number(w.anorganic)])
-                                    );
-                                    // Ensure division by zero doesn't happen, set a min max of 100
-                                    const maxVal = Math.max(rawMax, 100);
+                                                return (
+                                                    <div key={index} className="flex flex-col items-center group relative">
+                                                        {/* Tooltip visible on group hover */}
+                                                        <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded-lg py-1.5 px-3 whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                                                            Org: {stat.organic}kg | Ano: {stat.anorganic}kg
+                                                        </div>
 
-                                    return weekly_statistics.map((stat, index) => {
-                                        // Calculate percentage height, capped at 100% just in case
-                                        let hOrg = (Number(stat.organic) / maxVal) * 100;
-                                        let hAno = (Number(stat.anorganic) / maxVal) * 100;
-
-                                        // Ensure minimum height of 4% so bars are slightly visible even for 0 values to show the baseline exist
-                                        hOrg = Math.max(hOrg, 4);
-                                        hAno = Math.max(hAno, 4);
-
-                                        return (
-                                            <div key={index} className="flex flex-col items-center group relative">
-                                                {/* Tooltip visible on group hover */}
-                                                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded-lg py-1.5 px-3 whitespace-nowrap z-20 pointer-events-none shadow-lg">
-                                                    Org: {stat.organic}kg | Ano: {stat.anorganic}kg
-                                                </div>
-
-                                                <div className="flex items-end space-x-1.5 h-64">
-                                                    {/* Organic Bar */}
-                                                    <div 
-                                                        className="w-6 sm:w-12 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
-                                                        style={{ height: `${hOrg}%` }}
-                                                        title={`Organik: ${stat.organic} Kg`}
-                                                    >
-                                                        {hOrg > 15 && <span className="text-[10px] font-bold text-amber-700/80 -rotate-90 origin-bottom">{stat.organic > 0 ? stat.organic : ''}</span>}
+                                                        <div className="flex items-end space-x-1.5 h-64">
+                                                            {/* Organic Bar */}
+                                                            <div 
+                                                                className="w-6 sm:w-12 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
+                                                                style={{ height: `${hOrg}%` }}
+                                                                title={`Organik: ${stat.organic} Kg`}
+                                                            >
+                                                                {hOrg > 15 && <span className="text-[10px] font-bold text-amber-700/80 -rotate-90 origin-bottom">{stat.organic > 0 ? stat.organic : ''}</span>}
+                                                            </div>
+                                                            
+                                                            {/* Anorganic Bar */}
+                                                            <div 
+                                                                className="w-6 sm:w-12 bg-gradient-to-t from-teal-200 to-teal-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
+                                                                style={{ height: `${hAno}%` }}
+                                                                title={`Anorganik: ${stat.anorganic} Kg`}
+                                                            >
+                                                                {hAno > 15 && <span className="text-[10px] font-bold text-teal-700/80 -rotate-90 origin-bottom">{stat.anorganic > 0 ? stat.anorganic : ''}</span>}
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8 whitespace-nowrap">{stat.week}</span>
                                                     </div>
-                                                    
-                                                    {/* Anorganic Bar */}
-                                                    <div 
-                                                        className="w-6 sm:w-12 bg-gradient-to-t from-teal-200 to-teal-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
-                                                        style={{ height: `${hAno}%` }}
-                                                        title={`Anorganik: ${stat.anorganic} Kg`}
-                                                    >
-                                                        {hAno > 15 && <span className="text-[10px] font-bold text-teal-700/80 -rotate-90 origin-bottom">{stat.anorganic > 0 ? stat.anorganic : ''}</span>}
-                                                    </div>
-                                                </div>
-                                                <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8 whitespace-nowrap">{stat.week}</span>
-                                            </div>
-                                        );
-                                    });
-                                })()}
+                                                );
+                                            });
+                                        })()}
+                                    </div>
+                                </div>
+                                <div className="mt-12 flex justify-center space-x-6 text-sm font-medium text-gray-600">
+                                     <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-200 mr-2"></span> Organik (Kg)</div>
+                                     <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-teal-200 mr-2"></span> Anorganik (Kg)</div>
+                                </div>
                             </div>
-                        </div>
-                        <div className="mt-12 flex justify-center space-x-6 text-sm font-medium text-gray-600">
-                             <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-200 mr-2"></span> Organik (Kg)</div>
-                             <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-teal-200 mr-2"></span> Anorganik (Kg)</div>
-                        </div>
-                    </div>
+                        </>
+                    )}
 
                 </main>
             </div>
