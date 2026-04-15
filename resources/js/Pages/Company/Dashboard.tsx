@@ -106,22 +106,20 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                         
                         {/* Welcome Card */}
                         <div className="lg:col-span-2 bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-8 sm:p-10 shadow-[0_8px_30px_rgba(22,163,74,0.2)] text-white relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                            {/* Abstract shapes */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -mr-10 -mt-20"></div>
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-green-400 opacity-20 rounded-full blur-2xl -ml-10 -mb-10"></div>
                             
-                            <div className="relative z-10 mb-6 sm:mb-0">
-                                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">Halo Mitra! 👋</h2>
-                                <p className="text-green-100 text-sm sm:text-base font-medium mb-4">Selamat datang kembali di dasbor WellMaggot.</p>
+                            <div className="relative z-10 mb-6 sm:mb-0 p-6 sm:p-8 rounded-[2rem] bg-white/10 backdrop-blur-2xl border border-white/20 border-t-white/40 border-l-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.15)] overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50 pointer-events-none"></div>
+                                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2 relative z-10 drop-shadow-sm">Halo Mitra! 👋</h2>
+                                <p className="text-white/90 text-sm sm:text-base font-medium mb-4 relative z-10 drop-shadow-sm">Selamat datang kembali di dasbor WellMaggot.</p>
                                 
                                 {company.subscription_status === 'cancellation_requested' && (
-                                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-yellow-400/20 text-yellow-100 border border-yellow-400/30">
+                                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white/20 text-white border border-white/30 backdrop-blur-xl relative z-10 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
                                         Menunggu Proses Pembatalan Layanan
                                     </span>
                                 )}
                             </div>
                             
-                            <div className="relative z-10 flex flex-col sm:flex-row gap-3">
+                            <div className="relative z-10 flex flex-col sm:flex-row gap-3 ml-7">
                                 {company.subscription_plan !== 'Basic' && (
                                     <button className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm">
                                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -178,11 +176,14 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                         </div>
                                     </div>
                                     
-                                    <div className="relative z-10">
+                                    <div className="relative z-10 mt-auto">
                                         <p className="text-sm font-bold text-gray-500 mb-1">Total Organik</p>
                                         <div className="flex items-baseline space-x-2">
                                             <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_organic).toLocaleString('id-ID')}</span>
                                             <span className="text-lg font-bold text-amber-500">Kg</span>
+                                        </div>
+                                        <div className="mt-3 pt-3 border-t border-amber-100/50">
+                                            <p className="text-xs font-semibold text-amber-700/80">Dimanfaatkan untuk Pakan Maggot BSF 🐛</p>
                                         </div>
                                     </div>
                                 </div>
@@ -197,11 +198,14 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                         </div>
                                     </div>
 
-                                    <div className="relative z-10">
+                                    <div className="relative z-10 mt-auto">
                                         <p className="text-sm font-bold text-gray-500 mb-1">Total Anorganik</p>
                                         <div className="flex items-baseline space-x-2">
                                             <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_anorganic).toLocaleString('id-ID')}</span>
                                             <span className="text-lg font-bold text-teal-500">Kg</span>
+                                        </div>
+                                        <div className="mt-3 pt-3 border-t border-teal-100/50">
+                                            <p className="text-xs font-semibold text-teal-700/80">Didaur ulang / Bank Sampah ♻️</p>
                                         </div>
                                     </div>
                                 </div>
@@ -216,11 +220,14 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                         </div>
                                     </div>
 
-                                    <div className="relative z-10">
+                                    <div className="relative z-10 mt-auto">
                                         <p className="text-sm font-bold text-gray-500 mb-1">Total Residu</p>
                                         <div className="flex items-baseline space-x-2">
                                             <span className="text-3xl sm:text-4xl font-black text-gray-900">{Number(statistics.total_residue).toLocaleString('id-ID')}</span>
                                             <span className="text-lg font-bold text-gray-400">Kg</span>
+                                        </div>
+                                        <div className="mt-3 pt-3 border-t border-gray-200/50">
+                                            <p className="text-xs font-semibold text-gray-500">Dibuang secara aman ke TPA 🚮</p>
                                         </div>
                                     </div>
                                 </div>

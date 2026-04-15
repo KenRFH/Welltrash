@@ -6,9 +6,10 @@ const HistoryIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="curr
 const CalendarIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
 const BillingIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>;
 const PartnersIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>;
+const ActivitiesIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 
 interface Props {
-    active: 'dashboard' | 'history' | 'schedule' | 'billing' | 'mitra';
+    active: 'dashboard' | 'history' | 'schedule' | 'billing' | 'mitra' | 'kegiatan';
     isLocked?: boolean;
     isMobileOpen?: boolean;
     onClose?: () => void;
@@ -64,6 +65,9 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                                 <span className=""><CalendarIcon /></span> Jadwal & Agenda
                             </div>
                             <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group">
+                                <span className=""><ActivitiesIcon /></span> Kegiatan
+                            </div>
+                            <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group">
                                 <span className=""><BillingIcon /></span> Tagihan
                             </div>
                             <div className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'mitra' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
@@ -90,13 +94,17 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                             <Link href={route('company.schedule')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'schedule' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
                                 <span className={active !== 'schedule' ? t.groupHoverText : ''}><CalendarIcon /></span> Jadwal & Agenda
                             </Link>
-                            
-                            <Link href="#" className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group">
-                                <span className=""><BillingIcon /></span> Tagihan
+
+                            <Link href={route('company.kegiatan')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'kegiatan' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
+                                <span className={active !== 'kegiatan' ? t.groupHoverText : ''}><ActivitiesIcon /></span> Kegiatan
                             </Link>
                             
-                            <Link href="#" className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group">
-                                <span className=""><PartnersIcon /></span> Mitra
+                            <Link href={route('company.billing')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'billing' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
+                                <span className={active !== 'billing' ? t.groupHoverText : ''}><BillingIcon /></span> Tagihan
+                            </Link>
+                            
+                            <Link href={route('company.mitra')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'mitra' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
+                                <span className={active !== 'mitra' ? t.groupHoverText : ''}><PartnersIcon /></span> Mitra
                             </Link>
                         </>
                     )}

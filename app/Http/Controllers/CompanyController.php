@@ -197,4 +197,115 @@ class CompanyController extends Controller
 
         return back()->with('error', 'Tidak dapat memproses permintaan.');
     }
+
+    public function mitra()
+    {
+        $user = Auth::user();
+        if (!$user->company) {
+            return redirect()->route('company.register');
+        }
+
+        $company = $user->company;
+        $activeDaysLeft = 0;
+        if ($company->subscription_end_date) {
+            $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
+            if ($endDate->isFuture()) {
+                $activeDaysLeft = (int) ceil(now()->floatDiffInDays($endDate));
+            }
+        }
+
+        return Inertia::render('Company/Mitra', [
+            'company' => $company,
+            'activeDaysLeft' => $activeDaysLeft
+        ]);
+    }
+
+    public function upgradeService(Request $request)
+    {
+        $request->validate([
+            'subscription_plan' => 'required|string|in:Premium,Premium +'
+        ]);
+
+        $customMessages = 'Permintaan peningkatan layanan ke ' . $request->subscription_plan . ' berhasil diajukan.';
+        
+        $company = Auth::user()->company;
+        if ($company) {
+            // Alternatively, in a real app this might go to 'pending approval'. But here we just update it.
+            $company->update([
+                'subscription_plan' => $request->subscription_plan
+            ]);
+            return back()->with('success', $customMessages);
+        }
+
+        return back()->with('error', 'Gagal memproses peningkatan layanan.');
+    }
+
+    public function billing()
+    {
+        $user = Auth::user();
+        if (!$user->company) {
+            return redirect()->route('company.register');
+        }
+
+        $company = $user->company;
+        $activeDaysLeft = 0;
+        if ($company->subscription_end_date) {
+            $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
+            if ($endDate->isFuture()) {
+                $activeDaysLeft = (int) ceil(now()->floatDiffInDays($endDate));
+            }
+        }
+
+        return Inertia::render('Company/Billing', [
+            'company' => $company,
+            'activeDaysLeft' => $activeDaysLeft
+        ]);
+    }
+
+    public function uploadPayment(Request $request)
+    {
+        $request->validate([
+            'payment_evidence' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+        ]);
+
+        $company = Auth::user()->company;
+        if ($company) {
+            $paymentEvidencePath = $request->file('payment_evidence')->store('documents/payments', 'public');
+            
+            $endDate = $company->subscription_end_date ? \Carbon\Carbon::parse($company->subscription_end_date) : now();
+            if ($endDate->isPast()) {
+                $endDate = now();
+            }
+
+            $company->update([
+                'payment_evidence_path' => $paymentEvidencePath,
+                'subscription_end_date' => $endDate->addDays(30),
+            ]);
+
+            return back()->with('success', 'Pembayaran berhasil diunggah. Masa aktif kemitraan Anda telah diperpanjang.');
+        }
+
+        return back()->with('error', 'Gagal memproses pembayaran.');
+    }
+
+    public function activities()
+    {
+        $user = Auth::user();
+        if (!$user->company) {
+            return redirect()->route('company.register');
+        }
+
+        $company = $user->company;
+        $pickups = $company->pickups()
+            ->with('driver')
+            ->where('status', 'completed')
+            ->orderBy('pickup_date', 'desc')
+            ->get();
+
+        return Inertia::render('Company/Activities', [
+            'company' => $company,
+            'activities' => $pickups,
+            'plan' => $company->subscription_plan
+        ]);
+    }
 }

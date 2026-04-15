@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
+import logowelltrash from "../../../public/build/assets/logowelltrash.png";
 
 
 const Navbar = () => {
@@ -27,8 +28,14 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between font-outfit">
 
         {/* Logo */}
-        <div className="text-2xl md:text-3xl font-extrabold">
-          WellTrash
+        <div className="flex-shrink-0 relative w-32 md:w-48 h-10 md:h-12 flex items-center">
+          <Link href={route('beranda')} className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center">
+            <img 
+              src={logowelltrash} 
+              alt="WellTrash Logo" 
+              className="h-20 md:h-28 w-auto object-contain object-left pointer-events-none" 
+            />
+          </Link>
         </div>
 
         {/* Desktop Menu */}

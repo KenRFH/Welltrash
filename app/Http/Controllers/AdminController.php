@@ -34,7 +34,10 @@ class AdminController extends Controller
 
     public function approveCompany(Company $company)
     {
-        $company->update(['subscription_status' => 'active']);
+        $company->update([
+            'subscription_status' => 'active',
+            'subscription_end_date' => now()->addDays(30)
+        ]);
         
         // As soon as the company is active, generate their initial pickups!
         \Illuminate\Support\Facades\Artisan::call('pickups:generate', [

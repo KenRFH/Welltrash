@@ -20,6 +20,7 @@ class Company extends Model
         'business_category',
         'subscription_plan',
         'subscription_status',
+        'subscription_end_date',
         'payment_evidence_path',
         'signed_mou_path',
         'pickup_schedule',
@@ -27,6 +28,7 @@ class Company extends Model
 
     protected $casts = [
         'pickup_schedule' => 'array',
+        'subscription_end_date' => 'datetime',
     ];
 
     public function user()
@@ -37,5 +39,10 @@ class Company extends Model
     public function pickups()
     {
         return $this->hasMany(Pickup::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(CompanyActivity::class)->orderBy('activity_date', 'desc')->orderBy('created_at', 'desc');
     }
 }

@@ -84,7 +84,14 @@ Route::middleware(['auth', 'role:company'])
         Route::post('/schedule', [CompanyController::class, 'updateSchedule'])->name('schedule.update');
         
         Route::post('/unsubscribe', [CompanyController::class, 'unsubscribeRequest'])->name('unsubscribe');
-
+        
+        Route::get('/mitra', [CompanyController::class, 'mitra'])->name('mitra');
+        Route::post('/mitra/upgrade', [CompanyController::class, 'upgradeService'])->name('mitra.upgrade');
+        
+        Route::get('/billing', [CompanyController::class, 'billing'])->name('billing');
+        Route::post('/billing/pay', [CompanyController::class, 'uploadPayment'])->name('billing.pay');
+        
+        Route::get('/kegiatan', [CompanyController::class, 'activities'])->name('kegiatan');
     });
 
 use App\Http\Controllers\DriverController;
@@ -95,18 +102,14 @@ use App\Http\Controllers\DriverController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:driver'])
-    ->prefix('driver')
-    ->name('driver.')
-    ->group(function () {
-
-        Route::get('/dashboard', [DriverController::class, 'dashboard'])->name('dashboard');
-        Route::get('/history', [DriverController::class, 'history'])->name('history');
-        
-        Route::post('/pickup/{pickup}/status', [DriverController::class, 'updateStatus'])->name('pickup.status');
-        Route::post('/pickup/{pickup}/submit', [DriverController::class, 'submitPickup'])->name('pickup.submit');
-
-    });
+Route::prefix('driver')->middleware(['auth', 'role:driver'])->group(function () {
+    Route::get('/dashboard', [DriverController::class, 'dashboard'])->name('driver.dashboard');
+    Route::put('/update-status/{pickup}', [DriverController::class, 'updateStatus'])->name('driver.updateStatus');
+    Route::post('/submit-pickup/{pickup}', [DriverController::class, 'submitPickup'])->name('driver.submitPickup');
+    Route::get('/history', [DriverController::class, 'history'])->name('driver.history');
+    Route::get('/kegiatan', [DriverController::class, 'activities'])->name('driver.kegiatan');
+    Route::post('/kegiatan', [DriverController::class, 'storeActivity'])->name('driver.kegiatan.store');
+});
 
 /*
 |--------------------------------------------------------------------------

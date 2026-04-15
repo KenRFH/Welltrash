@@ -26,20 +26,27 @@ const Welcome = () => {
                                 <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
                                     Profesional{" "}
                                     <span className="bg-clip-text text-transparent bg-gradient-to-br from-green-500 to-green-600">
-                                        Solusi Manajemen
+                                        Solusi{" "}
+                                        <span className="text-[#FF9A0C]">
+                                            Manajemen
+                                        </span>
                                     </span>{" "}
                                     Sampah
                                 </h1>
                                 <p className="text-lg text-gray-600 max-w-lg">
-                                    Welltrash is a simple, professional, and
-                                    scheduled platform for companies to manage
-                                    their waste efficiently. Transforming waste
-                                    management across Indonesia.
+                                    Welltrash adalah platform pengelolaan sampah
+                                    yang sederhana, profesional, dan terjadwal
+                                    untuk membantu perusahaan mengelola sampah
+                                    secara efisien dan berkelanjutan di
+                                    Kabupaten Jember.
                                 </p>
                             </div>
 
                             <div className="flex flex-wrap gap-4">
-                                <Link href={route('login')} className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all shadow-lg shadow-green-600/30 flex items-center gap-2 group duration-500">
+                                <Link
+                                    href={route("login")}
+                                    className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all shadow-lg shadow-green-600/30 flex items-center gap-2 group duration-500"
+                                >
                                     Mulai Berlangganan
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +64,10 @@ const Welcome = () => {
                                     </svg>
                                 </Link>
 
-                                <Link href={route('about')} className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-full border border-gray-200 transition-all shadow-sm">
+                                <Link
+                                    href={route("about")}
+                                    className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-full border border-gray-200 transition-all shadow-sm"
+                                >
                                     Tentang Kami
                                 </Link>
                             </div>

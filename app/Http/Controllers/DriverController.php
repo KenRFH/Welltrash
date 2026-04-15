@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Company;
 use App\Models\Pickup;
+use App\Models\CompanyActivity;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -140,5 +141,63 @@ class DriverController extends Controller
         return Inertia::render('Driver/History', [
             'pickups' => $pickups
         ]);
+    }
+
+    /**
+     * Display the driver activities page to document what happens to the waste.
+     */
+    public function activities(Request $request)
+    {
+        // Get all active companies so the driver can select whose trash they are processing
+        $companies = Company::where('subscription_status', 'active')->get(['id', 'company_name', 'address']);
+
+        // Get past generic activities (could scope to driver, but no driver_id on activities table yet so fetch all)
+        // Let's fetch latest activities to show what has been submitted recently
+        $activities = CompanyActivity::with('company:id,company_name')->orderBy('activity_date', 'desc')->get();
+
+        return Inertia::render('Driver/Activities', [
+            'companies' => $companies,
+            'activities' => $activities
+        ]);
+    }
+
+    /**
+     * Store the documented activity
+     */
+    public function storeActivity(Request $request)
+    {
+        $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'activity_date' => 'required|date',
+            'note' => 'nullable|string',
+            'media' => 'nullable|file|mimes:jpeg,png,jpg,mp4,mov,avi|max:20480',
+        ]);
+
+        $company = Company::find($request->company_id);
+
+        $mediaPath = null;
+        $mediaType = null;
+
+        if ($request->hasFile('media')) {
+            $file = $request->file('media');
+            $mimeType = $file->getMimeType();
+            
+            if (str_starts_with($mimeType, 'video/')) {
+                $mediaType = 'video';
+                $mediaPath = $file->store('documents/activities/videos', 'public');
+            } else {
+                $mediaType = 'image';
+                $mediaPath = $file->store('documents/activities/images', 'public');
+            }
+        }
+
+        $company->activities()->create([
+            'activity_date' => $request->activity_date,
+            'note' => $request->note,
+            'media_path' => $mediaPath,
+            'media_type' => $mediaType,
+        ]);
+
+        return back()->with('success', 'Kegiatan pemanfaatan sampah berhasil didokumentasikan.');
     }
 }

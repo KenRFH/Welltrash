@@ -406,6 +406,21 @@ export default function Register({ auth }: any) {
                                 </div>
                             </div>
 
+                            {/* Partnership Period Info */}
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-6">
+                                <div className="flex items-start">
+                                    <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                        <h4 className="font-bold text-blue-800 mb-1">Informasi Masa Aktif Kemitraan</h4>
+                                        <p className="text-sm text-blue-700">
+                                            Semua layanan kemitraan memiliki estimasi masa aktif <strong>30 hari</strong> yang dimulai sejak tanggal persetujuan admin. Anda dapat memantau informasi sisa masa aktif beserta opsi perpanjangan melalui halaman <strong>Mitra</strong> dan <strong>Tagihan</strong> setelah pendaftaran Anda diverifikasi.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* File Uploads for existing backend support */}
                             <div className="space-y-4">
                                 <div>
