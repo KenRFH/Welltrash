@@ -45,5 +45,16 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
+
+        // Web Admin
+        User::updateOrCreate(
+            ['email' => 'webadmin@welltrash.com'],
+            [
+                'name' => 'Web Admin User',
+                'password' => 'webadmin123',
+                'role' => 'web_admin',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

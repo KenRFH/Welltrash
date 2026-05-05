@@ -51,7 +51,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     };
 
     const handleUpdateStatus = (pickupId: number, status: string, reason?: string) => {
-        router.post(route('driver.pickup.status', pickupId), { status, cancellation_reason: reason }, {
+        router.put(route('driver.updateStatus', pickupId), { status, cancellation_reason: reason }, {
             preserveScroll: true
         });
     };
@@ -63,7 +63,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
 
     const handleSubmitPickup = (e: React.FormEvent, pickupId: number) => {
         e.preventDefault();
-        postSubmit(route('driver.pickup.submit', pickupId), {
+        postSubmit(route('driver.submitPickup', pickupId), {
             preserveScroll: true,
             onSuccess: () => setActiveModal(null),
         });

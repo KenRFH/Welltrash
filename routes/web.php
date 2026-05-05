@@ -33,6 +33,51 @@ Route::get('/layanan', function () {
     ]);
 })->name('services');
 
+Route::get('/activity', function () {
+    $activities = \App\Models\Activity::orderBy('date', 'desc')->get();
+    return Inertia::render('Activity', [
+        'activities' => $activities,
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('activity');
+
+Route::get('/activity/{id}', function ($id) {
+    $activity = \App\Models\Activity::findOrFail($id);
+    return Inertia::render('ActivityDetail', [
+        'activity' => $activity,
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('activity.show');
+
+Route::get('/news', function () {
+    $news = \App\Models\News::orderBy('published_date', 'desc')->get();
+    return Inertia::render('News', [
+        'news' => $news,
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('news');
+
+Route::get('/news/{id}', function ($id) {
+    $newsItem = \App\Models\News::findOrFail($id);
+    return Inertia::render('NewsDetail', [
+        'newsItem' => $newsItem,
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('news.show');
+
+Route::get('/katalog', function () {
+    $katalogs = \App\Models\Katalog::orderBy('created_at', 'desc')->get();
+    return Inertia::render('Katalog', [
+        'katalogs' => $katalogs,
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('katalog');
+
 use App\Http\Controllers\AdminController;
 
 /*
@@ -60,6 +105,26 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
 
+    });
+
+use App\Http\Controllers\WebAdminController;
+use App\Http\Controllers\WebAdmin\ActivityController;
+use App\Http\Controllers\WebAdmin\KatalogController;
+
+/*
+|--------------------------------------------------------------------------
+| WebAdmin Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:web_admin'])
+    ->prefix('webadmin')
+    ->name('webadmin.')
+    ->group(function () {
+        Route::get('/dashboard', [WebAdminController::class, 'dashboard'])->name('dashboard');
+        Route::resource('activities', App\Http\Controllers\WebAdmin\ActivityController::class)->except(['show']);
+        Route::resource('katalogs', App\Http\Controllers\WebAdmin\KatalogController::class)->except(['show']);
+        Route::resource('news', App\Http\Controllers\WebAdmin\NewsController::class)->except(['show']);
     });
 
 use App\Http\Controllers\CompanyController;
@@ -122,9 +187,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
         return match ($user->role) {
-            'admin'  => redirect()->route('admin.dashboard'),
-            'driver' => redirect()->route('driver.dashboard'),
-            default  => redirect()->route('company.dashboard'),
+            'admin'      => redirect()->route('admin.dashboard'),
+            'web_admin'  => redirect()->route('webadmin.dashboard'),
+            'driver'     => redirect()->route('driver.dashboard'),
+            default      => redirect()->route('company.dashboard'),
         };
     })->name('dashboard');
 

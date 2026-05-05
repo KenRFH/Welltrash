@@ -162,8 +162,8 @@ export default function Schedule({ company, pickups }: Props) {
                     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 transition-all hover:shadow-lg">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
                             <div>
-                                <h2 className="text-xl font-extrabold text-gray-900 mb-1">Agenda & Riwayat</h2>
-                                <p className="text-gray-500 text-sm">Daftar jadwal terencana yang dibuat otomatis dan aktivitas yang sudah berlalu.</p>
+                                <h2 className="text-xl font-extrabold text-gray-900 mb-1">Agenda</h2>
+                                <p className="text-gray-500 text-sm">Daftar jadwal terencana yang dibuat otomatis untuk masa mendatang.</p>
                             </div>
                             <div className="mt-4 sm:mt-0 px-4 py-2 bg-gray-50 rounded-xl text-sm font-bold text-gray-600 border border-gray-200">
                                 Total Data: {pickups.length}

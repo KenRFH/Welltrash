@@ -9,7 +9,7 @@ const CalendarIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentC
 
 interface Pickup {
     id: number;
-    status: 'completed' | 'failed';
+    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
@@ -33,7 +33,13 @@ interface Props {
     auth: {
         user: { name: string; email: string };
     };
-    pickups: Pickup[];
+    pickups: {
+        data: Pickup[];
+        current_page: number;
+        last_page: number;
+        links: { url: string | null; label: string; active: boolean }[];
+        total: number;
+    };
 }
 
 export default function History({ auth, company, pickups }: Props) {
@@ -84,7 +90,7 @@ export default function History({ auth, company, pickups }: Props) {
 
                 {/* Body Content */}
                 <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-8 sm:px-10">
-                    {pickups.length === 0 ? (
+                    {pickups.data.length === 0 ? (
                         <div className="bg-white rounded-3xl p-10 mt-6 text-center border border-dashed border-gray-300 relative z-10">
                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <HistoryIcon />
@@ -94,7 +100,7 @@ export default function History({ auth, company, pickups }: Props) {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6 relative z-10">
-                            {pickups.map((pickup) => {
+                            {pickups.data.map((pickup) => {
                                 const isCompleted = pickup.status === 'completed';
                                 const dateStr = new Date(pickup.pickup_date).toLocaleDateString('id-ID', {
                                     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -119,9 +125,13 @@ export default function History({ auth, company, pickups }: Props) {
                                                     <span className="inline-flex items-center bg-green-50 text-green-700 text-sm font-bold px-4 py-1.5 rounded-full border border-green-100">
                                                         <span className="w-2 h-2 rounded-full bg-green-500 mr-2"></span> Selesai
                                                     </span>
-                                                ) : (
+                                                ) : pickup.status === 'failed' ? (
                                                     <span className="inline-flex items-center bg-red-50 text-red-700 text-sm font-bold px-4 py-1.5 rounded-full border border-red-100">
                                                         <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span> Dibatalkan
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center bg-yellow-50 text-yellow-700 text-sm font-bold px-4 py-1.5 rounded-full border border-yellow-100">
+                                                        <span className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span> Terlewat
                                                     </span>
                                                 )}
                                             </div>
@@ -174,7 +184,7 @@ export default function History({ auth, company, pickups }: Props) {
                                                     )}
                                                 </div>
                                             </div>
-                                        ) : (
+                                        ) : pickup.status === 'failed' ? (
                                             <div className="bg-red-50/50 p-5 rounded-2xl border border-red-100 flex items-start gap-4">
                                                 <div className="bg-red-100 p-2 rounded-lg text-red-600">
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -184,10 +194,54 @@ export default function History({ auth, company, pickups }: Props) {
                                                     <p className="text-sm text-red-600">{pickup.cancellation_reason || 'Tidak ada alasan.'}</p>
                                                 </div>
                                             </div>
+                                        ) : (
+                                            <div className="bg-yellow-50/50 p-5 rounded-2xl border border-yellow-100 flex items-start gap-4">
+                                                <div className="bg-yellow-100 p-2 rounded-lg text-yellow-600">
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-yellow-800 mb-1">Status Pengambilan:</p>
+                                                    <p className="text-sm text-yellow-600">Jadwal ini telah terlewat dan belum diselesaikan oleh armada kami.</p>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 );
                             })}
+
+                            {/* Pagination */}
+                            {pickups.last_page > 1 && (
+                                <div className="flex justify-center mt-8 mb-4">
+                                    <div className="flex flex-wrap gap-2 justify-center bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+                                        {pickups.links.map((link, i) => {
+                                            const isPrevious = link.label.includes('Previous');
+                                            const isNext = link.label.includes('Next');
+                                            let label = link.label;
+                                            if (isPrevious) label = '«';
+                                            if (isNext) label = '»';
+
+                                            return link.url ? (
+                                                <Link
+                                                    key={i}
+                                                    href={link.url}
+                                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                                        link.active
+                                                            ? 'bg-green-600 text-white shadow-md shadow-green-200'
+                                                            : 'bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-700'
+                                                    }`}
+                                                    dangerouslySetInnerHTML={{ __html: label }}
+                                                />
+                                            ) : (
+                                                <span
+                                                    key={i}
+                                                    className="px-4 py-2 rounded-xl text-sm font-bold bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed"
+                                                    dangerouslySetInnerHTML={{ __html: label }}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </main>

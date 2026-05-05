@@ -25,6 +25,10 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
+        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
+            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        }
+
         $totalOrganic = $company->pickups()->where('status', 'completed')->sum('organic_weight') ?? 0;
         $totalAnorganic = $company->pickups()->where('status', 'completed')->sum('anorganic_weight') ?? 0;
         $totalResidue = $company->pickups()->where('status', 'completed')->sum('residue_weight') ?? 0;
@@ -82,14 +86,18 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
+        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
+            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        }
+
         if ($company->subscription_plan === 'Basic') {
             return redirect()->route('company.dashboard')->with('error', 'Fitur ini hanya tersedia untuk paket Premium.');
         }
 
         $pickups = $company->pickups()->with('driver')
-            ->whereIn('status', ['completed', 'failed'])
+            ->whereDate('pickup_date', '<', \Carbon\Carbon::today()->toDateString())
             ->orderBy('pickup_date', 'desc')
-            ->get();
+            ->paginate(5);
 
         return Inertia::render('Company/History', [
             'company' => $company,
@@ -141,6 +149,10 @@ class CompanyController extends Controller
             return redirect()->route('company.register');
         }
 
+        if ($user->company->subscription_end_date && \Carbon\Carbon::parse($user->company->subscription_end_date)->isPast()) {
+            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        }
+
         // Only active companies can manage normal schedules
         if ($user->company->subscription_status !== 'active') {
             return redirect()->route('company.dashboard')->with('error', 'Status langganan Anda belum aktif.');
@@ -149,6 +161,7 @@ class CompanyController extends Controller
         // Fetch their current schedule and the pickups generated for them
         $company = $user->company;
         $pickups = $company->pickups()
+            ->whereDate('pickup_date', '>=', \Carbon\Carbon::today()->toDateString())
             ->orderBy('pickup_date', 'asc')
             ->get();
 
@@ -166,6 +179,10 @@ class CompanyController extends Controller
         ]);
 
         $company = Auth::user()->company;
+        
+        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
+            return back()->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        }
         
         // 1. Update the schedule
         $company->update([
@@ -296,15 +313,17 @@ class CompanyController extends Controller
         }
 
         $company = $user->company;
-        $pickups = $company->pickups()
-            ->with('driver')
-            ->where('status', 'completed')
-            ->orderBy('pickup_date', 'desc')
+
+        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
+            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        }
+        $activities = $company->activities()
+            ->orderBy('activity_date', 'desc')
             ->get();
 
         return Inertia::render('Company/Activities', [
             'company' => $company,
-            'activities' => $pickups,
+            'activities' => $activities,
             'plan' => $company->subscription_plan
         ]);
     }

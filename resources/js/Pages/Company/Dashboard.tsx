@@ -233,82 +233,139 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                 </div>
                             </div>
 
-                            {/* Chart Container Placeholder */}
-                            <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 mb-12 relative z-10">
-                                <div className="flex justify-between items-center mb-8">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan Mingguan</h3>
-                                        <p className="text-sm text-gray-500 mt-1">Bulan {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
+                            {/* Charts Container */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 relative z-10">
+                                {/* Bar Chart */}
+                                <div className="lg:col-span-2 bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-gray-900">Statistik Pengumpulan Mingguan</h3>
+                                            <p className="text-sm text-gray-500 mt-1">Bulan {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
+                                        </div>
+                                        <Link href={route('company.history')} className="text-sm font-semibold text-green-600 hover:text-green-800 bg-green-50 px-4 py-2 rounded-xl transition-colors">
+                                            Lihat Detail
+                                        </Link>
                                     </div>
-                                    <Link href={route('company.history')} className="text-sm font-semibold text-green-600 hover:text-green-800 bg-green-50 px-4 py-2 rounded-xl transition-colors">
-                                        Lihat Detail
-                                    </Link>
+
+                                    {/* Real Bar Chart rendering */}
+                                    <div className="relative h-64 border-l border-b border-gray-200 ml-4 pb-4 w-full flex items-end">
+                                        {/* Grid lines */}
+                                        <div className="absolute inset-y-0 left-0 w-full flex flex-col justify-between pointer-events-none">
+                                            <div className="border-t border-gray-100 w-full"></div>
+                                            <div className="border-t border-gray-100 w-full"></div>
+                                            <div className="border-t border-gray-100 w-full"></div>
+                                            <div className="border-t border-gray-100 w-full"></div>
+                                        </div>
+
+                                        <div className="absolute inset-0 flex justify-around px-4 sm:px-12 items-end bottom-0 pb-0 z-10 w-full">
+                                            {(() => {
+                                                const rawMax = Math.max(
+                                                    ...weekly_statistics.flatMap(w => [Number(w.organic), Number(w.anorganic)])
+                                                );
+                                                const maxVal = Math.max(rawMax, 100);
+
+                                                return weekly_statistics.map((stat, index) => {
+                                                    let hOrg = (Number(stat.organic) / maxVal) * 100;
+                                                    let hAno = (Number(stat.anorganic) / maxVal) * 100;
+
+                                                    hOrg = Math.max(hOrg, 4);
+                                                    hAno = Math.max(hAno, 4);
+
+                                                    return (
+                                                        <div key={index} className="flex flex-col items-center group relative">
+                                                            <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded-lg py-1.5 px-3 whitespace-nowrap z-20 pointer-events-none shadow-lg">
+                                                                Org: {stat.organic}kg | Ano: {stat.anorganic}kg
+                                                            </div>
+
+                                                            <div className="flex items-end space-x-1.5 h-64">
+                                                                <div 
+                                                                    className="w-6 sm:w-12 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
+                                                                    style={{ height: `${hOrg}%` }}
+                                                                    title={`Organik: ${stat.organic} Kg`}
+                                                                >
+                                                                    {hOrg > 15 && <span className="text-[10px] font-bold text-amber-700/80 -rotate-90 origin-bottom">{stat.organic > 0 ? stat.organic : ''}</span>}
+                                                                </div>
+                                                                
+                                                                <div 
+                                                                    className="w-6 sm:w-12 bg-gradient-to-t from-teal-200 to-teal-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
+                                                                    style={{ height: `${hAno}%` }}
+                                                                    title={`Anorganik: ${stat.anorganic} Kg`}
+                                                                >
+                                                                    {hAno > 15 && <span className="text-[10px] font-bold text-teal-700/80 -rotate-90 origin-bottom">{stat.anorganic > 0 ? stat.anorganic : ''}</span>}
+                                                                </div>
+                                                            </div>
+                                                            <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8 whitespace-nowrap">{stat.week}</span>
+                                                        </div>
+                                                    );
+                                                });
+                                            })()}
+                                        </div>
+                                    </div>
+                                    <div className="mt-12 flex justify-center space-x-6 text-sm font-medium text-gray-600">
+                                        <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-200 mr-2"></span> Organik (Kg)</div>
+                                        <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-teal-200 mr-2"></span> Anorganik (Kg)</div>
+                                    </div>
                                 </div>
 
-                                {/* Real Bar Chart rendering */}
-                                <div className="relative h-64 border-l border-b border-gray-200 ml-4 pb-4 w-full flex items-end">
-                                    {/* Grid lines */}
-                                    <div className="absolute inset-y-0 left-0 w-full flex flex-col justify-between pointer-events-none">
-                                        <div className="border-t border-gray-100 w-full"></div>
-                                        <div className="border-t border-gray-100 w-full"></div>
-                                        <div className="border-t border-gray-100 w-full"></div>
-                                        <div className="border-t border-gray-100 w-full"></div>
+                                {/* Pie Chart */}
+                                <div className="bg-white rounded-3xl p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex flex-col">
+                                    <div className="mb-6">
+                                        <h3 className="text-xl font-bold text-gray-900">Distribusi Sampah</h3>
+                                        <p className="text-sm text-gray-500 mt-1">Komposisi total sampah yang terkumpul</p>
                                     </div>
-
-                                    <div className="absolute inset-0 flex justify-around px-4 sm:px-12 items-end bottom-0 pb-0 z-10 w-full">
+                                    
+                                    <div className="flex-1 flex flex-col items-center justify-center relative">
                                         {(() => {
-                                            // Calculate maximum value for normalization to set bar heights correctly
-                                            const rawMax = Math.max(
-                                                ...weekly_statistics.flatMap(w => [Number(w.organic), Number(w.anorganic)])
-                                            );
-                                            // Ensure division by zero doesn't happen, set a min max of 100
-                                            const maxVal = Math.max(rawMax, 100);
+                                            const o = Number(statistics.total_organic) || 0;
+                                            const a = Number(statistics.total_anorganic) || 0;
+                                            const r = Number(statistics.total_residue) || 0;
+                                            const total = o + a + r;
+                                            
+                                            const pO = total > 0 ? (o / total) * 100 : 0;
+                                            const pA = total > 0 ? (a / total) * 100 : 0;
+                                            const pR = total > 0 ? (r / total) * 100 : 0;
+                                            
+                                            const gradient = total > 0
+                                                ? `conic-gradient(#fbbf24 0% ${pO}%, #2dd4bf ${pO}% ${pO + pA}%, #d1d5db ${pO + pA}% 100%)`
+                                                : `conic-gradient(#f3f4f6 0% 100%)`;
 
-                                            return weekly_statistics.map((stat, index) => {
-                                                // Calculate percentage height, capped at 100% just in case
-                                                let hOrg = (Number(stat.organic) / maxVal) * 100;
-                                                let hAno = (Number(stat.anorganic) / maxVal) * 100;
-
-                                                // Ensure minimum height of 4% so bars are slightly visible even for 0 values to show the baseline exist
-                                                hOrg = Math.max(hOrg, 4);
-                                                hAno = Math.max(hAno, 4);
-
-                                                return (
-                                                    <div key={index} className="flex flex-col items-center group relative">
-                                                        {/* Tooltip visible on group hover */}
-                                                        <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs rounded-lg py-1.5 px-3 whitespace-nowrap z-20 pointer-events-none shadow-lg">
-                                                            Org: {stat.organic}kg | Ano: {stat.anorganic}kg
+                                            return (
+                                                <>
+                                                    <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full flex items-center justify-center shadow-inner group transition-transform hover:scale-105 duration-300" style={{ background: gradient }}>
+                                                        <div className="absolute inset-0 rounded-full border-4 border-white/20"></div>
+                                                        <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white rounded-full flex flex-col items-center justify-center shadow-sm z-10">
+                                                            <span className="text-3xl sm:text-4xl font-black text-gray-900">{total}</span>
+                                                            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-1">Kg Total</span>
                                                         </div>
-
-                                                        <div className="flex items-end space-x-1.5 h-64">
-                                                            {/* Organic Bar */}
-                                                            <div 
-                                                                className="w-6 sm:w-12 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
-                                                                style={{ height: `${hOrg}%` }}
-                                                                title={`Organik: ${stat.organic} Kg`}
-                                                            >
-                                                                {hOrg > 15 && <span className="text-[10px] font-bold text-amber-700/80 -rotate-90 origin-bottom">{stat.organic > 0 ? stat.organic : ''}</span>}
-                                                            </div>
-                                                            
-                                                            {/* Anorganic Bar */}
-                                                            <div 
-                                                                className="w-6 sm:w-12 bg-gradient-to-t from-teal-200 to-teal-100 rounded-t-md group-hover:opacity-90 transition-all duration-500 ease-out flex items-end justify-center pb-2"
-                                                                style={{ height: `${hAno}%` }}
-                                                                title={`Anorganik: ${stat.anorganic} Kg`}
-                                                            >
-                                                                {hAno > 15 && <span className="text-[10px] font-bold text-teal-700/80 -rotate-90 origin-bottom">{stat.anorganic > 0 ? stat.anorganic : ''}</span>}
-                                                            </div>
-                                                        </div>
-                                                        <span className="text-gray-500 font-semibold text-xs sm:text-sm mt-4 block absolute -bottom-8 whitespace-nowrap">{stat.week}</span>
                                                     </div>
-                                                );
-                                            });
+
+                                                    <div className="mt-8 w-full space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center">
+                                                                <span className="w-3 h-3 rounded-full bg-amber-400 mr-3 shadow-sm"></span>
+                                                                <span className="text-sm font-semibold text-gray-700">Organik</span>
+                                                            </div>
+                                                            <span className="text-sm font-bold text-gray-900">{o} Kg <span className="text-gray-400 font-medium ml-1">({pO.toFixed(1)}%)</span></span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center">
+                                                                <span className="w-3 h-3 rounded-full bg-teal-400 mr-3 shadow-sm"></span>
+                                                                <span className="text-sm font-semibold text-gray-700">Anorganik</span>
+                                                            </div>
+                                                            <span className="text-sm font-bold text-gray-900">{a} Kg <span className="text-gray-400 font-medium ml-1">({pA.toFixed(1)}%)</span></span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center">
+                                                                <span className="w-3 h-3 rounded-full bg-gray-300 mr-3 shadow-sm"></span>
+                                                                <span className="text-sm font-semibold text-gray-700">Residu</span>
+                                                            </div>
+                                                            <span className="text-sm font-bold text-gray-900">{r} Kg <span className="text-gray-400 font-medium ml-1">({pR.toFixed(1)}%)</span></span>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            );
                                         })()}
                                     </div>
-                                </div>
-                                <div className="mt-12 flex justify-center space-x-6 text-sm font-medium text-gray-600">
-                                     <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-200 mr-2"></span> Organik (Kg)</div>
-                                     <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-teal-200 mr-2"></span> Anorganik (Kg)</div>
                                 </div>
                             </div>
                         </>

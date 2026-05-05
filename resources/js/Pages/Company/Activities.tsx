@@ -2,23 +2,17 @@ import { Head } from '@inertiajs/react';
 import React, { useState } from 'react';
 import CompanySidebar from '@/Components/CompanySidebar';
 
-interface PickupActivity {
+interface Activity {
     id: number;
-    pickup_date: string;
-    organic_weight: number | null;
-    anorganic_weight: number | null;
-    residue_weight: number | null;
-    organic_image_path: string | null;
-    anorganic_image_path: string | null;
-    residue_image_path: string | null;
-    driver: {
-        name: string;
-    } | null;
+    activity_date: string;
+    note: string | null;
+    media_path: string | null;
+    media_type: 'image' | 'video' | null;
 }
 
 interface Props {
     company: any;
-    activities: PickupActivity[];
+    activities: Activity[];
     plan: string;
     auth: {
         user: { name: string }
@@ -59,8 +53,8 @@ export default function Activities({ auth, company, activities, plan }: Props) {
                         
                         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative z-10 mb-8 flex items-center justify-between">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-1">Riwayat Pengangkutan Sampah</h3>
-                                <p className="text-gray-500 font-medium text-sm">Dokumentasi dan laporan tonase dari tim pengangkut WellMaggot di lokasi Anda.</p>
+                                <h3 className="text-xl font-bold text-gray-900 mb-1">Log Dokumentasi Pemanfaatan</h3>
+                                <p className="text-gray-500 font-medium text-sm">Dokumentasi kegiatan pemanfaatan sampah yang dilakukan oleh tim WellMaggot.</p>
                             </div>
                             <div className="hidden md:flex p-3 bg-green-50 rounded-2xl text-green-600">
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
@@ -82,7 +76,7 @@ export default function Activities({ auth, company, activities, plan }: Props) {
                                         
                                         {/* Timeline marker */}
                                         <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-green-100 text-green-600 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10 font-bold text-xs ring-4 ring-white">
-                                            {new Date(activity.pickup_date).getDate()}
+                                            {new Date(activity.activity_date).getDate()}
                                         </div>
                                         
                                         {/* Card Content */}
@@ -90,59 +84,38 @@ export default function Activities({ auth, company, activities, plan }: Props) {
                                             <div className="flex items-center justify-between mb-4 border-b border-gray-50 pb-3">
                                                 <div>
                                                     <time className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                                                        {new Date(activity.pickup_date).toLocaleDateString('id-ID', { weekday: 'long', month: 'short', year: 'numeric' })}
+                                                        {new Date(activity.activity_date).toLocaleDateString('id-ID', { weekday: 'long', month: 'short', year: 'numeric' })}
                                                     </time>
-                                                    <span className="text-sm font-semibold text-gray-700 bg-gray-50 px-2 py-1 rounded-md">
-                                                        Oleh: {activity.driver?.name || 'Driver'}
-                                                    </span>
                                                 </div>
                                                 <div className="bg-green-500 rounded-full p-2 text-white shadow-sm">
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                 </div>
                                             </div>
                                             
-                                            {/* Weights */}
-                                            <div className="grid grid-cols-3 gap-2 mb-4">
-                                                <div className="bg-green-50/50 rounded-xl p-2 text-center border border-green-100/50">
-                                                    <p className="text-[10px] sm:text-xs font-bold text-green-600 uppercase mb-1">Organik</p>
-                                                    <p className="font-semibold text-gray-800">{activity.organic_weight || 0} <span className="text-xs font-normal">kg</span></p>
-                                                </div>
-                                                <div className="bg-blue-50/50 rounded-xl p-2 text-center border border-blue-100/50">
-                                                    <p className="text-[10px] sm:text-xs font-bold text-blue-600 uppercase mb-1">Anorganik</p>
-                                                    <p className="font-semibold text-gray-800">{activity.anorganic_weight || 0} <span className="text-xs font-normal">kg</span></p>
-                                                </div>
-                                                <div className="bg-orange-50/50 rounded-xl p-2 text-center border border-orange-100/50">
-                                                    <p className="text-[10px] sm:text-xs font-bold text-orange-600 uppercase mb-1">Residu</p>
-                                                    <p className="font-semibold text-gray-800">{activity.residue_weight || 0} <span className="text-xs font-normal">kg</span></p>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Photos */}
-                                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
-                                                {activity.organic_image_path && (
-                                                    <div className="aspect-square rounded-lg overflow-hidden relative group/img">
-                                                        <img src={`/storage/${activity.organic_image_path}`} alt="Organik" className="w-full h-full object-cover transition-transform group-hover/img:scale-105" />
-                                                        <a href={`/storage/${activity.organic_image_path}`} target="_blank" className="absolute inset-0 z-10 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center transition-colors">
-                                                            <span className="text-white text-xs font-bold opacity-0 group-hover/img:opacity-100">Buka</span>
-                                                        </a>
+                                            <div className="flex flex-col gap-4">
+                                                {activity.media_path && (
+                                                    <div className="w-full rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100">
+                                                        {activity.media_type === 'video' ? (
+                                                            <video src={`/storage/${activity.media_path}`} className="w-full object-contain max-h-64" controls preload="metadata" />
+                                                        ) : (
+                                                            <div className="w-full group/img relative cursor-pointer">
+                                                                 <img src={`/storage/${activity.media_path}`} className="w-full object-contain max-h-64 transition-transform group-hover/img:scale-105" alt="Media Kegiatan" />
+                                                                 <a href={`/storage/${activity.media_path}`} target="_blank" className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center transition-colors">
+                                                                    <span className="text-white text-xs font-bold opacity-0 group-hover/img:opacity-100 backdrop-blur-sm px-3 py-1.5 bg-black/40 rounded-full">Lihat Penuh</span>
+                                                                 </a>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
-                                                {activity.anorganic_image_path && (
-                                                    <div className="aspect-square rounded-lg overflow-hidden relative group/img">
-                                                        <img src={`/storage/${activity.anorganic_image_path}`} alt="Anorganik" className="w-full h-full object-cover transition-transform group-hover/img:scale-105" />
-                                                        <a href={`/storage/${activity.anorganic_image_path}`} target="_blank" className="absolute inset-0 z-10 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center transition-colors">
-                                                            <span className="text-white text-xs font-bold opacity-0 group-hover/img:opacity-100">Buka</span>
-                                                        </a>
-                                                    </div>
-                                                )}
-                                                {activity.residue_image_path && (
-                                                    <div className="aspect-square rounded-lg overflow-hidden relative group/img">
-                                                        <img src={`/storage/${activity.residue_image_path}`} alt="Residu" className="w-full h-full object-cover transition-transform group-hover/img:scale-105" />
-                                                        <a href={`/storage/${activity.residue_image_path}`} target="_blank" className="absolute inset-0 z-10 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center transition-colors">
-                                                            <span className="text-white text-xs font-bold opacity-0 group-hover/img:opacity-100">Buka</span>
-                                                        </a>
-                                                    </div>
-                                                )}
+
+                                                <div className="w-full">
+                                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Catatan Kegiatan</h4>
+                                                    {activity.note ? (
+                                                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap p-4 bg-gray-50 rounded-xl border border-gray-100">{activity.note}</p>
+                                                    ) : (
+                                                        <p className="text-gray-400 text-sm italic p-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed">Tidak ada catatan tertulis.</p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
 

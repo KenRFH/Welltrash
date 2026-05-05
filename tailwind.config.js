@@ -13,7 +13,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans], // ganti default
+                sans: ['Outfit', ...defaultTheme.fontFamily.sans],
                 inter: ['Inter', 'sans-serif'],
                 outfit: ['Outfit', 'sans-serif'],
                 poppins: ['Poppins', 'sans-serif'],
