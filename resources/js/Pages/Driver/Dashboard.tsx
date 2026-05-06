@@ -71,7 +71,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Driver Dashboard | WellMaggot" />
+            <Head title="Driver Dashboard | WellTrash" />
 
              {/* Sidebar Component */}
              <DriverSidebar 

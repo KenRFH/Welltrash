@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Company;
+use App\Models\User;
+use App\Models\Pickup;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -39,7 +41,6 @@ class AdminController extends Controller
             'subscription_end_date' => now()->addDays(30)
         ]);
         
-        // As soon as the company is active, generate their initial pickups!
         \Illuminate\Support\Facades\Artisan::call('pickups:generate', [
             '--company' => $company->id
         ]);
@@ -49,7 +50,6 @@ class AdminController extends Controller
 
     public function rejectCompany(Company $company)
     {
-        // For now, we will just delete the record so they can try again
         $company->delete();
         return back()->with('success', 'Company rejected successfully.');
     }
@@ -64,9 +64,99 @@ class AdminController extends Controller
 
     public function approveCancellation(Company $company)
     {
-        // Delete the company record entirely per the user's implicit approval of the default "delete" idea,
-        // so they can register again from scratch.
         $company->delete();
         return back()->with('success', 'Company subscription cancelled and data removed.');
+    }
+
+    public function dashboard()
+    {
+        $companies = Company::with(['pickups' => function ($q) {
+            $q->where('status', 'completed');
+        }])->get();
+
+        $trashStats = $companies->map(function ($c) {
+            return [
+                'company_name'   => $c->company_name,
+                'subscription_plan' => $c->subscription_plan,
+                'subscription_status' => $c->subscription_status,
+                'organic'        => round($c->pickups->sum('organic_weight'), 2),
+                'anorganic'      => round($c->pickups->sum('anorganic_weight'), 2),
+                'residue'        => round($c->pickups->sum('residue_weight'), 2),
+                'total_pickups'  => $c->pickups->count(),
+            ];
+        });
+
+        $totals = [
+            'organic'       => round($trashStats->sum('organic'), 2),
+            'anorganic'     => round($trashStats->sum('anorganic'), 2),
+            'residue'       => round($trashStats->sum('residue'), 2),
+            'total_pickups' => $trashStats->sum('total_pickups'),
+            'total_companies' => $companies->count(),
+            'active_companies' => $companies->where('subscription_status', 'active')->count(),
+            'pending_companies' => Company::where('subscription_status', 'pending')->count(),
+        ];
+
+        return Inertia::render('Admin/Dashboard', [
+            'trashStats' => $trashStats,
+            'totals'     => $totals,
+        ]);
+    }
+
+    public function drivers()
+    {
+        $drivers = User::where('role', 'driver')
+            ->withCount(['pickups as total_pickups', 'pickups as completed_pickups' => function ($q) {
+                $q->where('status', 'completed');
+            }, 'pickups as failed_pickups' => function ($q) {
+                $q->where('status', 'failed');
+            }])
+            ->with(['pickups' => function ($q) {
+                $q->latest('pickup_date')->take(1);
+            }])
+            ->get()
+            ->map(function ($d) {
+                return [
+                    'id'               => $d->id,
+                    'name'             => $d->name,
+                    'email'            => $d->email,
+                    'total_pickups'    => $d->total_pickups,
+                    'completed_pickups'=> $d->completed_pickups,
+                    'failed_pickups'   => $d->failed_pickups,
+                    'last_activity'    => $d->pickups->first()?->pickup_date,
+                ];
+            });
+
+        return Inertia::render('Admin/Drivers/Index', [
+            'drivers' => $drivers,
+        ]);
+    }
+
+    public function driverDetail(User $user)
+    {
+        $pickups = Pickup::where('driver_id', $user->id)
+            ->with('company')
+            ->orderByDesc('pickup_date')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id'                  => $p->id,
+                    'pickup_date'         => $p->pickup_date,
+                    'status'              => $p->status,
+                    'organic_weight'      => (float) $p->organic_weight,
+                    'anorganic_weight'    => (float) $p->anorganic_weight,
+                    'residue_weight'      => (float) $p->residue_weight,
+                    'cancellation_reason' => $p->cancellation_reason,
+                    'company'             => $p->company ? [
+                        'id'           => $p->company->id,
+                        'company_name' => $p->company->company_name,
+                        'address'      => $p->company->address,
+                    ] : null,
+                ];
+            });
+
+        return Inertia::render('Admin/Drivers/Show', [
+            'driver'  => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
+            'pickups' => $pickups,
+        ]);
     }
 }

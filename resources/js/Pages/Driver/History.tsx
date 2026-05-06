@@ -32,7 +32,7 @@ export default function History({ pickups, auth }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Riwayat Driver | WellMaggot" />
+            <Head title="Riwayat Driver | WellTrash" />
 
             {/* Sidebar Component */}
             <DriverSidebar 

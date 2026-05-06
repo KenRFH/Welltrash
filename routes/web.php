@@ -4,18 +4,50 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
-
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
+use Spatie\Sitemap\SitemapGenerator;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/generate-sitemap', function () {
+
+    $sitemap = Sitemap::create()
+        ->add(Url::create('/'))
+        ->add(Url::create('/tentang-kami'))
+        ->add(Url::create('/layanan'))
+        ->add(Url::create('/activity'))
+        ->add(Url::create('/news'))
+        ->add(Url::create('/katalog'));
+
+    // Activity detail
+    foreach (\App\Models\Activity::all() as $activity) {
+        $sitemap->add(Url::create("/activity/{$activity->id}"));
+    }
+
+    // News detail
+    foreach (\App\Models\News::all() as $news) {
+        $sitemap->add(Url::create("/news/{$news->id}"));
+    }
+
+    $sitemap->writeToFile(public_path('sitemap.xml'));
+
+    return 'Sitemap generated!';
+});
+
 
 Route::get('/', function () {
+    $activities = \App\Models\Activity::orderBy('date', 'desc')->take(3)->get();
+    $news       = \App\Models\News::orderBy('published_date', 'desc')->take(3)->get();
+    $katalogs   = \App\Models\Katalog::orderBy('created_at', 'desc')->take(3)->get();
     return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-
+        'canLogin'   => Route::has('login'),
+        'canRegister'=> Route::has('register'),
+        'activities' => $activities,
+        'news'       => $news,
+        'katalogs'   => $katalogs,
     ]);
 })->name('beranda');
 
@@ -91,9 +123,7 @@ Route::middleware(['auth', 'role:admin'])
     ->name('admin.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return Inertia::render('Admin/Dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
         Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
         Route::get('/companies/pending', [AdminController::class, 'pendingCompanies'])->name('companies.pending');
@@ -104,6 +134,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('/companies/{company}/cancellations/approve', [AdminController::class, 'approveCancellation'])->name('companies.cancellations.approve');
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
+
+        Route::get('/drivers', [AdminController::class, 'drivers'])->name('drivers');
+        Route::get('/drivers/{user}', [AdminController::class, 'driverDetail'])->name('drivers.show');
 
     });
 
