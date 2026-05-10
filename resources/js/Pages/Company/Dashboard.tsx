@@ -159,7 +159,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                             </div>
                             <h3 className="text-xl font-bold text-gray-900">Fitur Premium Dikunci</h3>
                             <p className="text-gray-500 text-sm mt-2 max-w-md mx-auto mb-6">Tingkatkan paket layanan Anda ke Premium untuk melihat data pelacakan historis, metrik ESG, dan unduh laporan.</p>
-                            <a href="https://wa.me/628123456789" target="_blank" rel="noreferrer" className="inline-block bg-gradient-to-r from-green-500 to-green-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            <a href="https://wa.me/62811988706" target="_blank" rel="noreferrer" className="inline-block bg-gradient-to-r from-green-500 to-green-600 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all">
                                 Hubungi Sales untuk Upgrade
                             </a>
                         </div>

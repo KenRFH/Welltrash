@@ -451,7 +451,7 @@ export default function Register({ auth }: any) {
                             {/* Form Action Buttons */}
                             <div className="flex justify-center items-center gap-4 pt-8">
                                 <a 
-                                    href="https://wa.me/628123456789" 
+                                    href="https://wa.me/62811988706" 
                                     target="_blank" 
                                     rel="noreferrer"
                                     className="px-8 py-3 rounded-lg border border-teal-600 text-teal-700 font-bold hover:bg-teal-50 transition-colors text-sm"

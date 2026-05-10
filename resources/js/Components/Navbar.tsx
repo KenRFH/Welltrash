@@ -33,7 +33,6 @@ const Navbar = ({ dark = false }: NavbarProps) => {
   const borderColor = dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
   const linkColor = dark ? "rgba(240,244,255,0.7)" : undefined;
   const linkHoverColor = dark ? "#FE961C" : undefined;
-  const logoFilter = dark ? "brightness(0) invert(1)" : undefined;
   const hamburgerColor = dark ? "#F0F4FF" : "#111827";
   const mobileBg = dark ? "#0E172A" : "#f0f0f0";
   const mobileLinkColor = dark ? "rgba(240,244,255,0.8)" : "#111827";
@@ -57,7 +56,6 @@ const Navbar = ({ dark = false }: NavbarProps) => {
               src={logowelltrash}
               alt="WellTrash Logo"
               className="h-20 md:h-28 w-auto object-contain object-left pointer-events-none transition-all"
-              style={logoFilter ? { filter: logoFilter } : {}}
             />
           </Link>
         </div>

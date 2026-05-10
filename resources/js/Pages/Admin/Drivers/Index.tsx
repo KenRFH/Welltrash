@@ -38,7 +38,6 @@ export default function Index({ drivers }: Props) {
                     </div>
                 ) : (
                     <>
-                        {/* Desktop Table */}
                         <div className="hidden md:block overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-50">
                                 <thead>
@@ -88,7 +87,6 @@ export default function Index({ drivers }: Props) {
                             </table>
                         </div>
 
-                        {/* Mobile Cards */}
                         <div className="md:hidden divide-y divide-gray-50">
                             {drivers.map((driver) => (
                                 <div key={driver.id} className="p-6 hover:bg-gray-50 transition-colors">

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', '') }}</title>
-        <link rel="icon" href="/build/assets/logowelltrash.png" type="image/png">
+        <link rel="icon" href="favicon.ico" type="image/png" sizes="32x32">
         <meta name="google-site-verification" content="7Dv7Uj6fl3SKyiRKsaJ0jVmXNE_O67duJakj-l7Wru8" />
         <meta name="description" content="Layanan jasa angkut sampah Jember cepat dan terpercaya untuk rumah tangga dan bisnis.">
         <link rel="canonical" href="https://welltrash.com/jasa-angkut-sampah-jember">

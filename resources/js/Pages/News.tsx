@@ -31,7 +31,6 @@ export default function NewsPage({ news }: Props) {
             <Head title="Berita & Blog | Welltrash" />
             <Navbar />
 
-            {/* Hero */}
             <section className="pt-36 pb-20 px-6 max-w-7xl mx-auto border-b border-gray-100">
                 <p className="text-xs font-bold tracking-[0.4em] uppercase mb-4" style={{ color: '#FE961C' }}>Berita & Blog</p>
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -49,11 +48,8 @@ export default function NewsPage({ news }: Props) {
                     Belum ada artikel
                 </div>
             ) : (
-                /* Split panel — left: article list, right: live preview */
                 <section className="max-w-7xl mx-auto px-6 py-16">
                     <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-
-                        {/* Left: Numbered article list */}
                         <div className="lg:w-1/2 divide-y divide-gray-100">
                             {news.map((item, i) => (
                                 <button
@@ -61,7 +57,6 @@ export default function NewsPage({ news }: Props) {
                                     onClick={() => setActiveId(item.id)}
                                     className={`w-full text-left flex items-start gap-5 py-6 group transition-colors duration-200 ${activeId === item.id ? '' : 'hover:bg-gray-50'} -mx-3 px-3 rounded-xl`}
                                 >
-                                    {/* Number */}
                                     <span
                                         className="text-3xl font-black tabular-nums flex-shrink-0 transition-colors duration-300 leading-none mt-1"
                                         style={{ color: activeId === item.id ? '#FE961C' : '#E5E7EB' }}
@@ -69,7 +64,6 @@ export default function NewsPage({ news }: Props) {
                                         {String(i + 1).padStart(2, '0')}
                                     </span>
 
-                                    {/* Text */}
                                     <div className="flex-1 min-w-0">
                                         {item.published_date && (
                                             <span className="text-xs text-gray-400 font-medium mb-1 block">{formatDate(item.published_date)}</span>
@@ -83,7 +77,6 @@ export default function NewsPage({ news }: Props) {
                                         <p className="text-sm text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">{item.content}</p>
                                     </div>
 
-                                    {/* Arrow */}
                                     <svg
                                         className="w-5 h-5 flex-shrink-0 mt-1.5 transition-all duration-300"
                                         style={{ color: activeId === item.id ? '#FE961C' : '#D1D5DB', transform: activeId === item.id ? 'translateX(2px)' : 'none' }}
@@ -95,12 +88,10 @@ export default function NewsPage({ news }: Props) {
                             ))}
                         </div>
 
-                        {/* Right: Preview panel — sticky */}
                         <div className="lg:w-1/2">
                             <div className="lg:sticky lg:top-28">
                                 {activeArticle ? (
                                     <div className="rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
-                                        {/* Image */}
                                         <div className="h-64 bg-gray-100 overflow-hidden">
                                             {activeArticle.image_path ? (
                                                 <img
@@ -118,7 +109,6 @@ export default function NewsPage({ news }: Props) {
                                             )}
                                         </div>
 
-                                        {/* Content */}
                                         <div className="p-8 bg-white">
                                             {activeArticle.published_date && (
                                                 <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: '#7CC13B' }}>

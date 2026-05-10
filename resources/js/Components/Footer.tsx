@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
 import logowelltrash from "../../../public/build/assets/logowelltrash.png";
+import WhatsAppWidget from "./WhatsAppWidget";
 
 interface FooterProps {
     dark?: boolean;
@@ -23,7 +24,8 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
     const linkHoverColor = dark ? '#FE961C' : '#7CC13B';
 
     return (
-        <footer style={{ backgroundColor: bg, color: '#F0F4FF' }} className="font-sans">
+        <footer style={{ backgroundColor: bg, color: '#F0F4FF' }} className="font-sans relative">
+            <WhatsAppWidget />
             <div className="max-w-7xl mx-auto px-6 pt-16 pb-10">
 
                 {/* Top section */}
@@ -42,7 +44,7 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
                         </p>
                         {/* Social */}
                         <div className="flex items-center gap-4">
-                            <a href="#" aria-label="Instagram"
+                            <a href="https://www.instagram.com/welltrash.jember/" target="_blank" rel="noreferrer" aria-label="Instagram"
                                 className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
                                 style={{ backgroundColor: borderColor }}
                                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = accentColor}
@@ -52,7 +54,7 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
                                     <path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.45 2.525c.636-.247 1.363-.416 2.427-.465C9.673 2.013 9.92 2 12.315 2zm0 2.162c-2.372 0-2.703.01-3.7.055-.893.041-1.378.19-1.7.315a2.822 2.822 0 00-1.045.68 2.822 2.822 0 00-.68 1.045c-.125.322-.274.807-.315 1.7-.045.997-.055 1.328-.055 3.7s.01 2.703.055 3.7c.041.893.19 1.378.315 1.7.163.42.38.72.68 1.045.325.3.625.517 1.045.68.322.125.807.274 1.7.315.997.045 1.328.055 3.7.055s2.703-.01 3.7-.055c.893-.041 1.378-.19 1.7-.315a2.822 2.822 0 001.045-.68 2.822 2.822 0 00.68-1.045c.125-.322.274-.807.315-1.7.045-.997.055-1.328.055-3.7s-.01-2.703-.055-3.7c-.041-.893-.19-1.378-.315-1.7a2.822 2.822 0 00-.68-1.045 2.822 2.822 0 00-1.045-.68c-.322-.125-.807-.274-1.7-.315-.997-.045-1.328-.055-3.7-.055zm0 3.838a4.162 4.162 0 110 8.325 4.162 4.162 0 010-8.325zm0 2.162a2 2 0 100 4 2 2 0 000-4zm3.965-3.405a.972.972 0 110 1.944.972.972 0 010-1.944z" clipRule="evenodd" />
                                 </svg>
                             </a>
-                            <a href="#" aria-label="WhatsApp"
+                            <a href="https://wa.me/62811988706" target="_blank" rel="noreferrer" aria-label="WhatsApp"
                                 className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
                                 style={{ backgroundColor: borderColor }}
                                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = accentColor}
@@ -106,7 +108,7 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
                                 <svg className="w-5 h-5 flex-shrink-0" style={{ color: accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
-                                <a href="https://wa.me/6281336104254" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">+62 813-3610-4254</a>
+                                <a href="https://wa.me/62811988706" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">+62 811-988-706</a>
                             </li>
                         </ul>
                     </div>
@@ -115,10 +117,6 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
                 {/* Bottom bar */}
                 <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs" style={{ color: subtleTextColor }}>
                     <p>© {new Date().getFullYear()} PT Sarana Utama Welltrash Farm. All rights reserved.</p>
-                    <div className="flex items-center gap-6">
-                        <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-                    </div>
                 </div>
             </div>
         </footer>
