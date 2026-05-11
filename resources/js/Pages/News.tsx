@@ -98,6 +98,8 @@ export default function NewsPage({ news }: Props) {
                                                     key={activeArticle.id}
                                                     src={`/storage/${activeArticle.image_path}`}
                                                     alt={activeArticle.title}
+                                                    loading="lazy"
+                                                    decoding="async"
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (

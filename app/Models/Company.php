@@ -24,6 +24,8 @@ class Company extends Model
         'payment_evidence_path',
         'signed_mou_path',
         'pickup_schedule',
+        'rejection_reason',
+        'refund_evidence_path',
     ];
 
     protected $casts = [

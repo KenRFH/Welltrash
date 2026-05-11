@@ -10,21 +10,64 @@ export default function Register({ auth }: any) {
         address: '',
         phone: '',
         business_category: '', // NEW Field
-        subscription_plan: 'Basic',
+        subscription_plan: 'Reguler',
         pickup_schedule: [] as string[],
-        payment_evidence: null as File | null,
         signed_mou: null as File | null,
     });
 
-    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
     const predefinedCategories = ['Hotel', 'Restoran', 'Cafe', 'SPPG', 'Gudang'];
     const [isCustomCategory, setIsCustomCategory] = React.useState(false);
 
-    const planPrices = {
-        'Basic': 'Rp 899.000',
-        'Premium': 'Rp 1.129.000',
-        'Premium +': 'Rp 5.750.000'
-    };
+
+
+    const packagesData = [
+        {
+            id: 'Request',
+            name: 'Paket Request (By Call)',
+            price: 'Rp 500.000',
+            period: '/sekali angkut',
+            desc: 'Jasa angkut sampah on-demand yang fleksibel untuk kebutuhan mendadak.',
+            features: ['Layanan Jemput Sesuai Panggilan', 'Jadwal Fleksibel & Cepat', 'Pemilahan Sampah Standar'],
+            isPopular: false,
+        },
+        {
+            id: 'Rumah Tangga',
+            name: 'Paket Rumah Tangga',
+            price: 'Rp 750.000',
+            period: '/estimasi',
+            desc: 'Layanan penjemputan sampah rumah tangga harian agar lingkungan tetap bersih.',
+            features: ['Max 100kg / sekali angkut', 'Jadwal Jemput Rutin Harian', 'Laporan Kebersihan Bulanan'],
+            isPopular: false,
+        },
+        {
+            id: 'Reguler',
+            name: 'Paket Reguler',
+            price: 'Rp 2.000.000',
+            period: '/bulan',
+            desc: 'Solusi pengolahan limbah untuk bisnis menengah dengan jadwal pengambilan teratur.',
+            features: ['Maks 400kg / sekali angkut', 'Jadwal 2-3x / Minggu', 'Sertifikat Ramah Lingkungan'],
+            isPopular: false,
+        },
+        {
+            id: 'Prime',
+            name: 'Paket Prime (Bisnis)',
+            price: 'Rp 3.000.000',
+            period: '/bulan',
+            desc: 'Layanan pengolahan sampah prioritas dengan standar kebersihan tinggi.',
+            features: ['Maks 500kg / sekali angkut', 'Jadwal 5 Hari / Minggu', 'Sertifikat Mitra Ramah Lingkungan'],
+            isPopular: true,
+        },
+        {
+            id: 'Premium+',
+            name: 'Paket Premium+',
+            price: 'Rp 5.000.000',
+            period: '/bulan',
+            desc: 'Solusi limbah industri skala besar dengan sistem pelaporan audit mendalam.',
+            features: ['Tanpa perlu pilah sampah', 'Maks 500kg / sekali angkut', 'Laporan Kebersihan Audit'],
+            isPopular: false,
+        }
+    ];
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
@@ -38,9 +81,14 @@ export default function Register({ auth }: any) {
     };
 
     const handleDayToggle = (day: string) => {
+        const isRestrictedPlan = data.subscription_plan === 'Rumah Tangga' || data.subscription_plan === 'Reguler';
         if (data.pickup_schedule.includes(day)) {
             setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
         } else {
+            if (isRestrictedPlan && data.pickup_schedule.length >= 4) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${data.subscription_plan} maksimal hanya dapat memilih 4 hari penjemputan.` } }));
+                return;
+            }
             setData('pickup_schedule', [...data.pickup_schedule, day]);
         }
     };
@@ -52,7 +100,7 @@ export default function Register({ auth }: any) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Pendaftaran Mitra | WellMaggot" />
+            <Head title="Pendaftaran Mitra | WellTrash" />
 
             {/* Sidebar Component (Locked) */}
             <CompanySidebar 
@@ -92,10 +140,7 @@ export default function Register({ auth }: any) {
                     </div>
 
                     <div className="flex items-center space-x-6">
-                        {/* Notification Bell */}
-                        <button className="text-gray-400 hover:text-gray-500 transition-colors">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                        </button>
+
                         
                         {/* User Profile */}
                         <div className="flex items-center space-x-3">
@@ -167,7 +212,7 @@ export default function Register({ auth }: any) {
                                     type="tel"
                                     value={data.phone}
                                     onChange={e => setData('phone', e.target.value)}
-                                    placeholder="Nama WA PIC"
+                                    placeholder="Nomer WA PIC"
                                     className="w-full bg-gray-50 border-0 rounded-lg py-3 px-4 text-sm text-gray-700 focus:ring-2 focus:ring-teal-500 transition-colors"
                                     required
                                 />
@@ -189,114 +234,85 @@ export default function Register({ auth }: any) {
                             {/* Pilih Paket Langganan */}
                             <div className="pt-2 pb-4">
                                 <label className="block text-sm font-bold text-gray-700 mb-4">Pilih Paket Langganan</label>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {/* Basic Card */}
-                                    <div 
-                                        onClick={() => setData('subscription_plan', 'Basic')}
-                                        className={`relative rounded-2xl p-6 cursor-pointer transition-all border flex flex-col h-full ${data.subscription_plan === 'Basic' ? 'border-teal-500 ring-4 ring-teal-50 bg-white' : 'border-gray-200 bg-white hover:border-teal-300'}`}
-                                    >
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2">Basic</h3>
-                                        <p className="text-sm text-gray-500 mb-6 min-h-[40px]">Layanan pengangkutan sampah esensial untuk bisnis skala kecil.</p>
-                                        <div className="mb-6">
-                                            <span className="text-3xl font-black text-gray-900">Rp 899.000</span>
-                                            <span className="text-sm text-gray-500 font-medium">/bulan</span>
-                                        </div>
-                                        <ul className="space-y-3 text-sm text-gray-600 mb-8 flex-1">
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-teal-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Penjemputan Sampah Terjadwal
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-teal-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Sesuai SLA Perusahaan
-                                            </li>
-                                            <li className="flex items-start text-gray-400">
-                                                <svg className="w-5 h-5 text-gray-300 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                Akses Dashboard Emisi &amp; Data
-                                            </li>
-                                            <li className="flex items-start text-gray-400">
-                                                <svg className="w-5 h-5 text-gray-300 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                Laporan ESG &amp; Environmental
-                                            </li>
-                                        </ul>
-                                        <div className={`w-full py-3 rounded-lg text-center font-bold text-sm transition-colors mt-auto ${data.subscription_plan === 'Basic' ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
-                                            Pilih Basic
-                                        </div>
-                                    </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {packagesData.map((pkg) => {
+                                        const isSelected = data.subscription_plan === pkg.id;
+                                        
+                                        // Different styling logic based on popularity or selection
+                                        let cardStyles = '';
+                                        let titleStyles = '';
+                                        let btnStyles = '';
+                                        
+                                        if (pkg.isPopular) {
+                                            cardStyles = isSelected 
+                                                ? 'bg-[#0f172a] ring-4 ring-teal-50 border border-[#0f172a] transform scale-[1.02]' 
+                                                : 'bg-[#0f172a] border border-[#0f172a] opacity-90 transform scale-[0.98] hover:opacity-100 hover:scale-[1.02]';
+                                            titleStyles = 'text-white';
+                                            btnStyles = isSelected 
+                                                ? 'bg-[#22c55e] text-white shadow-lg shadow-green-500/20' 
+                                                : 'bg-[#22c55e]/30 text-green-400 hover:bg-[#22c55e]/40';
+                                        } else {
+                                            cardStyles = isSelected 
+                                                ? 'border-teal-500 ring-4 ring-teal-50 bg-white' 
+                                                : 'border-gray-200 bg-white hover:border-teal-300';
+                                            titleStyles = 'text-gray-900';
+                                            btnStyles = isSelected 
+                                                ? 'bg-teal-50 text-teal-700 border border-teal-200' 
+                                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50';
+                                        }
 
-                                    {/* Premium Card */}
-                                    <div 
-                                        onClick={() => setData('subscription_plan', 'Premium')}
-                                        className={`relative rounded-2xl p-6 cursor-pointer transition-all flex flex-col h-full ${data.subscription_plan === 'Premium' ? 'bg-[#0f172a] ring-4 ring-teal-50 border border-[#0f172a]' : 'bg-[#0f172a] border border-[#0f172a] opacity-90 transform scale-[0.98] hover:opacity-100 hover:scale-[1.02]'}`}
-                                    >
-                                        <div className="absolute -top-3 left-6 bg-teal-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                            TERPOPULER
-                                        </div>
-                                        <h3 className="text-xl font-bold text-white mb-2 mt-2">Premium</h3>
-                                        <p className="text-sm text-gray-400 mb-6 min-h-[40px]">Manajemen sampah terotomatisasi dengan data pelaporan emisi.</p>
-                                        <div className="mb-6">
-                                            <span className="text-3xl font-black text-white">Rp 1.129.000</span>
-                                            <span className="text-sm text-gray-400 font-medium">/bulan</span>
-                                        </div>
-                                        <ul className="space-y-3 text-sm text-gray-300 mb-8 flex-1">
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-teal-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Penjemputan Sampah Terjadwal
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-teal-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Akses Penuh Dashboard Web
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-teal-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Pelacakan Historis Sampah
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-teal-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Unduh Laporan Format ESG
-                                            </li>
-                                        </ul>
-                                        <div className={`w-full py-3 rounded-lg text-center font-bold text-sm transition-colors mt-auto ${data.subscription_plan === 'Premium' ? 'bg-[#22c55e] text-white shadow-lg shadow-green-500/20' : 'bg-[#22c55e]/30 text-green-400 hover:bg-[#22c55e]/40'}`}>
-                                            Pilih Premium
-                                        </div>
-                                    </div>
-
-                                    {/* Premium+ Card */}
-                                    <div 
-                                        onClick={() => setData('subscription_plan', 'Premium +')}
-                                        className={`relative rounded-2xl p-6 cursor-pointer transition-all border flex flex-col h-full ${data.subscription_plan === 'Premium +' ? 'border-teal-500 ring-4 ring-teal-50 bg-white' : 'border-gray-200 bg-white hover:border-teal-300'}`}
-                                    >
-                                        <div className="absolute top-4 right-4 bg-orange-100 text-orange-600 text-[10px] font-bold px-3 py-1 rounded-full">
-                                            Hemat 15%
-                                        </div>
-                                        <h3 className="text-xl font-bold text-gray-900 mb-2">Premium +</h3>
-                                        <p className="text-sm text-gray-500 mb-6 min-h-[40px] pr-8 leading-snug">Kontrak jangka panjang (6 Bulan) dengan semua fitur premium dan harga lebih hemat.</p>
-                                        <div className="mb-6 flex flex-col sm:flex-row sm:items-baseline">
-                                            <span className="text-2xl lg:text-3xl font-black text-gray-900">Rp 5.750.000</span>
-                                            <span className="text-sm text-gray-500 font-medium sm:ml-1">/6 bulan</span>
-                                        </div>
-                                        <ul className="space-y-3 text-sm text-gray-600 mb-8 flex-1">
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Semua Fitur di Paket Premium
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Dashboard &amp; Laporan Data ESG
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Harga Jauh Lebih Menguntungkan
-                                            </li>
-                                            <li className="flex items-start">
-                                                <svg className="w-5 h-5 text-green-500 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                                                Prioritas Customer Support
-                                            </li>
-                                        </ul>
-                                        <div className={`w-full py-3 rounded-lg text-center font-bold text-sm transition-colors mt-auto ${data.subscription_plan === 'Premium +' ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
-                                            Pilih Premium +
-                                        </div>
-                                    </div>
+                                        return (
+                                            <div 
+                                                key={pkg.id}
+                                                onClick={() => {
+                                                    setData((prevData) => {
+                                                        const isRestricted = pkg.id === 'Rumah Tangga' || pkg.id === 'Reguler';
+                                                        let newSchedule = prevData.pickup_schedule;
+                                                        if (isRestricted && newSchedule.length > 4) {
+                                                            newSchedule = newSchedule.slice(0, 4);
+                                                        }
+                                                        return { ...prevData, subscription_plan: pkg.id, pickup_schedule: newSchedule };
+                                                    });
+                                                }}
+                                                className={`relative rounded-2xl p-6 cursor-pointer transition-all flex flex-col h-full border ${cardStyles}`}
+                                            >
+                                                {pkg.isPopular && (
+                                                    <div className="absolute -top-3 left-6 bg-teal-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                                        TERPOPULER
+                                                    </div>
+                                                )}
+                                                
+                                                <h3 className={`text-xl font-bold mb-2 ${pkg.isPopular ? 'mt-2' : ''} ${titleStyles}`}>
+                                                    {pkg.name}
+                                                </h3>
+                                                <p className={`text-sm mb-6 min-h-[40px] ${pkg.isPopular ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                    {pkg.desc}
+                                                </p>
+                                                
+                                                <div className="mb-6 flex flex-col sm:flex-row sm:items-baseline">
+                                                    <span className={`text-2xl font-black ${titleStyles}`}>{pkg.price}</span>
+                                                    <span className={`text-sm font-medium sm:ml-1 ${pkg.isPopular ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                        {pkg.period}
+                                                    </span>
+                                                </div>
+                                                
+                                                <ul className={`space-y-3 text-sm mb-8 flex-1 ${pkg.isPopular ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    {pkg.features.map((feature, i) => (
+                                                        <li key={i} className="flex items-start">
+                                                            <svg className={`w-5 h-5 mr-3 shrink-0 ${pkg.isPopular ? 'text-teal-400' : 'text-teal-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            {feature}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                
+                                                <div className={`w-full py-3 rounded-lg text-center font-bold text-sm transition-colors mt-auto ${btnStyles}`}>
+                                                    Pilih {pkg.id}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                                 {errors.subscription_plan && <p className="text-xs text-red-500 mt-2">{errors.subscription_plan}</p>}
                             </div>
@@ -387,21 +403,17 @@ export default function Register({ auth }: any) {
                                 </a>
                             </div>
                             
-                            {/* Bank Transfer Information */}
+                            {/* Registration Flow Information */}
                             <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 mb-6">
-                                <h4 className="font-bold text-teal-800 mb-2">Informasi Pembayaran</h4>
-                                <p className="text-sm text-teal-700 mb-4">
-                                    Silakan transfer sesuai dengan nominal paket <strong>{data.subscription_plan}</strong> yang Anda pilih untuk mengaktifkan layanan armada kami.
-                                </p>
-                                <div className="bg-white rounded-lg p-4 border border-teal-100/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
+                                <div className="flex items-start">
+                                    <svg className="w-5 h-5 text-teal-600 mt-0.5 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                     <div>
-                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Bank Mandiri</p>
-                                        <p className="font-bold text-gray-900 text-lg tracking-wide">123-456-789-0123</p>
-                                        <p className="text-sm text-gray-600">a.n. PT Welltrash Indonesia</p>
-                                    </div>
-                                    <div className="text-left sm:text-right border-t sm:border-t-0 sm:border-l border-gray-100 pt-3 sm:pt-0 sm:pl-6 w-full sm:w-auto">
-                                        <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Nominal Transfer</p>
-                                        <p className="font-black text-teal-600 text-2xl">{planPrices[data.subscription_plan as keyof typeof planPrices]}</p>
+                                        <h4 className="font-bold text-teal-800 mb-2">Informasi Alur Pendaftaran</h4>
+                                        <p className="text-sm text-teal-700">
+                                            Anda <strong>tidak perlu melakukan pembayaran</strong> pada tahap ini. Setelah mengirimkan formulir, tim admin kami akan meninjau pendaftaran Anda. Jika disetujui, Anda akan diarahkan ke halaman tagihan untuk melakukan pembayaran sesuai paket yang dipilih guna mengaktifkan akun kemitraan.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -433,18 +445,6 @@ export default function Register({ auth }: any) {
                                         required
                                     />
                                     {errors.signed_mou && <p className="text-xs text-red-500 mt-1">{errors.signed_mou}</p>}
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Bukti Pembayaran (Image/PDF)</label>
-                                    <input
-                                        type="file"
-                                        accept="image/*,application/pdf"
-                                        onChange={(e) => setData('payment_evidence', e.target.files ? e.target.files[0] : null)}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"
-                                        required
-                                    />
-                                    {errors.payment_evidence && <p className="text-xs text-red-500 mt-1">{errors.payment_evidence}</p>}
                                 </div>
                             </div>
                             

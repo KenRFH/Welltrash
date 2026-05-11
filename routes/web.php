@@ -128,7 +128,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
         Route::get('/companies/pending', [AdminController::class, 'pendingCompanies'])->name('companies.pending');
         Route::patch('/companies/{company}/approve', [AdminController::class, 'approveCompany'])->name('companies.approve');
-        Route::delete('/companies/{company}/reject', [AdminController::class, 'rejectCompany'])->name('companies.reject');
+        Route::patch('/companies/{company}/activate', [AdminController::class, 'activateCompany'])->name('companies.activate');
+        Route::patch('/companies/{company}/toggle-status', [AdminController::class, 'toggleStatus'])->name('companies.toggleStatus');
+        Route::post('/companies/{company}/reject', [AdminController::class, 'rejectCompany'])->name('companies.reject');
         
         Route::get('/companies/cancellations/requests', [AdminController::class, 'cancellationRequests'])->name('companies.cancellations');
         Route::delete('/companies/{company}/cancellations/approve', [AdminController::class, 'approveCancellation'])->name('companies.cancellations.approve');
@@ -177,6 +179,9 @@ Route::middleware(['auth', 'role:company'])
         Route::get('/history', [CompanyController::class, 'history'])->name('history');
         Route::get('/register', [CompanyController::class, 'register'])->name('register');
         Route::post('/register', [CompanyController::class, 'store'])->name('store');
+        Route::post('/reregister', [CompanyController::class, 'reregister'])->name('reregister');
+        
+        Route::post('/payment/store', [CompanyController::class, 'storePayment'])->name('payment.store');
         
         Route::get('/schedule', [CompanyController::class, 'schedule'])->name('schedule');
         Route::post('/schedule', [CompanyController::class, 'updateSchedule'])->name('schedule.update');
@@ -236,6 +241,16 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Fallback Route (404)
+|--------------------------------------------------------------------------
+*/
+
+Route::fallback(function () {
+    return Inertia::render('NotFound');
 });
 
 /*

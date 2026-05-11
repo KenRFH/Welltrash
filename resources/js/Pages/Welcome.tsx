@@ -5,7 +5,7 @@ import Why from "@/Components/Why";
 import Mitra from "@/Components/Mitra";
 import WasteFlow from "@/Components/WasteFlow";
 import Footer from "@/Components/Footer";
-import { Link } from "@inertiajs/react";
+import { Link, Head } from "@inertiajs/react";
 
 interface Activity {
     id: number;
@@ -42,6 +42,10 @@ function fmt(d: string | null) {
 const Welcome = ({ activities, news, katalogs }: Props) => {
     return (
         <>
+            <Head>
+                <title>Jasa Pengangkutan Sampah Jember</title>
+                <meta name="description" content="Layanan jasa pengangkutan sampah profesional dan terpercaya di Jember. Solusi kebersihan hemat & cepat untuk rumah tangga hingga bisnis. Pesan WellTrash sekarang!" />
+            </Head>
             <Navbar />
 
             <section className="relative w-full min-h-screen flex items-center bg-white mt-20">
@@ -101,6 +105,9 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                                 <div className="aspect-[4/5] overflow-hidden">
                                     <img src={imgHero}
                                         alt="Jasa Pengangkutan Sampah Profesional Kabupaten Jember - Welltrash"
+                                        fetchPriority="high"
+                                        loading="eager"
+                                        decoding="sync"
                                         className="w-full h-full object-cover transition-transform duration-700" />
                                 </div>
                                 <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md px-5 py-4 rounded-2xl shadow-lg border border-gray-200 max-w-[220px]">
@@ -134,7 +141,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                             </h2>
 
                             {activities.length === 0 ? (
-                                <p className="text-gray-300 font-bold py-10">Belum ada aktivitas.</p>
+                                <p className="text-gray-500 font-bold py-10">Belum ada aktivitas.</p>
                             ) : (
                                 <div className="divide-y divide-gray-100">
                                     {activities.map((a, i) => (
@@ -177,6 +184,8 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                                     {a.image_path
                                         ? <img src={`/storage/${a.image_path}`}
                                             alt={`Kegiatan Welltrash - ${a.title} | Jasa Pengangkutan Sampah Jember`}
+                                            loading="lazy"
+                                            decoding="async"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                                         : <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                                             <svg className="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -213,7 +222,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                     </div>
 
                     {news.length === 0 ? (
-                        <p className="py-16 text-center text-gray-300 font-bold">Belum ada berita.</p>
+                        <p className="py-16 text-center text-gray-500 font-bold">Belum ada berita.</p>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {news.map((item, i) => (
@@ -224,6 +233,8 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                                         {item.image_path
                                             ? <img src={`/storage/${item.image_path}`}
                                                 alt={`Berita Welltrash - ${item.title} | Jasa Pengangkutan Sampah Jember`}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                                             : <div className="w-full h-full flex items-center justify-center" style={{ background: "#F4FAF0" }}>
                                                 <svg className="w-10 h-10" style={{ color: "#7CC13B", opacity: 0.3 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -332,7 +343,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                     </div>
 
                     <p className="mt-14 text-center text-sm leading-relaxed max-w-xl mx-auto"
-                        style={{ color: "rgba(255,255,255,0.3)" }}>
+                        style={{ color: "rgba(255,255,255,0.7)" }}>
                         Bersama <span className="font-bold" style={{ color: "#7CC13B" }}>Welltrash</span>,
                         setiap sampah yang diangkut adalah satu langkah nyata menuju
                         Kabupaten Jember yang lebih hijau dan berkelanjutan.
@@ -383,6 +394,8 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                                         {item.image_path
                                             ? <img src={`/storage/${item.image_path}`}
                                                 alt={`Produk Welltrash - ${item.name} | Daur Ulang Sampah Jember`}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700" />
                                             : <div className="w-full h-full flex items-center justify-center">
                                                 <svg className="w-12 h-12" style={{ color: "rgba(255,255,255,0.05)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">

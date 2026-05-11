@@ -18,7 +18,7 @@ export default function Authenticated({
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
                                 <Link href="/" className="text-xl font-bold text-indigo-600">
-                                    WellMaggot
+                                    WellTrash
                                 </Link>
                             </div>
 

@@ -65,7 +65,7 @@ export default function Activities({ companies, activities }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Kegiatan Pemanfaatan | WellMaggot Driver" />
+            <Head title="Kegiatan Pemanfaatan | WellTrash Driver" />
 
             <DriverSidebar 
                 active="kegiatan" 

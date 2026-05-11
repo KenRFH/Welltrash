@@ -4,6 +4,7 @@ import "./bootstrap";
 import { createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { createRoot } from "react-dom/client";
+import GlobalToast from "./Components/GlobalToast";
 
 const appName = "WellTrash - Jasa Angkut Sampah & Pengolahan Limbah di Jember";
 
@@ -16,8 +17,14 @@ createInertiaApp({
         ),
     setup({ el, App, props }) {
         const root = createRoot(el);
+        const initialFlash = props.initialPage.props.flash;
 
-        root.render(<App {...props} />);
+        root.render(
+            <>
+                <GlobalToast initialFlash={initialFlash as any} />
+                <App {...props} />
+            </>
+        );
     },
     progress: {
         color: "#4B5563",

@@ -53,7 +53,7 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Tagihan | WellMaggot" />
+            <Head title="Tagihan | WellTrash" />
 
             <CompanySidebar 
                 active="billing" 
@@ -165,12 +165,12 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
                                     <div className="flex items-center justify-between bg-white/60 p-3 rounded-xl border border-blue-100">
                                         <span className="font-bold text-gray-700">Bank BCA</span>
                                         <span className="font-bold text-blue-900 font-mono tracking-wider">1234 5678 90</span>
-                                        <span className="text-gray-500 text-xs">a.n PT WellMaggot</span>
+                                        <span className="text-gray-500 text-xs">a.n PT WellTrash</span>
                                     </div>
                                     <div className="flex items-center justify-between bg-white/60 p-3 rounded-xl border border-blue-100">
                                         <span className="font-bold text-gray-700">Bank Mandiri</span>
                                         <span className="font-bold text-blue-900 font-mono tracking-wider">098 765 432 1</span>
-                                        <span className="text-gray-500 text-xs">a.n PT WellMaggot</span>
+                                        <span className="text-gray-500 text-xs">a.n PT WellTrash</span>
                                     </div>
                                 </div>
                             </div>

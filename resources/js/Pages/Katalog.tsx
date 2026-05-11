@@ -71,6 +71,8 @@ export default function KatalogPage({ katalogs }: Props) {
                                                 <img
                                                     src={`/storage/${item.image_path}`}
                                                     alt={item.name}
+                                                    loading="lazy"
+                                                    decoding="async"
                                                     className="w-full h-full object-contain p-6 transition-transform duration-600"
                                                     style={{ transform: isHovered ? 'scale(1.08)' : 'scale(1)' }}
                                                 />

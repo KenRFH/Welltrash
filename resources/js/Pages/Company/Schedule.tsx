@@ -18,6 +18,7 @@ interface Pickup {
 interface Company {
     id: number;
     company_name: string;
+    subscription_plan: string;
     pickup_schedule: string[];
 }
 
@@ -26,7 +27,7 @@ interface Props {
     pickups: Pickup[];
 }
 
-const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
 export default function Schedule({ company, pickups }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,9 +36,14 @@ export default function Schedule({ company, pickups }: Props) {
     });
 
     const toggleDay = (day: string) => {
+        const isRestrictedPlan = company.subscription_plan === 'Rumah Tangga' || company.subscription_plan === 'Reguler';
         if (data.pickup_schedule.includes(day)) {
             setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
         } else {
+            if (isRestrictedPlan && data.pickup_schedule.length >= 4) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${company.subscription_plan} maksimal hanya dapat memilih 4 hari penjemputan.` } }));
+                return;
+            }
             setData('pickup_schedule', [...data.pickup_schedule, day]);
         }
     };
@@ -61,7 +67,7 @@ export default function Schedule({ company, pickups }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Jadwal Pengambilan | WellMaggot" />
+            <Head title="Jadwal Pengambilan | WellTrash" />
 
              {/* Sidebar Component */}
              <CompanySidebar 

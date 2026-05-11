@@ -40,7 +40,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Dasbor Perusahaan | WellMaggot" />
+            <Head title="Dasbor Perusahaan | WellTrash" />
 
             {/* Sidebar Component */}
             <CompanySidebar 
@@ -81,12 +81,6 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                     </div>
                     
                     <div className="flex items-center space-x-6">
-                        <button className="relative text-gray-400 hover:text-green-600 transition-colors p-2 rounded-xl hover:bg-green-50">
-                            <span className="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                        </button>
 
                         <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
@@ -110,7 +104,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                             <div className="relative z-10 mb-6 sm:mb-0 p-6 sm:p-8 rounded-[2rem] bg-white/10 backdrop-blur-2xl border border-white/20 border-t-white/40 border-l-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.15)] overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-50 pointer-events-none"></div>
                                 <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2 relative z-10 drop-shadow-sm">Halo Mitra! 👋</h2>
-                                <p className="text-white/90 text-sm sm:text-base font-medium mb-4 relative z-10 drop-shadow-sm">Selamat datang kembali di dasbor WellMaggot.</p>
+                                <p className="text-white/90 text-sm sm:text-base font-medium mb-4 relative z-10 drop-shadow-sm">Selamat datang kembali di dasbor WellTrash.</p>
                                 
                                 {company.subscription_status === 'cancellation_requested' && (
                                     <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-white/20 text-white border border-white/30 backdrop-blur-xl relative z-10 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">

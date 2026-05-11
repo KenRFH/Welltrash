@@ -24,7 +24,7 @@ export default function Activities({ auth, company, activities, plan }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Kegiatan & Dokumentasi | WellMaggot" />
+            <Head title="Kegiatan & Dokumentasi | WellTrash" />
 
             <CompanySidebar 
                 active="kegiatan" 
@@ -54,7 +54,7 @@ export default function Activities({ auth, company, activities, plan }: Props) {
                         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative z-10 mb-8 flex items-center justify-between">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-1">Log Dokumentasi Pemanfaatan</h3>
-                                <p className="text-gray-500 font-medium text-sm">Dokumentasi kegiatan pemanfaatan sampah yang dilakukan oleh tim WellMaggot.</p>
+                                <p className="text-gray-500 font-medium text-sm">Dokumentasi kegiatan pemanfaatan sampah yang dilakukan oleh tim WellTrash.</p>
                             </div>
                             <div className="hidden md:flex p-3 bg-green-50 rounded-2xl text-green-600">
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>

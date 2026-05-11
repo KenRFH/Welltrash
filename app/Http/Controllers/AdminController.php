@@ -12,7 +12,17 @@ class AdminController extends Controller
 {
     public function indexCompanies()
     {
-        $companies = Company::with('user')->get();
+        $companies = Company::with('user')->get()->map(function ($company) {
+            $company->remaining_days = null;
+            if ($company->subscription_status === 'active' && $company->subscription_end_date) {
+                $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
+                $company->remaining_days = now()->lessThanOrEqualTo($endDate) 
+                    ? now()->diffInDays($endDate) 
+                    : 0;
+            }
+            return $company;
+        });
+
         return Inertia::render('Admin/Companies/Index', [
             'companies' => $companies
         ]);
@@ -21,6 +31,15 @@ class AdminController extends Controller
     public function showCompany(Company $company)
     {
         $company->load('user');
+        
+        $company->remaining_days = null;
+        if ($company->subscription_status === 'active' && $company->subscription_end_date) {
+            $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
+            $company->remaining_days = now()->lessThanOrEqualTo($endDate) 
+                ? now()->diffInDays($endDate) 
+                : 0;
+        }
+
         return Inertia::render('Admin/Companies/Show', [
             'company' => $company
         ]);
@@ -37,6 +56,15 @@ class AdminController extends Controller
     public function approveCompany(Company $company)
     {
         $company->update([
+            'subscription_status' => 'approved',
+        ]);
+        
+        return back()->with('success', 'Perusahaan berhasil disetujui. Menunggu mitra untuk mengunggah bukti pembayaran.');
+    }
+
+    public function activateCompany(Company $company)
+    {
+        $company->update([
             'subscription_status' => 'active',
             'subscription_end_date' => now()->addDays(30)
         ]);
@@ -45,13 +73,36 @@ class AdminController extends Controller
             '--company' => $company->id
         ]);
 
-        return back()->with('success', 'Perusahaan berhasil disetujui dan jadwal awal telah dibuat.');
+        return back()->with('success', 'Perusahaan berhasil diaktifkan dan jadwal awal telah dibuat.');
     }
 
-    public function rejectCompany(Company $company)
+    public function toggleStatus(Company $company)
     {
-        $company->delete();
-        return back()->with('success', 'Company rejected successfully.');
+        if ($company->subscription_status === 'active') {
+            $company->update(['subscription_status' => 'inactive']);
+            $msg = 'Akun mitra dinonaktifkan.';
+        } elseif ($company->subscription_status === 'inactive') {
+            $company->update(['subscription_status' => 'active']);
+            $msg = 'Akun mitra diaktifkan.';
+        } else {
+            return back()->with('error', 'Hanya akun aktif/nonaktif yang dapat diubah statusnya.');
+        }
+        return back()->with('success', $msg);
+    }
+
+    public function rejectCompany(Request $request, Company $company)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string',
+        ]);
+
+        $company->update([
+            'subscription_status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'refund_evidence_path' => null,
+        ]);
+
+        return back()->with('success', 'Perusahaan berhasil ditolak.');
     }
 
     public function cancellationRequests()

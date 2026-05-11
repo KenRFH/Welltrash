@@ -36,7 +36,7 @@ export default function Mitra({ auth, company, activeDaysLeft }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Kemitraan | WellMaggot" />
+            <Head title="Kemitraan | WellTrash" />
 
             <CompanySidebar 
                 active="mitra" 

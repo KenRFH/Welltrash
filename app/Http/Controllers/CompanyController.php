@@ -18,12 +18,36 @@ class CompanyController extends Controller
             return redirect()->route('company.register');
         }
 
-        // If the company registration is pending, show the pending page
         if ($user->company->subscription_status === 'pending') {
             return Inertia::render('Company/Pending');
         }
 
+        if ($user->company->subscription_status === 'rejected') {
+            return Inertia::render('Company/Rejected', [
+                'company' => $user->company
+            ]);
+        }
+
+        if ($user->company->subscription_status === 'approved') {
+            return Inertia::render('Company/AwaitingPayment', [
+                'company' => $user->company
+            ]);
+        }
+
+        if ($user->company->subscription_status === 'payment_uploaded') {
+            return Inertia::render('Company/PendingActivation');
+        }
+
+        if ($user->company->subscription_status === 'inactive') {
+            return Inertia::render('Company/Inactive');
+        }
+
         $company = $user->company;
+
+        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        if (!in_array($company->subscription_plan, $allowedPlans)) {
+            return redirect()->route('company.mitra')->with('error', 'Akses dashboard hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
+        }
 
         if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
             return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
@@ -76,6 +100,34 @@ class CompanyController extends Controller
         return Inertia::render('Company/Register');
     }
 
+    public function reregister()
+    {
+        $user = Auth::user();
+        if ($user->company && $user->company->subscription_status === 'rejected') {
+            $user->company->delete();
+        }
+        return redirect()->route('company.register');
+    }
+
+    public function storePayment(Request $request)
+    {
+        $request->validate([
+            'payment_evidence' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+        ]);
+
+        $company = Auth::user()->company;
+        if ($company && $company->subscription_status === 'approved') {
+            $path = $request->file('payment_evidence')->store('documents/payments', 'public');
+            $company->update([
+                'payment_evidence_path' => $path,
+                'subscription_status' => 'payment_uploaded'
+            ]);
+            return redirect()->route('company.dashboard')->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu aktivasi admin.');
+        }
+
+        return back()->with('error', 'Tidak dapat mengunggah pembayaran pada status saat ini.');
+    }
+
     public function history()
     {
         $user = Auth::user();
@@ -86,12 +138,13 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
-        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
-            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        if (!in_array($company->subscription_plan, $allowedPlans)) {
+            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
         }
 
-        if ($company->subscription_plan === 'Basic') {
-            return redirect()->route('company.dashboard')->with('error', 'Fitur ini hanya tersedia untuk paket Premium.');
+        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
+            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
         }
 
         $pickups = $company->pickups()->with('driver')
@@ -113,16 +166,18 @@ class CompanyController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'business_category' => 'nullable|string|max:255',
-            'subscription_plan' => 'required|string|in:Basic,Premium,Premium +',
-            'payment_evidence' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'subscription_plan' => 'required|string|in:Request,Rumah Tangga,Reguler,Prime,Premium+',
             'signed_mou' => 'required|file|mimes:pdf|max:10240',
             'pickup_schedule' => 'required|array|min:1',
-            'pickup_schedule.*' => 'string',
+            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat',
         ]);
+
+        if (in_array($request->subscription_plan, ['Rumah Tangga', 'Reguler']) && count($request->pickup_schedule) > 4) {
+            return back()->withErrors(['pickup_schedule' => 'Paket ini maksimal hanya dapat memilih 4 hari penjemputan.'])->withInput();
+        }
 
         $user = Auth::user();
 
-        $paymentEvidencePath = $request->file('payment_evidence')->store('documents/payments', 'public');
         $signedMouPath = $request->file('signed_mou')->store('documents/mous', 'public');
 
         Company::create([
@@ -134,9 +189,9 @@ class CompanyController extends Controller
             'business_category' => $request->business_category,
             'subscription_plan' => $request->subscription_plan,
             'subscription_status' => 'pending', 
-            'payment_evidence_path' => $paymentEvidencePath,
             'signed_mou_path' => $signedMouPath,
             'pickup_schedule' => $request->pickup_schedule,
+            'payment_evidence_path' => null,
         ]);
 
         return redirect()->route('company.dashboard')->with('success', 'Registration submitted back for approval.');
@@ -151,6 +206,11 @@ class CompanyController extends Controller
 
         if ($user->company->subscription_end_date && \Carbon\Carbon::parse($user->company->subscription_end_date)->isPast()) {
             return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
+        }
+
+        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        if (!in_array($user->company->subscription_plan, $allowedPlans)) {
+            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
         }
 
         // Only active companies can manage normal schedules
@@ -175,10 +235,14 @@ class CompanyController extends Controller
     {
         $request->validate([
             'pickup_schedule' => 'required|array|min:1',
-            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
+            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat',
         ]);
 
         $company = Auth::user()->company;
+
+        if (in_array($company->subscription_plan, ['Rumah Tangga', 'Reguler']) && count($request->pickup_schedule) > 4) {
+            return back()->withErrors(['pickup_schedule' => 'Paket ini maksimal hanya dapat memilih 4 hari penjemputan.']);
+        }
         
         if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
             return back()->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
@@ -240,7 +304,7 @@ class CompanyController extends Controller
     public function upgradeService(Request $request)
     {
         $request->validate([
-            'subscription_plan' => 'required|string|in:Premium,Premium +'
+            'subscription_plan' => 'required|string|in:Reguler,Prime,Premium+'
         ]);
 
         $customMessages = 'Permintaan peningkatan layanan ke ' . $request->subscription_plan . ' berhasil diajukan.';
@@ -317,6 +381,12 @@ class CompanyController extends Controller
         if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
             return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
         }
+
+        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        if (!in_array($company->subscription_plan, $allowedPlans)) {
+            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
+        }
+
         $activities = $company->activities()
             ->orderBy('activity_date', 'desc')
             ->get();
