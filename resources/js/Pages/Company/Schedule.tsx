@@ -33,7 +33,7 @@ interface Props {
     };
 }
 
-const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
 export default function Schedule({ company, pickups }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -128,7 +128,7 @@ export default function Schedule({ company, pickups }: Props) {
                         </div>
                         
                         <form onSubmit={submit}>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
                                 {DAYS_OF_WEEK.map((day) => {
                                     const isSelected = data.pickup_schedule.includes(day);
                                     return (

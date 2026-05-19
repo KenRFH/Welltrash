@@ -3,7 +3,7 @@ import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
-import videoDemo from "@/assets/img/mini_demo.webp";
+import videoDemo from "@/assets/img/mini_demo.mp4";
 
 const DAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
@@ -297,10 +297,10 @@ const Services = () => {
     {/* Video dengan fade edges */}
     <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-slate-100">
       <video
-        autoPlay
-        muted
-        loop
-        playsInline
+        autoPlay={true}
+        muted={true}
+        loop={true}
+        playsInline={true}
         className="w-full object-cover max-h-[220px] md:max-h-none"
         src={videoDemo}
       />

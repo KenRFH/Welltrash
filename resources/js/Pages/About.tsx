@@ -5,7 +5,7 @@ import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 
 import videoHero from "@/assets/img/header_main_welltrash.mp4";
-import posterHero from "@/assets/img/hero_about.png";
+
 import imgProfileDirektur from "@/assets/img/profile_Direktur.webp";
 import imgProfileHarry from "@/assets/img/profile_Andik.webp";
 import imgProfileAndik from "@/assets/img/profile_Andik.webp";
@@ -21,6 +21,10 @@ const About = () => {
             // Use getBoundingClientRect to track section position relative to viewport
             const rect = heroRef.current.getBoundingClientRect();
             // rect.top is negative as section scrolls up — use it to move video downward
+            if (window.innerWidth < 768) {
+                videoRef.current.style.transform = 'none';
+                return;
+            }
             const offset = -rect.top * 0.4; // 40% parallax speed
             videoRef.current.style.transform = `translateY(${offset}px)`;
         };
@@ -40,22 +44,16 @@ const About = () => {
             {/* Video Parallax Hero Section */}
             <section
                 ref={heroRef}
-                className="relative w-full h-[50vh] md:h-screen overflow-hidden"
+                className="relative w-full aspect-video md:aspect-auto md:h-screen overflow-hidden bg-slate-900 flex items-center justify-center"
             >
                 <video
                     ref={videoRef}
                     src={videoHero}
-                    poster={posterHero}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute left-0 w-full object-cover will-change-transform"
-                    style={{
-                        height: '140%',
-                        top: '-20%',
-                        transform: 'translateY(var(--parallax-y, 0px))',
-                    }}
+                    autoPlay={true}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    className="absolute md:top-[-20%] top-0 left-0 w-full md:h-[140%] h-full object-cover object-center will-change-transform"
                 />
             </section>
 
@@ -146,7 +144,7 @@ const About = () => {
                             {/* Level 1 */}
                             <div className="w-full max-w-[300px] p-8 bg-white border border-gray-400 text-center mb-10 relative z-10 hover:border-[#7CC13B] transition-colors">
                                 <div className="w-28 h-28 mx-auto bg-gray-100 mb-6 overflow-hidden">
-                                    <img src={imgProfileDirektur} alt="Direktur Utama" className="w-full h-full object-cover transition-all duration-500" />
+                                    <img src={imgProfileDirektur} alt="Direktur Utama" loading="lazy" decoding="async" className="w-full h-full object-cover transition-all duration-500" />
                                 </div>
                                 <h3 className="text-xl font-normal text-gray-900 uppercase tracking-wide">Direktur Utama</h3>
                                 <p className="text-[#FE961C] text-xs font-normal tracking-[0.2em] mt-2 uppercase">Mashudi</p>
@@ -168,7 +166,7 @@ const About = () => {
                                         <div className="w-px h-10 bg-gray-400 absolute -top-10 hidden md:block" />
                                         <div className="w-full p-8 bg-white border border-gray-400 text-center hover:border-gray-300 transition-colors relative z-10">
                                             <div className="w-20 h-20 mx-auto bg-gray-100 mb-5 overflow-hidden">
-                                                <img src={person.img} alt={person.name} className="w-full h-full object-cover transition-all duration-500" />
+                                                <img src={person.img} alt={person.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-all duration-500" />
                                             </div>
                                             <h3 className="text-lg font-normal text-gray-900 leading-tight mb-2">{person.name}</h3>
                                             <p className="text-gray-400 text-xs font-light tracking-[0.2em]">{person.role}</p>
