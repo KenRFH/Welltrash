@@ -35,6 +35,17 @@ class UserSeeder extends Seeder
             ]
         );
 
+         // Driver2
+         User::updateOrCreate(
+            ['email' => 'driver2@welltrash.com'],
+            [
+                'name' => 'Driver User2',
+                'password' => 'driver123',
+                'role' => 'driver',
+                'email_verified_at' => now(),
+            ]
+        );
+
         // Company
         User::updateOrCreate(
             ['email' => 'company@welltrash.com'],

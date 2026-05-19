@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>Jasa Pengangkutan Sampah Jember | WellTrash</title>
+        <title inertia>Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash</title>
         <link rel="icon" href="/favicon.ico" type="image/png" sizes="32x32">
         <meta name="google-site-verification" content="7Dv7Uj6fl3SKyiRKsaJ0jVmXNE_O67duJakj-l7Wru8" />
         <meta name="description" content="Layanan jasa pengangkutan sampah profesional dan terpercaya di Jember. Solusi kebersihan hemat & cepat untuk rumah tangga hingga bisnis. Pesan WellTrash sekarang!">

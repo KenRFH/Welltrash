@@ -109,7 +109,7 @@ export default function Register() {
                                 className="w-full justify-center bg-[#0F172A] hover:bg-black text-white py-3 rounded-md text-lg font-medium transition-colors disabled:opacity-50"
                                 disabled={processing}
                             >
-                                Masuk
+                                Daftar
                             </button>
                         </div>
                     </form>

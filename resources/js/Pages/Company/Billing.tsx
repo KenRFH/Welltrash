@@ -53,7 +53,7 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Tagihan | WellTrash" />
+            <Head title="Tagihan" />
 
             <CompanySidebar 
                 active="billing" 

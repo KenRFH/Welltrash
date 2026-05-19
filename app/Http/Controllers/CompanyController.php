@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\Company;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class CompanyController extends Controller
 {
@@ -44,9 +46,9 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
-        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
         if (!in_array($company->subscription_plan, $allowedPlans)) {
-            return redirect()->route('company.mitra')->with('error', 'Akses dashboard hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
+            return redirect()->route('company.mitra')->with('error', 'Akses dashboard hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
         }
 
         if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
@@ -138,9 +140,9 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
-        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
         if (!in_array($company->subscription_plan, $allowedPlans)) {
-            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
+            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
         }
 
         if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
@@ -148,7 +150,10 @@ class CompanyController extends Controller
         }
 
         $pickups = $company->pickups()->with('driver')
-            ->whereDate('pickup_date', '<', \Carbon\Carbon::today()->toDateString())
+            ->where(function ($query) {
+                $query->whereDate('pickup_date', '<', \Carbon\Carbon::today()->toDateString())
+                      ->orWhereIn('status', ['completed', 'failed']);
+            })
             ->orderBy('pickup_date', 'desc')
             ->paginate(5);
 
@@ -158,6 +163,50 @@ class CompanyController extends Controller
         ]);
     }
 
+    public function laporanPdf()
+{
+    $user = Auth::user();
+
+    if (!$user->company) {
+        return redirect()->route('company.register');
+    }
+
+    $company = $user->company;
+
+    $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
+
+    if (!in_array($company->subscription_plan, $allowedPlans)) {
+        return redirect()->route('company.mitra')
+            ->with('error', 'Fitur ini hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
+    }
+
+    if (
+        $company->subscription_end_date &&
+        Carbon::parse($company->subscription_end_date)->isPast()
+    ) {
+        return redirect()->route('company.billing')
+            ->with('error', 'Masa aktif langganan Anda telah habis.');
+    }
+
+    $pickups = $company->pickups()
+        ->with('driver')
+        ->where(function ($query) {
+            $query->whereDate('pickup_date', '<', Carbon::today()->toDateString())
+                ->orWhereIn('status', ['completed', 'failed']);
+        })
+        ->orderBy('pickup_date', 'desc')
+        ->get();
+
+    $pdf = Pdf::loadView('pdf.laporan-sampah', [
+        'company' => $company,
+        'pickups' => $pickups
+    ]);
+
+    return $pdf->stream('laporan-sampah.pdf');
+
+   
+}
+
     public function store(Request $request)
     {
         $request->validate([
@@ -166,15 +215,28 @@ class CompanyController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'business_category' => 'nullable|string|max:255',
-            'subscription_plan' => 'required|string|in:Request,Rumah Tangga,Reguler,Prime,Premium+',
+            'subscription_plan' => 'required|string|in:Rumah Tangga (< 10km),Rumah Tangga (> 10km),Reguler,Prime,Premium+',
             'signed_mou' => 'required|file|mimes:pdf|max:10240',
-            'pickup_schedule' => 'required|array|min:1',
-            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat',
+            'pickup_schedule' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) use ($request) {
+                    $plan = $request->subscription_plan;
+                    if ($plan === 'Request') return; // no schedule needed
+                    if (empty($value)) {
+                        $fail('Jadwal penjemputan wajib dipilih.');
+                        return;
+                    }
+                    $maxDays = in_array($plan, ['Prime', 'Premium+']) ? 6 : 4;
+                    if (count($value) > $maxDays) {
+                        $fail("Paket {$plan} maksimal hanya dapat memilih {$maxDays} hari penjemputan.");
+                    }
+                }
+            ],
+            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
         ]);
 
-        if (in_array($request->subscription_plan, ['Rumah Tangga', 'Reguler']) && count($request->pickup_schedule) > 4) {
-            return back()->withErrors(['pickup_schedule' => 'Paket ini maksimal hanya dapat memilih 4 hari penjemputan.'])->withInput();
-        }
+        // Remove old separate restriction check (now handled in validation above)
 
         $user = Auth::user();
 
@@ -208,9 +270,9 @@ class CompanyController extends Controller
             return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
         }
 
-        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
         if (!in_array($user->company->subscription_plan, $allowedPlans)) {
-            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
+            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
         }
 
         // Only active companies can manage normal schedules
@@ -223,7 +285,7 @@ class CompanyController extends Controller
         $pickups = $company->pickups()
             ->whereDate('pickup_date', '>=', \Carbon\Carbon::today()->toDateString())
             ->orderBy('pickup_date', 'asc')
-            ->get();
+            ->paginate(10);
 
         return Inertia::render('Company/Schedule', [
             'company' => $company,
@@ -234,16 +296,24 @@ class CompanyController extends Controller
     public function updateSchedule(Request $request)
     {
         $request->validate([
-            'pickup_schedule' => 'required|array|min:1',
-            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat',
+            'pickup_schedule' => [
+                'required',
+                'array',
+                'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    $company = Auth::user()->company;
+                    $plan = $company ? $company->subscription_plan : null;
+                    $maxDays = in_array($plan, ['Prime', 'Premium+']) ? 6 : 4;
+                    if (count($value) > $maxDays) {
+                        $fail("Paket {$plan} maksimal hanya dapat memilih {$maxDays} hari penjemputan.");
+                    }
+                }
+            ],
+            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
         ]);
 
         $company = Auth::user()->company;
 
-        if (in_array($company->subscription_plan, ['Rumah Tangga', 'Reguler']) && count($request->pickup_schedule) > 4) {
-            return back()->withErrors(['pickup_schedule' => 'Paket ini maksimal hanya dapat memilih 4 hari penjemputan.']);
-        }
-        
         if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
             return back()->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
         }
@@ -304,7 +374,7 @@ class CompanyController extends Controller
     public function upgradeService(Request $request)
     {
         $request->validate([
-            'subscription_plan' => 'required|string|in:Reguler,Prime,Premium+'
+            'subscription_plan' => 'required|string|in:Rumah Tangga (< 10km),Rumah Tangga (> 10km),Reguler,Prime,Premium+'
         ]);
 
         $customMessages = 'Permintaan peningkatan layanan ke ' . $request->subscription_plan . ' berhasil diajukan.';
@@ -382,14 +452,14 @@ class CompanyController extends Controller
             return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
         }
 
-        $allowedPlans = ['Reguler', 'Prime', 'Premium+'];
+        $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
         if (!in_array($company->subscription_plan, $allowedPlans)) {
-            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Reguler, Prime, dan Premium+.');
+            return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
         }
 
         $activities = $company->activities()
             ->orderBy('activity_date', 'desc')
-            ->get();
+            ->paginate(5);
 
         return Inertia::render('Company/Activities', [
             'company' => $company,

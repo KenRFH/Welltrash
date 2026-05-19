@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import React from 'react';
-import Welltrash_logo from '../../../public/build/assets/logowelltrash.png'
+// The source image was removed, so we fallback to the built asset path
+const Welltrash_logo = "/build/assets/logowelltrash-DkJ1DW_Z.png";
 
 const HomeIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>;
 const HistoryIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
@@ -28,7 +29,7 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
         logoutHoverBg: 'hover:bg-red-50 hover:border-red-100',
     };
 
-    const isBasic = plan === 'Basic';
+    const isBasic = plan === 'Rumah Tangga (< 10km)';
 
     return (
         <>
@@ -43,8 +44,8 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
             <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col justify-between shadow-xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div>
                     <div className="h-24 flex items-center justify-between px-8 border-b border-gray-50 mt-10">
-                        <img src={Welltrash_logo} alt="Welltrash Logo" className="h-30 w-auto" />
-                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600">
+                        <img src={Welltrash_logo} alt="Welltrash Logo" className="h-24 w-24" />
+                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600" aria-label="Close menu">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
@@ -75,12 +76,19 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                         </>
                     ) : (
                         <>
-                            <Link href={route('company.dashboard')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'dashboard' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
-                                <span className={active !== 'dashboard' ? t.groupHoverText : ''}><HomeIcon /></span> Beranda
-                            </Link>
+                            {isBasic ? (
+                                <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group relative" title="Upgrade layanan untuk membuka fitur ini">
+                                    <span className=""><HomeIcon /></span> Beranda
+                                    <svg className="w-4 h-4 ml-auto text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                </div>
+                            ) : (
+                                <Link href={route('company.dashboard')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'dashboard' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
+                                    <span className={active !== 'dashboard' ? t.groupHoverText : ''}><HomeIcon /></span> Beranda
+                                </Link>
+                            )}
                             
                             {isBasic ? (
-                                <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group relative" title="Upgrade ke Premium untuk membuka fitur ini">
+                                <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group relative" title="Upgrade layanan untuk membuka fitur ini">
                                     <span className=""><HistoryIcon /></span> Riwayat
                                     <svg className="w-4 h-4 ml-auto text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 </div>
@@ -94,9 +102,16 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                                 <span className={active !== 'schedule' ? t.groupHoverText : ''}><CalendarIcon /></span> Jadwal & Agenda
                             </Link>
 
-                            <Link href={route('company.kegiatan')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'kegiatan' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
-                                <span className={active !== 'kegiatan' ? t.groupHoverText : ''}><ActivitiesIcon /></span> Kegiatan
-                            </Link>
+                            {isBasic ? (
+                                <div className="flex items-center px-4 py-3 text-gray-400 cursor-not-allowed rounded-2xl font-medium transition-all group relative" title="Upgrade layanan untuk membuka fitur ini">
+                                    <span className=""><ActivitiesIcon /></span> Kegiatan
+                                    <svg className="w-4 h-4 ml-auto text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                </div>
+                            ) : (
+                                <Link href={route('company.kegiatan')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'kegiatan' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
+                                    <span className={active !== 'kegiatan' ? t.groupHoverText : ''}><ActivitiesIcon /></span> Kegiatan
+                                </Link>
+                            )}
                             
                             <Link href={route('company.billing')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'billing' ? `${t.activeText} ${t.activeBg} font-semibold shadow-sm` : `text-gray-500 hover:bg-gray-50 ${t.hoverText} font-medium group`}`}>
                                 <span className={active !== 'billing' ? t.groupHoverText : ''}><BillingIcon /></span> Tagihan

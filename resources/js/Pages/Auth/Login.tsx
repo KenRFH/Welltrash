@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
-export default function Login({ status, canResetPassword }: { status?: string; canResetPassword: boolean }) {
+export default function Login({ status }: { status?: string }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -65,17 +65,6 @@ export default function Login({ status, canResetPassword }: { status?: string; c
                                 onChange={(e) => setData('password', e.target.value)}
                             />
                             {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-                        </div>
-
-                        <div className="flex items-center justify-end">
-                            {canResetPassword && (
-                                <Link
-                                    href={route('password.request')}
-                                    className="text-sm text-blue-700 hover:text-blue-900 font-semibold"
-                                >
-                                    Lupa Password?
-                                </Link>
-                            )}
                         </div>
 
                         <div className="pt-2">

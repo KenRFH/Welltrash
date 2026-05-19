@@ -24,7 +24,13 @@ interface Company {
 
 interface Props {
     company: Company;
-    pickups: Pickup[];
+    pickups: {
+        data: Pickup[];
+        current_page: number;
+        last_page: number;
+        links: { url: string | null; label: string; active: boolean }[];
+        total: number;
+    };
 }
 
 const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
@@ -36,7 +42,7 @@ export default function Schedule({ company, pickups }: Props) {
     });
 
     const toggleDay = (day: string) => {
-        const isRestrictedPlan = company.subscription_plan === 'Rumah Tangga' || company.subscription_plan === 'Reguler';
+        const isRestrictedPlan = company.subscription_plan.includes('Rumah Tangga') || company.subscription_plan === 'Reguler';
         if (data.pickup_schedule.includes(day)) {
             setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
         } else {
@@ -67,7 +73,7 @@ export default function Schedule({ company, pickups }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Jadwal Pengambilan | WellTrash" />
+            <Head title="Jadwal Pengambilan" />
 
              {/* Sidebar Component */}
              <CompanySidebar 
@@ -172,11 +178,11 @@ export default function Schedule({ company, pickups }: Props) {
                                 <p className="text-gray-500 text-sm">Daftar jadwal terencana yang dibuat otomatis untuk masa mendatang.</p>
                             </div>
                             <div className="mt-4 sm:mt-0 px-4 py-2 bg-gray-50 rounded-xl text-sm font-bold text-gray-600 border border-gray-200">
-                                Total Data: {pickups.length}
+                                Total Data: {pickups.total}
                             </div>
                         </div>
 
-                        {pickups.length === 0 ? (
+                        {pickups.data.length === 0 ? (
                             <div className="text-center py-16 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
                                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -198,7 +204,7 @@ export default function Schedule({ company, pickups }: Props) {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-50 bg-white">
-                                            {pickups.map(pickup => (
+                                            {pickups.data.map(pickup => (
                                                 <tr key={pickup.id} className="hover:bg-gray-50/50 transition-colors">
                                                     <td className="py-4 font-bold text-gray-800 tracking-tight pl-6 flex items-center">
                                                         <div className="w-2 h-2 rounded-full bg-green-500 mr-3"></div>
@@ -230,6 +236,40 @@ export default function Schedule({ company, pickups }: Props) {
                                             ))}
                                         </tbody>
                                     </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {pickups.last_page > 1 && (
+                            <div className="flex justify-center mt-8 mb-4">
+                                <div className="flex flex-wrap gap-2 justify-center bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+                                    {pickups.links.map((link, i) => {
+                                        const isPrevious = link.label.includes('Previous');
+                                        const isNext = link.label.includes('Next');
+                                        let label = link.label;
+                                        if (isPrevious) label = '«';
+                                        if (isNext) label = '»';
+
+                                        return link.url ? (
+                                            <Link
+                                                key={i}
+                                                href={link.url}
+                                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                                    link.active
+                                                        ? 'bg-green-600 text-white shadow-md shadow-green-200'
+                                                        : 'bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-700'
+                                                }`}
+                                                dangerouslySetInnerHTML={{ __html: label }}
+                                            />
+                                        ) : (
+                                            <span
+                                                key={i}
+                                                className="px-4 py-2 rounded-xl text-sm font-bold bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed"
+                                                dangerouslySetInnerHTML={{ __html: label }}
+                                            />
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

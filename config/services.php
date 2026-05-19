@@ -41,4 +41,8 @@ return [
         ],
     ],
 
+    'spreadsheet' => [
+    'api_key' => env('SPREADSHEET_API_KEY'),
+],
+
 ];

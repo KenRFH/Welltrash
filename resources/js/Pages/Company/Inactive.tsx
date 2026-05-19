@@ -4,7 +4,7 @@ import React from 'react';
 export default function Inactive() {
     return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-[#F8FAFC] p-4 font-sans relative overflow-hidden">
-            <Head title="Akun Dinonaktifkan | WellTrash" />
+            <Head title="Akun Dinonaktifkan" />
             
             <div className="max-w-md w-full bg-white shadow-[0_20px_60px_rgb(0,0,0,0.04)] rounded-[2rem] p-10 text-center border border-gray-100">
                 <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-gray-200">

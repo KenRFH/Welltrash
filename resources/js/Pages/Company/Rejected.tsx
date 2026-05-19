@@ -19,7 +19,7 @@ export default function Rejected({ company }: Props) {
 
     return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-[#F8FAFC] p-4 font-sans relative overflow-hidden">
-            <Head title="Pendaftaran Ditolak | WellTrash" />
+            <Head title="Pendaftaran Ditolak" />
             
             {/* Background elements to match theme */}
             <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-gray-100 to-transparent -z-10"></div>

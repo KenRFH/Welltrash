@@ -36,7 +36,7 @@ export default function Mitra({ auth, company, activeDaysLeft }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Kemitraan | WellTrash" />
+            <Head title="Kemitraan" />
 
             <CompanySidebar 
                 active="mitra" 
@@ -116,9 +116,11 @@ export default function Mitra({ auth, company, activeDaysLeft }: Props) {
                                             onChange={(e) => setData('subscription_plan', e.target.value)}
                                             className="w-full pl-4 pr-10 py-3 rounded-2xl border-gray-200 bg-gray-50/50 text-gray-900 focus:ring-2 focus:ring-green-100 focus:border-green-400 focus:bg-white transition-all shadow-sm"
                                         >
-                                            <option value="Basic">Basic</option>
-                                            <option value="Premium">Premium</option>
-                                            <option value="Premium +">Premium +</option>
+                                            <option value="Rumah Tangga (< 10km)">Rumah Tangga (&lt; 10km)</option>
+                                            <option value="Rumah Tangga (> 10km)">Rumah Tangga (&gt; 10km)</option>
+                                            <option value="Reguler">Reguler</option>
+                                            <option value="Prime">Prime</option>
+                                            <option value="Premium+">Premium+</option>
                                         </select>
                                         {errors.subscription_plan && <p className="text-red-500 text-sm mt-1">{errors.subscription_plan}</p>}
                                     </div>

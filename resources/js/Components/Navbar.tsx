@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
-import logowelltrash from "../../../public/build/assets/logowelltrash.png";
+// The source image was removed, so we fallback to the built asset path
+const logowelltrash = "/build/assets/logowelltrash-DkJ1DW_Z.png";
 
 interface NavbarProps {
     dark?: boolean;
@@ -55,7 +56,7 @@ const Navbar = ({ dark = false }: NavbarProps) => {
             <img
               src={logowelltrash}
               alt="WellTrash Logo"
-              className="h-20 md:h-28 w-auto object-contain object-left pointer-events-none transition-all"
+              className="h-14 w-14 md:h-20 md:w-20 object-contain object-left pointer-events-none transition-all"
             />
           </Link>
         </div>
@@ -124,6 +125,8 @@ const Navbar = ({ dark = false }: NavbarProps) => {
         <button
           className="md:hidden flex flex-col gap-1.5"
           onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle navigation menu"
+          aria-expanded={isOpen}
         >
           <span className={`w-6 h-0.5 transition-all duration-300 ${isOpen ? "rotate-45 translate-y-2" : ""}`} style={{ backgroundColor: hamburgerColor }}></span>
           <span className={`w-6 h-0.5 transition-all duration-300 ${isOpen ? "opacity-0" : ""}`} style={{ backgroundColor: hamburgerColor }}></span>

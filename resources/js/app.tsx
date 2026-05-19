@@ -4,12 +4,13 @@ import "./bootstrap";
 import { createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { createRoot } from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 import GlobalToast from "./Components/GlobalToast";
 
-const appName = "WellTrash - Jasa Angkut Sampah & Pengolahan Limbah di Jember";
+const appName = "Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash";
 
 createInertiaApp({
-    title: (title) => title ? `${title} | WellTrash` : appName,
+    title: (title) => title ? `${title} | Jasa Penjemputan & Pengelolaan Sampah se Jember` : appName,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.tsx`,
@@ -20,10 +21,10 @@ createInertiaApp({
         const initialFlash = props.initialPage.props.flash;
 
         root.render(
-            <>
+            <HelmetProvider>
                 <GlobalToast initialFlash={initialFlash as any} />
                 <App {...props} />
-            </>
+            </HelmetProvider>
         );
     },
     progress: {

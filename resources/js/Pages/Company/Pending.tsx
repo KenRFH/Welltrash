@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/react';
 export default function Pending() {
     return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-50 via-white to-emerald-50 p-4 font-sans">
-            <Head title="Menunggu Persetujuan | WellTrash" />
+            <Head title="Menunggu Persetujuan" />
             
             <div className="max-w-md w-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-3xl p-10 text-center border border-gray-100 relative overflow-hidden">
                 {/* Decorative background blur */}

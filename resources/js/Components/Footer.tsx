@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
-import logowelltrash from "../../../public/build/assets/logowelltrash.png";
+// The source image was removed, so we fallback to the built asset path
+const logowelltrash = "/build/assets/logowelltrash-DkJ1DW_Z.png";
 import WhatsAppWidget from "./WhatsAppWidget";
 
 interface FooterProps {
@@ -102,7 +103,7 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
                                 <svg className="w-5 h-5 flex-shrink-0" style={{ color: accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                <a href="mailto:mashudiproject@gmail.com" className="hover:text-white transition-colors">mashudiproject@gmail.com</a>
+                                <a href="mailto:new.welltrashjember@gmail.com" className="hover:text-white transition-colors">new.welltrashjember@gmail.com</a>
                             </li>
                             <li className="flex items-center gap-3 text-sm" style={{ color: subtleTextColor }}>
                                 <svg className="w-5 h-5 flex-shrink-0" style={{ color: accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,7 +117,7 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
 
                 {/* Bottom bar */}
                 <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs" style={{ color: subtleTextColor }}>
-                    <p>© {new Date().getFullYear()} PT Sarana Utama Welltrash Farm. All rights reserved.</p>
+                    <p>© {new Date().getFullYear()} PT Sarana Utama Welltrash - Satukan Aksi, Wujudkan Jember Bersih</p>
                 </div>
             </div>
         </footer>

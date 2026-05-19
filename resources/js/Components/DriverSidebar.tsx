@@ -30,7 +30,7 @@ export default function DriverSidebar({ active, isMobileOpen = false, onClose }:
                             <span className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500 tracking-tight">Welltrash</span>
                             <span className="ml-2 text-[10px] font-bold text-white bg-green-500 px-2 py-0.5 rounded-full uppercase tracking-wider hidden sm:inline-block">Driver</span>
                         </div>
-                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600">
+                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600" aria-label="Close menu">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>

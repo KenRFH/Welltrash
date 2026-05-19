@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import SEO from '@/Components/SEO';
 import React, { useState } from 'react';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
@@ -22,7 +22,10 @@ export default function KatalogPage({ katalogs }: Props) {
 
     return (
         <div className="min-h-screen font-sans" style={{ backgroundColor: '#0E172A', color: '#F0F4FF' }}>
-            <Head title="Katalog Produk | Welltrash" />
+            <SEO 
+                title="Katalog Produk | Welltrash" 
+                description="Jelajahi produk daur ulang berkualitas tinggi — dari bahan baku hingga produk siap pakai dari WellTrash."
+            />
             <Navbar dark />
 
             {/* Hero */}

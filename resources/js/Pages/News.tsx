@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import SEO from '@/Components/SEO';
 import React, { useState } from 'react';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
@@ -27,8 +28,11 @@ export default function NewsPage({ news }: Props) {
     const activeArticle = news.find(n => n.id === activeId);
 
     return (
-        <div className="min-h-screen bg-white font-sans">
-            <Head title="Berita & Blog | Welltrash" />
+        <div className="min-h-screen bg-[#F9FAFB] font-sans text-gray-900">
+            <SEO 
+                title="Berita & Blog | Welltrash" 
+                description="Baca berita, artikel, dan blog terbaru dari Welltrash seputar lingkungan dan pengelolaan sampah."
+            />
             <Navbar />
 
             <section className="pt-36 pb-20 px-6 max-w-7xl mx-auto border-b border-gray-100">

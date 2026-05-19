@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import SEO from '@/Components/SEO';
 import React from 'react';
 import Navbar from '@/Components/Navbar';
 
@@ -18,8 +19,13 @@ interface Props {
 
 export default function ActivityDetail({ activity, canLogin, canRegister }: Props) {
     return (
-        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-green-500 selection:text-white">
-            <Head title={`${activity.title} | Aktivitas Welltrash`} />
+        <div className="min-h-screen bg-white font-sans text-gray-900">
+            <SEO 
+                title={`${activity.title} | Aktivitas Welltrash`}
+                description={activity.description.substring(0, 160)}
+                image={activity.image_path ? `https://welltrash.id/storage/${activity.image_path}` : undefined}
+                type="article"
+            />
             
             <Navbar />
 

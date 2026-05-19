@@ -47,7 +47,7 @@ class DriverController extends Controller
         $isToday = ($diff === 0);
 
         // Fetch pre-generated pickups for that specific date
-        $pickups = Pickup::with('company')
+        $pickups = Pickup::with(['company', 'driver'])
             ->whereDate('pickup_date', $targetDate)
             ->get();
 

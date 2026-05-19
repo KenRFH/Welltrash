@@ -28,6 +28,7 @@
     },
     "dependencies": {
         "class-variance-authority": "^0.7.1",
-        "motion": "^12.34.0"
+        "motion": "^12.34.0",
+        "react-helmet-async": "^3.0.0"
     }
 }

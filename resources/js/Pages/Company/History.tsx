@@ -47,7 +47,7 @@ export default function History({ auth, company, pickups }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Riwayat | WellTrash" />
+            <Head title="Riwayat" />
 
             {/* Sidebar Component */}
             <CompanySidebar 

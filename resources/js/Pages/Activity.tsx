@@ -1,4 +1,5 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import SEO from '@/Components/SEO';
 import React from 'react';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
@@ -25,7 +26,10 @@ function formatDate(d: string | null) {
 export default function ActivityPage({ activities }: Props) {
     return (
         <div className="min-h-screen bg-white font-sans">
-            <Head title="Aktivitas Kami | Welltrash" />
+            <SEO 
+                title="Aktivitas Kami | Welltrash" 
+                description="Berbagai kegiatan, edukasi, dan aksi nyata Welltrash bersama komunitas demi lingkungan yang lebih baik."
+            />
             <Navbar />
 
             {/* Hero Banner */}
@@ -80,7 +84,7 @@ export default function ActivityPage({ activities }: Props) {
                             {/* Content side */}
                             <div className={`flex-1 flex flex-col justify-center py-8 ${isEven ? 'md:order-2 md:pl-14' : 'md:order-1 md:pr-14'}`}>
                                 <div className="flex items-center gap-3 mb-5">
-                                    <span className="text-3xl font-black text-gray-100 tabular-nums">
+                                    <span className="text-3xl font-black text-lime-500 tabular-nums">
                                         {String(i + 1).padStart(2, '0')}
                                     </span>
                                     {activity.date && (

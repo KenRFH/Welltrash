@@ -40,7 +40,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Dasbor Perusahaan | WellTrash" />
+            <Head title="Dasbor Perusahaan" />
 
             {/* Sidebar Component */}
             <CompanySidebar 
@@ -113,25 +113,56 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                 )}
                             </div>
                             
-                            <div className="relative z-10 flex flex-col sm:flex-row gap-3 ml-7">
-                                {company.subscription_plan !== 'Basic' && (
-                                    <button className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm">
-                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                        Unduh Laporan
-                                    </button>
-                                )}
+                           <div className="relative z-10 flex flex-col sm:flex-row gap-3 ml-7">
+    
+    {company.subscription_plan !== 'Basic' && (
+        <a
+            href={route('company.laporan.pdf')} target="_blank" rel="noreferrer"
+            className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all border shadow-sm rounded-2xl backdrop-blur-sm bg-white/10 hover:bg-white/20 border-white/20"
+        >
+            <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+            </svg>
 
-                                {company.subscription_status === 'active' && (
-                                    <button 
-                                        onClick={handleUnsubscribe}
-                                        disabled={processing}
-                                        className="px-6 py-3 bg-red-500/80 hover:bg-red-600 backdrop-blur-sm border border-red-500 text-white rounded-2xl text-sm font-semibold transition-all flex items-center shadow-sm group disabled:opacity-50"
-                                    >
-                                        <svg className="w-5 h-5 mr-2 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                        Batalkan Layanan
-                                    </button>
-                                )}
-                            </div>
+            Unduh Laporan
+        </a>
+    )}
+
+    {company.subscription_status === 'active' && (
+        <button
+            type="button"
+            onClick={handleUnsubscribe}
+            disabled={processing}
+            className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all border shadow-sm rounded-2xl backdrop-blur-sm bg-red-500/80 hover:bg-red-600 border-red-500 group disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            <svg
+                className="w-5 h-5 mr-2 group-hover:animate-pulse"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                />
+            </svg>
+
+            {processing ? 'Memproses...' : 'Batalkan Layanan'}
+        </button>
+    )}
+</div>
                         </div>
                         
                         {/* Date Card */}

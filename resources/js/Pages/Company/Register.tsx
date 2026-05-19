@@ -15,7 +15,7 @@ export default function Register({ auth }: any) {
         signed_mou: null as File | null,
     });
 
-    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const predefinedCategories = ['Hotel', 'Restoran', 'Cafe', 'SPPG', 'Gudang'];
     const [isCustomCategory, setIsCustomCategory] = React.useState(false);
 
@@ -23,48 +23,53 @@ export default function Register({ auth }: any) {
 
     const packagesData = [
         {
-            id: 'Request',
-            name: 'Paket Request (By Call)',
-            price: 'Rp 500.000',
-            period: '/sekali angkut',
-            desc: 'Jasa angkut sampah on-demand yang fleksibel untuk kebutuhan mendadak.',
-            features: ['Layanan Jemput Sesuai Panggilan', 'Jadwal Fleksibel & Cepat', 'Pemilahan Sampah Standar'],
+            id: 'Rumah Tangga (< 10km)',
+            name: 'Paket Rumah Tangga (< 10km)',
+            price: 'Rp 750.000',
+            period: '/bulan',
+            maxDays: 4,
+            desc: 'Penjemputan sampah harian untuk area dengan radius kurang dari 10km.',
+            features: ['Max 1m³ (4 trashbag) / sekali angkut', 'Pilih maks. 4 hari (Senin–Sabtu)', 'Tanpa Akses Dashboard'],
             isPopular: false,
         },
         {
-            id: 'Rumah Tangga',
-            name: 'Paket Rumah Tangga',
-            price: 'Rp 750.000',
-            period: '/estimasi',
-            desc: 'Layanan penjemputan sampah rumah tangga harian agar lingkungan tetap bersih.',
-            features: ['Max 100kg / sekali angkut', 'Jadwal Jemput Rutin Harian', 'Laporan Kebersihan Bulanan'],
+            id: 'Rumah Tangga (> 10km)',
+            name: 'Paket Rumah Tangga (> 10km)',
+            price: 'Rp 1.000.000',
+            period: '/bulan',
+            maxDays: 4,
+            desc: 'Penjemputan sampah harian untuk area dengan radius lebih dari 10km.',
+            features: ['Max 1m³ (4 trashbag) / sekali angkut', 'Pilih maks. 4 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
             isPopular: false,
         },
         {
             id: 'Reguler',
             name: 'Paket Reguler',
-            price: 'Rp 2.000.000',
+            price: 'Rp 2.500.000',
             period: '/bulan',
+            maxDays: 4,
             desc: 'Solusi pengolahan limbah untuk bisnis menengah dengan jadwal pengambilan teratur.',
-            features: ['Maks 400kg / sekali angkut', 'Jadwal 2-3x / Minggu', 'Sertifikat Ramah Lingkungan'],
+            features: ['Maks 4m³ / sekali angkut', 'Pilih maks. 4 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
             isPopular: false,
         },
         {
             id: 'Prime',
             name: 'Paket Prime (Bisnis)',
-            price: 'Rp 3.000.000',
+            price: 'Rp 3.200.000',
             period: '/bulan',
+            maxDays: 6,
             desc: 'Layanan pengolahan sampah prioritas dengan standar kebersihan tinggi.',
-            features: ['Maks 500kg / sekali angkut', 'Jadwal 5 Hari / Minggu', 'Sertifikat Mitra Ramah Lingkungan'],
+            features: ['Maks 4m³ / sekali angkut', 'Pilih hingga 6 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
             isPopular: true,
         },
         {
             id: 'Premium+',
             name: 'Paket Premium+',
-            price: 'Rp 5.000.000',
+            price: 'Rp 4.499.000',
             period: '/bulan',
+            maxDays: 6,
             desc: 'Solusi limbah industri skala besar dengan sistem pelaporan audit mendalam.',
-            features: ['Tanpa perlu pilah sampah', 'Maks 500kg / sekali angkut', 'Laporan Kebersihan Audit'],
+            features: ['Tanpa perlu pilah sampah', 'Pilih hingga 6 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
             isPopular: false,
         }
     ];
@@ -80,13 +85,19 @@ export default function Register({ auth }: any) {
         }
     };
 
+    const getMaxDays = (plan: string) => {
+        if (plan === 'Rumah Tangga (< 10km)' || plan === 'Rumah Tangga (> 10km)' || plan === 'Reguler') return 4;
+        if (plan === 'Prime' || plan === 'Premium+') return 6;
+        return 0;
+    };
+
     const handleDayToggle = (day: string) => {
-        const isRestrictedPlan = data.subscription_plan === 'Rumah Tangga' || data.subscription_plan === 'Reguler';
+        const maxDays = getMaxDays(data.subscription_plan);
         if (data.pickup_schedule.includes(day)) {
             setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
         } else {
-            if (isRestrictedPlan && data.pickup_schedule.length >= 4) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${data.subscription_plan} maksimal hanya dapat memilih 4 hari penjemputan.` } }));
+            if (maxDays > 0 && data.pickup_schedule.length >= maxDays) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${data.subscription_plan} maksimal hanya dapat memilih ${maxDays} hari penjemputan.` } }));
                 return;
             }
             setData('pickup_schedule', [...data.pickup_schedule, day]);
@@ -100,7 +111,7 @@ export default function Register({ auth }: any) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Pendaftaran Mitra | WellTrash" />
+            <Head title="Pendaftaran Mitra" />
 
             {/* Sidebar Component (Locked) */}
             <CompanySidebar 
@@ -266,10 +277,10 @@ export default function Register({ auth }: any) {
                                                 key={pkg.id}
                                                 onClick={() => {
                                                     setData((prevData) => {
-                                                        const isRestricted = pkg.id === 'Rumah Tangga' || pkg.id === 'Reguler';
+                                                        const maxDays = pkg.maxDays ?? 0;
                                                         let newSchedule = prevData.pickup_schedule;
-                                                        if (isRestricted && newSchedule.length > 4) {
-                                                            newSchedule = newSchedule.slice(0, 4);
+                                                        if (maxDays > 0 && newSchedule.length > maxDays) {
+                                                            newSchedule = newSchedule.slice(0, maxDays);
                                                         }
                                                         return { ...prevData, subscription_plan: pkg.id, pickup_schedule: newSchedule };
                                                     });
@@ -319,29 +330,50 @@ export default function Register({ auth }: any) {
 
                             {/* Jadwal Penjemputan */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Jadwal Penjemputan</label>
-                                <div className="p-3 bg-gray-50 rounded-lg">
-                                    <div className="flex flex-wrap gap-2">
-                                        {daysOfWeek.map((day) => (
-                                            <label
-                                                key={day}
-                                                className={`cursor-pointer px-4 py-2 text-sm rounded-md transition-colors ${
-                                                    data.pickup_schedule.includes(day)
-                                                        ? 'bg-teal-600 text-white font-semibold'
-                                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
-                                                }`}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    className="sr-only"
-                                                    checked={data.pickup_schedule.includes(day)}
-                                                    onChange={() => handleDayToggle(day)}
-                                                />
-                                                {day}
-                                            </label>
-                                        ))}
+                                <label className="block text-sm font-bold text-gray-700 mb-1">
+                                    Jadwal Penjemputan
+                                    {data.subscription_plan !== 'Request' && (
+                                        <span className="ml-2 text-xs font-normal text-gray-400">
+                                            ({data.pickup_schedule.length}/{getMaxDays(data.subscription_plan)} hari dipilih)
+                                        </span>
+                                    )}
+                                </label>
+                                {data.subscription_plan === 'Request' ? (
+                                    <p className="text-sm text-gray-400 bg-gray-50 rounded-lg px-4 py-3">
+                                        Paket By Call tidak memerlukan jadwal tetap — tim kami akan merespons setiap panggilan Anda.
+                                    </p>
+                                ) : (
+                                    <div className="p-3 bg-gray-50 rounded-lg">
+                                        <div className="flex flex-wrap gap-2">
+                                            {daysOfWeek.map((day) => {
+                                                const maxDays = getMaxDays(data.subscription_plan);
+                                                const isSelected = data.pickup_schedule.includes(day);
+                                                const isDisabled = !isSelected && data.pickup_schedule.length >= maxDays;
+                                                return (
+                                                    <label
+                                                        key={day}
+                                                        className={`cursor-pointer px-4 py-2 text-sm rounded-md transition-colors ${
+                                                            isSelected
+                                                                ? 'bg-teal-600 text-white font-semibold'
+                                                                : isDisabled
+                                                                ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-100'
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            className="sr-only"
+                                                            checked={isSelected}
+                                                            disabled={isDisabled}
+                                                            onChange={() => handleDayToggle(day)}
+                                                        />
+                                                        {day}
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 {errors.pickup_schedule && <p className="text-xs text-red-500 mt-1">{errors.pickup_schedule}</p>}
                             </div>
 

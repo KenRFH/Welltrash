@@ -176,27 +176,36 @@ Route::middleware(['auth', 'role:company'])
     ->group(function () {
 
         Route::get('/dashboard', [CompanyController::class, 'dashboard'])->name('dashboard');
+
         Route::get('/history', [CompanyController::class, 'history'])->name('history');
+
+        Route::get('/laporan/pdf', [CompanyController::class, 'laporanPdf'])
+            ->name('laporan.pdf');
+
         Route::get('/register', [CompanyController::class, 'register'])->name('register');
+
         Route::post('/register', [CompanyController::class, 'store'])->name('store');
+
         Route::post('/reregister', [CompanyController::class, 'reregister'])->name('reregister');
-        
+
         Route::post('/payment/store', [CompanyController::class, 'storePayment'])->name('payment.store');
-        
+
         Route::get('/schedule', [CompanyController::class, 'schedule'])->name('schedule');
+
         Route::post('/schedule', [CompanyController::class, 'updateSchedule'])->name('schedule.update');
-        
+
         Route::post('/unsubscribe', [CompanyController::class, 'unsubscribeRequest'])->name('unsubscribe');
-        
+
         Route::get('/mitra', [CompanyController::class, 'mitra'])->name('mitra');
+
         Route::post('/mitra/upgrade', [CompanyController::class, 'upgradeService'])->name('mitra.upgrade');
-        
+
         Route::get('/billing', [CompanyController::class, 'billing'])->name('billing');
+
         Route::post('/billing/pay', [CompanyController::class, 'uploadPayment'])->name('billing.pay');
-        
+
         Route::get('/kegiatan', [CompanyController::class, 'activities'])->name('kegiatan');
     });
-
 use App\Http\Controllers\DriverController;
 
 /*

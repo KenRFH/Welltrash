@@ -13,11 +13,11 @@ export default function AwaitingPayment({ company }: Props) {
     });
 
     const planPrices = {
-        'Request': 'Rp 500.000',
-        'Rumah Tangga': 'Rp 750.000',
-        'Reguler': 'Rp 2.000.000',
-        'Prime': 'Rp 3.000.000',
-        'Premium+': 'Rp 5.000.000'
+        'Rumah Tangga (< 10km)': 'Rp 750.000',
+        'Rumah Tangga (> 10km)': 'Rp 1.000.000',
+        'Reguler': 'Rp 2.500.000',
+        'Prime': 'Rp 3.200.000',
+        'Premium+': 'Rp 4.499.000'
     };
 
     const submit = (e: React.FormEvent) => {
@@ -27,7 +27,7 @@ export default function AwaitingPayment({ company }: Props) {
 
     return (
         <div className="min-h-screen flex flex-col justify-center items-center bg-[#F8FAFC] p-4 font-sans relative overflow-hidden">
-            <Head title="Unggah Pembayaran | WellTrash" />
+            <Head title="Unggah Pembayaran" />
             
             <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-teal-50 to-transparent -z-10"></div>
 
