@@ -18,7 +18,7 @@ interface Pickup {
     residue_image_path: string | null;
     cancellation_reason: string | null;
     pickup_date: string;
-    driver: {
+    cleanup: {
         id: number;
         name: string;
     } | null;
@@ -116,7 +116,7 @@ export default function History({ auth, company, pickups }: Props) {
                                                     </div>
                                                     <div>
                                                         <h3 className="text-lg font-extrabold text-gray-900 leading-tight">{dateStr}</h3>
-                                                        <p className="text-xs font-bold text-gray-500 mt-1">Supir: {pickup.driver?.name || 'Belum Ditugaskan'}</p>
+                                                        <p className="text-xs font-bold text-gray-500 mt-1">CleanUP: {pickup.cleanup?.name || 'Belum Ditugaskan'}</p>
                                                     </div>
                                                 </div>
                                             </div>

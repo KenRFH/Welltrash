@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pickups', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
-            $table->foreignId('driver_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('cleanup_id')->nullable()->constrained('users')->onDelete('set null');
             $table->date('pickup_date');
             $table->enum('status', ['pending', 'on_the_way', 'picking', 'picked', 'cancelled'])->default('pending');
             $table->text('cancellation_reason')->nullable();

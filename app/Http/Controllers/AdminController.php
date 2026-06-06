@@ -153,9 +153,9 @@ class AdminController extends Controller
         ]);
     }
 
-    public function drivers()
+    public function cleanups()
     {
-        $drivers = User::where('role', 'driver')
+        $cleanups = User::where('role', 'CleanUP')
             ->withCount(['pickups as total_pickups', 'pickups as completed_pickups' => function ($q) {
                 $q->where('status', 'completed');
             }, 'pickups as failed_pickups' => function ($q) {
@@ -177,14 +177,14 @@ class AdminController extends Controller
                 ];
             });
 
-        return Inertia::render('Admin/Drivers/Index', [
-            'drivers' => $drivers,
+        return Inertia::render('Admin/CleanUP/Index', [
+            'cleanups' => $cleanups,
         ]);
     }
 
-    public function driverDetail(User $user)
+    public function cleanupDetail(User $user)
     {
-        $pickups = Pickup::where('driver_id', $user->id)
+        $pickups = Pickup::where('cleanup_id', $user->id)
             ->with('company')
             ->orderByDesc('pickup_date')
             ->get()
@@ -205,8 +205,8 @@ class AdminController extends Controller
                 ];
             });
 
-        return Inertia::render('Admin/Drivers/Show', [
-            'driver'  => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
+        return Inertia::render('Admin/CleanUP/Show', [
+            'cleanup'  => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
             'pickups' => $pickups,
         ]);
     }

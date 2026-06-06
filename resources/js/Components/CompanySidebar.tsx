@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import React from 'react';
 // The source image was removed, so we fallback to the built asset path
-const Welltrash_logo = "/build/assets/logowelltrash-DkJ1DW_Z.png";
+import Welltrash_logo from "../assets/img/logowelltrash.webp";
 
 const HomeIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>;
 const HistoryIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
@@ -29,7 +29,7 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
         logoutHoverBg: 'hover:bg-red-50 hover:border-red-100',
     };
 
-    const isBasic = plan === 'Rumah Tangga (< 10km)';
+    const isBasic = false;
 
     return (
         <>
@@ -43,11 +43,8 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
 
             <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col justify-between shadow-xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div>
-                    <div className="h-24 flex items-center justify-between px-8 border-b border-gray-50 mt-10">
+                    <div className="h-24 flex items-center justify-center px-8 border-b border-gray-50 mt-10">
                         <img src={Welltrash_logo} alt="Welltrash Logo" className="h-24 w-24" />
-                        <button onClick={onClose} className="md:hidden text-gray-400 hover:text-gray-600" aria-label="Close menu">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
                     </div>
                 
                 <nav className="mt-8 px-4 space-y-2">

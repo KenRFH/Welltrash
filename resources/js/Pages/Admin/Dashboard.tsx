@@ -165,7 +165,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                 {[
                     { label: 'Persetujuan', sub: 'Tinjau mitra baru', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-100', href: '/admin/companies/pending' },
                     { label: 'Pembatalan', sub: 'Permintaan berhenti', icon: 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', href: '/admin/companies/cancellations/requests' },
-                    { label: 'Monitor Driver', sub: 'Lacak aktivitas log', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', href: '/admin/drivers' },
+                    { label: 'Monitor CleanUP', sub: 'Lacak aktivitas log', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100', href: '/admin/cleanups' },
                 ].map((action, i) => (
                     <Link key={i} href={action.href} className={`group bg-white rounded-3xl p-6 border ${action.border} hover:shadow-xl hover:-translate-y-1 transition-all flex items-center gap-5`}>
                         <div className={`w-14 h-14 ${action.bg} ${action.color} rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform`}>

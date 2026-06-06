@@ -17,31 +17,31 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@welltrash.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Mashudi',
                 'password' => 'admin123',
                 'role' => 'admin',
                 'email_verified_at' => now(),
             ]
         );
 
-        // Driver
+        // CleanUP
         User::updateOrCreate(
-            ['email' => 'driver@welltrash.com'],
+            ['email' => 'cleanup@welltrash.com'],
             [
-                'name' => 'Driver User',
-                'password' => 'driver123',
-                'role' => 'driver',
+                'name' => 'CleanUP User',
+                'password' => 'cleanup123',
+                'role' => 'CleanUP',
                 'email_verified_at' => now(),
             ]
         );
 
-         // Driver2
+         // CleanUP2
          User::updateOrCreate(
-            ['email' => 'driver2@welltrash.com'],
+            ['email' => 'cleanup2@welltrash.com'],
             [
-                'name' => 'Driver User2',
-                'password' => 'driver123',
-                'role' => 'driver',
+                'name' => 'CleanUP User2',
+                'password' => 'cleanup123',
+                'role' => 'CleanUP',
                 'email_verified_at' => now(),
             ]
         );

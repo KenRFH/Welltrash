@@ -6,12 +6,15 @@ use App\Models\Company;
 
 Route::get('/mitra', function (Request $request) {
 
-    $apiKey = $request->header('X-API-KEY');
+    $requestKey = trim($request->header('X-API-KEY'));
+    $serverKey = trim(config('services.spreadsheet.api_key'));
 
-    if ($apiKey !== env('SPREADSHEET_API_KEY')) {
+    if ($requestKey !== $serverKey) {
 
         return response()->json([
-            'message' => 'Unauthorized'
+            'message' => 'Unauthorized',
+            'request_key' => $requestKey,
+            'server_key' => $serverKey,
         ], 401);
 
     }
@@ -20,7 +23,20 @@ Route::get('/mitra', function (Request $request) {
         'company_name',
         'pic_name',
         'subscription_plan',
-        'subscription_status'
-    )->get();
+        'subscription_status',
+        'phone',
+        'subscription_end_date'
+    )->get()->map(function ($company) {
+        return [
+            'company_name'         => $company->company_name,
+            'pic_name'             => $company->pic_name,
+            'subscription_plan'    => $company->subscription_plan,
+            'subscription_status'  => $company->subscription_status,
+            'phone'                => $company->phone,
+            'subscription_end_date'=> $company->subscription_end_date
+                ? $company->subscription_end_date->format('d-m-Y')
+                : '-',
+        ];
+    });
 
 });

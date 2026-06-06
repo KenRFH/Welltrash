@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
-import DriverSidebar from '@/Components/DriverSidebar';
+import CleanUPSidebar from '@/Components/CleanUPSidebar';
+import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
 
 interface Pickup {
     id: number;
@@ -32,10 +33,10 @@ export default function History({ pickups, auth }: Props) {
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Riwayat Driver" />
+            <Head title="Riwayat CleanUP" />
 
             {/* Sidebar Component */}
-            <DriverSidebar 
+            <CleanUPSidebar 
                 active="history" 
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
@@ -62,11 +63,11 @@ export default function History({ pickups, auth }: Props) {
                     <div className="flex items-center space-x-6">
                         <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
-                                <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=16a34a&bold=true`} alt="Driver avatar" />
+                                <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=16a34a&bold=true`} alt="CleanUP avatar" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
-                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Mitra Pengemudi</span>
+                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Mitra CleanUP</span>
                             </div>
                         </div>
                     </div>
@@ -174,6 +175,7 @@ export default function History({ pickups, auth }: Props) {
                     )}
                 </main>
             </div>
+            <AbsensiFloatingButton />
         </div>
     );
 }

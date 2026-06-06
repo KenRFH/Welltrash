@@ -4,6 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\LeaveRequestController;
+use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use Spatie\Sitemap\SitemapGenerator;
@@ -52,9 +55,11 @@ Route::get('/', function () {
 })->name('beranda');
 
 Route::get('/tentang-kami', function () {
+    $teams = \App\Models\Team::orderBy('order_num', 'asc')->orderBy('created_at', 'desc')->get();
     return Inertia::render('About', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
+        'teams' => $teams,
     ]);
 })->name('about');
 
@@ -111,6 +116,7 @@ Route::get('/katalog', function () {
 })->name('katalog');
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminAccountController;
 
 /*
 |--------------------------------------------------------------------------
@@ -125,6 +131,12 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+        // Kelola Akun
+        Route::get('/accounts', [AdminAccountController::class, 'index'])->name('accounts.index');
+        Route::post('/accounts', [AdminAccountController::class, 'store'])->name('accounts.store');
+        Route::post('/accounts/{user}', [AdminAccountController::class, 'update'])->name('accounts.update');
+        Route::delete('/accounts/{user}', [AdminAccountController::class, 'destroy'])->name('accounts.destroy');
+
         Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
         Route::get('/companies/pending', [AdminController::class, 'pendingCompanies'])->name('companies.pending');
         Route::patch('/companies/{company}/approve', [AdminController::class, 'approveCompany'])->name('companies.approve');
@@ -137,8 +149,13 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
 
-        Route::get('/drivers', [AdminController::class, 'drivers'])->name('drivers');
-        Route::get('/drivers/{user}', [AdminController::class, 'driverDetail'])->name('drivers.show');
+        Route::get('/cleanups', [AdminController::class, 'cleanups'])->name('cleanups');
+        Route::get('/cleanups/{user}', [AdminController::class, 'cleanupDetail'])->name('cleanups.show');
+
+        // Absensi
+        Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');
+        Route::patch('/attendance/salary/{user}', [AdminAttendanceController::class, 'updateSalary'])->name('attendance.updateSalary');
+        Route::patch('/attendance/leave/{leaveRequest}/review', [AdminAttendanceController::class, 'reviewLeave'])->name('attendance.leave.review');
 
     });
 
@@ -160,6 +177,7 @@ Route::middleware(['auth', 'role:web_admin'])
         Route::resource('activities', App\Http\Controllers\WebAdmin\ActivityController::class)->except(['show']);
         Route::resource('katalogs', App\Http\Controllers\WebAdmin\KatalogController::class)->except(['show']);
         Route::resource('news', App\Http\Controllers\WebAdmin\NewsController::class)->except(['show']);
+        Route::resource('teams', App\Http\Controllers\WebAdmin\TeamController::class)->except(['show', 'create', 'edit']);
     });
 
 use App\Http\Controllers\CompanyController;
@@ -206,21 +224,32 @@ Route::middleware(['auth', 'role:company'])
 
         Route::get('/kegiatan', [CompanyController::class, 'activities'])->name('kegiatan');
     });
-use App\Http\Controllers\DriverController;
+use App\Http\Controllers\CleanUPController;
 
 /*
 |--------------------------------------------------------------------------
-| Driver Routes
+| CleanUP Routes
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('driver')->middleware(['auth', 'role:driver'])->group(function () {
-    Route::get('/dashboard', [DriverController::class, 'dashboard'])->name('driver.dashboard');
-    Route::put('/update-status/{pickup}', [DriverController::class, 'updateStatus'])->name('driver.updateStatus');
-    Route::post('/submit-pickup/{pickup}', [DriverController::class, 'submitPickup'])->name('driver.submitPickup');
-    Route::get('/history', [DriverController::class, 'history'])->name('driver.history');
-    Route::get('/kegiatan', [DriverController::class, 'activities'])->name('driver.kegiatan');
-    Route::post('/kegiatan', [DriverController::class, 'storeActivity'])->name('driver.kegiatan.store');
+Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function () {
+    Route::get('/dashboard', [CleanUPController::class, 'dashboard'])->name('cleanup.dashboard');
+    Route::put('/update-status/{pickup}', [CleanUPController::class, 'updateStatus'])->name('cleanup.updateStatus');
+    Route::post('/submit-pickup/{pickup}', [CleanUPController::class, 'submitPickup'])->name('cleanup.submitPickup');
+    Route::get('/history', [CleanUPController::class, 'history'])->name('cleanup.history');
+    Route::get('/kegiatan', [CleanUPController::class, 'activities'])->name('cleanup.kegiatan');
+    Route::post('/kegiatan', [CleanUPController::class, 'storeActivity'])->name('cleanup.kegiatan.store');
+
+    // Absensi
+    Route::get('/attendance', [AttendanceController::class, 'myAttendance'])->name('cleanup.attendance');
+    Route::get('/attendance/status', [AttendanceController::class, 'status'])->name('cleanup.attendance.status');
+    Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('cleanup.attendance.clockIn');
+    Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('cleanup.attendance.clockOut');
+    Route::post('/attendance/overtime/clock-in', [AttendanceController::class, 'clockInOvertime'])->name('cleanup.attendance.clockInOvertime');
+    Route::post('/attendance/overtime/clock-out', [AttendanceController::class, 'clockOutOvertime'])->name('cleanup.attendance.clockOutOvertime');
+
+    // Pengajuan Izin/Sakit
+    Route::post('/leave-request', [LeaveRequestController::class, 'store'])->name('cleanup.leave.store');
 });
 
 /*
@@ -236,7 +265,7 @@ Route::middleware('auth')->group(function () {
         return match ($user->role) {
             'admin'      => redirect()->route('admin.dashboard'),
             'web_admin'  => redirect()->route('webadmin.dashboard'),
-            'driver'     => redirect()->route('driver.dashboard'),
+            'CleanUP'     => redirect()->route('cleanup.dashboard'),
             default      => redirect()->route('company.dashboard'),
         };
     })->name('dashboard');

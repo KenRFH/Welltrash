@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
-class DriverController extends Controller
+class CleanUPController extends Controller
 {
     /**
-     * Display the driver dashboard with companies scheduled for a specific day.
+     * Display the CleanUP dashboard with companies scheduled for a specific day.
      */
     public function dashboard(Request $request)
     {
@@ -47,11 +47,11 @@ class DriverController extends Controller
         $isToday = ($diff === 0);
 
         // Fetch pre-generated pickups for that specific date
-        $pickups = Pickup::with(['company', 'driver'])
+        $pickups = Pickup::with(['company', 'cleanup'])
             ->whereDate('pickup_date', $targetDate)
             ->get();
 
-        return Inertia::render('Driver/Dashboard', [
+        return Inertia::render('CleanUP/Dashboard', [
             'daysOfWeek' => $daysOfWeek,
             'selectedDay' => $selectedDay,
             'targetDate' => $targetDate,
@@ -65,7 +65,7 @@ class DriverController extends Controller
      */
     public function updateStatus(Request $request, Pickup $pickup)
     {
-        // STRICT RULE: Driver can only update if pickup_date == today
+        // STRICT RULE: CleanUP can only update if pickup_date == today
         if (!Carbon::parse($pickup->pickup_date)->isToday()) {
             return back()->with('error', 'Akses ditolak. Anda hanya dapat memperbarui status untuk jadwal HARI INI.');
         }
@@ -75,10 +75,10 @@ class DriverController extends Controller
             'cancellation_reason' => 'required_if:status,failed|string|max:1000'
         ]);
 
-        $driver = Auth::user();
+        $cleanup = Auth::user();
 
         $pickup->update([
-            'driver_id' => $driver->id,
+            'cleanup_id' => $cleanup->id,
             'status' => $request->status,
             'cancellation_reason' => $request->status === 'failed' ? $request->cancellation_reason : null,
         ]);
@@ -91,7 +91,7 @@ class DriverController extends Controller
      */
     public function submitPickup(Request $request, Pickup $pickup)
     {
-        // STRICT RULE: Driver can only update if pickup_date == today
+        // STRICT RULE: CleanUP can only update if pickup_date == today
         if (!Carbon::parse($pickup->pickup_date)->isToday()) {
             return back()->with('error', 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI.');
         }
@@ -105,14 +105,14 @@ class DriverController extends Controller
             'residue_image' => 'required|image|max:10240',
         ]);
 
-        $driver = Auth::user();
+        $cleanup = Auth::user();
 
         $organicPath = $request->file('organic_image')->store('pickups/organic', 'public');
         $anorganicPath = $request->file('anorganic_image')->store('pickups/anorganic', 'public');
         $residuePath = $request->file('residue_image')->store('pickups/residue', 'public');
 
         $pickup->update([
-            'driver_id' => $driver->id,
+            'cleanup_id' => $cleanup->id,
             'status' => 'completed',
             'organic_weight' => $request->organic_weight,
             'anorganic_weight' => $request->anorganic_weight,
@@ -126,36 +126,36 @@ class DriverController extends Controller
     }
 
     /**
-     * Display the driver history of completed and failed pickups.
+     * Display the CleanUP history of completed and failed pickups.
      */
     public function history(Request $request)
     {
-        $driver = Auth::user();
+        $cleanup = Auth::user();
 
         $pickups = Pickup::with('company')
-            ->where('driver_id', $driver->id)
+            ->where('cleanup_id', $cleanup->id)
             ->whereIn('status', ['completed', 'failed'])
             ->orderBy('pickup_date', 'desc')
             ->get();
 
-        return Inertia::render('Driver/History', [
+        return Inertia::render('CleanUP/History', [
             'pickups' => $pickups
         ]);
     }
 
     /**
-     * Display the driver activities page to document what happens to the waste.
+     * Display the CleanUP activities page to document what happens to the waste.
      */
     public function activities(Request $request)
     {
-        // Get all active companies so the driver can select whose trash they are processing
+        // Get all active companies so the CleanUP can select whose trash they are processing
         $companies = Company::where('subscription_status', 'active')->get(['id', 'company_name', 'address']);
 
-        // Get past generic activities (could scope to driver, but no driver_id on activities table yet so fetch all)
+        // Get past generic activities (could scope to cleanup, but no cleanup_id on activities table yet so fetch all)
         // Let's fetch latest activities to show what has been submitted recently
         $activities = CompanyActivity::with('company:id,company_name')->orderBy('activity_date', 'desc')->get();
 
-        return Inertia::render('Driver/Activities', [
+        return Inertia::render('CleanUP/Activities', [
             'companies' => $companies,
             'activities' => $activities
         ]);

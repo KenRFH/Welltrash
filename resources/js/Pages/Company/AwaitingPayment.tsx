@@ -13,11 +13,10 @@ export default function AwaitingPayment({ company }: Props) {
     });
 
     const planPrices = {
-        'Rumah Tangga (< 10km)': 'Rp 750.000',
         'Rumah Tangga (> 10km)': 'Rp 1.000.000',
         'Reguler': 'Rp 2.500.000',
         'Prime': 'Rp 3.200.000',
-        'Premium+': 'Rp 4.499.000'
+        'Premium+': 'Rp 5.200.000'
     };
 
     const submit = (e: React.FormEvent) => {
@@ -50,7 +49,7 @@ export default function AwaitingPayment({ company }: Props) {
                         <div className="bg-white rounded-xl p-5 border border-teal-100/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
                             <div>
                                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Bank Mandiri</p>
-                                <p className="font-bold text-gray-900 text-lg tracking-wide">123-456-789-0123</p>
+                                <p className="font-bold text-gray-900 text-lg tracking-wide">143-00-3598547-0</p>
                                 <p className="text-sm text-gray-600">a.n. PT Welltrash Indonesia</p>
                             </div>
                             <div className="text-left sm:text-right border-t sm:border-t-0 sm:border-l border-gray-100 pt-3 sm:pt-0 sm:pl-6">

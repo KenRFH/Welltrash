@@ -6,7 +6,7 @@
 
     <style>
         body {
-            font-family: poppins, sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 12px;
             padding: 20px;
         }
@@ -53,7 +53,7 @@
                 <th>Organic (kg)</th>
                 <th>Anorganic (kg)</th>
                 <th>Residu (kg)</th>
-                <th>Driver</th>
+                <th>CleanUP</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -73,7 +73,7 @@
 
                     <td>{{ $pickup->residue_weight ?? 0 }}</td>
 
-                    <td>{{ $pickup->driver->name ?? '-' }}</td>
+                    <td>{{ $pickup->cleanup->name ?? '-' }}</td>
 
                     <td>
                         @if($pickup->status == 'completed')

@@ -116,7 +116,6 @@ export default function Mitra({ auth, company, activeDaysLeft }: Props) {
                                             onChange={(e) => setData('subscription_plan', e.target.value)}
                                             className="w-full pl-4 pr-10 py-3 rounded-2xl border-gray-200 bg-gray-50/50 text-gray-900 focus:ring-2 focus:ring-green-100 focus:border-green-400 focus:bg-white transition-all shadow-sm"
                                         >
-                                            <option value="Rumah Tangga (< 10km)">Rumah Tangga (&lt; 10km)</option>
                                             <option value="Rumah Tangga (> 10km)">Rumah Tangga (&gt; 10km)</option>
                                             <option value="Reguler">Reguler</option>
                                             <option value="Prime">Prime</option>

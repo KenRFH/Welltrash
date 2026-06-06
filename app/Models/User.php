@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'daily_salary',
     ];
 
     /**
@@ -43,7 +44,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
@@ -54,6 +55,17 @@ class User extends Authenticatable
 
     public function pickups()
     {
-        return $this->hasMany(Pickup::class, 'driver_id');
+        return $this->hasMany(Pickup::class, 'cleanup_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class);
     }
 }
+

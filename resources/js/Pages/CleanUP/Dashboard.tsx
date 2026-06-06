@@ -1,7 +1,7 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import React, { useState } from 'react';
-
-import DriverSidebar from '@/Components/DriverSidebar';
+import CleanUPSidebar from '@/Components/CleanUPSidebar';
+import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
 
 // Icons
 const CameraIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
@@ -18,7 +18,7 @@ interface Pickup {
         phone: string;
         pic_name: string;
     };
-    driver: {
+    cleanup: {
         id: number;
         name: string;
     } | null;
@@ -71,11 +71,11 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     });
 
     const handleDayClick = (day: string) => {
-        router.get(route('driver.dashboard'), { day }, { preserveState: true });
+        router.get(route('cleanup.dashboard'), { day }, { preserveState: true });
     };
 
     const handleUpdateStatus = (pickupId: number, status: string, reason?: string) => {
-        router.put(route('driver.updateStatus', pickupId), { status, cancellation_reason: reason }, {
+        router.put(route('cleanup.updateStatus', pickupId), { status, cancellation_reason: reason }, {
             preserveScroll: true
         });
     };
@@ -89,7 +89,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const handleSubmitPickup = (e: React.FormEvent, pickupId: number) => {
         e.preventDefault();
         if (fileSizeError) return;
-        postSubmit(route('driver.submitPickup', pickupId), {
+        postSubmit(route('cleanup.submitPickup', pickupId), {
             preserveScroll: true,
             onSuccess: () => setActiveModal(null),
         });
@@ -97,10 +97,10 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
 
     return (
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Driver Dashboard" />
+            <Head title="CleanUP Dashboard" />
 
              {/* Sidebar Component */}
-             <DriverSidebar 
+             <CleanUPSidebar 
                  active="dashboard" 
                  isMobileOpen={isSidebarOpen}
                  onClose={() => setIsSidebarOpen(false)}
@@ -127,11 +127,11 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                     <div className="flex items-center space-x-6">
                         <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
-                                <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=16a34a&bold=true`} alt="Driver avatar" />
+                                <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=16a34a&bold=true`} alt="CleanUP avatar" />
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
-                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Mitra Pengemudi</span>
+                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Mitra CleanUP</span>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                     className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm ${
                                         selectedDay === day
                                             ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/30'
-                                            : 'bg-white border text-gray-500 hover:bg-gray-50 hover:text-green-600 border-gray-200'
+                                             : 'bg-white border text-gray-500 hover:bg-gray-50 hover:text-green-600 border-gray-200'
                                     }`}
                                 >
                                     {day}
@@ -235,15 +235,15 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                 <div className="text-sm text-gray-500 leading-snug">
                                                     <span className="line-clamp-2">{pickup.company.address}</span>
                                                 </div>
-                                                {/* Driver badge — shown when pickup has been handled */}
-                                                {pickup.driver && (
+                                                {/* CleanUP badge — shown when pickup has been handled */}
+                                                {pickup.cleanup && (
                                                     <div className={`mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${
                                                         status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-600'
                                                     }`}>
                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                         </svg>
-                                                        {status === 'completed' ? 'Diselesaikan oleh' : 'Dikerjakan oleh'}: {pickup.driver.name}
+                                                        {status === 'completed' ? 'Diselesaikan oleh' : 'Dikerjakan oleh'}: {pickup.cleanup.name}
                                                     </div>
                                                 )}
                                             </div>
@@ -476,6 +476,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                     </div>
                 )}
             </div>
+            <AbsensiFloatingButton />
         </div>
     );
 }

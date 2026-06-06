@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 // The source image was removed, so we fallback to the built asset path
-const logowelltrash = "/build/assets/logowelltrash-DkJ1DW_Z.png";
+import Welltrash_logo from "../assets/img/logowelltrash.webp";
 
 interface NavbarProps {
     dark?: boolean;
@@ -54,9 +54,9 @@ const Navbar = ({ dark = false }: NavbarProps) => {
         <div className="flex-shrink-0 relative w-32 md:w-48 h-10 md:h-12 flex items-center">
           <Link href={route('beranda')} className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center">
             <img
-              src={logowelltrash}
+              src={Welltrash_logo}
               alt="WellTrash Logo"
-              className="h-14 w-14 md:h-20 md:w-20 object-contain object-left pointer-events-none transition-all"
+              className="h-14 w-14 md:h-18 md:w-18 object-contain object-left pointer-events-none transition-all"
             />
           </Link>
         </div>

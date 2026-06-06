@@ -1,6 +1,6 @@
 import Navbar from "@/Components/Navbar";
 import imgHero from "@/assets/img/karyawanWelltrash.webp";
-import React from "react";
+import React, { useState } from "react";
 import Why from "@/Components/Why";
 import Mitra from "@/Components/Mitra";
 import WasteFlow from "@/Components/WasteFlow";
@@ -41,6 +41,35 @@ function fmt(d: string | null) {
 }
 
 const Welcome = ({ activities, news, katalogs }: Props) => {
+    const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+    const faqItems = [
+        {
+            q: "Apa itu WellTrash?",
+            a: "WellTrash adalah platform layanan pengelolaan limbah digital pertama di Jember yang mengusung konsep ekonomi sirkular. Kami menyediakan solusi pengangkutan sampah terjadwal dan terpadu untuk rumah tangga, institusi, hingga sektor bisnis/industri di Kabupaten Jember."
+        },
+        {
+            q: "Wilayah mana saja yang dilayani oleh WellTrash?",
+            a: "Saat ini, WellTrash melayani seluruh wilayah Kabupaten Jember. Kami mencakup area perumahan, perkantoran, kafe, restoran, instansi pemerintah, hingga sektor komersial/industri."
+        },
+        {
+            q: "Bagaimana cara berlangganan jasa pengangkutan sampah WellTrash?",
+            a: "Anda dapat mendaftar langsung secara online dengan mengklik tombol 'Pesan Layanan Sekarang', mengisi data profil, memilih jadwal penjemputan berkala yang sesuai, serta mengunggah kelengkapan berkas MOU kerja sama untuk memulai."
+        },
+        {
+            q: "Apakah WellTrash mendukung inisiatif ESG perusahaan?",
+            a: "Ya, kami sepenuhnya mendukung pemenuhan ESG (Environmental, Social, and Governance) mitra bisnis melalui sistem pencatatan volume limbah yang kredibel, serta menyajikan laporan pelacakan sampah secara rutin dan transparan."
+        },
+        {
+            q: "Apa saja paket layanan pengangkutan sampah yang tersedia?",
+            a: "Kami menyediakan paket layanan yang fleksibel sesuai kebutuhan Anda, mulai dari paket Reguler, Prime, hingga Premium+ dengan kapasitas frekuensi penjemputan berkala hingga 6 hari dalam seminggu."
+        },
+        {
+            q: "Bagaimana sampah diolah setelah diangkut oleh tim WellTrash?",
+            a: "Sampah yang diangkut oleh tim profesional kami dibawa ke fasilitas WellTrash Farm untuk dipilah, diolah menjadi produk daur ulang bernilai ekonomi, dan meminimalkan residu sampah yang terbuang langsung ke TPA."
+        }
+    ];
+
     return (
         <>
             <SEO 
@@ -347,6 +376,76 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
             </section>
 
             <Mitra />
+
+            {/* FAQ SEO Section */}
+            <section className="py-24 bg-white relative overflow-hidden">
+                {/* JSON-LD Schema markup for Google Rich Snippets */}
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            "@context": "https://schema.org",
+                            "@type": "FAQPage",
+                            "mainEntity": faqItems.map(item => ({
+                                "@type": "Question",
+                                "name": item.q,
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": item.a
+                                }
+                            }))
+                        })
+                    }}
+                />
+
+                <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
+                            FAQ Pengangkutan <span className="text-[#FE961C]">Sampah Jember</span>
+                        </h2>
+                        <p className="text-gray-500 mt-4 text-base font-light max-w-2xl mx-auto leading-relaxed">
+                            Temukan jawaban lengkap atas pertanyaan umum mengenai layanan jasa pengangkut sampah profesional, tata cara berlangganan, serta pengolahan limbah daur ulang dari WellTrash.
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {faqItems.map((item, idx) => {
+                            const isOpen = openFaq === idx;
+                            return (
+                                <div
+                                    key={idx}
+                                    className="border border-gray-100 rounded-2xl bg-white hover:border-gray-200 transition-all duration-300 shadow-sm"
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpenFaq(isOpen ? null : idx)}
+                                        className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
+                                        aria-expanded={isOpen}
+                                    >
+                                        <span className="text-lg font-bold text-gray-900 pr-4 group-hover:text-[#7CC13B] transition-colors">
+                                            {item.q}
+                                        </span>
+                                        <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-50 text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-[#7CC13B]/10 text-[#7CC13B]' : ''}`}>
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
+                                        </span>
+                                    </button>
+                                    
+                                    <div
+                                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[300px] border-t border-gray-50' : 'max-h-0'}`}
+                                    >
+                                        <div className="px-6 py-5 text-gray-600 text-sm leading-relaxed font-light">
+                                            {item.a}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
             <Footer />
         </>
     );

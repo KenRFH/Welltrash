@@ -23,16 +23,6 @@ export default function Register({ auth }: any) {
 
     const packagesData = [
         {
-            id: 'Rumah Tangga (< 10km)',
-            name: 'Paket Rumah Tangga (< 10km)',
-            price: 'Rp 750.000',
-            period: '/bulan',
-            maxDays: 4,
-            desc: 'Penjemputan sampah harian untuk area dengan radius kurang dari 10km.',
-            features: ['Max 1m³ (4 trashbag) / sekali angkut', 'Pilih maks. 4 hari (Senin–Sabtu)', 'Tanpa Akses Dashboard'],
-            isPopular: false,
-        },
-        {
             id: 'Rumah Tangga (> 10km)',
             name: 'Paket Rumah Tangga (> 10km)',
             price: 'Rp 1.000.000',
@@ -65,7 +55,7 @@ export default function Register({ auth }: any) {
         {
             id: 'Premium+',
             name: 'Paket Premium+',
-            price: 'Rp 4.499.000',
+            price: 'Rp 5.200.000',
             period: '/bulan',
             maxDays: 6,
             desc: 'Solusi limbah industri skala besar dengan sistem pelaporan audit mendalam.',
@@ -86,7 +76,7 @@ export default function Register({ auth }: any) {
     };
 
     const getMaxDays = (plan: string) => {
-        if (plan === 'Rumah Tangga (< 10km)' || plan === 'Rumah Tangga (> 10km)' || plan === 'Reguler') return 4;
+        if (plan === 'Rumah Tangga (> 10km)' || plan === 'Reguler') return 4;
         if (plan === 'Prime' || plan === 'Premium+') return 6;
         return 0;
     };

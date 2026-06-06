@@ -77,19 +77,6 @@ const Services = () => {
             ],
         },
         {
-            name: "Paket Rumah Tangga (< 10km)",
-            price: "750k",
-            priceDetail: "Per bulan",
-            pickup: "Maks. 4 Hari / Minggu",
-            maxDays: 4,
-            description: "Penjemputan sampah harian untuk area dengan radius kurang dari 10km.",
-            features: [
-                "Max 1m³ (4 kantong trashbag) / sekali angkut",
-                "Pilih 4 hari kerja dari Senin – Sabtu",
-                "Akses Aplikasi Terbatas (Hanya Jadwal)",
-            ],
-        },
-        {
             name: "Paket Rumah Tangga (> 10km)",
             price: "1.000k",
             priceDetail: "Per bulan",
@@ -135,7 +122,7 @@ const Services = () => {
         },
         {
             name: "Paket Premium+",
-            price: "4.499k",
+            price: "5.200k",
             priceDetail: "Biaya mulai dari",
             pickup: "Maks. 6 Hari / Minggu",
             maxDays: 6,

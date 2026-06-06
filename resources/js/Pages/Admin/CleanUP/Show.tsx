@@ -17,14 +17,14 @@ interface Pickup {
     } | null;
 }
 
-interface Driver {
+interface CleanUP {
     id: number;
     name: string;
     email: string;
 }
 
 interface Props {
-    driver: Driver;
+    cleanup: CleanUP;
     pickups: Pickup[];
 }
 
@@ -35,15 +35,15 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; bo
     scheduled:  { label: 'Terjadwal',    bg: 'bg-gray-100',   text: 'text-gray-700',   border: 'border-gray-200' },
 };
 
-export default function DriversShow({ driver, pickups = [] }: Props) {
+export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
     const [filter, setFilter] = useState<'all' | 'completed' | 'failed' | 'scheduled' | 'on_the_way'>('all');
 
-    if (!driver) {
+    if (!cleanup) {
         return (
             <div className="flex h-screen items-center justify-center bg-gray-50 p-6">
                 <div className="text-center">
-                    <h1 className="text-xl font-black text-gray-900 mb-2">Driver Tidak Ditemukan</h1>
-                    <Link href="/admin/drivers" className="text-sm font-bold text-blue-600 hover:underline">Kembali ke Daftar</Link>
+                    <h1 className="text-xl font-black text-gray-900 mb-2">CleanUP Tidak Ditemukan</h1>
+                    <Link href="/admin/cleanups" className="text-sm font-bold text-blue-600 hover:underline">Kembali ke Daftar</Link>
                 </div>
             </div>
         );
@@ -58,11 +58,11 @@ export default function DriversShow({ driver, pickups = [] }: Props) {
 
     return (
         <AdminLayout
-            title={driver.name}
-            subtitle="Log Aktivitas Driver"
-            activeTab="drivers"
+            title={cleanup.name}
+            subtitle="Log Aktivitas CleanUP"
+            activeTab="cleanups"
             headerAction={
-                <Link href="/admin/drivers" className="p-2 bg-white rounded-full text-gray-400 hover:text-orange-600 hover:bg-orange-50 transition-all shadow-sm border border-gray-100">
+                <Link href="/admin/cleanups" className="p-2 bg-white rounded-full text-gray-400 hover:text-orange-600 hover:bg-orange-50 transition-all shadow-sm border border-gray-100">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </Link>
             }

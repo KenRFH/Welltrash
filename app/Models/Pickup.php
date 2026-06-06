@@ -8,7 +8,7 @@ class Pickup extends Model
 {
     protected $fillable = [
         'company_id',
-        'driver_id',
+        'cleanup_id',
         'pickup_date',
         'status',
         'cancellation_reason',
@@ -25,9 +25,9 @@ class Pickup extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function driver()
+    public function cleanup()
     {
-        return $this->belongsTo(User::class, 'driver_id');
+        return $this->belongsTo(User::class, 'cleanup_id');
     }
 
     

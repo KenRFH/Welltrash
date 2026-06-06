@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
 // The source image was removed, so we fallback to the built asset path
-const logowelltrash = "/build/assets/logowelltrash-DkJ1DW_Z.png";
+import Welltrash_logo from "../assets/img/logowelltrash.webp";
 import WhatsAppWidget from "./WhatsAppWidget";
 
 interface FooterProps {
@@ -35,7 +35,7 @@ const Footer: React.FC<FooterProps> = ({ dark = false }) => {
                     {/* Brand */}
                     <div className="md:col-span-1">
                         <img
-                            src={logowelltrash}
+                            src={Welltrash_logo}
                             alt="Welltrash Logo"
                             className="h-16 w-auto object-contain object-left mb-5"
                             style={{ filter: 'brightness(0) invert(1)' }}

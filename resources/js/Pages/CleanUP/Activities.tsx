@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
-import DriverSidebar from '@/Components/DriverSidebar';
+import CleanUPSidebar from '@/Components/CleanUPSidebar';
+import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
 
 interface Company {
     id: number;
@@ -54,7 +55,7 @@ export default function Activities({ companies, activities }: Props) {
 
     const handleUpload = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('driver.kegiatan.store'), {
+        post(route('cleanup.kegiatan.store'), {
             preserveScroll: true,
             onSuccess: () => {
                 reset('note', 'media');
@@ -67,7 +68,7 @@ export default function Activities({ companies, activities }: Props) {
         <div className="flex h-screen bg-[#F8FAFC] font-sans">
             <Head title="Kegiatan Pemanfaatan" />
 
-            <DriverSidebar 
+            <CleanUPSidebar 
                 active="kegiatan" 
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
@@ -261,6 +262,7 @@ export default function Activities({ companies, activities }: Props) {
                     </div>
                 </main>
             </div>
+            <AbsensiFloatingButton />
         </div>
     );
 }

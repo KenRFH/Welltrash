@@ -149,7 +149,7 @@ class CompanyController extends Controller
             return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
         }
 
-        $pickups = $company->pickups()->with('driver')
+        $pickups = $company->pickups()->with('cleanup')
             ->where(function ($query) {
                 $query->whereDate('pickup_date', '<', \Carbon\Carbon::today()->toDateString())
                       ->orWhereIn('status', ['completed', 'failed']);
@@ -188,23 +188,31 @@ class CompanyController extends Controller
             ->with('error', 'Masa aktif langganan Anda telah habis.');
     }
 
-    $pickups = $company->pickups()
-        ->with('driver')
-        ->where(function ($query) {
-            $query->whereDate('pickup_date', '<', Carbon::today()->toDateString())
-                ->orWhereIn('status', ['completed', 'failed']);
-        })
-        ->orderBy('pickup_date', 'desc')
-        ->get();
+    try {
+        $pickups = $company->pickups()
+            ->with('cleanup')
+            ->where(function ($query) {
+                $query->whereDate('pickup_date', '<', Carbon::today()->toDateString())
+                    ->orWhereIn('status', ['completed', 'failed']);
+            })
+            ->orderBy('pickup_date', 'desc')
+            ->get();
 
-    $pdf = Pdf::loadView('pdf.laporan-sampah', [
-        'company' => $company,
-        'pickups' => $pickups
-    ]);
+        $pdf = Pdf::loadView('pdf.laporan-sampah', [
+            'company' => $company,
+            'pickups' => $pickups
+        ]);
 
-    return $pdf->stream('laporan-sampah.pdf');
+        $pdf->setOption('defaultFont', 'DejaVu Sans');
+        $pdf->setOption('isHtml5ParserEnabled', true);
+        $pdf->setOption('isRemoteEnabled', false);
 
-   
+        return $pdf->stream('laporan-sampah.pdf');
+
+    } catch (\Exception $e) {
+        \Log::error('Laporan PDF Error: ' . $e->getMessage());
+        return back()->with('error', 'Gagal mengunduh laporan. Silakan coba lagi.');
+    }
 }
 
     public function store(Request $request)
@@ -215,7 +223,7 @@ class CompanyController extends Controller
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'business_category' => 'nullable|string|max:255',
-            'subscription_plan' => 'required|string|in:Rumah Tangga (< 10km),Rumah Tangga (> 10km),Reguler,Prime,Premium+',
+            'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+',
             'signed_mou' => 'required|file|mimes:pdf|max:10240',
             'pickup_schedule' => [
                 'nullable',
@@ -323,10 +331,10 @@ class CompanyController extends Controller
             'pickup_schedule' => $request->pickup_schedule
         ]);
 
-        // 2. Clear out future UNCOMPLETED pickups (scheduled or on_the_way)
+        // 2. Clear out future UNCOMPLETED pickups (scheduled)
         $company->pickups()
-            ->whereDate('pickup_date', '>', \Carbon\Carbon::today()->toDateString())
-            ->whereIn('status', ['scheduled', 'on_the_way'])
+            ->whereDate('pickup_date', '>=', \Carbon\Carbon::today()->toDateString())
+            ->where('status', 'scheduled')
             ->delete();
 
         // 3. Regenerate future scheduled pickups based on new schedule
@@ -374,7 +382,7 @@ class CompanyController extends Controller
     public function upgradeService(Request $request)
     {
         $request->validate([
-            'subscription_plan' => 'required|string|in:Rumah Tangga (< 10km),Rumah Tangga (> 10km),Reguler,Prime,Premium+'
+            'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+'
         ]);
 
         $customMessages = 'Permintaan peningkatan layanan ke ' . $request->subscription_plan . ' berhasil diajukan.';

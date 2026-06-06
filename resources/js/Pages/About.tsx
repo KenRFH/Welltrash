@@ -6,14 +6,23 @@ import SEO from "@/Components/SEO";
 
 import videoHero from "@/assets/img/header_main_welltrash.mp4";
 
-import imgProfileDirektur from "@/assets/img/profile_Direktur.webp";
-import imgProfileHarry from "@/assets/img/profile_Andik.webp";
-import imgProfileAndik from "@/assets/img/profile_Andik.webp";
-import imgProfileKen from "@/assets/img/profile_Ken.webp";
+interface TeamMember {
+    id: number;
+    name: string;
+    role: string;
+    desc: string | null;
+    image_path: string | null;
+    order_num: number;
+}
 
-const About = () => {
+interface Props {
+    teams: TeamMember[];
+}
+
+const About = ({ teams = [] }: Props) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const heroRef = useRef<HTMLElement>(null);
+    const sliderRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -42,6 +51,7 @@ const About = () => {
             <Navbar />
 
             {/* Video Parallax Hero Section */}
+            <div className="md:hidden block bg-white mx-auto h-24"></div>
             <section
                 ref={heroRef}
                 className="relative w-full aspect-video md:aspect-auto md:h-screen overflow-hidden bg-slate-900 flex items-center justify-center"
@@ -101,23 +111,21 @@ const About = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
                         <div>
                             <div className="flex items-center gap-4 mb-8">
-                                <span className="h-px w-12 bg-[#FE961C]" />
-                                <h2 className="text-sm font-normal tracking-[0.3em] uppercase text-[#FE961C]">Visi Kami</h2>
+                                <h2 className="text-sm italic font-black text-white bg-lime-500 p-4">Visi Kami</h2>
                             </div>
                             <p className="text-3xl lg:text-4xl font-thin text-gray-900 leading-tight tracking-wide">
-                                Menjadi platform kolaboratif nomor satu di Indonesia yang mengintegrasikan kecerdasan logistik dan prinsip ekonomi sirkular untuk mewujudkan lanskap industri masa depan yang <span className="text-[#7CC13B] font-normal">Zero Waste to Landfill</span>.
+                               “Menjadi perusahaan pengelolaan limbah yang bertanggung jawab, inovatif, dan berkelanjutan dalam menciptakan lingkungan yang bersih serta bernilai bagi masyarakat”
                             </p>
                         </div>
                         <div>
                             <div className="flex items-center gap-4 mb-8">
-                                <span className="h-px w-12 bg-[#7CC13B]" />
-                                <h2 className="text-sm font-normal tracking-[0.3em] uppercase text-[#7CC13B]">Misi Kami</h2>
+                                <h2 className="text-md font-old text-amber-500">Misi Kami</h2>
                             </div>
                             <ul className="space-y-8">
                                 {[
-                                    "Menyediakan solusi B2B yang hemat waktu, praktis, dan dapat diandalkan setiap harinya.",
+                                    "Menjalankan konsep green business di dalam manajemen lingkungan hidup",
                                     "Menyajikan pelaporan data secara rutin yang kredibel untuk mendukung inisiatif Environmental, Social, and Governance (ESG) mitra bisnis.",
-                                    "Mendorong recovery rate sampah yang dapat didaur ulang bersama jaringan fasilitas pengolahan."
+                                    "Menjadikan pengelolaan limbah sebagai sumber ekonomi yang mampu memberikan manfaat dan kesejahteraan bagi tim serta masyarakat. (Social Value)"
                                 ].map((misi, i) => (
                                     <li key={i} className="flex gap-6 items-start">
                                         <div className="shrink-0 w-12 h-12 flex items-center justify-center border border-gray-200 text-lg font-thin text-black">
@@ -132,49 +140,86 @@ const About = () => {
                 </div>
             </section>
 
-            {/* Struktur Organisasi */}
-            <section className="py-24 bg-white">
+            {/* Tim Kopasus Slider */}
+            <section className="py-24 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="text-center mb-20">
-                        <h2 className="text-4xl lg:text-5xl font-thin text-gray-900 tracking-wider uppercase">Struktur Organisasi</h2>
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+                        <div>
+                            <h2 className="text-4xl lg:text-5xl font-thin text-gray-900 uppercase tracking-wide">Tim Kopasus</h2>
+                        </div>
+                        
+                        {/* Navigation Arrows */}
+                        <div className="flex gap-3">
+                            <button 
+                                onClick={() => {
+                                    if (sliderRef.current) {
+                                        sliderRef.current.scrollBy({ left: -380, behavior: 'smooth' });
+                                    }
+                                }}
+                                className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 focus:outline-none"
+                                aria-label="Previous slide"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                </svg>
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    if (sliderRef.current) {
+                                        sliderRef.current.scrollBy({ left: 380, behavior: 'smooth' });
+                                    }
+                                }}
+                                className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 focus:outline-none"
+                                aria-label="Next slide"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="max-w-5xl mx-auto">
-                        <div className="flex flex-col items-center relative">
-                            {/* Level 1 */}
-                            <div className="w-full max-w-[300px] p-8 bg-white border border-gray-400 text-center mb-10 relative z-10 hover:border-[#7CC13B] transition-colors">
-                                <div className="w-28 h-28 mx-auto bg-gray-100 mb-6 overflow-hidden">
-                                    <img src={imgProfileDirektur} alt="Direktur Utama" loading="lazy" decoding="async" className="w-full h-full object-cover transition-all duration-500" />
-                                </div>
-                                <h3 className="text-xl font-normal text-gray-900 uppercase tracking-wide">Direktur Utama</h3>
-                                <p className="text-[#FE961C] text-xs font-normal tracking-[0.2em] mt-2 uppercase">Mashudi</p>
-                            </div>
-
-                            {/* Connecting Line Vertical */}
-                            <div className="w-px h-10 bg-gray-400 hidden md:block" />
-                            {/* Connecting Line Horizontal */}
-                            <div className="w-[calc(100%-33%)] h-px bg-gray-400 hidden md:block" />
-
-                            {/* Level 2 */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 w-full">
-                                {[
-                                    { name: "Bag. Humas & Kesekretariatan", role: "Harry", img: imgProfileHarry },
-                                    { name: "Bag. Oprasional", role: "Andik", img: imgProfileAndik },
-                                    { name: "Bag. Teknologi Informasi", role: "Ken", img: imgProfileKen },
-                                ].map((person, i) => (
-                                    <div key={i} className="relative flex flex-col items-center">
-                                        <div className="w-px h-10 bg-gray-400 absolute -top-10 hidden md:block" />
-                                        <div className="w-full p-8 bg-white border border-gray-400 text-center hover:border-gray-300 transition-colors relative z-10">
-                                            <div className="w-20 h-20 mx-auto bg-gray-100 mb-5 overflow-hidden">
-                                                <img src={person.img} alt={person.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-all duration-500" />
+                    {/* Slider Container */}
+                    <div 
+                        ref={sliderRef}
+                        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 scroll-smooth -mx-6 px-6 md:-mx-8 md:px-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    >
+                        {teams.length > 0 ? (
+                            teams.map((person) => (
+                                <div 
+                                    key={person.id} 
+                                    className="snap-start shrink-0 w-[290px] md:w-[360px] bg-white border border-gray-100 rounded-3xl p-6 hover:shadow-2xl hover:shadow-gray-100 transition-all duration-500 group"
+                                >
+                                    {/* Photo Container */}
+                                    <div className="w-full aspect-[4/5] bg-gray-50 rounded-2xl overflow-hidden mb-6 relative">
+                                        {person.image_path ? (
+                                            <img 
+                                                src={`/storage/${person.image_path}`} 
+                                                alt={person.name} 
+                                                loading="lazy" 
+                                                decoding="async" 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                                                <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                             </div>
-                                            <h3 className="text-lg font-normal text-gray-900 leading-tight mb-2">{person.name}</h3>
-                                            <p className="text-gray-400 text-xs font-light tracking-[0.2em]">{person.role}</p>
-                                        </div>
+                                        )}
                                     </div>
-                                ))}
+                                    
+                                    {/* Info */}
+                                    <h3 className="text-xl font-normal text-gray-900 mb-1 group-hover:text-[#7CC13B] transition-colors duration-300">{person.name}</h3>
+                                    <p className="text-[#FE961C] text-xs font-semibold tracking-[0.15em] mb-4 uppercase">{person.role}</p>
+                                    <p className="text-gray-400 text-sm font-light leading-relaxed">{person.desc}</p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-12 text-center text-gray-500 w-full">
+                                Belum ada anggota tim Kopasus yang terdaftar.
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </section>

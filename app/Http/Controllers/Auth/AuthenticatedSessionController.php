@@ -47,7 +47,7 @@ class AuthenticatedSessionController extends Controller
         // Jika login dari admin/login
         if ($request->is('admin/*')) {
 
-            if (!in_array($user->role, ['admin', 'driver'])) {
+            if (!in_array($user->role, ['admin', 'web_admin', 'CleanUP'])) {
                 Auth::logout();
 
                 return back()->withErrors([
@@ -57,9 +57,10 @@ class AuthenticatedSessionController extends Controller
         }
 
         return match ($user->role) {
-            'admin'  => redirect()->route('admin.dashboard'),
-            'driver' => redirect()->route('driver.dashboard'),
-            default  => redirect()->route('company.dashboard'),
+            'admin'     => redirect()->route('admin.dashboard'),
+            'web_admin' => redirect()->route('webadmin.dashboard'),
+            'CleanUP'   => redirect()->route('cleanup.dashboard'),
+            default     => redirect()->route('company.dashboard'),
         };
     }
 
