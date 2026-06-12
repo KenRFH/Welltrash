@@ -31,6 +31,7 @@ class Attendance extends Model
         'overtime_clock_out_lat',
         'overtime_clock_out_lng',
         'overtime_hours',
+        'overtime_approved',
     ];
 
     protected $casts = [
@@ -41,6 +42,7 @@ class Attendance extends Model
         'overtime_clock_in_at'  => 'datetime',
         'overtime_clock_out_at' => 'datetime',
         'overtime_hours'        => 'decimal:2',
+        'overtime_approved'     => 'boolean',
     ];
 
     public function user()

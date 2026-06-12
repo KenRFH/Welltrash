@@ -5,7 +5,7 @@ import AdminSidebar from '@/Components/AdminSidebar';
 interface Props {
     children: React.ReactNode;
     title: string;
-    activeTab: 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance';
+    activeTab: 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices';
     subtitle?: string;
     headerAction?: React.ReactNode;
 }

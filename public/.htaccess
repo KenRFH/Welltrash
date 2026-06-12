@@ -23,6 +23,12 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Fallback: Jika public/storage (symlink) tidak ada, arahkan ke storage/app/public
+    # (Digunakan pada hosting yang tidak mendukung symlink)
+    RewriteCond %{REQUEST_URI} ^/storage/(.*)$
+    RewriteCond %{DOCUMENT_ROOT}/storage [!-d]
+    RewriteRule ^storage/(.*)$ ../storage/app/public/$1 [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

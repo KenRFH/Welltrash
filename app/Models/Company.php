@@ -47,4 +47,9 @@ class Company extends Model
     {
         return $this->hasMany(CompanyActivity::class)->orderBy('activity_date', 'desc')->orderBy('created_at', 'desc');
     }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class)->orderBy('created_at', 'desc');
+    }
 }

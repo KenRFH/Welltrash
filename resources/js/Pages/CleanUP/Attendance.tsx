@@ -30,6 +30,14 @@ interface LeaveRecord {
     proof_image: string | null;
 }
 
+interface OvertimeRecord {
+    id: number;
+    date: string;
+    reason: string;
+    status: 'pending' | 'approved' | 'rejected';
+    admin_note: string | null;
+}
+
 interface Summary {
     total_days: number;
     qualified_days: number;
@@ -44,6 +52,8 @@ interface Summary {
 interface Props {
     attendances: AttendanceRecord[];
     leaveRequests: LeaveRecord[];
+    overtimeRequests: OvertimeRecord[];
+    todayApprovedOvertime: boolean;
     selectedMonth: string;
     summary: Summary;
     auth: { user: { name: string; email: string } };
@@ -70,20 +80,35 @@ function formatCurrency(amount: number) {
 export default function CleanUPAttendance({
     attendances,
     leaveRequests,
+    overtimeRequests,
+    todayApprovedOvertime,
     selectedMonth,
     summary,
     auth,
     flash,
 }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'absensi' | 'izin'>('absensi');
+    const [activeTab, setActiveTab] = useState<'absensi' | 'izin' | 'lembur'>('absensi');
     const [showLeaveForm, setShowLeaveForm] = useState(false);
+    const [showOvertimeForm, setShowOvertimeForm] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         date: new Date().toLocaleDateString('en-CA'),
         type: 'izin' as 'izin' | 'sakit',
         reason: '',
         proof_image: null as File | null,
+    });
+
+    const {
+        data: overtimeData,
+        setData: setOvertimeData,
+        post: postOvertime,
+        processing: overtimeProcessing,
+        errors: overtimeErrors,
+        reset: resetOvertime,
+    } = useForm({
+        date: new Date().toLocaleDateString('en-CA'),
+        reason: '',
     });
 
     const handleMonthChange = (month: string) => {
@@ -96,6 +121,16 @@ export default function CleanUPAttendance({
             onSuccess: () => {
                 reset('reason');
                 setShowLeaveForm(false);
+            },
+        });
+    };
+
+    const handleSubmitOvertime = (e: React.FormEvent) => {
+        e.preventDefault();
+        postOvertime(route('cleanup.attendance.requestOvertime'), {
+            onSuccess: () => {
+                resetOvertime();
+                setShowOvertimeForm(false);
             },
         });
     };
@@ -222,7 +257,7 @@ export default function CleanUPAttendance({
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-2 mb-5">
+                    <div className="flex gap-2 mb-5 flex-wrap">
                         <button
                             onClick={() => setActiveTab('absensi')}
                             className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'absensi' ? 'bg-green-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-green-300'}`}
@@ -235,7 +270,16 @@ export default function CleanUPAttendance({
                         >
                             Izin/Sakit ({leaveRequests.length})
                             {leaveRequests.some(l => l.status === 'pending') && (
-                                <span className="w-2 h-2 rounded-full bg-red-400 inline-block"></span>
+                                <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('lembur')}
+                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'lembur' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'}`}
+                        >
+                            Pengajuan Lembur ({overtimeRequests.length})
+                            {overtimeRequests.some(o => o.status === 'pending') && (
+                                <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
                             )}
                         </button>
                     </div>
@@ -510,6 +554,155 @@ export default function CleanUPAttendance({
                                                         <a href={`/storage/${leave.proof_image}`} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-lg hover:bg-blue-100 inline-block">
                                                             Lihat Bukti Sakit
                                                         </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    {/* ── TAB LEMBUR ── */}
+                    {activeTab === 'lembur' && (
+                        <div className="space-y-4">
+                            {/* Info izin lembur hari ini */}
+                            <div className={`flex items-start gap-3 px-5 py-4 rounded-2xl border ${
+                                todayApprovedOvertime
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-amber-50 border-amber-200'
+                            }`}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                    todayApprovedOvertime ? 'bg-green-100' : 'bg-amber-100'
+                                }`}>
+                                    {todayApprovedOvertime ? (
+                                        <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className={`text-sm font-bold ${todayApprovedOvertime ? 'text-green-800' : 'text-amber-800'}`}>
+                                        {todayApprovedOvertime
+                                            ? '✓ Anda memiliki izin lembur yang disetujui untuk hari ini'
+                                            : 'Belum ada izin lembur yang disetujui untuk hari ini'}
+                                    </p>
+                                    <p className={`text-xs mt-0.5 ${todayApprovedOvertime ? 'text-green-600' : 'text-amber-600'}`}>
+                                        {todayApprovedOvertime
+                                            ? 'Anda dapat melakukan absen lembur menggunakan tombol floating.'
+                                            : 'Ajukan permohonan lembur dan tunggu persetujuan admin sebelum absen lembur.'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Tombol + Form ajukan lembur */}
+                            <div className="flex justify-end">
+                                <button
+                                    onClick={() => setShowOvertimeForm(!showOvertimeForm)}
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-sm"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Ajukan Permohonan Lembur
+                                </button>
+                            </div>
+
+                            {showOvertimeForm && (
+                                <div className="bg-white rounded-3xl border border-indigo-100 shadow-sm overflow-hidden">
+                                    <div className="px-6 py-4 bg-gradient-to-r from-indigo-50 to-blue-50 border-b border-indigo-100">
+                                        <h3 className="font-bold text-gray-900">Permohonan Izin Lembur</h3>
+                                        <p className="text-xs text-gray-500 mt-0.5">Ajukan terlebih dahulu. Absen lembur hanya bisa dilakukan setelah admin menyetujui.</p>
+                                    </div>
+                                    <form onSubmit={handleSubmitOvertime} className="p-6 space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-1.5">Tanggal Rencana Lembur</label>
+                                            <input
+                                                type="date"
+                                                value={overtimeData.date}
+                                                onChange={e => setOvertimeData('date', e.target.value)}
+                                                min={new Date().toLocaleDateString('en-CA')}
+                                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all"
+                                            />
+                                            {overtimeErrors.date && <p className="text-red-500 text-xs mt-1">{overtimeErrors.date}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-1.5">Alasan / Keperluan Lembur</label>
+                                            <textarea
+                                                value={overtimeData.reason}
+                                                onChange={e => setOvertimeData('reason', e.target.value)}
+                                                placeholder="Cth: Menyelesaikan pickup mitra tambahan, target pickup belum tercapai..."
+                                                rows={3}
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm resize-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all"
+                                            />
+                                            {overtimeErrors.reason && <p className="text-red-500 text-xs mt-1">{overtimeErrors.reason}</p>}
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                type="submit"
+                                                disabled={overtimeProcessing || !overtimeData.reason}
+                                                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+                                            >
+                                                {overtimeProcessing ? 'Mengirim...' : 'Kirim Permohonan'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowOvertimeForm(false)}
+                                                className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all"
+                                            >
+                                                Batal
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+
+                            {/* Daftar pengajuan lembur */}
+                            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="px-6 py-4 border-b border-gray-50">
+                                    <h3 className="font-bold text-gray-900 text-sm">Riwayat Permohonan Lembur</h3>
+                                </div>
+                                {overtimeRequests.length === 0 ? (
+                                    <div className="px-6 py-14 text-center">
+                                        <p className="text-gray-500 font-semibold text-sm">Belum ada permohonan lembur</p>
+                                        <p className="text-gray-400 text-xs mt-1">Klik tombol di atas untuk mengajukan</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-gray-50">
+                                        {overtimeRequests.map(ot => (
+                                            <div key={ot.id} className="px-5 py-4">
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[10px] font-black flex-shrink-0 ${
+                                                            ot.status === 'approved' ? 'bg-green-100 text-green-700'
+                                                            : ot.status === 'rejected' ? 'bg-red-100 text-red-700'
+                                                            : 'bg-indigo-100 text-indigo-700'
+                                                        }`}>
+                                                            {ot.status === 'approved' ? '✓' : ot.status === 'rejected' ? '✕' : '⏳'}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-gray-900">
+                                                                Lembur — {formatDate(ot.date)}
+                                                            </p>
+                                                            <p className="text-xs text-gray-500 mt-0.5">{ot.reason}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-shrink-0">
+                                                        {ot.status === 'pending' && (
+                                                            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-full">Menunggu</span>
+                                                        )}
+                                                        {ot.status === 'approved' && (
+                                                            <span className="text-[11px] font-bold text-green-700 bg-green-100 border border-green-200 px-2.5 py-1 rounded-full">Disetujui ✓</span>
+                                                        )}
+                                                        {ot.status === 'rejected' && (
+                                                            <span className="text-[11px] font-bold text-red-700 bg-red-100 border border-red-200 px-2.5 py-1 rounded-full">Ditolak</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {ot.admin_note && (
+                                                    <div className="mt-2.5 ml-[52px] border-l-2 border-gray-100 pl-3">
+                                                        <p className="text-[11px] font-bold text-gray-400 uppercase">Catatan Admin</p>
+                                                        <p className="text-xs text-gray-600 mt-0.5">{ot.admin_note}</p>
                                                     </div>
                                                 )}
                                             </div>

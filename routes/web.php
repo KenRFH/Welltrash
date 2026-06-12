@@ -117,6 +117,7 @@ Route::get('/katalog', function () {
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminAccountController;
+use App\Http\Controllers\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -156,6 +157,16 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');
         Route::patch('/attendance/salary/{user}', [AdminAttendanceController::class, 'updateSalary'])->name('attendance.updateSalary');
         Route::patch('/attendance/leave/{leaveRequest}/review', [AdminAttendanceController::class, 'reviewLeave'])->name('attendance.leave.review');
+        Route::patch('/attendance/overtime/{overtimeRequest}/review', [AdminAttendanceController::class, 'reviewOvertime'])->name('attendance.overtime.review');
+
+        // Invoice
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('/invoices/{invoice}/show', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::patch('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.markPaid');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+        Route::get('/invoices/{invoice}/whatsapp', [InvoiceController::class, 'sendWhatsApp'])->name('invoices.whatsapp');
 
     });
 
@@ -223,6 +234,10 @@ Route::middleware(['auth', 'role:company'])
         Route::post('/billing/pay', [CompanyController::class, 'uploadPayment'])->name('billing.pay');
 
         Route::get('/kegiatan', [CompanyController::class, 'activities'])->name('kegiatan');
+
+        // Invoice (Mitra)
+        Route::get('/invoices', [InvoiceController::class, 'companyInvoices'])->name('invoices.index');
+        Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadInvoice'])->name('invoices.download');
     });
 use App\Http\Controllers\CleanUPController;
 
@@ -247,6 +262,7 @@ Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function (
     Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('cleanup.attendance.clockOut');
     Route::post('/attendance/overtime/clock-in', [AttendanceController::class, 'clockInOvertime'])->name('cleanup.attendance.clockInOvertime');
     Route::post('/attendance/overtime/clock-out', [AttendanceController::class, 'clockOutOvertime'])->name('cleanup.attendance.clockOutOvertime');
+    Route::post('/attendance/overtime/request', [AttendanceController::class, 'requestOvertime'])->name('cleanup.attendance.requestOvertime');
 
     // Pengajuan Izin/Sakit
     Route::post('/leave-request', [LeaveRequestController::class, 'store'])->name('cleanup.leave.store');

@@ -203,9 +203,16 @@ class CompanyController extends Controller
             'pickups' => $pickups
         ]);
 
+        // Pastikan folder font cache ada (penting di hosting)
+        $fontDir = storage_path('fonts');
+        if (!is_dir($fontDir)) {
+            mkdir($fontDir, 0775, true);
+        }
+
         $pdf->setOption('defaultFont', 'DejaVu Sans');
-        $pdf->setOption('isHtml5ParserEnabled', true);
-        $pdf->setOption('isRemoteEnabled', false);
+        $pdf->setOption('enable_html5_parser', true);
+        $pdf->setOption('enable_remote', false);
+        $pdf->setPaper('A4', 'portrait');
 
         return $pdf->stream('laporan-sampah.pdf');
 

@@ -56,6 +56,19 @@ interface LeaveRequest {
     };
 }
 
+interface OvertimeRequest {
+    id: number;
+    user_id: number;
+    date: string;
+    reason: string;
+    status: 'pending' | 'approved' | 'rejected';
+    admin_note: string | null;
+    user: {
+        id: number;
+        name: string;
+    };
+}
+
 interface PaginatedData<T> {
     data: T[];
     links: { url: string | null; label: string; active: boolean }[];
@@ -67,6 +80,7 @@ interface Props {
     attendances: PaginatedData<Attendance>;
     overtimes: PaginatedData<Attendance>;
     leaveRequests: LeaveRequest[];
+    overtimeRequests: OvertimeRequest[];
     selectedCleanupId: number | null;
     selectedDate: string;
     dailyRate: number;
@@ -96,16 +110,29 @@ export default function AttendanceIndex({
     attendances,
     overtimes,
     leaveRequests,
+    overtimeRequests,
     selectedCleanupId,
     selectedDate,
     dailyRate,
     minWorkHours,
     flash,
 }: Props) {
-    const [activeTab, setActiveTab] = useState<'absensi' | 'izin' | 'lembur'>('absensi');
+    const [activeTab, setActiveTab] = useState<'absensi' | 'izin' | 'lembur' | 'permohonan-lembur'>('absensi');
     const [reviewingId, setReviewingId] = useState<number | null>(null);
+    const [reviewingOvertimeId, setReviewingOvertimeId] = useState<number | null>(null);
 
     const { data: reviewData, setData: setReviewData, patch, processing: reviewProcessing, reset: resetReview } = useForm({
+        status: '' as 'approved' | 'rejected',
+        admin_note: '',
+    });
+
+    const {
+        data: overtimeReviewData,
+        setData: setOvertimeReviewData,
+        patch: patchOvertime,
+        processing: overtimeReviewProcessing,
+        reset: resetOvertimeReview,
+    } = useForm({
         status: '' as 'approved' | 'rejected',
         admin_note: '',
     });
@@ -137,6 +164,22 @@ export default function AttendanceIndex({
         });
     };
 
+    const openOvertimeReview = (ot: OvertimeRequest, status: 'approved' | 'rejected') => {
+        setOvertimeReviewData('status', status);
+        setOvertimeReviewData('admin_note', '');
+        setReviewingOvertimeId(ot.id);
+    };
+
+    const submitOvertimeReview = (otId: number) => {
+        patchOvertime(route('admin.attendance.overtime.review', otId), {
+            onSuccess: () => {
+                setReviewingOvertimeId(null);
+                resetOvertimeReview();
+            },
+        });
+    };
+
+    const pendingOvertimeCount = overtimeRequests.filter(o => o.status === 'pending').length;
     const selectedCleanup = selectedCleanupId
         ? cleanups.find(d => d.id === selectedCleanupId)
         : null;
@@ -201,7 +244,7 @@ export default function AttendanceIndex({
 
 
                 {/* Tab Navigation */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                     <button
                         onClick={() => setActiveTab('absensi')}
                         className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'absensi' ? 'bg-orange-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-orange-300'}`}
@@ -221,6 +264,15 @@ export default function AttendanceIndex({
                         Pengajuan Izin/Sakit ({leaveRequests.length})
                         {pendingLeaveCount > 0 && (
                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">{pendingLeaveCount}</span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('permohonan-lembur')}
+                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'permohonan-lembur' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}
+                    >
+                        Permohonan Lembur ({overtimeRequests.length})
+                        {pendingOvertimeCount > 0 && (
+                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">{pendingOvertimeCount}</span>
                         )}
                     </button>
                 </div>
@@ -609,6 +661,121 @@ export default function AttendanceIndex({
                                                     </span>
                                                 )}
                                                 {leave.status === 'rejected' && (
+                                                    <span className="text-[11px] font-bold text-red-700 bg-red-100 border border-red-200 px-2.5 py-1 rounded-full">
+                                                        ❌ Ditolak
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+                {/* ── TAB PERMOHONAN LEMBUR ── */}
+                {activeTab === 'permohonan-lembur' && (
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                            <div>
+                                <h2 className="font-bold text-gray-900">Permohonan Izin Lembur</h2>
+                                <p className="text-xs text-gray-500 mt-0.5">{overtimeRequests.length} permohonan</p>
+                            </div>
+                            {pendingOvertimeCount > 0 && (
+                                <span className="text-xs font-bold text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-xl">
+                                    {pendingOvertimeCount} menunggu review
+                                </span>
+                            )}
+                        </div>
+
+                        {overtimeRequests.length === 0 ? (
+                            <div className="px-6 py-16 text-center">
+                                <p className="text-gray-500 font-semibold text-sm">Tidak ada permohonan lembur</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-gray-50">
+                                {overtimeRequests.map(ot => (
+                                    <div key={ot.id} className={`px-6 py-5 ${ot.status === 'pending' ? 'bg-violet-50/30' : ''}`}>
+                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                                            <div className="flex items-start gap-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5 ${
+                                                    ot.status === 'approved' ? 'bg-green-100 text-green-700'
+                                                    : ot.status === 'rejected' ? 'bg-red-100 text-red-700'
+                                                    : 'bg-violet-100 text-violet-700'
+                                                }`}>
+                                                    {ot.status === 'approved' ? '✓' : ot.status === 'rejected' ? '✕' : '⏳'}
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="font-bold text-gray-900 text-sm">{ot.user.name}</p>
+                                                        <span className="text-xs text-gray-500">{formatDate(ot.date)}</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mt-1">{ot.reason}</p>
+                                                    {ot.admin_note && (
+                                                        <p className="text-xs text-gray-400 mt-1.5 italic">Catatan: {ot.admin_note}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                                {ot.status === 'pending' && (
+                                                    <>
+                                                        <span className="text-[11px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-2.5 py-1 rounded-full">
+                                                            Menunggu
+                                                        </span>
+                                                        {reviewingOvertimeId === ot.id ? (
+                                                            <div className="space-y-2 w-56">
+                                                                <textarea
+                                                                    value={overtimeReviewData.admin_note}
+                                                                    onChange={e => setOvertimeReviewData('admin_note', e.target.value)}
+                                                                    placeholder="Catatan admin (opsional)"
+                                                                    rows={2}
+                                                                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl resize-none focus:ring-1 focus:ring-violet-200 focus:border-violet-400"
+                                                                />
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={() => submitOvertimeReview(ot.id)}
+                                                                        disabled={overtimeReviewProcessing}
+                                                                        className={`flex-1 py-2 text-xs font-bold text-white rounded-xl transition-all disabled:opacity-50 ${
+                                                                            overtimeReviewData.status === 'approved'
+                                                                                ? 'bg-green-600 hover:bg-green-700'
+                                                                                : 'bg-red-500 hover:bg-red-600'
+                                                                        }`}
+                                                                    >
+                                                                        {overtimeReviewData.status === 'approved' ? 'Setujui' : 'Tolak'}
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => setReviewingOvertimeId(null)}
+                                                                        className="px-3 py-2 text-xs font-bold bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200"
+                                                                    >
+                                                                        Batal
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => openOvertimeReview(ot, 'approved')}
+                                                                    className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-1.5 rounded-xl transition-colors"
+                                                                >
+                                                                    ✓ Setujui
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => openOvertimeReview(ot, 'rejected')}
+                                                                    className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-xl transition-colors"
+                                                                >
+                                                                    ✕ Tolak
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+                                                {ot.status === 'approved' && (
+                                                    <span className="text-[11px] font-bold text-green-700 bg-green-100 border border-green-200 px-2.5 py-1 rounded-full">
+                                                        ✅ Disetujui
+                                                    </span>
+                                                )}
+                                                {ot.status === 'rejected' && (
                                                     <span className="text-[11px] font-bold text-red-700 bg-red-100 border border-red-200 px-2.5 py-1 rounded-full">
                                                         ❌ Ditolak
                                                     </span>
