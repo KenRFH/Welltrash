@@ -10,3 +10,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('pickups:generate')->daily();
+
+// Kirim WA invoice terjadwal — cek setiap menit
+Schedule::command('invoices:send-wa')->everyMinute()->withoutOverlapping();
+

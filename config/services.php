@@ -45,4 +45,10 @@ return [
     'api_key' => env('SPREADSHEET_API_KEY'),
 ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'url'   => 'https://api.fonnte.com/send',
+    ],
+
 ];
+

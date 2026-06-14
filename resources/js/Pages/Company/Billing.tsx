@@ -23,10 +23,22 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
     });
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran file melebihi batas maksimal 2MB. Silakan pilih file yang lebih kecil atau kompres terlebih dahulu.');
+                setData('payment_evidence', null);
+                setPreviewUrl(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                return;
+            }
+
             setData('payment_evidence', file);
             
             // Create preview if it's an image
@@ -106,7 +118,7 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
                             
                             <form onSubmit={handleUpload} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-gray-700">Bukti Pembayaran (JPG/PNG/PDF, Max 5MB)</label>
+                                    <label className="block text-sm font-bold text-gray-700">Bukti Pembayaran (JPG/PNG/PDF, Max 2MB)</label>
                                     
                                     <div className={`mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-2xl transition-colors ${previewUrl ? 'border-green-300 bg-green-50/30' : 'border-gray-300 hover:border-green-400 hover:bg-green-50/10'}`}>
                                         <div className="space-y-1 text-center w-full">
@@ -121,15 +133,20 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
                                             )}
                                             
                                             <div className="flex text-sm text-gray-600 justify-center">
-                                                <label className="relative cursor-pointer bg-white rounded-md font-bold text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-green-500 transition-colors">
-                                                    <span>{data.payment_evidence ? 'Ganti file' : 'Unggah file'}</span>
-                                                    <input 
-                                                        type="file" 
-                                                        className="sr-only" 
-                                                        accept=".jpeg,.png,.jpg,.pdf"
-                                                        onChange={handleFileChange}
-                                                    />
-                                                </label>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="relative cursor-pointer bg-white rounded-md font-bold text-green-600 hover:text-green-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                                                >
+                                                    {data.payment_evidence ? 'Ganti file' : 'Unggah file'}
+                                                </button>
+                                                <input 
+                                                    ref={fileInputRef}
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    accept=".jpeg,.png,.jpg,.pdf"
+                                                    onChange={handleFileChange}
+                                                />
                                                 {!data.payment_evidence && <p className="pl-1">atau seret dan lepas</p>}
                                             </div>
                                             {data.payment_evidence && (

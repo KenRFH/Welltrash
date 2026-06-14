@@ -18,10 +18,10 @@ interface Props {
 
 // Suggested prices per plan (admin can override)
 const PLAN_PRICES: Record<string, number> = {
-    'Rumah Tangga (> 10km)': 150000,
-    'Reguler': 300000,
-    'Prime': 500000,
-    'Premium+': 750000,
+    'Rumah Tangga (> 10km)': 1000000,
+    'Reguler': 2500000,
+    'Prime': 3200000,
+    'Premium+': 5200000,
 };
 
 export default function InvoicesCreate({ companies, selectedCompanyId }: Props) {
@@ -32,6 +32,8 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
         due_date: '',
         amount: '',
         notes: '',
+        wa_send_at: '',
+        wa_enabled: false as boolean,
     });
 
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(
@@ -42,7 +44,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
         if (data.company_id) {
             const found = companies.find(c => c.id === Number(data.company_id)) ?? null;
             setSelectedCompany(found);
-            if (found && !data.amount) {
+            if (found) {
                 setData('amount', String(PLAN_PRICES[found.subscription_plan] ?? ''));
             }
         } else {
@@ -62,12 +64,26 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
         if (!data.due_date) {
             const due = new Date(now);
             due.setDate(due.getDate() + 14);
-            setData('due_date', due.toISOString().split('T')[0]);
+            const dueStr = due.toISOString().split('T')[0];
+            setData('due_date', dueStr);
+            // Default jadwal WA = tanggal jatuh tempo jam 08:00
+            setData('wa_send_at', `${dueStr}T08:00`);
         }
     }, []);
 
+    // Sinkronkan default wa_send_at saat due_date berubah
+    useEffect(() => {
+        if (data.due_date && data.wa_enabled) {
+            setData('wa_send_at', `${data.due_date}T08:00`);
+        }
+    }, [data.due_date]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // Jika WA tidak diaktifkan, kosongkan wa_send_at sebelum submit
+        if (!data.wa_enabled) {
+            setData('wa_send_at', '');
+        }
         post(route('admin.invoices.store'));
     };
 
@@ -234,6 +250,64 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                                 {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes}</p>}
                             </div>
                         </div>
+                    </div>
+
+                    {/* WA Schedule */}
+                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                        <h3 className="text-base font-black text-gray-900 mb-2 flex items-center gap-2">
+                            <span className="w-6 h-6 bg-green-600 text-white rounded-full text-xs flex items-center justify-center font-black">4</span>
+                            Jadwal Kirim WhatsApp
+                        </h3>
+                        <p className="text-xs text-gray-400 mb-5">
+                            Invoice akan otomatis dikirim via WhatsApp ke nomor PIC pada waktu yang ditentukan.
+                        </p>
+
+                        {/* Toggle */}
+                        <label className="flex items-center gap-3 cursor-pointer mb-5 select-none">
+                            <div
+                                onClick={() => setData('wa_enabled', !data.wa_enabled)}
+                                className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${
+                                    data.wa_enabled ? 'bg-green-500' : 'bg-gray-200'
+                                }`}
+                            >
+                                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                                    data.wa_enabled ? 'translate-x-6' : ''
+                                }`} />
+                            </div>
+                            <span className={`text-sm font-bold ${
+                                data.wa_enabled ? 'text-green-700' : 'text-gray-400'
+                            }`}>
+                                {data.wa_enabled ? '✅ Aktif — WA akan dikirim otomatis' : 'Nonaktif — kirim manual'}
+                            </span>
+                        </label>
+
+                        {data.wa_enabled && (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-2">
+                                        Tanggal &amp; Jam Kirim WA *
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        value={data.wa_send_at}
+                                        onChange={e => setData('wa_send_at', e.target.value)}
+                                        className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-gray-900 focus:ring-2 focus:ring-green-100 focus:border-green-400 focus:bg-white transition-all"
+                                    />
+                                    {errors.wa_send_at && <p className="text-red-500 text-xs mt-1">{errors.wa_send_at}</p>}
+                                </div>
+
+                                {selectedCompany && (
+                                    <div className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-2xl px-4 py-3">
+                                        <span className="text-xl">📱</span>
+                                        <div>
+                                            <p className="text-xs font-black text-green-800">Akan dikirim ke:</p>
+                                            <p className="text-sm font-bold text-green-700">{selectedCompany.pic_name}</p>
+                                            <p className="text-xs text-green-600">{selectedCompany.phone}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Actions */}

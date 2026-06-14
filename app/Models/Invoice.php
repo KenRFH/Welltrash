@@ -20,6 +20,10 @@ class Invoice extends Model
         'status',
         'notes',
         'pdf_path',
+        'payment_proof_path',
+        'wa_send_at',
+        'wa_sent_at',
+        'wa_status',
     ];
 
     protected $casts = [
@@ -27,7 +31,19 @@ class Invoice extends Model
         'period_end'   => 'date',
         'due_date'     => 'date',
         'amount'       => 'decimal:2',
+        'wa_send_at'   => 'datetime',
+        'wa_sent_at'   => 'datetime',
     ];
+
+    /**
+     * Scope: invoice yang jadwal WA-nya sudah tiba dan belum dikirim.
+     */
+    public function scopePendingWa($query)
+    {
+        return $query->where('wa_status', 'pending')
+                     ->whereNotNull('wa_send_at')
+                     ->where('wa_send_at', '<=', now());
+    }
 
     public function company()
     {

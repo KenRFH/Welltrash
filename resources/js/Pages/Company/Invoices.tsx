@@ -1,5 +1,5 @@
-import { Head } from '@inertiajs/react';
-import React, { useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import React, { useState, useRef } from 'react';
 import CompanySidebar from '@/Components/CompanySidebar';
 
 interface Invoice {
@@ -11,6 +11,7 @@ interface Invoice {
     amount: string;
     status: 'unpaid' | 'paid';
     notes: string | null;
+    payment_proof_path: string | null;
     created_at: string;
 }
 
@@ -37,11 +38,21 @@ interface Props {
 
 export default function CompanyInvoices({ company, invoices, activeDaysLeft }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'unpaid' | 'paid'>('all');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        payment_proof: null as File | null,
+    });
 
     const formatRupiah = (amount: string | number) => {
         const num = typeof amount === 'string' ? parseFloat(amount) : amount;
         return new Intl.NumberFormat('id-ID', {
-            style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
         }).format(num);
     };
 
@@ -51,14 +62,72 @@ export default function CompanyInvoices({ company, invoices, activeDaysLeft }: P
     const isOverdue = (inv: Invoice) =>
         inv.status === 'unpaid' && new Date(inv.due_date) < new Date();
 
-    const unpaidInvoices = invoices.data.filter(i => i.status === 'unpaid');
-    const paidInvoices   = invoices.data.filter(i => i.status === 'paid');
-    const totalUnpaid    = unpaidInvoices.reduce((s, i) => s + parseFloat(i.amount), 0);
-    const totalPaid      = paidInvoices.reduce((s, i) => s + parseFloat(i.amount), 0);
+    const handleOpenUploadModal = (invoice: Invoice) => {
+        setSelectedInvoice(invoice);
+        setData('payment_proof', null);
+        setPreviewUrl(null);
+    };
+
+    const handleCloseUploadModal = () => {
+        setSelectedInvoice(null);
+        reset();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran file melebihi batas maksimal 2MB. Silakan pilih file yang lebih kecil atau kompres terlebih dahulu.');
+                setData('payment_proof', null);
+                setPreviewUrl(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                return;
+            }
+
+            setData('payment_proof', file);
+            if (file.type.startsWith('image/')) {
+                setPreviewUrl(URL.createObjectURL(file));
+            } else {
+                setPreviewUrl(null);
+            }
+        }
+    };
+
+    const handleSubmitProof = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedInvoice) return;
+        post(route('company.invoices.uploadProof', selectedInvoice.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                handleCloseUploadModal();
+                alert('Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.');
+            },
+        });
+    };
+
+    // Local filtering
+    const filteredInvoices = invoices.data.filter(inv => {
+        if (statusFilter === 'all') return true;
+        return inv.status === statusFilter;
+    });
+
+    const unpaidCount = invoices.data.filter(i => i.status === 'unpaid').length;
+    const paidCount = invoices.data.filter(i => i.status === 'paid').length;
+
+    const totalUnpaidAmount = invoices.data
+        .filter(i => i.status === 'unpaid')
+        .reduce((sum, i) => sum + parseFloat(i.amount), 0);
+
+    const totalPaidAmount = invoices.data
+        .filter(i => i.status === 'paid')
+        .reduce((sum, i) => sum + parseFloat(i.amount), 0);
 
     return (
-        <div className="flex h-screen bg-[#F2F6F0] font-sans">
-            <Head title="Invoice Saya" />
+        <div className="flex h-screen bg-[#FAFBFD] text-slate-800 font-sans antialiased">
+            <Head title="Invoice & Tagihan" />
 
             <CompanySidebar
                 active="invoices"
@@ -70,236 +139,328 @@ export default function CompanyInvoices({ company, invoices, activeDaysLeft }: P
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* ── HEADER ── */}
-                <header className="h-20 flex items-center justify-between px-6 sm:px-10 bg-white border-b border-gray-100 z-10 sticky top-0 shadow-[0_1px_12px_rgba(0,0,0,0.04)]">
+                <header className="h-20 flex items-center justify-between px-6 sm:px-10 bg-white border-b border-slate-100 z-10 sticky top-0 shadow-sm">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden"
+                            className="p-2 -ml-2 text-slate-400 hover:text-green-600 md:hidden transition-colors"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
                         <div>
-                            <h1 className="text-xl font-black text-gray-900 tracking-tight">Invoice Saya</h1>
-                            <p className="text-[11px] text-gray-400 font-medium">
-                                {company.company_name} · Paket <span className="font-bold text-green-600">{company.subscription_plan}</span>
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900">Tagihan & Invoice</h1>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                {company.company_name} · Paket <span className="font-semibold text-green-600">{company.subscription_plan}</span>
                             </p>
                         </div>
                     </div>
 
-                    {/* Masa aktif pill */}
-                    <div className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black border ${
+                    {/* Active days status */}
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
                         activeDaysLeft > 7
-                            ? 'bg-green-50 text-green-700 border-green-100'
+                            ? 'bg-emerald-50/50 text-emerald-700 border-emerald-100/50'
                             : activeDaysLeft > 0
-                                ? 'bg-yellow-50 text-yellow-700 border-yellow-100'
-                                : 'bg-red-50 text-red-600 border-red-100'
+                                ? 'bg-amber-50/50 text-amber-700 border-amber-100/50'
+                                : 'bg-rose-50/50 text-rose-600 border-rose-100/50'
                     }`}>
-                        <span className={`w-2 h-2 rounded-full ${activeDaysLeft > 7 ? 'bg-green-500' : activeDaysLeft > 0 ? 'bg-yellow-500' : 'bg-red-500'}`} />
-                        {activeDaysLeft > 0 ? `${activeDaysLeft} hari aktif` : 'Masa aktif habis'}
+                        <span className={`w-2 h-2 rounded-full ${activeDaysLeft > 7 ? 'bg-emerald-500 animate-pulse' : activeDaysLeft > 0 ? 'bg-amber-500' : 'bg-rose-500'}`} />
+                        {activeDaysLeft > 0 ? `${activeDaysLeft} Hari Aktif` : 'Masa Aktif Habis'}
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto">
-                    {/* ── HERO BANNER ── */}
-                    <div className="bg-gradient-to-br from-green-700 via-green-600 to-emerald-600 px-6 sm:px-10 py-10 relative overflow-hidden">
-                        {/* Dekorasi */}
-                        <div className="absolute inset-0 opacity-10">
-                            <div className="absolute top-4 right-16 w-48 h-48 rounded-full border-2 border-white/60" />
-                            <div className="absolute -bottom-8 right-4 w-72 h-72 rounded-full border border-white/30" />
-                            <div className="absolute top-2 left-1/2 w-32 h-32 rounded-full bg-white/20" />
+                <main className="flex-1 overflow-y-auto px-6 sm:px-10 py-8 space-y-8">
+                    
+                    {/* ── STATS CARDS ── */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between hover:border-slate-200 transition-colors">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Tagihan</span>
+                            <span className="text-2xl font-extrabold text-slate-900 mt-2">{invoices.total}</span>
+                            <span className="text-[11px] text-slate-400 mt-1">Seluruh periode kemitraan</span>
+                        </div>
+                        
+                        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between hover:border-slate-200 transition-colors">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Belum Lunas</span>
+                            <span className="text-2xl font-extrabold text-rose-600 mt-2">{formatRupiah(totalUnpaidAmount)}</span>
+                            <span className="text-[11px] text-slate-400 mt-1">{unpaidCount} tagihan menunggu pembayaran</span>
                         </div>
 
-                        <div className="relative z-10 max-w-4xl mx-auto">
-                            <p className="text-green-200 text-xs font-bold uppercase tracking-widest mb-1">Welltrash Mitra</p>
-                            <h2 className="text-2xl sm:text-3xl font-black text-white mb-6">Invoice & Tagihan</h2>
-
-                            <div className="grid grid-cols-3 gap-3 sm:gap-6">
-                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                                    <p className="text-green-200 text-[10px] font-bold uppercase tracking-widest">Total Invoice</p>
-                                    <p className="text-3xl font-black text-white mt-1">{invoices.total}</p>
-                                    <p className="text-green-300 text-[10px] mt-1">Semua periode</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                                    <p className="text-red-200 text-[10px] font-bold uppercase tracking-widest">Belum Lunas</p>
-                                    <p className="text-xl sm:text-2xl font-black text-white mt-1 leading-tight">{formatRupiah(totalUnpaid)}</p>
-                                    <p className="text-green-300 text-[10px] mt-1">{unpaidInvoices.length} invoice</p>
-                                </div>
-                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-                                    <p className="text-green-200 text-[10px] font-bold uppercase tracking-widest">Sudah Lunas</p>
-                                    <p className="text-xl sm:text-2xl font-black text-white mt-1 leading-tight">{formatRupiah(totalPaid)}</p>
-                                    <p className="text-green-300 text-[10px] mt-1">{paidInvoices.length} invoice</p>
-                                </div>
-                            </div>
+                        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between hover:border-slate-200 transition-colors">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sudah Lunas</span>
+                            <span className="text-2xl font-extrabold text-emerald-600 mt-2">{formatRupiah(totalPaidAmount)}</span>
+                            <span className="text-[11px] text-slate-400 mt-1">{paidCount} tagihan selesai diverifikasi</span>
                         </div>
                     </div>
 
-                    {/* ── INVOICE LIST ── */}
-                    <div className="px-6 sm:px-10 py-8 max-w-4xl mx-auto space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-sm font-black text-gray-700 uppercase tracking-widest">Daftar Invoice</h3>
-                            <span className="text-xs text-gray-400 font-medium">{invoices.total} tagihan</span>
+                    {/* ── FILTER & CONTENT TABS ── */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setStatusFilter('all')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                                        statusFilter === 'all'
+                                            ? 'bg-slate-900 text-white shadow-sm'
+                                            : 'bg-transparent text-slate-500 hover:text-slate-900'
+                                    }`}
+                                >
+                                    Semua
+                                </button>
+                                <button
+                                    onClick={() => setStatusFilter('unpaid')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                        statusFilter === 'unpaid'
+                                            ? 'bg-slate-900 text-white shadow-sm'
+                                            : 'bg-transparent text-slate-500 hover:text-slate-900'
+                                    }`}
+                                >
+                                    Belum Lunas
+                                    {unpaidCount > 0 && (
+                                        <span className="bg-rose-500 text-white text-[10px] w-4.5 h-4.5 rounded-full flex items-center justify-center font-bold px-1">
+                                            {unpaidCount}
+                                        </span>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setStatusFilter('paid')}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                                        statusFilter === 'paid'
+                                            ? 'bg-slate-900 text-white shadow-sm'
+                                            : 'bg-transparent text-slate-500 hover:text-slate-900'
+                                    }`}
+                                >
+                                    Lunas
+                                </button>
+                            </div>
+                            <span className="text-xs text-slate-400 font-medium">Menampilkan {filteredInvoices.length} tagihan</span>
                         </div>
 
-                        {invoices.data.length === 0 ? (
-                            <div className="bg-white rounded-3xl p-16 text-center shadow-sm border border-gray-100">
-                                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
-                                    <svg className="w-10 h-10 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        {/* ── INVOICE ITEMS LIST ── */}
+                        {filteredInvoices.length === 0 ? (
+                            <div className="bg-white rounded-3xl p-12 text-center border border-slate-100 shadow-sm">
+                                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
-                                <p className="text-gray-700 font-bold">Belum ada invoice</p>
-                                <p className="text-xs text-gray-400 mt-2 max-w-xs mx-auto leading-relaxed">
-                                    Invoice akan muncul di sini setelah diterbitkan oleh admin Welltrash
+                                <h3 className="text-sm font-bold text-slate-700">Tidak Ada Tagihan</h3>
+                                <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                                    Tagihan dalam kategori ini tidak ditemukan atau belum diterbitkan oleh Admin.
                                 </p>
                             </div>
                         ) : (
-                            <>
-                                {invoices.data.map(invoice => (
+                            <div className="space-y-4">
+                                {filteredInvoices.map(invoice => (
                                     <div
                                         key={invoice.id}
-                                        className={`bg-white rounded-3xl shadow-sm border overflow-hidden transition-all hover:shadow-md ${
-                                            isOverdue(invoice)
-                                                ? 'border-red-100'
-                                                : invoice.status === 'paid'
-                                                    ? 'border-green-100'
-                                                    : 'border-gray-100'
-                                        }`}
+                                        className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md hover:border-slate-200 transition-all duration-300 transform hover:scale-[1.005]"
                                     >
-                                        {/* Status strip di atas */}
-                                        <div className={`h-1 w-full ${
-                                            invoice.status === 'paid'
-                                                ? 'bg-green-500'
-                                                : isOverdue(invoice)
-                                                    ? 'bg-red-500'
-                                                    : 'bg-yellow-400'
-                                        }`} />
+                                        {/* Left: Info Invoice */}
+                                        <div className="space-y-2 flex-1">
+                                            <div className="flex items-center gap-2.5 flex-wrap">
+                                                <span className="font-mono font-bold text-sm text-slate-900 tracking-tight">
+                                                    {invoice.invoice_number}
+                                                </span>
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                                    invoice.status === 'paid'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                        : invoice.payment_proof_path
+                                                            ? 'bg-amber-50 text-amber-700 border-amber-100'
+                                                            : isOverdue(invoice)
+                                                                ? 'bg-rose-50 text-rose-700 border-rose-100 animate-pulse'
+                                                                : 'bg-slate-50 text-slate-600 border-slate-100'
+                                                }`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${
+                                                        invoice.status === 'paid'
+                                                            ? 'bg-emerald-500'
+                                                            : invoice.payment_proof_path
+                                                                ? 'bg-amber-500'
+                                                                : 'bg-rose-500'
+                                                    }`} />
+                                                    {invoice.status === 'paid'
+                                                        ? 'Lunas'
+                                                        : invoice.payment_proof_path
+                                                            ? 'Menunggu Verifikasi'
+                                                            : 'Belum Lunas'}
+                                                </span>
+                                            </div>
 
-                                        <div className="p-6">
-                                            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                                                {/* Kiri: info invoice */}
-                                                <div className="flex-1 space-y-3">
-                                                    {/* Nomor & Status */}
-                                                    <div className="flex items-center gap-3 flex-wrap">
-                                                        <span className="font-mono font-black text-gray-900 text-base tracking-tight">
-                                                            {invoice.invoice_number}
-                                                        </span>
-                                                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                                                            invoice.status === 'paid'
-                                                                ? 'bg-green-50 text-green-700 border-green-200'
-                                                                : isOverdue(invoice)
-                                                                    ? 'bg-red-50 text-red-700 border-red-200'
-                                                                    : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                                        }`}>
-                                                            <span className={`w-1.5 h-1.5 rounded-full ${
-                                                                invoice.status === 'paid' ? 'bg-green-500'
-                                                                    : isOverdue(invoice) ? 'bg-red-500' : 'bg-yellow-500'
-                                                            }`} />
-                                                            {invoice.status === 'paid' ? 'Lunas' : isOverdue(invoice) ? 'Jatuh Tempo' : 'Belum Lunas'}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Detail grid */}
-                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2">
-                                                        <div>
-                                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Periode</p>
-                                                            <p className="text-xs text-gray-700 font-semibold mt-0.5">
-                                                                {formatDateShort(invoice.period_start)} – {formatDateShort(invoice.period_end)}
-                                                            </p>
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Jatuh Tempo</p>
-                                                            <p className={`text-xs font-semibold mt-0.5 ${isOverdue(invoice) ? 'text-red-600 font-black' : 'text-gray-700'}`}>
-                                                                {formatDateShort(invoice.due_date)}
-                                                            </p>
-                                                        </div>
-                                                        <div className="col-span-2 sm:col-span-1">
-                                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Total Tagihan</p>
-                                                            <p className="text-lg font-black text-gray-900 mt-0.5 leading-none">
-                                                                {formatRupiah(invoice.amount)}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {invoice.notes && (
-                                                        <div className="bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 text-xs text-amber-800 flex items-start gap-2">
-                                                            <span className="text-sm flex-shrink-0">📝</span>
-                                                            <span>{invoice.notes}</span>
-                                                        </div>
-                                                    )}
+                                            <div className="flex items-center gap-6 text-xs text-slate-400 flex-wrap">
+                                                <div>
+                                                    <span className="font-medium text-slate-400">Periode:</span>{' '}
+                                                    <span className="font-semibold text-slate-600">
+                                                        {formatDateShort(invoice.period_start)} – {formatDateShort(invoice.period_end)}
+                                                    </span>
                                                 </div>
+                                                <div>
+                                                    <span className="font-medium text-slate-400">Jatuh Tempo:</span>{' '}
+                                                    <span className={`font-semibold ${isOverdue(invoice) ? 'text-rose-600' : 'text-slate-600'}`}>
+                                                        {formatDateShort(invoice.due_date)}
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                                                {/* Kanan: tombol download */}
-                                                <div className="flex sm:flex-col items-center gap-2 flex-shrink-0">
-                                                    <a
-                                                        href={route('company.invoices.download', invoice.id)}
-                                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-2xl text-xs font-black transition-all shadow-sm shadow-green-100/60 whitespace-nowrap"
+                                            {invoice.notes && (
+                                                <div className="bg-slate-50 text-slate-500 text-[11px] px-3 py-1.5 rounded-xl inline-block max-w-md italic">
+                                                    Catatan: "{invoice.notes}"
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Right: Amount & Actions */}
+                                        <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
+                                            <div className="text-left md:text-right">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Tagihan</p>
+                                                <p className="text-lg font-black text-slate-900 mt-0.5">{formatRupiah(invoice.amount)}</p>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <a
+                                                    href={route('company.invoices.download', invoice.id)}
+                                                    className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-100"
+                                                    title="Download PDF"
+                                                >
+                                                    <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                    </svg>
+                                                    PDF
+                                                </a>
+
+                                                {invoice.status === 'unpaid' && (
+                                                    <button
+                                                        onClick={() => handleOpenUploadModal(invoice)}
+                                                        className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                                                            invoice.payment_proof_path
+                                                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                                                                : 'bg-green-600 hover:bg-green-500 text-white shadow-green-100'
+                                                        }`}
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                                         </svg>
-                                                        Download PDF
-                                                    </a>
-
-                                                    {invoice.status === 'unpaid' && (
-                                                        <a
-                                                            href={route('company.billing')}
-                                                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 rounded-2xl text-xs font-black transition-all whitespace-nowrap"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                            </svg>
-                                                            Upload Bukti
-                                                        </a>
-                                                    )}
-                                                </div>
+                                                        {invoice.payment_proof_path ? 'Ubah Bukti' : 'Kirim Bukti'}
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
                                 ))}
-
-                                {/* Pagination */}
-                                {invoices.last_page > 1 && (
-                                    <div className="flex justify-center gap-1 pt-2">
-                                        {invoices.links.map((link, i) => (
-                                            link.url ? (
-                                                <a key={i} href={link.url}
-                                                    className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
-                                                        link.active ? 'bg-green-600 text-white shadow-sm' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                                                    }`}
-                                                    dangerouslySetInnerHTML={{ __html: link.label }}
-                                                />
-                                            ) : (
-                                                <span key={i}
-                                                    className="px-3.5 py-2 rounded-xl text-xs font-black text-gray-300 bg-white border border-gray-100"
-                                                    dangerouslySetInnerHTML={{ __html: link.label }} />
-                                            )
-                                        ))}
-                                    </div>
-                                )}
-                            </>
+                            </div>
                         )}
+                    </div>
 
-                        {/* Info box */}
-                        <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex gap-4 items-start">
-                            <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <svg className="w-4.5 h-4.5 w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p className="text-sm font-black text-gray-800">Cara Pembayaran</p>
-                                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                                    Transfer ke <span className="font-bold text-gray-700">BCA 1234567890 a.n PT Welltrash Indonesia</span> sesuai total tagihan.
-                                    Setelah transfer, klik <span className="font-bold text-green-600">"Upload Bukti"</span> di samping invoice yang belum lunas.
-                                </p>
-                            </div>
+                    {/* ── CARA PEMBAYARAN BOX ── */}
+                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex gap-4 items-start max-w-3xl">
+                        <div className="w-9 h-9 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div className="space-y-1">
+                            <h4 className="text-sm font-bold text-slate-800">Petunjuk Pembayaran</h4>
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                Transfer sesuai total tagihan ke rekening <span className="font-bold text-slate-700">BCA 1234567890 a.n PT Welltrash Indonesia</span>. 
+                                Setelah transfer berhasil, klik tombol <span className="font-bold text-green-600">"Kirim Bukti"</span> pada tagihan terkait untuk diverifikasi Admin.
+                            </p>
                         </div>
                     </div>
                 </main>
             </div>
+
+            {/* ── MODAL UPLOAD BUKTI PEMBAYARAN ── */}
+            {selectedInvoice && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-all">
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-slate-100 shadow-2xl relative">
+                        <button
+                            onClick={handleCloseUploadModal}
+                            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h3 className="text-lg font-bold text-slate-900 tracking-tight">Kirim Bukti Transfer</h3>
+                        <p className="text-xs text-slate-400 font-medium mt-1">
+                            Unggah resi untuk tagihan <span className="font-mono font-semibold text-slate-700">{selectedInvoice.invoice_number}</span> sebesar{' '}
+                            <span className="font-bold text-slate-900">{formatRupiah(selectedInvoice.amount)}</span>.
+                        </p>
+
+                        <form onSubmit={handleSubmitProof} className="space-y-6 mt-6">
+                            <div className="space-y-2">
+                                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">File Bukti (JPG/PNG/WEBP/HEIC/PDF, Max 2MB)</label>
+                                
+                                <div className={`flex justify-center px-6 pt-6 pb-6 border-2 border-dashed rounded-2xl transition-colors ${previewUrl ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200 hover:border-green-400 hover:bg-slate-50/30'}`}>
+                                    <div className="space-y-2 text-center w-full flex flex-col items-center">
+                                        {previewUrl ? (
+                                            <div className="mb-2">
+                                                <img src={previewUrl} alt="Preview" className="mx-auto h-32 object-contain rounded-xl shadow-sm border border-slate-100" />
+                                            </div>
+                                        ) : selectedInvoice.payment_proof_path && !data.payment_proof ? (
+                                            <div className="mb-2">
+                                                {selectedInvoice.payment_proof_path.endsWith('.pdf') ? (
+                                                    <div className="p-4 bg-rose-50/50 rounded-2xl text-rose-600 inline-block border border-rose-100">
+                                                        <span className="text-2xl">📄</span> PDF Bukti
+                                                    </div>
+                                                ) : (
+                                                    <img src={`/storage/${selectedInvoice.payment_proof_path}`} alt="Bukti Saat Ini" className="mx-auto h-32 object-contain rounded-xl shadow-sm border border-slate-100 bg-white" />
+                                                )}
+                                                <p className="text-[10px] text-slate-400 mt-2 font-medium">Bukti terkirim sebelumnya</p>
+                                            </div>
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center mb-2">
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="flex text-xs text-slate-500 justify-center items-center">
+                                            <button 
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="px-3 py-1.5 bg-slate-900 text-white rounded-lg font-bold hover:bg-slate-800 transition-colors shadow-sm"
+                                            >
+                                                Pilih File
+                                            </button>
+                                            <input 
+                                                ref={fileInputRef}
+                                                type="file" 
+                                                className="hidden" 
+                                                accept=".jpeg,.png,.jpg,.pdf,.webp,.heic"
+                                                onChange={handleFileChange}
+                                            />
+                                            {!data.payment_proof && <span className="pl-2">atau seret file ke sini</span>}
+                                        </div>
+                                        {data.payment_proof && (
+                                            <p className="text-xs text-slate-700 font-bold mt-1">Terpilih: {data.payment_proof.name}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                {errors.payment_proof && <p className="text-rose-500 text-xs mt-1 font-semibold">{errors.payment_proof}</p>}
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseUploadModal}
+                                    className="flex-1 py-3 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all"
+                                >
+                                    Batal
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    disabled={processing || !data.payment_proof}
+                                    className="flex-1 py-3 px-4 border border-transparent rounded-xl shadow-sm text-xs font-bold text-white bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {processing ? 'Mengirimkan...' : 'Kirim Bukti'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

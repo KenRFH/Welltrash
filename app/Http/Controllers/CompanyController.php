@@ -430,8 +430,22 @@ class CompanyController extends Controller
 
     public function uploadPayment(Request $request)
     {
+        if ($request->hasFile('payment_evidence')) {
+            $file = $request->file('payment_evidence');
+            if (!$file->isValid()) {
+                return back()->withErrors([
+                    'payment_evidence' => 'Gagal mengunggah file. Pastikan ukuran file tidak melebihi 2MB.'
+                ]);
+            }
+        }
+
         $request->validate([
-            'payment_evidence' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'payment_evidence' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
+        ], [
+            'payment_evidence.required' => 'Bukti pembayaran wajib diunggah.',
+            'payment_evidence.file' => 'Bukti pembayaran harus berupa file.',
+            'payment_evidence.mimes' => 'Format file harus jpeg, png, jpg, atau pdf.',
+            'payment_evidence.max' => 'Ukuran file maksimal adalah 2MB.',
         ]);
 
         $company = Auth::user()->company;

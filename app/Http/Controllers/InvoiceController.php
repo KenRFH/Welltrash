@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Models\Invoice;
 use App\Models\Company;
@@ -31,6 +33,10 @@ class InvoiceController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('wa_status')) {
+            $query->where('wa_status', $request->wa_status);
+        }
+
         $invoices = $query->paginate(15)->withQueryString();
 
         $companies = Company::select('id', 'company_name')
@@ -41,7 +47,7 @@ class InvoiceController extends Controller
         return Inertia::render('Admin/Invoices/Index', [
             'invoices'  => $invoices,
             'companies' => $companies,
-            'filters'   => $request->only(['company_id', 'status']),
+            'filters'   => $request->only(['company_id', 'status', 'wa_status']),
         ]);
     }
 
@@ -75,6 +81,7 @@ class InvoiceController extends Controller
             'due_date'     => 'required|date',
             'amount'       => 'required|numeric|min:0',
             'notes'        => 'nullable|string|max:1000',
+            'wa_send_at'   => 'nullable|date',
         ]);
 
         $company = Company::with(['pickups' => function ($q) use ($request) {
@@ -93,6 +100,8 @@ class InvoiceController extends Controller
             'amount'         => $request->amount,
             'status'         => 'unpaid',
             'notes'          => $request->notes,
+            'wa_send_at'     => $request->wa_send_at ?: null,
+            'wa_status'      => $request->wa_send_at ? 'pending' : 'skipped',
         ]);
 
         // Generate PDF & simpan — gunakan nama file aman (ganti / dengan -)
@@ -122,6 +131,68 @@ class InvoiceController extends Controller
         // Sanitize: ganti / dengan - agar valid sebagai nama file
         $safeFilename = str_replace('/', '-', $invoice->invoice_number);
         return $pdf->stream("invoice-{$safeFilename}.pdf");
+    }
+
+    /**
+     * POST /admin/invoices/{invoice}/resend-wa — kirim ulang WA
+     */
+    public function resendWa(Invoice $invoice)
+    {
+        $invoice->load('company');
+        $company = $invoice->company;
+
+        $raw   = preg_replace('/\D/', '', $company->phone ?? '');
+        $phone = ltrim($raw, '0');
+        if (!str_starts_with($phone, '62')) {
+            $phone = '62' . $phone;
+        }
+
+        Carbon::setLocale('id');
+        $periodStart = Carbon::parse($invoice->period_start)->translatedFormat('d F Y');
+        $periodEnd   = Carbon::parse($invoice->period_end)->translatedFormat('d F Y');
+        $dueDate     = Carbon::parse($invoice->due_date)->translatedFormat('d F Y');
+        $amount      = 'Rp ' . number_format($invoice->amount, 0, ',', '.');
+        $pdfUrl      = $invoice->pdf_path ? url('storage/' . $invoice->pdf_path) : null;
+
+        $message = "Halo *{$company->pic_name}*,\n\n"
+            . "Berikut kami sampaikan *Invoice Tagihan Welltrash* untuk *{$company->company_name}*.\n\n"
+            . "━━━━━━━━━━━━━━━━━━━\n"
+            . "📋 *No. Invoice* : {$invoice->invoice_number}\n"
+            . "📅 *Periode*      : {$periodStart} – {$periodEnd}\n"
+            . "💰 *Total Tagihan*: {$amount}\n"
+            . "⏰ *Jatuh Tempo*  : {$dueDate}\n"
+            . ($invoice->notes ? "📝 *Catatan*      : {$invoice->notes}\n" : '')
+            . "━━━━━━━━━━━━━━━━━━━\n"
+            . ($pdfUrl ? "\n🔗 *Download Invoice PDF*:\n{$pdfUrl}\n" : '')
+            . "\nMohon segera melakukan pembayaran sebelum tanggal jatuh tempo.\n"
+            . "Terima kasih atas kepercayaan Anda 🌿\n"
+            . "*Tim Welltrash*";
+
+        try {
+            $response = Http::withHeaders(['Authorization' => config('services.fonnte.token')])
+                ->asForm()
+                ->post(config('services.fonnte.url'), [
+                    'target'  => $phone,
+                    'message' => $message,
+                ]);
+
+            $body = $response->json();
+
+            if ($response->successful() && ($body['status'] ?? false) === true) {
+                $invoice->update(['wa_status' => 'sent', 'wa_sent_at' => now()]);
+                return back()->with('success', "WhatsApp invoice {$invoice->invoice_number} berhasil dikirim ke {$company->pic_name}.");
+            }
+
+            $reason = $body['reason'] ?? $body['message'] ?? 'Unknown error';
+            $invoice->update(['wa_status' => 'failed']);
+            Log::error("[InvoiceWA] Resend gagal: {$invoice->invoice_number} → {$reason}");
+            return back()->with('error', "Gagal kirim WA: {$reason}");
+
+        } catch (\Exception $e) {
+            $invoice->update(['wa_status' => 'failed']);
+            Log::error("[InvoiceWA] Resend exception: {$e->getMessage()}");
+            return back()->with('error', 'Gagal kirim WA: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -166,8 +237,8 @@ class InvoiceController extends Controller
         $dueDate     = Carbon::parse($invoice->due_date)->translatedFormat('d F Y');
         $amount      = 'Rp ' . number_format($invoice->amount, 0, ',', '.');
 
-        $message = "Halo {$company->pic_name},\n\n"
-            . "Berikut kami sampaikan *Invoice Welltrash* untuk *{$company->company_name}*.\n\n"
+        $message = "Halo {$company->pic_name} 👋,\n\n"
+            . "Berikut kami sampaikan *Invoice Tagihan Welltrash* untuk *{$company->company_name}*.\n\n"
             . "📋 *No. Invoice* : {$invoice->invoice_number}\n"
             . "📅 *Periode*      : {$periodStart} – {$periodEnd}\n"
             . "💰 *Total Tagihan*: {$amount}\n"
@@ -181,8 +252,8 @@ class InvoiceController extends Controller
         }
 
         $message .= "\n\nUntuk pertanyaan, hubungi kami kembali.\n"
-            . "Terima kasih atas kepercayaan Anda 🌿\n"
-            . "*Tim Welltrash*";
+            . "Terima kasih atas kepercayaan Anda 🙏\n"
+            . "*Welltrash*";
 
         $url = 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
 
@@ -228,7 +299,7 @@ class InvoiceController extends Controller
         $user = Auth::user();
 
         // Pastikan invoice milik company yang login
-        if ($invoice->company_id !== $user->company?->id) {
+        if ($invoice->company_id != $user->company?->id) {
             abort(403);
         }
 
@@ -242,6 +313,65 @@ class InvoiceController extends Controller
         // Sanitize: ganti / dengan - agar valid sebagai nama file download
         $safeFilename = str_replace('/', '-', $invoice->invoice_number);
         return $pdf->download("invoice-{$safeFilename}.pdf");
+    }
+
+    /**
+     * POST /company/invoices/{invoice}/upload-proof — upload bukti pembayaran oleh mitra
+     */
+    public function uploadPaymentProof(Request $request, Invoice $invoice)
+    {
+        $user = Auth::user();
+        Log::info('Upload payment proof controller method called', [
+            'invoice_id' => $invoice->id,
+            'user_id' => $user?->id,
+            'company_id' => $user?->company?->id,
+            'invoice_company_id' => $invoice->company_id,
+            'has_file' => $request->hasFile('payment_proof'),
+            'file_valid' => $request->hasFile('payment_proof') ? $request->file('payment_proof')->isValid() : false,
+            'file_error' => $request->hasFile('payment_proof') ? $request->file('payment_proof')->getError() : null,
+        ]);
+
+        // Pastikan invoice milik company yang login
+        if ($invoice->company_id != $user->company?->id) {
+            abort(403);
+        }
+
+        // Pastikan invoice masih unpaid
+        if ($invoice->status !== 'unpaid') {
+            return back()->with('error', 'Invoice ini sudah lunas.');
+        }
+
+        if ($request->hasFile('payment_proof')) {
+            $file = $request->file('payment_proof');
+            if (!$file->isValid()) {
+                return back()->withErrors([
+                    'payment_proof' => 'Gagal mengunggah file. Pastikan ukuran file tidak melebihi 2MB.'
+                ]);
+            }
+        }
+
+        $request->validate([
+            'payment_proof' => 'required|file|mimes:jpeg,png,jpg,pdf,webp,heic|max:2048',
+        ], [
+            'payment_proof.required' => 'Bukti pembayaran wajib diunggah.',
+            'payment_proof.file' => 'Bukti pembayaran harus berupa file.',
+            'payment_proof.mimes' => 'Format file harus jpeg, png, jpg, pdf, webp, atau heic.',
+            'payment_proof.max' => 'Ukuran file maksimal adalah 2MB.',
+        ]);
+
+        // Hapus bukti pembayaran lama jika ada
+        if ($invoice->payment_proof_path) {
+            Storage::disk('public')->delete($invoice->payment_proof_path);
+        }
+
+        // Simpan file bukti transfer baru
+        $path = $request->file('payment_proof')->store('invoices/proofs', 'public');
+
+        $invoice->update([
+            'payment_proof_path' => $path,
+        ]);
+
+        return back()->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.');
     }
 
     // ─── HELPER ──────────────────────────────────────────────────────────────

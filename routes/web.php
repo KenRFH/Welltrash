@@ -165,6 +165,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
         Route::get('/invoices/{invoice}/show', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::patch('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.markPaid');
+        Route::post('/invoices/{invoice}/resend-wa', [InvoiceController::class, 'resendWa'])->name('invoices.resendWa');
         Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
         Route::get('/invoices/{invoice}/whatsapp', [InvoiceController::class, 'sendWhatsApp'])->name('invoices.whatsapp');
 
@@ -238,6 +239,7 @@ Route::middleware(['auth', 'role:company'])
         // Invoice (Mitra)
         Route::get('/invoices', [InvoiceController::class, 'companyInvoices'])->name('invoices.index');
         Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'downloadInvoice'])->name('invoices.download');
+        Route::post('/invoices/{invoice}/upload-proof', [InvoiceController::class, 'uploadPaymentProof'])->name('invoices.uploadProof');
     });
 use App\Http\Controllers\CleanUPController;
 
