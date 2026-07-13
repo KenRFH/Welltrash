@@ -127,7 +127,7 @@ export default function KatalogPage({ katalogs }: Props) {
                                             >
                                                 <div className="p-6 pt-4">
                                                     <a
-                                                        href="https://wa.me/62811988706"
+                                                        href="https://wa.me/62819848706"
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-bold text-white transition-opacity hover:opacity-90"
@@ -152,7 +152,7 @@ export default function KatalogPage({ katalogs }: Props) {
                                 Tertarik dengan produk kami?
                             </p>
                             <a
-                                href="https://wa.me/62811988706"
+                                href="https://wa.me/62819848706"
                                 target="_blank"
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-3 font-bold px-7 py-3.5 rounded-full text-white text-sm transition-all duration-300 bg-[#0E172A] hover:bg-[#0E172A]/80"

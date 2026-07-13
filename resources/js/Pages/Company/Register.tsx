@@ -447,9 +447,9 @@ export default function Register({ auth }: any) {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
-                                        <h4 className="font-bold text-blue-800 mb-1">Informasi Masa Aktif Kemitraan</h4>
+                                        <h4 className="font-bold text-blue-800 mb-1">Informasi Aktivasi Kemitraan</h4>
                                         <p className="text-sm text-blue-700">
-                                            Semua layanan kemitraan memiliki estimasi masa aktif <strong>30 hari</strong> yang dimulai sejak tanggal persetujuan admin. Anda dapat memantau informasi sisa masa aktif beserta opsi perpanjangan melalui halaman <strong>Mitra</strong> dan <strong>Tagihan</strong> setelah pendaftaran Anda diverifikasi.
+                                            Akun kemitraan Anda akan aktif setelah diverifikasi dan diaktifkan oleh admin. Anda dapat memantau status kemitraan melalui halaman profil setelah pendaftaran Anda disetujui.
                                         </p>
                                     </div>
                                 </div>
@@ -473,7 +473,7 @@ export default function Register({ auth }: any) {
                             {/* Form Action Buttons */}
                             <div className="flex justify-center items-center gap-4 pt-8">
                                 <a 
-                                    href="https://wa.me/62811988706" 
+                                    href="https://wa.me/62819848706" 
                                     target="_blank" 
                                     rel="noreferrer"
                                     className="px-8 py-3 rounded-lg border border-teal-600 text-teal-700 font-bold hover:bg-teal-50 transition-colors text-sm"

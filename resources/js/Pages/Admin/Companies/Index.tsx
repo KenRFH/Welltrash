@@ -88,9 +88,6 @@ export default function Index({ companies }: Props) {
                                             <td className="px-6 py-5">
                                                 <div className="flex flex-col items-start gap-1.5">
                                                     {getStatusBadge(company.subscription_status)}
-                                                    {company.subscription_status === 'active' && company.remaining_days !== null && (
-                                                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">Sisa {company.remaining_days} Hari</span>
-                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-5 text-right space-x-2">
@@ -171,9 +168,6 @@ export default function Index({ companies }: Props) {
                                         </div>
                                         <div className="flex flex-col items-end gap-1.5">
                                             {getStatusBadge(company.subscription_status)}
-                                            {company.subscription_status === 'active' && company.remaining_days !== null && (
-                                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">Sisa {company.remaining_days} Hari</span>
-                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-1 mb-4">

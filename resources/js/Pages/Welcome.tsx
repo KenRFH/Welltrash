@@ -123,7 +123,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                                         </div>
                                     ))}
                                 </div>
-                                <p>Dipercaya <span className="font-bold text-gray-800">20+ Mitra di Jember</span></p>
+                                <p>Dipercaya <span className="font-bold text-gray-800">30+ Mitra di Jember</span></p>
                             </div>
                         </div>
 
@@ -142,7 +142,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                                 </div>
                                 <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md px-5 py-4 rounded-lg shadow-lg border border-gray-200 max-w-[220px]">
                                     <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Telah Mengelola</p>
-                                    <h4 className="text-2xl font-bold text-lime-500">4000 Kg+</h4>
+                                    <h4 className="text-2xl font-bold text-lime-500">8000 Kg+</h4>
                                     <p className="text-xs text-gray-600 mt-1">Sampah di Jember</p>
                                 </div>
                             </div>
@@ -294,7 +294,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
                 </div>
             </section>
 
-            <section className="md:min-h-screen py-24 relative overflow-hidden rounded-[1.2rem] " style={{ backgroundColor: "#0D1520" }}>
+            <section className="md:min-h-screen py-24 relative overflow-hidden rounded-t-[1.2rem] " style={{ backgroundColor: "#0D1520" }}>
                 <div className="absolute inset-0 opacity-[0.03]"
                     style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
 

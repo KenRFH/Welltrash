@@ -14,13 +14,12 @@ interface Props {
         address: string;
         phone: string;
     };
-    activeDaysLeft: number;
     auth: {
         user: { name: string }
     };
 }
 
-export default function Mitra({ auth, company, activeDaysLeft }: Props) {
+export default function Mitra({ auth, company }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         subscription_plan: company.subscription_plan,
     });
@@ -43,7 +42,7 @@ export default function Mitra({ auth, company, activeDaysLeft }: Props) {
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
                 plan={company.subscription_plan}
-                isLocked={activeDaysLeft <= 0}
+                isLocked={false}
             />
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -78,12 +77,7 @@ export default function Mitra({ auth, company, activeDaysLeft }: Props) {
                                     </span>
                                 </div>
                             </div>
-                            <div className="mt-6 md:mt-0 text-center md:text-right relative z-10 bg-green-50 px-6 py-4 rounded-2xl border border-green-100">
-                                <p className="text-sm font-bold text-green-600 uppercase tracking-wider mb-1">Masa Aktif Tersisa</p>
-                                <div className="text-4xl font-extrabold text-green-700">
-                                    {activeDaysLeft} <span className="text-lg font-bold text-green-600/70">Hari</span>
-                                </div>
-                            </div>
+
                         </div>
 
                         {/* Partnership Details Grid */}

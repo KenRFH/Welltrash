@@ -2,7 +2,7 @@ import React from 'react';
 
 const WhatsAppWidget: React.FC = () => {
     // Nomor WhatsApp dengan format internasional tanpa tanda '+'
-    const phoneNumber = "62811988706";
+    const phoneNumber = "62819848706";
     const message = encodeURIComponent("Halo WellTrash, saya ingin bertanya mengenai layanan Anda.");
 
     return (

@@ -51,9 +51,6 @@ class CompanyController extends Controller
             return redirect()->route('company.mitra')->with('error', 'Akses dashboard hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
         }
 
-        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
-            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
-        }
 
         $totalOrganic = $company->pickups()->where('status', 'completed')->sum('organic_weight') ?? 0;
         $totalAnorganic = $company->pickups()->where('status', 'completed')->sum('anorganic_weight') ?? 0;
@@ -145,9 +142,6 @@ class CompanyController extends Controller
             return redirect()->route('company.mitra')->with('error', 'Fitur ini hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
         }
 
-        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
-            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
-        }
 
         $pickups = $company->pickups()->with('cleanup')
             ->where(function ($query) {
@@ -180,13 +174,6 @@ class CompanyController extends Controller
             ->with('error', 'Fitur ini hanya tersedia untuk paket Rumah Tangga (> 10km), Reguler, Prime, dan Premium+.');
     }
 
-    if (
-        $company->subscription_end_date &&
-        Carbon::parse($company->subscription_end_date)->isPast()
-    ) {
-        return redirect()->route('company.billing')
-            ->with('error', 'Masa aktif langganan Anda telah habis.');
-    }
 
     try {
         $pickups = $company->pickups()
@@ -281,9 +268,6 @@ class CompanyController extends Controller
             return redirect()->route('company.register');
         }
 
-        if ($user->company->subscription_end_date && \Carbon\Carbon::parse($user->company->subscription_end_date)->isPast()) {
-            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
-        }
 
         $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
         if (!in_array($user->company->subscription_plan, $allowedPlans)) {
@@ -329,9 +313,6 @@ class CompanyController extends Controller
 
         $company = Auth::user()->company;
 
-        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
-            return back()->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
-        }
         
         // 1. Update the schedule
         $company->update([
@@ -372,17 +353,9 @@ class CompanyController extends Controller
         }
 
         $company = $user->company;
-        $activeDaysLeft = 0;
-        if ($company->subscription_end_date) {
-            $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
-            if ($endDate->isFuture()) {
-                $activeDaysLeft = (int) ceil(now()->floatDiffInDays($endDate));
-            }
-        }
-
+ 
         return Inertia::render('Company/Mitra', [
             'company' => $company,
-            'activeDaysLeft' => $activeDaysLeft
         ]);
     }
 
@@ -414,17 +387,9 @@ class CompanyController extends Controller
         }
 
         $company = $user->company;
-        $activeDaysLeft = 0;
-        if ($company->subscription_end_date) {
-            $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
-            if ($endDate->isFuture()) {
-                $activeDaysLeft = (int) ceil(now()->floatDiffInDays($endDate));
-            }
-        }
-
+ 
         return Inertia::render('Company/Billing', [
             'company' => $company,
-            'activeDaysLeft' => $activeDaysLeft
         ]);
     }
 
@@ -452,17 +417,12 @@ class CompanyController extends Controller
         if ($company) {
             $paymentEvidencePath = $request->file('payment_evidence')->store('documents/payments', 'public');
             
-            $endDate = $company->subscription_end_date ? \Carbon\Carbon::parse($company->subscription_end_date) : now();
-            if ($endDate->isPast()) {
-                $endDate = now();
-            }
-
             $company->update([
                 'payment_evidence_path' => $paymentEvidencePath,
-                'subscription_end_date' => $endDate->addDays(30),
+                'subscription_status' => 'payment_uploaded',
             ]);
 
-            return back()->with('success', 'Pembayaran berhasil diunggah. Masa aktif kemitraan Anda telah diperpanjang.');
+            return back()->with('success', 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi dan aktivasi oleh admin.');
         }
 
         return back()->with('error', 'Gagal memproses pembayaran.');
@@ -477,9 +437,6 @@ class CompanyController extends Controller
 
         $company = $user->company;
 
-        if ($company->subscription_end_date && \Carbon\Carbon::parse($company->subscription_end_date)->isPast()) {
-            return redirect()->route('company.billing')->with('error', 'Masa aktif langganan Anda telah habis. Silakan unggah bukti pembayaran.');
-        }
 
         $allowedPlans = ['Rumah Tangga (> 10km)', 'Reguler', 'Prime', 'Premium+'];
         if (!in_array($company->subscription_plan, $allowedPlans)) {

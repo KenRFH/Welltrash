@@ -73,9 +73,6 @@ export default function Show({ company }: Props) {
                             <div className="flex flex-col items-start md:items-end gap-3">
                                 <div className="flex flex-col items-end gap-1.5">
                                     {getStatusBadge(company.subscription_status)}
-                                    {company.subscription_status === 'active' && company.remaining_days !== null && (
-                                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest bg-white px-2 py-0.5 rounded-md border border-gray-100">Sisa {company.remaining_days} Hari</span>
-                                    )}
                                 </div>
                                 <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Terdaftar: {new Date(company.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                             </div>

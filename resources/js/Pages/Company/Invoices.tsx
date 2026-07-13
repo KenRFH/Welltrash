@@ -33,10 +33,9 @@ interface Props {
         subscription_end_date: string | null;
     };
     invoices: PaginatedInvoices;
-    activeDaysLeft: number;
 }
 
-export default function CompanyInvoices({ company, invoices, activeDaysLeft }: Props) {
+export default function CompanyInvoices({ company, invoices }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -134,7 +133,7 @@ export default function CompanyInvoices({ company, invoices, activeDaysLeft }: P
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
                 plan={company.subscription_plan}
-                isLocked={activeDaysLeft <= 0}
+                isLocked={false}
             />
 
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -157,17 +156,7 @@ export default function CompanyInvoices({ company, invoices, activeDaysLeft }: P
                         </div>
                     </div>
 
-                    {/* Active days status */}
-                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
-                        activeDaysLeft > 7
-                            ? 'bg-emerald-50/50 text-emerald-700 border-emerald-100/50'
-                            : activeDaysLeft > 0
-                                ? 'bg-amber-50/50 text-amber-700 border-amber-100/50'
-                                : 'bg-rose-50/50 text-rose-600 border-rose-100/50'
-                    }`}>
-                        <span className={`w-2 h-2 rounded-full ${activeDaysLeft > 7 ? 'bg-emerald-500 animate-pulse' : activeDaysLeft > 0 ? 'bg-amber-500' : 'bg-rose-500'}`} />
-                        {activeDaysLeft > 0 ? `${activeDaysLeft} Hari Aktif` : 'Masa Aktif Habis'}
-                    </div>
+
                 </header>
 
                 <main className="flex-1 overflow-y-auto px-6 sm:px-10 py-8 space-y-8">

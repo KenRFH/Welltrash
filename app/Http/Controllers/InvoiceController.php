@@ -37,7 +37,7 @@ class InvoiceController extends Controller
             $query->where('wa_status', $request->wa_status);
         }
 
-        $invoices = $query->paginate(15)->withQueryString();
+        $invoices = $query->paginate(5)->withQueryString();
 
         $companies = Company::select('id', 'company_name')
             ->where('subscription_status', 'active')
@@ -274,20 +274,11 @@ class InvoiceController extends Controller
             return redirect()->route('company.register');
         }
 
-        $activeDaysLeft = 0;
-        if ($company->subscription_end_date) {
-            $endDate = Carbon::parse($company->subscription_end_date);
-            if ($endDate->isFuture()) {
-                $activeDaysLeft = (int) ceil(now()->floatDiffInDays($endDate));
-            }
-        }
-
-        $invoices = $company->invoices()->paginate(10);
-
+        $invoices = $company->invoices()->paginate(5);
+ 
         return Inertia::render('Company/Invoices', [
             'company'       => $company,
             'invoices'      => $invoices,
-            'activeDaysLeft' => $activeDaysLeft,
         ]);
     }
 

@@ -20,7 +20,7 @@ export default function Inactive() {
 
                 <div className="flex flex-col gap-3">
                     <a
-                        href="https://wa.me/62811988706"
+                        href="https://wa.me/62819848706"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full inline-flex items-center justify-center px-6 py-4 bg-[#FE961C] text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all"

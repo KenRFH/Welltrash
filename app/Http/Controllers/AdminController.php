@@ -14,12 +14,6 @@ class AdminController extends Controller
     {
         $companies = Company::with('user')->get()->map(function ($company) {
             $company->remaining_days = null;
-            if ($company->subscription_status === 'active' && $company->subscription_end_date) {
-                $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
-                $company->remaining_days = now()->lessThanOrEqualTo($endDate) 
-                    ? now()->diffInDays($endDate) 
-                    : 0;
-            }
             return $company;
         });
 
@@ -33,12 +27,6 @@ class AdminController extends Controller
         $company->load('user');
         
         $company->remaining_days = null;
-        if ($company->subscription_status === 'active' && $company->subscription_end_date) {
-            $endDate = \Carbon\Carbon::parse($company->subscription_end_date);
-            $company->remaining_days = now()->lessThanOrEqualTo($endDate) 
-                ? now()->diffInDays($endDate) 
-                : 0;
-        }
 
         return Inertia::render('Admin/Companies/Show', [
             'company' => $company
@@ -66,7 +54,7 @@ class AdminController extends Controller
     {
         $company->update([
             'subscription_status' => 'active',
-            'subscription_end_date' => now()->addDays(30)
+            'subscription_end_date' => null
         ]);
         
         \Illuminate\Support\Facades\Artisan::call('pickups:generate', [

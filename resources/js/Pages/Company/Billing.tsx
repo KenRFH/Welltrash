@@ -11,13 +11,12 @@ interface Props {
         subscription_end_date: string | null;
         payment_evidence_path: string | null;
     };
-    activeDaysLeft: number;
     auth: {
         user: { name: string }
     };
 }
 
-export default function Billing({ auth, company, activeDaysLeft }: Props) {
+export default function Billing({ auth, company }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         payment_evidence: null as File | null,
     });
@@ -56,7 +55,7 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
         post(route('company.billing.pay'), {
             preserveScroll: true,
             onSuccess: () => {
-                alert('Pembayaran berhasil diunggah dan masa aktif telah diperpanjang.');
+                alert('Bukti pembayaran berhasil diunggah. Akun Anda akan diaktifkan setelah diverifikasi oleh admin.');
                 setData('payment_evidence', null);
                 setPreviewUrl(null);
             },
@@ -72,7 +71,7 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
                 isMobileOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
                 plan={company.subscription_plan}
-                isLocked={activeDaysLeft <= 0}
+                isLocked={false}
             />
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -91,30 +90,12 @@ export default function Billing({ auth, company, activeDaysLeft }: Props) {
                 </header>
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-8 sm:px-10">
-                    <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="max-w-4xl mx-auto space-y-6">
                         
-                        {/* Days Left Card */}
-                        <div className="md:col-span-1 bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-8 shadow-sm border border-white/10 text-white relative flex flex-col justify-center items-center text-center overflow-hidden">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                            <div className="absolute bottom-0 left-0 w-32 h-32 bg-green-400 opacity-20 rounded-full blur-2xl -ml-10 -mb-10"></div>
-                            
-                            <h3 className="text-sm font-bold text-green-100 uppercase tracking-wider mb-2 relative z-10">Sisa Masa Aktif Kemitraan</h3>
-                            <div className="text-6xl font-black relative z-10 my-4 tracking-tight drop-shadow-md">
-                                {activeDaysLeft}
-                            </div>
-                            <p className="text-green-100 font-medium relative z-10">Hari</p>
-                            
-                            {activeDaysLeft < 7 && activeDaysLeft >= 0 && (
-                                <span className="mt-4 inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold bg-yellow-400/20 text-yellow-100 border border-yellow-400/50">
-                                    Segera Perpanjang!
-                                </span>
-                            )}
-                        </div>
-
                         {/* Payment Upload Card */}
-                        <div className="md:col-span-2 bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative z-10">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">Perpanjang Kemitraan</h3>
-                            <p className="text-gray-500 font-medium text-sm mb-6">Untuk memperpanjang masa aktif kemitraan selama 30 hari, silakan unggah bukti pembayaran Anda di bawah ini.</p>
+                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative z-10">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Aktivasi Kemitraan</h3>
+                            <p className="text-gray-500 font-medium text-sm mb-6">Silakan unggah bukti pembayaran Anda di bawah ini untuk diverifikasi oleh admin.</p>
                             
                             <form onSubmit={handleUpload} className="space-y-6">
                                 <div className="space-y-2">

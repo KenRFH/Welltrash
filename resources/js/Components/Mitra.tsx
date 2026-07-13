@@ -1,8 +1,10 @@
 import React from "react";
 import sppg from "@/assets/icon/mitra/sppg_bgn.png";
 import dlh from "@/assets/icon/mitra/dlh.png";
-import dafam from "@/assets/icon/mitra/dafam.png";
 import pemkab from "@/assets/icon/mitra/pemkab.png";
+import siloam from "@/assets/icon/mitra/rs_siloam.png";
+import rskaliwates from "@/assets/icon/mitra/logo_rsu_kaliwates.png";
+import subandi from "@/assets/icon/mitra/logo_rsu_subandi.jpg";
 
 type MitraProps = {
     name: string;
@@ -12,8 +14,10 @@ type MitraProps = {
 const mitraData: MitraProps[] = [
     { name: "SPPG", icon: sppg },
     { name: "DLH Jember", icon: dlh },
-    { name: "DAFAM Hotel", icon: dafam },
     { name: "Pemkab Jember", icon: pemkab },
+    { name: "RS Siloam", icon: siloam },
+    { name: "RS Kaliwates", icon: rskaliwates },
+    { name: "RS Subandi", icon: subandi },
 ];
 
 const Mitra: React.FC = () => {

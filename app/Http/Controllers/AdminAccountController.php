@@ -96,7 +96,7 @@ class AdminAccountController extends Controller
                 'business_category' => $validated['business_category'] ?? null,
                 'subscription_plan' => $validated['subscription_plan'],
                 'subscription_status' => 'active', // Set to active immediately for direct partner creations
-                'subscription_end_date' => now()->addDays(30), // Default 30 days active
+                'subscription_end_date' => null,
                 'signed_mou_path' => $signedMouPath,
                 'pickup_schedule' => $validated['pickup_schedule'] ?? [],
             ]);
@@ -207,7 +207,7 @@ class AdminAccountController extends Controller
                 $companyData['user_id'] = $user->id;
                 $companyData['pickup_schedule'] = $newSchedule;
                 $companyData['subscription_status'] = 'active';
-                $companyData['subscription_end_date'] = now()->addDays(30);
+                $companyData['subscription_end_date'] = null;
                 $company = Company::create($companyData);
                 $scheduleChanged = true;
             }
