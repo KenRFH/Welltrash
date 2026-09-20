@@ -104,13 +104,32 @@ class InvoiceController extends Controller
             'wa_status'      => $request->wa_send_at ? 'pending' : 'skipped',
         ]);
 
-        // Generate PDF & simpan — gunakan nama file aman (ganti / dengan -)
-        $safeFilename = str_replace('/', '-', $invoiceNumber);
-        $pdf = $this->generatePdf($invoice, $company);
-        $storagePath = 'invoices/' . $safeFilename . '.pdf';
-        Storage::disk('public')->put($storagePath, $pdf->output());
+        try {
+            // Generate PDF & simpan — gunakan nama file aman (ganti / dengan -)
+            $safeFilename = str_replace('/', '-', $invoiceNumber);
+            $pdf = $this->generatePdf($invoice, $company);
+            $storagePath = 'invoices/' . $safeFilename . '.pdf';
+            
+            // Pastikan direktori invoices ada di storage
+            if (!Storage::disk('public')->exists('invoices')) {
+                Storage::disk('public')->makeDirectory('invoices');
+            }
 
-        $invoice->update(['pdf_path' => $storagePath]);
+            Storage::disk('public')->put($storagePath, $pdf->output());
+            $invoice->update(['pdf_path' => $storagePath]);
+        } catch (\Exception $e) {
+            Log::error('Gagal membuat PDF Invoice: ' . $e->getMessage(), [
+                'exception' => $e,
+                'invoice_id' => $invoice->id
+            ]);
+
+            // Hapus record invoice yang gagal agar data tetap bersih
+            $invoice->delete();
+
+            return back()->withErrors([
+                'general' => 'Gagal membuat file PDF Invoice. Detail error: ' . $e->getMessage() . '. Silakan periksa log sistem dan pastikan folder storage memiliki izin tulis (writeable).'
+            ])->withInput();
+        }
 
         return redirect()->route('admin.invoices.index')
             ->with('success', "Invoice {$invoiceNumber} berhasil dibuat.");
@@ -121,16 +140,23 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        $invoice->load('company');
-        $company = $invoice->company->load(['pickups' => function ($q) use ($invoice) {
-            $q->where('status', 'completed')
-              ->whereBetween('pickup_date', [$invoice->period_start, $invoice->period_end]);
-        }]);
+        try {
+            $invoice->load('company');
+            $company = $invoice->company->load(['pickups' => function ($q) use ($invoice) {
+                $q->where('status', 'completed')
+                  ->whereBetween('pickup_date', [$invoice->period_start, $invoice->period_end]);
+            }]);
 
-        $pdf = $this->generatePdf($invoice, $company);
-        // Sanitize: ganti / dengan - agar valid sebagai nama file
-        $safeFilename = str_replace('/', '-', $invoice->invoice_number);
-        return $pdf->stream("invoice-{$safeFilename}.pdf");
+            $pdf = $this->generatePdf($invoice, $company);
+            // Sanitize: ganti / dengan - agar valid sebagai nama file
+            $safeFilename = str_replace('/', '-', $invoice->invoice_number);
+            return $pdf->stream("invoice-{$safeFilename}.pdf");
+        } catch (\Exception $e) {
+            Log::error('Gagal menampilkan PDF Invoice: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Gagal menampilkan file PDF. Detail error: ' . $e->getMessage() . '. Pastikan folder storage memiliki izin tulis (writeable).'
+            ], 500);
+        }
     }
 
     /**

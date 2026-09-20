@@ -80,12 +80,12 @@ const Services = () => {
             name: "Paket Rumah Tangga (> 10km)",
             price: "1.000k",
             priceDetail: "Per bulan",
-            pickup: "Maks. 4 Hari / Minggu",
-            maxDays: 4,
+            pickup: "Maks. 5 Hari / Minggu",
+            maxDays: 5,
             description: "Penjemputan sampah harian untuk area dengan radius lebih dari 10km.",
             features: [
                 "Max 1m³ (4 kantong trashbag) / sekali angkut",
-                "Pilih 4 hari kerja dari Senin – Sabtu",
+                "Pilih 5 hari dari Senin – Minggu",
                 "Akses penuh Dashboard Aplikasi",
             ],
         },
@@ -93,13 +93,13 @@ const Services = () => {
             name: "Paket Reguler",
             price: "2.500k",
             priceDetail: "Biaya mulai dari",
-            pickup: "Maks. 4 Hari / Minggu",
-            maxDays: 4,
+            pickup: "Maks. 5 Hari / Minggu",
+            maxDays: 5,
             description: "Solusi pengolahan limbah untuk bisnis kecil dan menengah dengan jadwal pengambilan teratur.",
             features: [
                 "Ideal untuk Kafe, Restoran atau bagian non-klinis RS",
                 "Maks 4m³ / sekali angkut",
-                "Pilih 4 hari kerja dari Senin – Sabtu",
+                "Pilih 5 hari dari Senin – Minggu",
                 "Akses penuh Dashboard Aplikasi",
                 "Sertifikat Mitra Ramah Lingkungan",
             ],
@@ -108,14 +108,14 @@ const Services = () => {
             name: "Paket Prime (Bisnis)",
             price: "3.200k",
             priceDetail: "Biaya mulai dari",
-            pickup: "Maks. 6 Hari / Minggu",
-            maxDays: 6,
+            pickup: "Maks. 7 Hari / Minggu",
+            maxDays: 7,
             isFeatured: true,
             description: "Layanan pengolahan sampah prioritas untuk perusahaan yang fokus pada standar kebersihan tinggi.",
             features: [
                 "Ideal untuk SPPG, Gudang, Hotel & operasional besar",
                 "Maks 4m³ / sekali angkut",
-                "Pilih hingga 6 hari kerja (Senin – Sabtu)",
+                "Pilih hingga 7 hari (Senin – Minggu)",
                 "Akses penuh Dashboard Aplikasi",
                 "Sertifikat Mitra Ramah Lingkungan",
             ],
@@ -124,13 +124,13 @@ const Services = () => {
             name: "Paket Premium+",
             price: "5.200k",
             priceDetail: "Biaya mulai dari",
-            pickup: "Maks. 6 Hari / Minggu",
-            maxDays: 6,
+            pickup: "Maks. 7 Hari / Minggu",
+            maxDays: 7,
             description: "Solusi pengelolaan limbah industri skala besar dengan sistem pelaporan audit yang mendalam.",
             features: [
                 "Tanpa perlu pilah sampah",
                 "Maks 4m³ / sekali angkut",
-                "Pilih hingga 6 hari kerja (Senin – Sabtu)",
+                "Pilih hingga 7 hari (Senin – Minggu)",
                 "Akses penuh Dashboard Aplikasi",
                 "Sertifikat Mitra Ramah Lingkungan",
             ],
@@ -151,7 +151,7 @@ const Services = () => {
                         Terbaik & Terpercaya
                     </h1>
                     <p className="text-lg text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed">
-                        Pilih paket yang sesuai dan atur hari penjemputan Anda — Senin hingga Sabtu, sesuai kebutuhan bisnis Anda.
+                        Pilih paket yang sesuai dan atur hari penjemputan Anda — Senin hingga Minggu, sesuai kebutuhan bisnis Anda.
                     </p>
                 </div>
             </section>

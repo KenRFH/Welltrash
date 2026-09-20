@@ -33,7 +33,7 @@ interface Props {
     };
 }
 
-const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
 export default function Schedule({ company, pickups }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -46,8 +46,8 @@ export default function Schedule({ company, pickups }: Props) {
         if (data.pickup_schedule.includes(day)) {
             setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
         } else {
-            if (isRestrictedPlan && data.pickup_schedule.length >= 4) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${company.subscription_plan} maksimal hanya dapat memilih 4 hari penjemputan.` } }));
+            if (isRestrictedPlan && data.pickup_schedule.length >= 5) {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${company.subscription_plan} maksimal hanya dapat memilih 5 hari penjemputan.` } }));
                 return;
             }
             setData('pickup_schedule', [...data.pickup_schedule, day]);
@@ -128,7 +128,7 @@ export default function Schedule({ company, pickups }: Props) {
                         </div>
                         
                         <form onSubmit={submit}>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
                                 {DAYS_OF_WEEK.map((day) => {
                                     const isSelected = data.pickup_schedule.includes(day);
                                     return (

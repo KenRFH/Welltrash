@@ -86,9 +86,7 @@ class CleanUPController extends Controller
         return back()->with('success', 'Status updated successfully.');
     }
 
-    /**
-     * Submit final pickup details including weights and photos for a specific generated pickup.
-     */
+   
     public function submitPickup(Request $request, Pickup $pickup)
     {
         // STRICT RULE: CleanUP can only update if pickup_date == today
@@ -100,16 +98,12 @@ class CleanUPController extends Controller
             'organic_weight' => 'required|numeric|min:0',
             'anorganic_weight' => 'required|numeric|min:0',
             'residue_weight' => 'required|numeric|min:0',
-            'organic_image' => 'required|image|max:10240',
-            'anorganic_image' => 'required|image|max:10240',
-            'residue_image' => 'required|image|max:10240',
+            'evidence_pickup_path' => 'required|image|max:2048',
         ]);
 
         $cleanup = Auth::user();
 
-        $organicPath = $request->file('organic_image')->store('pickups/organic', 'public');
-        $anorganicPath = $request->file('anorganic_image')->store('pickups/anorganic', 'public');
-        $residuePath = $request->file('residue_image')->store('pickups/residue', 'public');
+        $evidencePickupPath = $request->file('evidence_pickup_path')->store('pickups/evidence', 'public');
 
         $pickup->update([
             'cleanup_id' => $cleanup->id,
@@ -117,9 +111,7 @@ class CleanUPController extends Controller
             'organic_weight' => $request->organic_weight,
             'anorganic_weight' => $request->anorganic_weight,
             'residue_weight' => $request->residue_weight,
-            'organic_image_path' => $organicPath,
-            'anorganic_image_path' => $anorganicPath,
-            'residue_image_path' => $residuePath,
+            'evidence_pickup_path' => $evidencePickupPath,
         ]);
 
         return back()->with('success', 'Berhasil merekam pengambilan sampah!');

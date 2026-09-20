@@ -15,7 +15,7 @@ export default function Register({ auth }: any) {
         signed_mou: null as File | null,
     });
 
-    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
     const predefinedCategories = ['Hotel', 'Restoran', 'Cafe', 'SPPG', 'Gudang'];
     const [isCustomCategory, setIsCustomCategory] = React.useState(false);
 
@@ -27,9 +27,9 @@ export default function Register({ auth }: any) {
             name: 'Paket Rumah Tangga (> 10km)',
             price: 'Rp 1.000.000',
             period: '/bulan',
-            maxDays: 4,
+            maxDays: 5,
             desc: 'Penjemputan sampah harian untuk area dengan radius lebih dari 10km.',
-            features: ['Max 1m³ (4 trashbag) / sekali angkut', 'Pilih maks. 4 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
+            features: ['Max 1m³ (4 trashbag) / sekali angkut', 'Pilih maks. 5 hari (Senin–Minggu)', 'Akses Penuh Dashboard'],
             isPopular: false,
         },
         {
@@ -37,9 +37,9 @@ export default function Register({ auth }: any) {
             name: 'Paket Reguler',
             price: 'Rp 2.500.000',
             period: '/bulan',
-            maxDays: 4,
+            maxDays: 5,
             desc: 'Solusi pengolahan limbah untuk bisnis menengah dengan jadwal pengambilan teratur.',
-            features: ['Maks 4m³ / sekali angkut', 'Pilih maks. 4 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
+            features: ['Maks 4m³ / sekali angkut', 'Pilih maks. 5 hari (Senin–Minggu)', 'Akses Penuh Dashboard'],
             isPopular: false,
         },
         {
@@ -47,9 +47,9 @@ export default function Register({ auth }: any) {
             name: 'Paket Prime (Bisnis)',
             price: 'Rp 3.200.000',
             period: '/bulan',
-            maxDays: 6,
+            maxDays: 7,
             desc: 'Layanan pengolahan sampah prioritas dengan standar kebersihan tinggi.',
-            features: ['Maks 4m³ / sekali angkut', 'Pilih hingga 6 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
+            features: ['Maks 4m³ / sekali angkut', 'Pilih hingga 7 hari (Senin–Minggu)', 'Akses Penuh Dashboard'],
             isPopular: true,
         },
         {
@@ -57,9 +57,9 @@ export default function Register({ auth }: any) {
             name: 'Paket Premium+',
             price: 'Rp 5.200.000',
             period: '/bulan',
-            maxDays: 6,
+            maxDays: 7,
             desc: 'Solusi limbah industri skala besar dengan sistem pelaporan audit mendalam.',
-            features: ['Tanpa perlu pilah sampah', 'Pilih hingga 6 hari (Senin–Sabtu)', 'Akses Penuh Dashboard'],
+            features: ['Tanpa perlu pilah sampah', 'Pilih hingga 7 hari (Senin–Minggu)', 'Akses Penuh Dashboard'],
             isPopular: false,
         }
     ];

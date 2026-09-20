@@ -9,9 +9,7 @@ interface Pickup {
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
-    organic_image_path: string | null;
-    anorganic_image_path: string | null;
-    residue_image_path: string | null;
+    evidence_pickup_path: string | null;
     cancellation_reason: string | null;
     pickup_date: string;
     company: {
@@ -113,50 +111,52 @@ export default function History({ pickups, auth }: Props) {
                                         </div>
 
                                         {isCompleted ? (
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                {/* Organic */}
-                                                <div className="bg-amber-50/50 rounded-2xl p-5 border border-amber-100/50 flex flex-col items-center sm:items-start text-center sm:text-left relative overflow-hidden">
-                                                    <div className="absolute top-0 right-0 w-20 h-20 bg-amber-100/50 rounded-full blur-xl -mr-10 -mt-10"></div>
-                                                    <div className="relative z-10 w-full">
-                                                        <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2 mb-2 justify-center sm:justify-start">
-                                                            <span className="text-xl">🍞</span>
-                                                            <span className="text-sm font-bold text-amber-800">Organik</span>
+                                            <>
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                    {/* Organic */}
+                                                    <div className="bg-amber-50/50 rounded-2xl p-5 border border-amber-100/50 flex flex-col items-center sm:items-start text-center sm:text-left relative overflow-hidden">
+                                                        <div className="absolute top-0 right-0 w-20 h-20 bg-amber-100/50 rounded-full blur-xl -mr-10 -mt-10"></div>
+                                                        <div className="relative z-10 w-full">
+                                                            <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2 mb-2 justify-center sm:justify-start">
+                                                                <span className="text-xl">🍞</span>
+                                                                <span className="text-sm font-bold text-amber-800">Organik</span>
+                                                            </div>
+                                                            <div className="text-3xl font-black text-gray-900 mb-3">{pickup.organic_weight} <span className="text-base font-bold text-amber-500">Kg</span></div>
                                                         </div>
-                                                        <div className="text-3xl font-black text-gray-900 mb-3">{pickup.organic_weight} <span className="text-base font-bold text-amber-500">Kg</span></div>
-                                                        {pickup.organic_image_path && (
-                                                            <a href={`/storage/${pickup.organic_image_path}`} target="_blank" rel="noreferrer" className="w-full text-center text-[10px] font-bold bg-white text-amber-700 border border-amber-200 px-3 py-2 rounded-xl block hover:bg-amber-50 transition-colors shadow-sm">Lihat Foto</a>
-                                                        )}
+                                                    </div>
+                                                    {/* Anorganic */}
+                                                    <div className="bg-teal-50/50 rounded-2xl p-5 border border-teal-100/50 flex flex-col items-center sm:items-start text-center sm:text-left relative overflow-hidden">
+                                                        <div className="absolute top-0 right-0 w-20 h-20 bg-teal-100/50 rounded-full blur-xl -mr-10 -mt-10"></div>
+                                                        <div className="relative z-10 w-full">
+                                                            <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2 mb-2 justify-center sm:justify-start">
+                                                                <span className="text-xl">🛍️</span>
+                                                                <span className="text-sm font-bold text-teal-800">Anorganik</span>
+                                                            </div>
+                                                            <div className="text-3xl font-black text-gray-900 mb-3">{pickup.anorganic_weight} <span className="text-base font-bold text-teal-500">Kg</span></div>
+                                                        </div>
+                                                    </div>
+                                                    {/* Residue */}
+                                                    <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-200/50 flex flex-col items-center sm:items-start text-center sm:text-left relative overflow-hidden">
+                                                        <div className="absolute top-0 right-0 w-20 h-20 bg-gray-100 rounded-full blur-xl -mr-10 -mt-10"></div>
+                                                        <div className="relative z-10 w-full">
+                                                            <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2 mb-2 justify-center sm:justify-start">
+                                                                <span className="text-xl">🗑️</span>
+                                                                <span className="text-sm font-bold text-gray-600">Residu</span>
+                                                            </div>
+                                                            <div className="text-3xl font-black text-gray-900 mb-3">{pickup.residue_weight} <span className="text-base font-bold text-gray-400">Kg</span></div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                {/* Anorganic */}
-                                                <div className="bg-teal-50/50 rounded-2xl p-5 border border-teal-100/50 flex flex-col items-center sm:items-start text-center sm:text-left relative overflow-hidden">
-                                                    <div className="absolute top-0 right-0 w-20 h-20 bg-teal-100/50 rounded-full blur-xl -mr-10 -mt-10"></div>
-                                                    <div className="relative z-10 w-full">
-                                                        <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2 mb-2 justify-center sm:justify-start">
-                                                            <span className="text-xl">🛍️</span>
-                                                            <span className="text-sm font-bold text-teal-800">Anorganik</span>
-                                                        </div>
-                                                        <div className="text-3xl font-black text-gray-900 mb-3">{pickup.anorganic_weight} <span className="text-base font-bold text-teal-500">Kg</span></div>
-                                                        {pickup.anorganic_image_path && (
-                                                            <a href={`/storage/${pickup.anorganic_image_path}`} target="_blank" rel="noreferrer" className="w-full text-center text-[10px] font-bold bg-white text-teal-700 border border-teal-200 px-3 py-2 rounded-xl block hover:bg-teal-50 transition-colors shadow-sm">Lihat Foto</a>
-                                                        )}
+                                                
+                                                {pickup.evidence_pickup_path && (
+                                                    <div className="mt-4 flex justify-end">
+                                                        <a href={`/storage/${pickup.evidence_pickup_path}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors shadow-sm">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                            Lihat Bukti Pengambilan
+                                                        </a>
                                                     </div>
-                                                </div>
-                                                {/* Residue */}
-                                                <div className="bg-gray-50/50 rounded-2xl p-5 border border-gray-200/50 flex flex-col items-center sm:items-start text-center sm:text-left relative overflow-hidden">
-                                                    <div className="absolute top-0 right-0 w-20 h-20 bg-gray-100 rounded-full blur-xl -mr-10 -mt-10"></div>
-                                                    <div className="relative z-10 w-full">
-                                                        <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-2 mb-2 justify-center sm:justify-start">
-                                                            <span className="text-xl">🗑️</span>
-                                                            <span className="text-sm font-bold text-gray-600">Residu</span>
-                                                        </div>
-                                                        <div className="text-3xl font-black text-gray-900 mb-3">{pickup.residue_weight} <span className="text-base font-bold text-gray-400">Kg</span></div>
-                                                        {pickup.residue_image_path && (
-                                                            <a href={`/storage/${pickup.residue_image_path}`} target="_blank" rel="noreferrer" className="w-full text-center text-[10px] font-bold bg-white text-gray-600 border border-gray-200 px-3 py-2 rounded-xl block hover:bg-gray-50 transition-colors shadow-sm">Lihat Foto</a>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                )}
+                                            </>
                                         ) : (
                                             <div className="bg-red-50 p-5 rounded-2xl border border-red-100 flex items-start gap-4">
                                                 <div className="bg-red-100 p-2 rounded-lg text-red-600">

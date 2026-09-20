@@ -15,9 +15,7 @@ class Pickup extends Model
         'organic_weight',
         'anorganic_weight',
         'residue_weight',
-        'organic_image_path',
-        'anorganic_image_path',
-        'residue_image_path',
+        'evidence_pickup_path',
     ];
 
     public function company()

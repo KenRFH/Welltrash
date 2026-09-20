@@ -109,6 +109,16 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                     <span className="text-gray-600">Buat Baru</span>
                 </div>
 
+                {(errors as any).general && (
+                    <div className="bg-rose-50 border border-rose-200 rounded-3xl p-5 mb-6 text-sm text-rose-700 font-bold flex items-start gap-3">
+                        <span className="text-lg">⚠️</span>
+                        <div>
+                            <p className="font-extrabold">Gagal Membuat Invoice</p>
+                            <p className="font-semibold text-rose-600 mt-1">{(errors as any).general}</p>
+                        </div>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Company Selector */}
                     <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">

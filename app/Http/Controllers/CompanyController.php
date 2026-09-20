@@ -229,13 +229,13 @@ class CompanyController extends Controller
                         $fail('Jadwal penjemputan wajib dipilih.');
                         return;
                     }
-                    $maxDays = in_array($plan, ['Prime', 'Premium+']) ? 6 : 4;
+                    $maxDays = in_array($plan, ['Prime', 'Premium+']) ? 7 : 5;
                     if (count($value) > $maxDays) {
                         $fail("Paket {$plan} maksimal hanya dapat memilih {$maxDays} hari penjemputan.");
                     }
                 }
             ],
-            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
         ]);
 
         // Remove old separate restriction check (now handled in validation above)
@@ -302,13 +302,13 @@ class CompanyController extends Controller
                 function ($attribute, $value, $fail) use ($request) {
                     $company = Auth::user()->company;
                     $plan = $company ? $company->subscription_plan : null;
-                    $maxDays = in_array($plan, ['Prime', 'Premium+']) ? 6 : 4;
+                    $maxDays = in_array($plan, ['Prime', 'Premium+']) ? 7 : 5;
                     if (count($value) > $maxDays) {
                         $fail("Paket {$plan} maksimal hanya dapat memilih {$maxDays} hari penjemputan.");
                     }
                 }
             ],
-            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+            'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
         ]);
 
         $company = Auth::user()->company;

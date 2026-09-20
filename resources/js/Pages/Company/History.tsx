@@ -13,9 +13,7 @@ interface Pickup {
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
-    organic_image_path: string | null;
-    anorganic_image_path: string | null;
-    residue_image_path: string | null;
+    evidence_pickup_path: string | null;
     cancellation_reason: string | null;
     pickup_date: string;
     cleanup: {
@@ -138,7 +136,8 @@ export default function History({ auth, company, pickups }: Props) {
                                         </div>
 
                                         {isCompleted ? (
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                            <>
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                                 {/* Organic */}
                                                 <div className="bg-amber-50/30 rounded-2xl p-5 border border-amber-100/50 flex flex-col items-center sm:items-start relative overflow-hidden group">
                                                     <div className="absolute top-0 right-0 w-20 h-20 bg-amber-100/50 rounded-full blur-xl -mr-10 -mt-10"></div>
@@ -147,11 +146,6 @@ export default function History({ auth, company, pickups }: Props) {
                                                         <span className="text-sm font-bold text-amber-800">Organik</span>
                                                     </div>
                                                     <div className="text-3xl font-black text-gray-900 mb-4 relative z-10">{pickup.organic_weight} <span className="text-base font-bold text-amber-500">Kg</span></div>
-                                                    {pickup.organic_image_path && (
-                                                        <a href={`/storage/${pickup.organic_image_path}`} target="_blank" rel="noreferrer" className="w-full text-center text-xs font-bold bg-white border border-amber-200 text-amber-700 px-4 py-2 rounded-xl hover:bg-amber-50 hover:border-amber-300 transition-colors relative z-10 shadow-sm">
-                                                            Lihat Foto Bukti
-                                                        </a>
-                                                    )}
                                                 </div>
 
                                                 {/* Anorganic */}
@@ -162,11 +156,6 @@ export default function History({ auth, company, pickups }: Props) {
                                                         <span className="text-sm font-bold text-teal-800">Anorganik</span>
                                                     </div>
                                                     <div className="text-3xl font-black text-gray-900 mb-4 relative z-10">{pickup.anorganic_weight} <span className="text-base font-bold text-teal-500">Kg</span></div>
-                                                    {pickup.anorganic_image_path && (
-                                                        <a href={`/storage/${pickup.anorganic_image_path}`} target="_blank" rel="noreferrer" className="w-full text-center text-xs font-bold bg-white border border-teal-200 text-teal-700 px-4 py-2 rounded-xl hover:bg-teal-50 hover:border-teal-300 transition-colors relative z-10 shadow-sm">
-                                                            Lihat Foto Bukti
-                                                        </a>
-                                                    )}
                                                 </div>
 
                                                 {/* Residue */}
@@ -177,13 +166,18 @@ export default function History({ auth, company, pickups }: Props) {
                                                         <span className="text-sm font-bold text-gray-600">Residu</span>
                                                     </div>
                                                     <div className="text-3xl font-black text-gray-900 mb-4 relative z-10">{pickup.residue_weight} <span className="text-base font-bold text-gray-400">Kg</span></div>
-                                                    {pickup.residue_image_path && (
-                                                        <a href={`/storage/${pickup.residue_image_path}`} target="_blank" rel="noreferrer" className="w-full text-center text-xs font-bold bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-colors relative z-10 shadow-sm">
-                                                            Lihat Foto Bukti
-                                                        </a>
-                                                    )}
                                                 </div>
                                             </div>
+                                            
+                                            {pickup.evidence_pickup_path && (
+                                                <div className="mt-6 flex justify-end">
+                                                    <a href={`/storage/${pickup.evidence_pickup_path}`} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-bold bg-green-50 text-green-700 border border-green-200 rounded-xl hover:bg-green-100 transition-colors shadow-sm">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                        Lihat Bukti Pengambilan
+                                                    </a>
+                                                </div>
+                                            )}
+                                            </>
                                         ) : pickup.status === 'failed' ? (
                                             <div className="bg-red-50/50 p-5 rounded-2xl border border-red-100 flex items-start gap-4">
                                                 <div className="bg-red-100 p-2 rounded-lg text-red-600">

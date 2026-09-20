@@ -63,7 +63,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
 
     // Plan-based schedule limits
     const getScheduleLimit = (plan: string) => {
-        return ['Prime', 'Premium+'].includes(plan) ? 6 : 4;
+        return ['Prime', 'Premium+'].includes(plan) ? 7 : 5;
     };
 
     const handleDayToggle = (day: string) => {
@@ -165,7 +165,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
         }
     };
 
-    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
     return (
         <AdminLayout
@@ -727,7 +727,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                         TERPILIH: {data.pickup_schedule.length} / {getScheduleLimit(data.subscription_plan)} HARI
                                                     </span>
                                                 </div>
-                                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                                                     {daysOfWeek.map((day, idx) => {
                                                         const isSelected = data.pickup_schedule.includes(day);
                                                         return (

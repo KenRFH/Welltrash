@@ -62,7 +62,7 @@ const Welcome = ({ activities, news, katalogs }: Props) => {
         },
         {
             q: "Apa saja paket layanan pengangkutan sampah yang tersedia?",
-            a: "Kami menyediakan paket layanan yang fleksibel sesuai kebutuhan Anda, mulai dari paket Reguler, Prime, hingga Premium+ dengan kapasitas frekuensi penjemputan berkala hingga 6 hari dalam seminggu."
+            a: "Kami menyediakan paket layanan yang fleksibel sesuai kebutuhan Anda, mulai dari paket Reguler, Prime, hingga Premium+ dengan kapasitas frekuensi penjemputan berkala hingga 7 hari dalam seminggu."
         },
         {
             q: "Bagaimana sampah diolah setelah diangkut oleh tim WellTrash?",

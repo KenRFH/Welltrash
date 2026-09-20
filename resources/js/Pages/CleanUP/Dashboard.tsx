@@ -48,26 +48,23 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const MAX_FILE_MB = 10;
     const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 
-    const handleImageChange = (field: 'organic_image' | 'anorganic_image' | 'residue_image', file: File | null) => {
+    const handleImageChange = (file: File | null) => {
         if (file && file.size > MAX_FILE_BYTES) {
             setFileSizeError(`Foto "${file.name}" terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal ${MAX_FILE_MB}MB per foto.`);
             return;
         }
         setFileSizeError(null);
-        setData(field, file);
+        setData('evidence_pickup_path', file);
     };
 
     // Form for status update
     const { post: postStatus, processing: processingStatus } = useForm();
     
-    // Form for final submission
     const { data, setData, post: postSubmit, processing: processingSubmit, errors, reset } = useForm({
         organic_weight: '',
         anorganic_weight: '',
         residue_weight: '',
-        organic_image: null as File | null,
-        anorganic_image: null as File | null,
-        residue_image: null as File | null,
+        evidence_pickup_path: null as File | null,
     });
 
     const handleDayClick = (day: string) => {
@@ -356,25 +353,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                 <span className="absolute right-4 top-[14px] text-gray-400 font-bold">Kg</span>
                                                 {errors.organic_weight && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{errors.organic_weight}</p>}
                                             </div>
-                                            <label className="flex flex-col items-center justify-center w-24 bg-white border border-amber-200 hover:bg-amber-100 text-amber-600 rounded-xl cursor-pointer transition-colors shadow-sm relative overflow-hidden">
-                                                {data.organic_image ? (
-                                                    <div className="absolute inset-0 bg-amber-500 flex flex-col items-center justify-center text-white">
-                                                        <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                        <span className="text-[10px] font-bold">TERFOTO</span>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <CameraIcon />
-                                                        <span className="text-[10px] font-bold mt-1">AMBIL FOTO</span>
-                                                    </>
-                                                )}
-                                                <input 
-                                                    type="file" accept="image/*" capture="environment" className="hidden" 
-                                                    onChange={e => handleImageChange('organic_image', e.target.files ? e.target.files[0] : null)}
-                                                />
-                                            </label>
                                         </div>
-                                        {errors.organic_image && <p className="text-red-500 text-xs mt-2">{errors.organic_image}</p>}
                                     </div>
 
                                     {/* Anorganic */}
@@ -394,25 +373,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                 <span className="absolute right-4 top-[14px] text-gray-400 font-bold">Kg</span>
                                                 {errors.anorganic_weight && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{errors.anorganic_weight}</p>}
                                             </div>
-                                            <label className="flex flex-col items-center justify-center w-24 bg-white border border-teal-200 hover:bg-teal-100 text-teal-600 rounded-xl cursor-pointer transition-colors shadow-sm relative overflow-hidden">
-                                                {data.anorganic_image ? (
-                                                    <div className="absolute inset-0 bg-teal-500 flex flex-col items-center justify-center text-white">
-                                                        <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                        <span className="text-[10px] font-bold">TERFOTO</span>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <CameraIcon />
-                                                        <span className="text-[10px] font-bold mt-1">AMBIL FOTO</span>
-                                                    </>
-                                                )}
-                                                <input 
-                                                    type="file" accept="image/*" capture="environment" className="hidden" 
-                                                    onChange={e => handleImageChange('anorganic_image', e.target.files ? e.target.files[0] : null)}
-                                                />
-                                            </label>
                                         </div>
-                                        {errors.anorganic_image && <p className="text-red-500 text-xs mt-2">{errors.anorganic_image}</p>}
                                     </div>
 
                                     {/* Residue */}
@@ -432,25 +393,33 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                 <span className="absolute right-4 top-[14px] text-gray-400 font-bold">Kg</span>
                                                 {errors.residue_weight && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{errors.residue_weight}</p>}
                                             </div>
-                                            <label className="flex flex-col items-center justify-center w-24 bg-white border border-gray-300 hover:bg-gray-200 text-gray-600 rounded-xl cursor-pointer transition-colors shadow-sm relative overflow-hidden">
-                                                 {data.residue_image ? (
-                                                    <div className="absolute inset-0 bg-gray-500 flex flex-col items-center justify-center text-white">
-                                                        <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                        <span className="text-[10px] font-bold">TERFOTO</span>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <CameraIcon />
-                                                        <span className="text-[10px] font-bold mt-1">AMBIL FOTO</span>
-                                                    </>
-                                                )}
-                                                <input 
-                                                    type="file" accept="image/*" capture="environment" className="hidden" 
-                                                    onChange={e => handleImageChange('residue_image', e.target.files ? e.target.files[0] : null)}
-                                                />
-                                            </label>
                                         </div>
-                                        {errors.residue_image && <p className="text-red-500 text-xs mt-2">{errors.residue_image}</p>}
+                                    </div>
+
+                                    {/* Evidence Upload */}
+                                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/60 shadow-sm relative group mt-4">
+                                        <h4 className="font-bold text-blue-900 flex items-center mb-3">
+                                            <span className="w-6 h-6 bg-blue-200 text-blue-700 rounded-lg flex items-center justify-center mr-2 text-sm">📸</span> Bukti Pengambilan
+                                        </h4>
+                                        <label className="flex flex-col items-center justify-center w-full h-32 bg-white border-2 border-dashed border-blue-200 hover:bg-blue-50 hover:border-blue-300 text-blue-600 rounded-xl cursor-pointer transition-colors shadow-sm relative overflow-hidden">
+                                            {data.evidence_pickup_path ? (
+                                                <div className="absolute inset-0 bg-blue-500 flex flex-col items-center justify-center text-white">
+                                                    <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                    <span className="text-sm font-bold">FOTO TERPILIH</span>
+                                                    <span className="text-[10px] mt-1 text-blue-100">Klik untuk mengganti</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <svg className="w-8 h-8 mb-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                    <span className="text-sm font-bold">PILIH ATAU AMBIL FOTO</span>
+                                                </div>
+                                            )}
+                                            <input 
+                                                type="file" accept="image/*" className="hidden" 
+                                                onChange={e => handleImageChange(e.target.files ? e.target.files[0] : null)}
+                                            />
+                                        </label>
+                                        {errors.evidence_pickup_path && <p className="text-red-500 text-xs mt-2">{errors.evidence_pickup_path}</p>}
                                     </div>
                                 </form>
                             </div>

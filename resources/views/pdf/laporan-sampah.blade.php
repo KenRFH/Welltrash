@@ -284,10 +284,15 @@
     <div class="header">
         <div class="header-left">
             @php
-                $logoPath = resource_path('js/assets/img/logowelltrash.webp');
-                $logoSrc  = file_exists($logoPath)
-                    ? 'data:image/webp;base64,' . base64_encode(file_get_contents($logoPath))
-                    : '';
+                $logoPath = resource_path('js/assets/img/logowelltrash.png');
+                if (!file_exists($logoPath)) {
+                    $logoPath = resource_path('js/assets/img/logowelltrash.webp');
+                }
+                $logoSrc = '';
+                if (file_exists($logoPath)) {
+                    $ext = pathinfo($logoPath, PATHINFO_EXTENSION);
+                    $logoSrc = 'data:image/' . ($ext === 'webp' ? 'webp' : 'png') . ';base64,' . base64_encode(file_get_contents($logoPath));
+                }
             @endphp
             <div class="logo-wrap">
                 @if($logoSrc)

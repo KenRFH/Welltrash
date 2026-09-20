@@ -54,7 +54,7 @@ class AdminAccountController extends Controller
                 'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+',
                 'signed_mou' => 'required|file|mimes:pdf,jpeg,png,jpg|max:10240', // MOU is mandatory on creation
                 'pickup_schedule' => 'nullable|array',
-                'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+                'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             ]);
         }
 
@@ -136,7 +136,7 @@ class AdminAccountController extends Controller
                 'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+',
                 'signed_mou' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:10240', // MOU is optional on edit
                 'pickup_schedule' => 'nullable|array',
-                'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
+                'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             ]);
         }
 
