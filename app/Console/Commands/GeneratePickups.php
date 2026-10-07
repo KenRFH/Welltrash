@@ -43,31 +43,45 @@ class GeneratePickups extends Command
 
         $pickupsCreated = 0;
 
+        $startDate = \Carbon\Carbon::today();
+        $endDate = \Carbon\Carbon::today()->addDays($daysAhead);
+
         foreach ($companies as $company) {
             $schedule = $company->pickup_schedule ?? [];
             if (empty($schedule)) continue;
 
+            // Fetch all existing pickup dates within the range in a single query
+            $existingDates = \App\Models\Pickup::where('company_id', $company->id)
+                ->whereBetween('pickup_date', [$startDate->toDateString(), $endDate->toDateString()])
+                ->pluck('pickup_date')
+                ->map(fn($d) => \Carbon\Carbon::parse($d)->toDateString())
+                ->flip()
+                ->toArray();
+
+            $newPickups = [];
+
             // Generate dates from today up to $daysAhead
             for ($i = 0; $i <= $daysAhead; $i++) {
                 $date = \Carbon\Carbon::today()->addDays($i);
-                $dayIndo = $englishToIndo[$date->englishDayOfWeek];
+                $dayIndo = $englishToIndo[$date->englishDayOfWeek] ?? null;
+                $dateStr = $date->toDateString();
 
-                // If this day matches their schedule
-                if (in_array($dayIndo, $schedule)) {
-                    // Check if it already exists to prevent duplicates
-                    $exists = \App\Models\Pickup::where('company_id', $company->id)
-                        ->whereDate('pickup_date', $date->toDateString())
-                        ->exists();
-
-                    if (!$exists) {
-                        \App\Models\Pickup::create([
-                            'company_id' => $company->id,
-                            'pickup_date' => $date->toDateString(),
-                            'status' => 'scheduled',
-                        ]);
-                        $pickupsCreated++;
-                    }
+                // If this day matches their schedule and does not exist yet
+                if ($dayIndo && in_array($dayIndo, $schedule) && !isset($existingDates[$dateStr])) {
+                    $newPickups[] = [
+                        'company_id' => $company->id,
+                        'pickup_date' => $dateStr,
+                        'status' => 'scheduled',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                    $existingDates[$dateStr] = true;
+                    $pickupsCreated++;
                 }
+            }
+
+            if (!empty($newPickups)) {
+                \App\Models\Pickup::insert($newPickups);
             }
         }
 

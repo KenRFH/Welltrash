@@ -2,6 +2,7 @@ import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import CleanUPSidebar from '@/Components/CleanUPSidebar';
 import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
+import { compressImage } from '@/utils/compressImage';
 
 interface Company {
     id: number;
@@ -43,9 +44,12 @@ export default function Activities({ companies, activities }: Props) {
         setExpandedId(expandedId === id ? null : id);
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
+            let file = e.target.files[0];
+            if (file.type.startsWith('image/')) {
+                file = await compressImage(file, 1600, 1600, 0.8);
+            }
             setData('media', file);
             
             const url = URL.createObjectURL(file);

@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import React from 'react';
 // The source image was removed, so we fallback to the built asset path
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
+import PwaInstallButton from './PwaInstallButton';
 
 const HomeIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>;
 const HistoryIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
@@ -123,7 +124,8 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                 </nav>
             </div>
 
-            <div className="p-6 mb-2 border-t border-gray-50">
+            <div className="p-6 mb-2 border-t border-gray-50 space-y-2.5">
+                <PwaInstallButton variant="sidebar" label="Unduh Aplikasi" />
                 <Link
                     href={route('logout')}
                     method="post"

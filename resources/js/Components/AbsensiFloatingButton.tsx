@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useForm, usePage } from '@inertiajs/react';
+import { compressImage } from '@/utils/compressImage';
 
 import { PageProps } from '@/types';
 
@@ -44,12 +45,13 @@ export default function AbsensiFloatingButton() {
         setShowModal(true);
     };
 
-    const handlePhotoChange = (file: File | null) => {
+    const handlePhotoChange = async (file: File | null) => {
         if (!file) return;
-        setData('photo', file);
+        const compressed = await compressImage(file, 1280, 1280, 0.78);
+        setData('photo', compressed);
         const reader = new FileReader();
         reader.onload = (e) => setPhotoPreview(e.target?.result as string);
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(compressed);
     };
 
     const getLocation = () => {

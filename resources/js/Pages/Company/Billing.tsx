@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import CompanySidebar from '@/Components/CompanySidebar';
+import { compressImage } from '@/utils/compressImage';
 
 interface Props {
     company: {
@@ -24,10 +25,14 @@ export default function Billing({ auth, company }: Props) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
+            let file = e.target.files[0];
             
+            if (file.type.startsWith('image/')) {
+                file = await compressImage(file, 1600, 1600, 0.8);
+            }
+
             if (file.size > 2 * 1024 * 1024) {
                 alert('Ukuran file melebihi batas maksimal 2MB. Silakan pilih file yang lebih kecil atau kompres terlebih dahulu.');
                 setData('payment_evidence', null);

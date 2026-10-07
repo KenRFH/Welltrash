@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import AdminSidebar from '@/Components/AdminSidebar';
+import PwaInstallButton from '@/Components/PwaInstallButton';
 
 interface Props {
     children: React.ReactNode;
@@ -58,6 +59,9 @@ export default function AdminLayout({ children, title, activeTab, subtitle, head
                     </div>
                     
                     <div className="flex items-center gap-3">
+                        <div className="hidden sm:block">
+                            <PwaInstallButton variant="header" label="Unduh App" />
+                        </div>
                         {headerAction}
                         <div className="hidden sm:flex items-center gap-3 pl-4 border-l border-gray-200">
                             <div className="text-right">

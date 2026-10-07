@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import CompanySidebar from '@/Components/CompanySidebar';
+import PwaInstallButton from '@/Components/PwaInstallButton';
 
 const CalendarIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
 
@@ -55,34 +56,12 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                 {/* Background Decor */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
 
-                {/* Header Navbar */}
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1 max-w-xl">
-                        {/* Mobile Menu Toggle */}
-                        <button 
-                            onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                        </button>
-                    
-                        <div className="relative group hidden sm:block w-full">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg className="h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                            <input 
-                                type="text" 
-                                placeholder="Cari data..." 
-                                className="w-full sm:w-80 pl-11 pr-4 py-2.5 rounded-2xl border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-green-100 focus:border-green-400 focus:bg-white transition-all shadow-sm"
-                            />
+               <div className="flex items-center space-x-3 fixed top-6 right-4 z-50">
+                        <div className="hidden sm:block">
+                            <PwaInstallButton variant="header" label="Unduh App" />
                         </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-6">
 
-                        <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                        <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 transition-all shadow-xl">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
                                 <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=4f46e5&bold=true`} alt="User avatar" />
                             </div>
@@ -92,7 +71,6 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                             </div>
                         </div>
                     </div>
-                </header>
 
                 {/* Dashboard Body */}
                 <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-8 sm:px-10">

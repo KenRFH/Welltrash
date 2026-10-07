@@ -195,7 +195,9 @@ class InvoiceController extends Controller
             . "*Tim Welltrash*";
 
         try {
-            $response = Http::withHeaders(['Authorization' => config('services.fonnte.token')])
+            $response = Http::timeout(5)
+                ->connectTimeout(3)
+                ->withHeaders(['Authorization' => config('services.fonnte.token')])
                 ->asForm()
                 ->post(config('services.fonnte.url'), [
                     'target'  => $phone,

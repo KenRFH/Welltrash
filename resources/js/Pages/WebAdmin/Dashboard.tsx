@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
 import WebAdminSidebar from '@/Components/WebAdminSidebar';
+import PwaInstallButton from '@/Components/PwaInstallButton';
 
 interface Props {
     auth: {
@@ -38,13 +39,18 @@ export default function Dashboard({ auth, activitiesCount, katalogCount, newsCou
                         <h1 className="text-xl font-bold text-gray-800">Dasbor Web Admin</h1>
                     </div>
                     
-                    <div className="flex items-center space-x-3 p-1.5 pr-4 rounded-full border border-gray-100 bg-white shadow-sm">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
-                            <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=4f46e5&bold=true`} alt="User avatar" />
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                        <div className="hidden sm:block">
+                            <PwaInstallButton variant="header" label="Unduh App" />
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
-                            <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Web Admin</span>
+                        <div className="flex items-center space-x-3 p-1.5 pr-4 rounded-full border border-gray-100 bg-white shadow-sm">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
+                                <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=4f46e5&bold=true`} alt="User avatar" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
+                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Web Admin</span>
+                            </div>
                         </div>
                     </div>
                 </header>

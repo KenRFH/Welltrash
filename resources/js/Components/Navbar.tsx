@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 // The source image was removed, so we fallback to the built asset path
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
+import PwaInstallButton from "./PwaInstallButton";
 
 interface NavbarProps {
     dark?: boolean;
@@ -86,38 +87,63 @@ const Navbar = ({ dark = false }: NavbarProps) => {
 
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center gap-4 text-sm font-semibold">
-          {canRegister && (
-            <Link
-              href="/register"
-              className="transition-colors duration-200"
-              style={{ color: linkColor }}
-              onMouseEnter={e => { if (linkHoverColor) (e.currentTarget as HTMLElement).style.color = linkHoverColor; }}
-              onMouseLeave={e => { if (linkColor) (e.currentTarget as HTMLElement).style.color = linkColor; }}
-            >
-              Daftar
-            </Link>
-          )}
-          {canLogin && (
-            <Link
-              href="/login"
-              className="px-5 py-2 rounded-full text-sm font-bold transition-all duration-200"
-              style={dark
-                ? { border: '1px solid rgba(254,150,28,0.5)', color: '#FE961C' }
-                : { border: '1px solid #15803d', color: '#15803d' }
-              }
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.backgroundColor = dark ? '#FE961C' : '#15803d';
-                el.style.color = '#fff';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.backgroundColor = 'transparent';
-                el.style.color = dark ? '#FE961C' : '#15803d';
-              }}
-            >
-              Masuk
-            </Link>
+          {(props.auth as any)?.user ? (
+            <>
+              <PwaInstallButton
+                variant="header"
+                label="Unduh App"
+                className={dark
+                  ? "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full font-semibold text-xs transition-all duration-150 border border-amber-500/60 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 shadow-sm active:scale-95"
+                  : undefined
+                }
+              />
+              <Link
+                href="/dashboard"
+                className="px-5 py-2 rounded-full text-sm font-bold transition-all duration-200"
+                style={dark
+                  ? { border: '1px solid #FE961C', backgroundColor: '#FE961C', color: '#fff' }
+                  : { border: '1px solid #15803d', backgroundColor: '#15803d', color: '#fff' }
+                }
+              >
+                Dashboard
+              </Link>
+            </>
+          ) : (
+            <>
+              {canRegister && (
+                <Link
+                  href="/register"
+                  className="transition-colors duration-200"
+                  style={{ color: linkColor }}
+                  onMouseEnter={e => { if (linkHoverColor) (e.currentTarget as HTMLElement).style.color = linkHoverColor; }}
+                  onMouseLeave={e => { if (linkColor) (e.currentTarget as HTMLElement).style.color = linkColor; }}
+                >
+                  Daftar
+                </Link>
+              )}
+              {canLogin && (
+                <Link
+                  href="/login"
+                  className="px-5 py-2 rounded-full text-sm font-bold transition-all duration-200"
+                  style={dark
+                    ? { border: '1px solid rgba(254,150,28,0.5)', color: '#FE961C' }
+                    : { border: '1px solid #15803d', color: '#15803d' }
+                  }
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.backgroundColor = dark ? '#FE961C' : '#15803d';
+                    el.style.color = '#fff';
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement;
+                    el.style.backgroundColor = 'transparent';
+                    el.style.color = dark ? '#FE961C' : '#15803d';
+                  }}
+                >
+                  Masuk
+                </Link>
+              )}
+            </>
           )}
         </div>
 
@@ -152,21 +178,38 @@ const Navbar = ({ dark = false }: NavbarProps) => {
               {item.label}
             </Link>
           ))}
-          {canRegister && (
-            <Link href="/register" onClick={() => setIsOpen(false)} style={{ color: mobileLinkColor }}>Daftar</Link>
-          )}
-          {canLogin && (
-            <Link
-              href="/login"
-              onClick={() => setIsOpen(false)}
-              className="px-6 py-2 rounded-full font-bold"
-              style={dark
-                ? { border: '1px solid #FE961C', color: '#FE961C' }
-                : { border: '1px solid #15803d', color: '#15803d' }
-              }
-            >
-              Masuk
-            </Link>
+          {(props.auth as any)?.user ? (
+            <>
+              <div className="w-full px-6 py-1">
+                <PwaInstallButton variant="sidebar" label="Unduh Aplikasi" />
+              </div>
+              <Link
+                href="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="px-6 py-2 rounded-full font-bold text-white bg-green-600"
+              >
+                Dashboard
+              </Link>
+            </>
+          ) : (
+            <>
+              {canRegister && (
+                <Link href="/register" onClick={() => setIsOpen(false)} style={{ color: mobileLinkColor }}>Daftar</Link>
+              )}
+              {canLogin && (
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="px-6 py-2 rounded-full font-bold"
+                  style={dark
+                    ? { border: '1px solid #FE961C', color: '#FE961C' }
+                    : { border: '1px solid #15803d', color: '#15803d' }
+                  }
+                >
+                  Masuk
+                </Link>
+              )}
+            </>
           )}
         </div>
       </div>

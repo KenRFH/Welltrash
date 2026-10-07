@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import CleanUPSidebar from '@/Components/CleanUPSidebar';
 import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
+import { compressImage } from '@/utils/compressImage';
 
 const DAILY_RATE     = 67692;
 const MIN_WORK_HOURS = 8;
@@ -476,7 +477,15 @@ export default function CleanUPAttendance({
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    onChange={e => setData('proof_image', e.target.files?.[0] || null)}
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0] || null;
+                                                        if (file) {
+                                                            const compressed = await compressImage(file, 1280, 1280, 0.78);
+                                                            setData('proof_image', compressed);
+                                                        } else {
+                                                            setData('proof_image', null);
+                                                        }
+                                                    }}
                                                     className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-amber-100 focus:border-amber-400 transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
                                                 />
                                                 {/* @ts-ignore */}

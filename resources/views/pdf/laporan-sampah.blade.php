@@ -302,7 +302,7 @@
                 @endif
                 <div class="logo-text">
                     <div class="brand-name">Welltrash</div>
-                    <div class="brand-tagline">Well solutions for trash</div>
+                    <div class="brand-tagline">Well solution for trash</div>
                     <div class="brand-address">
                         Baratan Wetan, Baratan, Kec. Patrang<br>
                         Kabupaten Jember, Jawa Timur 68100
