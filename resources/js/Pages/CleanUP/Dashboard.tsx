@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import CleanUPSidebar from '@/Components/CleanUPSidebar';
 import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
 import PwaInstallButton from '@/Components/PwaInstallButton';
+import CleanUPOfflineSync from '@/Components/CleanUPOfflineSync';
 import { compressImage } from '@/utils/compressImage';
+import { saveOfflinePickup, syncSinglePickup, getOfflinePickupIds } from '@/utils/offlinePickupQueue';
 
 // Icons
 const CameraIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
@@ -46,6 +48,13 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
     const [fileSizeError, setFileSizeError] = useState<string | null>(null);
+    const [pendingPickupIds, setPendingPickupIds] = useState<number[]>([]);
+    const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+    React.useEffect(() => {
+        getOfflinePickupIds().then(ids => setPendingPickupIds(ids));
+    }, []);
 
     const MAX_FILE_MB = 10;
     const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
@@ -91,13 +100,93 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
         setActiveModal(pickupId);
     };
 
-    const handleSubmitPickup = (e: React.FormEvent, pickupId: number) => {
+    const handleSubmitPickup = async (e: React.FormEvent, pickupId: number) => {
         e.preventDefault();
-        if (fileSizeError) return;
-        postSubmit(route('cleanup.submitPickup', pickupId), {
-            preserveScroll: true,
-            onSuccess: () => setActiveModal(null),
-        });
+        if (fileSizeError || isSubmitting) return;
+
+        if (!data.organic_weight || !data.anorganic_weight || !data.residue_weight) {
+            alert('Harap isi semua berat sampah (organik, anorganik, residu).');
+            return;
+        }
+
+        if (!data.evidence_pickup_path) {
+            alert('Harap sertakan foto bukti pengambilan sampah.');
+            return;
+        }
+
+        const activePickup = pickups.find(p => p.id === pickupId);
+        const companyName = activePickup?.company?.company_name || 'Mitra';
+
+        setIsSubmitting(true);
+        const numericPickupId = Number(pickupId);
+
+        const offlinePayload = {
+            pickupId: numericPickupId,
+            companyName,
+            organic_weight: data.organic_weight,
+            anorganic_weight: data.anorganic_weight,
+            residue_weight: data.residue_weight,
+            evidence_blob: data.evidence_pickup_path,
+            evidence_filename: data.evidence_pickup_path.name || `evidence_${numericPickupId}.jpg`,
+            offline_recorded_at: new Date().toISOString(),
+        };
+
+        // If offline: save directly to IndexedDB
+        if (!navigator.onLine) {
+            try {
+                await saveOfflinePickup(offlinePayload);
+                setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
+                setActiveModal(null);
+                reset();
+                setOfflineNotice(`Mode Offline: Data penjemputan ${companyName} tersimpan di HP. Akan otomatis diunggah saat terhubung ke internet.`);
+                window.dispatchEvent(new Event('welltrash:refresh-offline-queue'));
+            } catch (err: any) {
+                alert(`Gagal menyimpan data offline: ${err?.message || err}`);
+            } finally {
+                setIsSubmitting(false);
+            }
+            return;
+        }
+
+        // Online Store-and-Forward: save to IndexedDB as backup first, then attempt immediate upload
+        try {
+            await saveOfflinePickup(offlinePayload);
+
+            const syncRecord = {
+                ...offlinePayload,
+                created_at: Date.now(),
+            };
+
+            const res = await syncSinglePickup(syncRecord);
+
+            if (res.success) {
+                setActiveModal(null);
+                reset();
+                setPendingPickupIds(prev => prev.filter(id => id !== numericPickupId));
+                router.reload();
+            } else if (res.sessionExpired) {
+                setActiveModal(null);
+                reset();
+                setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
+                setOfflineNotice('Sesi Anda berakhir. Data tersimpan aman di HP. Silakan login kembali untuk melanjutkan pengiriman.');
+            } else {
+                // Network issue or server error - keep safely in IndexedDB
+                setActiveModal(null);
+                reset();
+                setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
+                setOfflineNotice(`Jaringan tidak stabil. Data penjemputan ${companyName} tersimpan di HP dan akan diunggah otomatis.`);
+                window.dispatchEvent(new Event('welltrash:refresh-offline-queue'));
+            }
+        } catch {
+            // Unexpected network failure: keep in IndexedDB
+            setActiveModal(null);
+            reset();
+            setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
+            setOfflineNotice(`Koneksi terputus. Data tersimpan aman di HP dan akan diunggah saat sinyal kembali.`);
+            window.dispatchEvent(new Event('welltrash:refresh-offline-queue'));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -146,6 +235,20 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                 </header>
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-8 pb-24 relative z-10 w-full max-w-5xl mx-auto">
+
+                     {/* Offline Synchronization Banner */}
+                     <CleanUPOfflineSync onPendingListChange={ids => setPendingPickupIds(ids)} />
+
+                     {/* Local Offline Action Notice */}
+                     {offlineNotice && (
+                         <div className="mb-6 flex items-start justify-between gap-3 bg-amber-50 border border-amber-300 text-amber-900 text-sm font-medium px-4 py-3.5 rounded-2xl shadow-sm animate-fadeIn">
+                             <div className="flex items-start gap-2.5">
+                                 <span className="text-amber-600 mt-0.5 text-base">📦</span>
+                                 <span>{offlineNotice}</span>
+                             </div>
+                             <button onClick={() => setOfflineNotice(null)} className="text-amber-700 hover:text-amber-900 font-bold ml-2">✕</button>
+                         </div>
+                     )}
 
                      {/* Flash Messages */}
                      {flash?.error && (
@@ -231,9 +334,11 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                 })
                                 .map((pickup) => {
                                 const status = pickup.status;
+                                const isPendingOffline = pendingPickupIds.includes(pickup.id);
                                 
                                 return (
                                     <div key={pickup.id} className={`bg-white rounded-2xl p-5 flex flex-col justify-between transition-all border relative overflow-hidden group ${
+                                        isPendingOffline ? 'border-amber-300 bg-amber-50/20 shadow-sm' :
                                         status === 'completed' ? 'border-green-200 bg-green-50/30' : 
                                         status === 'on_the_way' ? 'border-emerald-300 shadow-sm' : 'border-gray-100 hover:border-gray-200 hover:shadow-sm'
                                     }`}>
@@ -256,10 +361,18 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                 )}
                                             </div>
                                             <div className="flex-shrink-0">
-                                                {status === 'completed' && <span className="text-[10px] font-bold tracking-wider uppercase text-green-700 bg-green-100 px-2.5 py-1 rounded-md">Selesai</span>}
-                                                {status === 'failed' && <span className="text-[10px] font-bold tracking-wider uppercase text-red-700 bg-red-100 px-2.5 py-1 rounded-md">Gagal</span>}
-                                                {status === 'scheduled' && <span className="text-[10px] font-bold tracking-wider uppercase text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200">Terjadwal</span>}
-                                                {status === 'on_the_way' && <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> OTW</span>}
+                                                {isPendingOffline ? (
+                                                    <span className="text-[10px] font-bold tracking-wider uppercase text-amber-800 bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span> Menunggu Sinyal
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        {status === 'completed' && <span className="text-[10px] font-bold tracking-wider uppercase text-green-700 bg-green-100 px-2.5 py-1 rounded-md">Selesai</span>}
+                                                        {status === 'failed' && <span className="text-[10px] font-bold tracking-wider uppercase text-red-700 bg-red-100 px-2.5 py-1 rounded-md">Gagal</span>}
+                                                        {status === 'scheduled' && <span className="text-[10px] font-bold tracking-wider uppercase text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200">Terjadwal</span>}
+                                                        {status === 'on_the_way' && <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> OTW</span>}
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
 
@@ -278,7 +391,20 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                         )}
 
                                         <div className="pt-4 border-t border-gray-100 flex gap-2">
-                                            {isToday && status !== 'completed' && status !== 'failed' ? (
+                                            {isPendingOffline ? (
+                                                <div className="w-full flex items-center justify-between py-2.5 px-3.5 bg-amber-50 rounded-xl text-xs font-semibold text-amber-900 border border-amber-200">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-amber-600">⏳</span>
+                                                        <span>Tersimpan di HP (Menunggu Sinyal)</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => window.dispatchEvent(new Event('welltrash:refresh-offline-queue'))}
+                                                        className="text-xs bg-amber-600 text-white font-bold px-3 py-1.5 rounded-lg hover:bg-amber-700 transition shadow-sm"
+                                                    >
+                                                        Upload
+                                                    </button>
+                                                </div>
+                                            ) : isToday && status !== 'completed' && status !== 'failed' ? (
                                                 <>
                                                     {status === 'scheduled' && (
                                                         <button 
@@ -439,7 +565,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                 <button 
                                     type="submit" 
                                     form={`submit-form-${activeModal}`}
-                                    disabled={processingSubmit || !!fileSizeError}
+                                    disabled={isSubmitting || !!fileSizeError}
                                     className={`w-full font-extrabold text-lg py-4 rounded-2xl transition-all flex items-center justify-center hover:-translate-y-0.5 text-white ${
                                         fileSizeError
                                             ? 'bg-red-400 cursor-not-allowed opacity-80'
@@ -448,8 +574,8 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                 >
                                     {fileSizeError
                                         ? 'Foto Terlalu Besar — Ganti Foto'
-                                        : processingSubmit ? 'Menyimpan & Memproses...' : 'Simpan Data Pengambilan'}
-                                    {!processingSubmit && !fileSizeError && <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>}
+                                        : isSubmitting ? 'Menyimpan & Mengirim...' : 'Simpan Data Pengambilan'}
+                                    {!isSubmitting && !fileSizeError && <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>}
                                 </button>
                             </div>
                         </div>

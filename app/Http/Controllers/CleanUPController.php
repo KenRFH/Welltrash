@@ -87,18 +87,62 @@ class CleanUPController extends Controller
     }
 
    
+    /**
+     * Check authentication and get fresh CSRF token for offline sync.
+     */
+    public function syncStatus(Request $request)
+    {
+        return response()->json([
+            'authenticated' => true,
+            'csrf' => csrf_token(),
+            'user' => [
+                'id' => Auth::id(),
+                'name' => Auth::user()->name,
+            ],
+            'server_time' => Carbon::now()->toIso8601String(),
+        ]);
+    }
+
+    /**
+     * Store pickup completion details, including offline sync support with grace period.
+     */
     public function submitPickup(Request $request, Pickup $pickup)
     {
-        // STRICT RULE: CleanUP can only update if pickup_date == today
-        if (!Carbon::parse($pickup->pickup_date)->isToday()) {
-            return back()->with('error', 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI.');
+        $pickupDate = Carbon::parse($pickup->pickup_date)->startOfDay();
+        $today = Carbon::today();
+        
+        // Handle offline submission grace period (up to 48 hours if recorded on scheduled date)
+        $isGraceAllowed = false;
+        if ($request->filled('offline_recorded_at')) {
+            try {
+                $recordedAt = Carbon::parse($request->offline_recorded_at);
+                // Allow if recorded on the pickup_date and synced within 48 hours
+                if ($recordedAt->isSameDay($pickupDate) && $recordedAt->diffInHours(Carbon::now()) <= 48) {
+                    $isGraceAllowed = true;
+                }
+            } catch (\Exception $e) {
+                // fallback to standard check
+            }
+        }
+
+        // STRICT RULE with Grace Period
+        if (!$pickupDate->isToday() && !$isGraceAllowed) {
+            $errorMessage = 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI atau antrean offline dalam batas toleransi.';
+            if ($request->expectsJson() || $request->header('X-Background-Sync') === 'true') {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                ], 422);
+            }
+            return back()->with('error', $errorMessage);
         }
 
         $request->validate([
             'organic_weight' => 'required|numeric|min:0',
             'anorganic_weight' => 'required|numeric|min:0',
             'residue_weight' => 'required|numeric|min:0',
-            'evidence_pickup_path' => 'required|image|max:2048',
+            'evidence_pickup_path' => 'required|image|max:5120',
+            'offline_recorded_at' => 'nullable|string',
         ]);
 
         $cleanup = Auth::user();
@@ -113,6 +157,14 @@ class CleanUPController extends Controller
             'residue_weight' => $request->residue_weight,
             'evidence_pickup_path' => $evidencePickupPath,
         ]);
+
+        if ($request->expectsJson() || $request->header('X-Background-Sync') === 'true') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil merekam pengambilan sampah!',
+                'pickup_id' => $pickup->id,
+            ]);
+        }
 
         return back()->with('success', 'Berhasil merekam pengambilan sampah!');
     }

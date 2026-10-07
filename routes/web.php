@@ -251,6 +251,7 @@ use App\Http\Controllers\CleanUPController;
 
 Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function () {
     Route::get('/dashboard', [CleanUPController::class, 'dashboard'])->name('cleanup.dashboard');
+    Route::get('/sync-status', [CleanUPController::class, 'syncStatus'])->name('cleanup.syncStatus');
     Route::put('/update-status/{pickup}', [CleanUPController::class, 'updateStatus'])->name('cleanup.updateStatus');
     Route::post('/submit-pickup/{pickup}', [CleanUPController::class, 'submitPickup'])->name('cleanup.submitPickup');
     Route::get('/history', [CleanUPController::class, 'history'])->name('cleanup.history');

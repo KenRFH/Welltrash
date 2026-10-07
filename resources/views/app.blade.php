@@ -9,6 +9,8 @@
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
         <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
 
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
         <!-- PWA Manifest & Meta Tags -->
         <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="#16A34A">
