@@ -1,4 +1,8 @@
 *.log
+*.zip
+*.tar
+*.tar.gz
+*.rar
 .DS_Store
 .env
 .env.backup
