@@ -1,6 +1,21 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link } from '@inertiajs/react';
+import {
+    Building2,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Search,
+    PlusCircle,
+    FileText,
+    Power,
+    PhoneCall,
+    Sparkles,
+    Layers,
+    ArrowUpRight,
+    X,
+} from 'lucide-react';
 
 interface Company {
     id: number;
@@ -20,230 +35,636 @@ interface Props {
 }
 
 export default function Index({ companies }: Props) {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [planFilter, setPlanFilter] = useState<string>('all');
+
+    // Aggregate Metrics & Infographics Data
+    const totalCompanies = companies.length;
+    const activeCompanies = useMemo(() => companies.filter(c => c.subscription_status === 'active').length, [companies]);
+    const pendingActivation = useMemo(() => companies.filter(c => ['payment_uploaded', 'pending'].includes(c.subscription_status)).length, [companies]);
+    const inactiveCompanies = useMemo(() => companies.filter(c => ['inactive', 'rejected'].includes(c.subscription_status)).length, [companies]);
+
+    const activeRate = totalCompanies > 0 ? Math.round((activeCompanies / totalCompanies) * 100) : 0;
+
+    // Plan distribution calculation
+    const planCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        companies.forEach(c => {
+            const plan = c.subscription_plan || 'Reguler';
+            counts[plan] = (counts[plan] || 0) + 1;
+        });
+        return counts;
+    }, [companies]);
+
+    const uniquePlans = useMemo(() => Object.keys(planCounts).sort(), [planCounts]);
+
+    // Status distribution
+    const statusCounts = useMemo(() => {
+        const counts: Record<string, number> = {
+            active: 0,
+            payment_uploaded: 0,
+            pending: 0,
+            inactive: 0,
+            rejected: 0,
+            approved: 0,
+        };
+        companies.forEach(c => {
+            if (counts[c.subscription_status] !== undefined) {
+                counts[c.subscription_status]++;
+            }
+        });
+        return counts;
+    }, [companies]);
+
+    // Filtered list
+    const filteredCompanies = useMemo(() => {
+        return companies.filter(c => {
+            const matchesSearch =
+                c.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                c.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                c.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (c.phone && c.phone.includes(searchQuery));
+
+            const matchesStatus = statusFilter === 'all' || c.subscription_status === statusFilter;
+            const matchesPlan = planFilter === 'all' || c.subscription_plan === planFilter;
+
+            return matchesSearch && matchesStatus && matchesPlan;
+        });
+    }, [companies, searchQuery, statusFilter, planFilter]);
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'active':
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-green-50 text-green-700 border border-green-100 shadow-sm">Aktif</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Aktif
+                    </span>
+                );
             case 'pending':
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-yellow-50 text-yellow-700 border border-yellow-100 shadow-sm">Menunggu</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        Menunggu
+                    </span>
+                );
             case 'rejected':
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-red-50 text-red-700 border border-red-100 shadow-sm">Ditolak</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                        Ditolak
+                    </span>
+                );
             case 'approved':
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-700 border border-blue-100 shadow-sm">Disetujui</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        Disetujui
+                    </span>
+                );
             case 'payment_uploaded':
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-teal-50 text-teal-700 border border-teal-100 shadow-sm">Menunggu Aktivasi</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-teal-50 text-teal-700 border border-teal-200/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                        Verifikasi Pembayaran
+                    </span>
+                );
             case 'inactive':
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 border border-gray-200 shadow-sm">Nonaktif</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                        Nonaktif
+                    </span>
+                );
             default:
-                return <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-gray-50 text-gray-700 border border-gray-100 shadow-sm">{status}</span>;
+                return (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                        {status}
+                    </span>
+                );
         }
+    };
+
+    const getPlanBadge = (plan: string) => {
+        const p = plan?.toLowerCase() || '';
+        if (p.includes('prime') || p.includes('enterprise')) {
+            return (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/70">
+                    <Sparkles className="w-3 h-3 text-purple-500" />
+                    {plan}
+                </span>
+            );
+        }
+        if (p.includes('premium')) {
+            return (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200/70">
+                    {plan}
+                </span>
+            );
+        }
+        return (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/70">
+                {plan || 'Reguler'}
+            </span>
+        );
     };
 
     return (
         <AdminLayout
-            title="Semua Perusahaan"
-            subtitle="Manajemen Mitra Bisnis"
+            title="Kelola Mitra Bisnis"
+            subtitle="Direktori dan status operasional seluruh entitas perusahaan mitra Welltrash"
             activeTab="companies"
+            headerAction={
+                <Link
+                    href={route('admin.invoices.create')}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Buat Invoice Baru</span>
+                </Link>
+            }
         >
-            <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-                <div className="flex items-center justify-between px-6 py-6 border-b border-gray-50">
-                    <div>
-                        <h2 className="text-lg font-black text-gray-900">Daftar Mitra</h2>
-                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Total {companies.length} Perusahaan</p>
+            <div className="space-y-6">
+                {/* 1. Infographic Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Mitra</span>
+                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                                <Building2 className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">
+                            {totalCompanies}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Entitas</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="text-emerald-600 font-bold">{activeRate}%</span>
+                            <span>berlangganan aktif</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mitra Aktif</span>
+                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <CheckCircle2 className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
+                            {activeCompanies}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Mitra</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span>Jadwal rutin terintegrasi</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Perlu Tindakan</span>
+                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <Clock className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                            {pendingActivation}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Mitra</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            {pendingActivation > 0 ? (
+                                <span className="text-amber-700 font-semibold inline-flex items-center gap-1">
+                                    Verifikasi & aktivasi segera
+                                </span>
+                            ) : (
+                                <span>Semua mitra terverifikasi</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nonaktif / Ditolak</span>
+                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
+                                <AlertCircle className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-slate-700 tracking-tight tabular-nums">
+                            {inactiveCompanies}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Entitas</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span>Bisa diaktifkan kembali sewaktu-waktu</span>
+                        </div>
                     </div>
                 </div>
 
-                {companies.length === 0 ? (
-                    <div className="p-20 text-center">
-                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                {/* 2. Visual Distribution & Plan Infographics */}
+                <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <Layers className="w-4 h-4 text-emerald-600" />
+                                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                                    Distribusi Status & Portofolio Paket Mitra
+                                </h3>
+                            </div>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                Proporsi mitra bisnis berdasarkan status operasional dan pilihan paket layanan
+                            </p>
                         </div>
-                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Belum ada perusahaan terdaftar</p>
+                        <span className="text-xs font-semibold text-slate-500">
+                            Basis {totalCompanies} Total Perusahaan
+                        </span>
                     </div>
-                ) : (
-                    <>
-                        {/* Desktop Table */}
-                        <div className="hidden md:block overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-50">
-                                <thead>
-                                    <tr className="bg-gray-50/50">
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Perusahaan & Kontak</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Paket Layanan</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                                        <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {companies.map((company) => (
-                                        <tr key={company.id} className="hover:bg-gray-50/80 transition-colors group">
-                                            <td className="px-6 py-5">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{company.company_name}</span>
-                                                    <span className="text-xs text-gray-400 font-medium">{company.user.name} &bull; {company.user.email}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <span className="text-sm font-black text-gray-700 bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">{company.subscription_plan}</span>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex flex-col items-start gap-1.5">
-                                                    {getStatusBadge(company.subscription_status)}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5 text-right space-x-2">
-                                                {company.subscription_status === 'payment_uploaded' && (
-                                                    <Link
-                                                        href={route('admin.companies.activate', company.id)}
-                                                        method="patch"
-                                                        as="button"
-                                                        preserveScroll
-                                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-teal-50 text-teal-600 hover:bg-teal-600 hover:text-white transition-all border border-teal-100 hover:border-teal-600"
-                                                    >
-                                                        Tinjau & Aktifkan
-                                                    </Link>
-                                                )}
-                                                
-                                                {(company.subscription_status === 'active' || company.subscription_status === 'inactive') && (
-                                                    <Link
-                                                        href={route('admin.companies.toggleStatus', company.id)}
-                                                        method="patch"
-                                                        as="button"
-                                                        preserveScroll
-                                                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all border ${
-                                                            company.subscription_status === 'active' 
-                                                                ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-red-100 hover:border-red-600'
-                                                                : 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white border-green-100 hover:border-green-600'
-                                                        }`}
-                                                    >
-                                                        {company.subscription_status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}
-                                                    </Link>
-                                                )}
 
-                                                {company.subscription_status === 'active' && (
-                                                    <a 
-                                                        href={`https://wa.me/${company.phone?.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-black bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 hover:border-emerald-600"
-                                                        title="Hubungi PIC via WhatsApp"
-                                                    >
-                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                                        </svg>
-                                                    </a>
-                                                )}
-
-                                                <Link
-                                                    href={route('admin.companies.show', company.id)}
-                                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-orange-50 text-orange-600 hover:bg-orange-600 hover:text-white transition-all border border-orange-100 hover:border-orange-600"
-                                                >
-                                                    Detail
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
-                                                </Link>
-                                                
-                                                {company.subscription_status === 'active' && (
-                                                    <Link
-                                                        href={route('admin.invoices.create') + '?company_id=' + company.id}
-                                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all border border-green-100 hover:border-green-600"
-                                                    >
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                        Buat Invoice
-                                                    </Link>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                    {/* Segmented Distribution Bar */}
+                    <div className="space-y-2">
+                        <div className="h-3 w-full bg-slate-100 rounded-md overflow-hidden flex">
+                            {totalCompanies > 0 ? (
+                                <>
+                                    <div
+                                        style={{ width: `${(activeCompanies / totalCompanies) * 100}%` }}
+                                        className="bg-emerald-500 transition-all duration-500"
+                                        title={`Aktif: ${activeCompanies} (${activeRate}%)`}
+                                    />
+                                    <div
+                                        style={{ width: `${(statusCounts.payment_uploaded / totalCompanies) * 100}%` }}
+                                        className="bg-teal-400 transition-all duration-500"
+                                        title={`Verifikasi Pembayaran: ${statusCounts.payment_uploaded}`}
+                                    />
+                                    <div
+                                        style={{ width: `${(statusCounts.pending / totalCompanies) * 100}%` }}
+                                        className="bg-amber-400 transition-all duration-500"
+                                        title={`Menunggu: ${statusCounts.pending}`}
+                                    />
+                                    <div
+                                        style={{ width: `${(inactiveCompanies / totalCompanies) * 100}%` }}
+                                        className="bg-slate-300 transition-all duration-500"
+                                        title={`Nonaktif: ${inactiveCompanies}`}
+                                    />
+                                </>
+                            ) : (
+                                <div className="w-full bg-slate-200" />
+                            )}
                         </div>
 
-                        {/* Mobile Cards */}
-                        <div className="md:hidden divide-y divide-gray-50">
-                            {companies.map((company) => (
-                                <div key={company.id} className="p-6 hover:bg-gray-50 transition-colors">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex flex-col">
-                                            <span className="font-black text-gray-900 text-base">{company.company_name}</span>
-                                            <span className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">{company.subscription_plan}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end gap-1.5">
+                        {/* Legend */}
+                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 pt-1">
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
+                                <span>Aktif ({activeCompanies})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-teal-400" />
+                                <span>Verifikasi ({statusCounts.payment_uploaded})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-amber-400" />
+                                <span>Menunggu ({statusCounts.pending})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-slate-300" />
+                                <span>Nonaktif / Ditolak ({inactiveCompanies})</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Plan Distribution Badges */}
+                    {uniquePlans.length > 0 && (
+                        <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">
+                                Paket Langganan:
+                            </span>
+                            {uniquePlans.map(plan => {
+                                const count = planCounts[plan];
+                                const pct = totalCompanies > 0 ? Math.round((count / totalCompanies) * 100) : 0;
+                                return (
+                                    <button
+                                        key={plan}
+                                        onClick={() => setPlanFilter(planFilter === plan ? 'all' : plan)}
+                                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                                            planFilter === plan
+                                                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                                                : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'
+                                        }`}
+                                    >
+                                        <span>{plan}</span>
+                                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                            planFilter === plan ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-600'
+                                        }`}>
+                                            {count} ({pct}%)
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                            {planFilter !== 'all' && (
+                                <button
+                                    onClick={() => setPlanFilter('all')}
+                                    className="text-xs font-semibold text-rose-600 hover:text-rose-700 ml-1 inline-flex items-center gap-1"
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                    Reset
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* 3. Search & Filter Bar */}
+                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                            type="text"
+                            placeholder="Cari nama perusahaan, PIC, email, atau telepon..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-4 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* Status Filter */}
+                        <div className="flex items-center gap-1.5 bg-slate-100/70 p-1 rounded-lg border border-slate-200/60 text-xs">
+                            <span className="text-[11px] font-bold text-slate-400 px-2 uppercase">Status:</span>
+                            <button
+                                onClick={() => setStatusFilter('all')}
+                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                                    statusFilter === 'all'
+                                        ? 'bg-white text-slate-900 shadow-2xs'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Semua ({totalCompanies})
+                            </button>
+                            <button
+                                onClick={() => setStatusFilter('active')}
+                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                                    statusFilter === 'active'
+                                        ? 'bg-white text-emerald-700 shadow-2xs'
+                                        : 'text-slate-600 hover:text-emerald-700'
+                                }`}
+                            >
+                                Aktif ({activeCompanies})
+                            </button>
+                            <button
+                                onClick={() => setStatusFilter('payment_uploaded')}
+                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                                    statusFilter === 'payment_uploaded'
+                                        ? 'bg-white text-teal-700 shadow-2xs'
+                                        : 'text-slate-600 hover:text-teal-700'
+                                }`}
+                            >
+                                Verifikasi ({statusCounts.payment_uploaded})
+                            </button>
+                            <button
+                                onClick={() => setStatusFilter('inactive')}
+                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+                                    statusFilter === 'inactive'
+                                        ? 'bg-white text-slate-800 shadow-2xs'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Nonaktif ({inactiveCompanies})
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 4. Companies Table Container */}
+                <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-sm font-bold text-slate-900">
+                                Daftar Mitra Terdaftar
+                            </h2>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                Menampilkan {filteredCompanies.length} dari {totalCompanies} perusahaan mitra
+                            </p>
+                        </div>
+                    </div>
+
+                    {filteredCompanies.length === 0 ? (
+                        <div className="p-16 text-center">
+                            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                <Building2 className="w-6 h-6" />
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-800">Tidak ada perusahaan ditemukan</h4>
+                            <p className="text-xs text-slate-400 font-medium mt-1">
+                                Coba ubah kata kunci pencarian atau sesuaikan opsi filter di atas.
+                            </p>
+                            {(searchQuery || statusFilter !== 'all' || planFilter !== 'all') && (
+                                <button
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setStatusFilter('all');
+                                        setPlanFilter('all');
+                                    }}
+                                    className="mt-4 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                                >
+                                    Reset Semua Filter
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <>
+                            {/* Desktop Table View */}
+                            <div className="hidden lg:block overflow-x-auto">
+                                <table className="min-w-full divide-y divide-slate-100 text-left">
+                                    <thead>
+                                        <tr className="bg-slate-50/75">
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Perusahaan & PIC
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Paket Langganan
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Status Mitra
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Kontak
+                                            </th>
+                                            <th className="px-5 py-3.5 text-right text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Tindakan
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+
+                                        {filteredCompanies.map((company) => (
+                                            <tr key={company.id} className="hover:bg-slate-50/70 transition-colors group">
+                                                <td className="px-5 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-extrabold text-xs">
+                                                            {company.company_name.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                                                                {company.company_name}
+                                                            </div>
+                                                            <div className="text-xs text-slate-400 font-medium mt-0.5">
+                                                                PIC: <span className="text-slate-600">{company.user.name}</span> &bull; {company.user.email}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    {getPlanBadge(company.subscription_plan)}
+                                                </td>
+                                                <td className="px-5 py-4">
+                                                    {getStatusBadge(company.subscription_status)}
+                                                </td>
+                                                <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                                                    {company.phone ? (
+                                                        <a
+                                                            href={`https://wa.me/${company.phone.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 text-slate-600 hover:text-emerald-700 font-medium transition-colors"
+                                                            title="Buka WhatsApp PIC"
+                                                        >
+                                                            <PhoneCall className="w-3.5 h-3.5 text-emerald-600" />
+                                                            <span>{company.phone}</span>
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-slate-400">-</span>
+                                                    )}
+                                                </td>
+
+                                                <td className="px-5 py-4 text-right">
+                                                    <div className="inline-flex items-center gap-1.5">
+                                                        {company.subscription_status === 'payment_uploaded' && (
+                                                            <Link
+                                                                href={route('admin.companies.activate', company.id)}
+                                                                method="patch"
+                                                                as="button"
+                                                                preserveScroll
+                                                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white border border-teal-200 transition-colors"
+                                                            >
+                                                                Verifikasi & Aktifkan
+                                                            </Link>
+                                                        )}
+
+                                                        {(company.subscription_status === 'active' || company.subscription_status === 'inactive') && (
+                                                            <Link
+                                                                href={route('admin.companies.toggleStatus', company.id)}
+                                                                method="patch"
+                                                                as="button"
+                                                                preserveScroll
+                                                                className={`p-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                                                    company.subscription_status === 'active'
+                                                                        ? 'text-rose-600 hover:bg-rose-50 border-rose-200/80'
+                                                                        : 'text-emerald-600 hover:bg-emerald-50 border-emerald-200/80'
+                                                                }`}
+                                                                title={company.subscription_status === 'active' ? 'Nonaktifkan Mitra' : 'Aktifkan Mitra'}
+                                                            >
+                                                                <Power className="w-3.5 h-3.5" />
+                                                            </Link>
+                                                        )}
+
+                                                        {company.subscription_status === 'active' && (
+                                                            <Link
+                                                                href={route('admin.invoices.create') + '?company_id=' + company.id}
+                                                                className="p-1.5 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80 transition-colors"
+                                                                title="Buat Tagihan Invoice"
+                                                            >
+                                                                <FileText className="w-3.5 h-3.5" />
+                                                            </Link>
+                                                        )}
+
+                                                        <Link
+                                                            href={route('admin.companies.show', company.id)}
+                                                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
+                                                        >
+                                                            <span>Detail</span>
+                                                            <ArrowUpRight className="w-3.5 h-3.5" />
+                                                        </Link>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Card Feed View */}
+                            <div className="lg:hidden divide-y divide-slate-100">
+                                {filteredCompanies.map((company) => (
+                                    <div key={company.id} className="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors">
+                                        <div className="flex items-start justify-between gap-3 mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-extrabold text-xs shrink-0">
+                                                    {company.company_name.substring(0, 2).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-slate-900 text-sm">{company.company_name}</h3>
+                                                    <p className="text-xs text-slate-400 font-medium">
+                                                        PIC: {company.user.name}
+                                                    </p>
+                                                </div>
+                                            </div>
                                             {getStatusBadge(company.subscription_status)}
                                         </div>
-                                    </div>
-                                    <div className="flex flex-col gap-1 mb-4">
-                                        <p className="text-xs text-gray-500 font-medium flex items-center gap-2">
-                                            <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                            {company.user.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500 font-medium flex items-center gap-2">
-                                            <svg className="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                            {company.user.email}
-                                        </p>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        {company.subscription_status === 'payment_uploaded' && (
-                                            <Link
-                                                href={route('admin.companies.activate', company.id)}
-                                                method="patch"
-                                                as="button"
-                                                preserveScroll
-                                                className="w-full py-2.5 rounded-xl text-[10px] font-black bg-teal-50 text-teal-600 hover:bg-teal-600 hover:text-white transition-all border border-teal-100 hover:border-teal-600 uppercase tracking-widest text-center block"
-                                            >
-                                                Tinjau & Aktifkan
-                                            </Link>
-                                        )}
-                                        
-                                        {(company.subscription_status === 'active' || company.subscription_status === 'inactive') && (
-                                            <Link
-                                                href={route('admin.companies.toggleStatus', company.id)}
-                                                method="patch"
-                                                as="button"
-                                                preserveScroll
-                                                className={`w-full py-2.5 rounded-xl text-[10px] font-black transition-all border uppercase tracking-widest text-center block ${
-                                                    company.subscription_status === 'active' 
-                                                        ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-red-100 hover:border-red-600'
-                                                        : 'bg-green-50 text-green-600 hover:bg-green-600 hover:text-white border-green-100 hover:border-green-600'
-                                                }`}
-                                            >
-                                                {company.subscription_status === 'active' ? 'Nonaktifkan Akun' : 'Aktifkan Akun'}
-                                            </Link>
-                                        )}
 
-                                        {company.subscription_status === 'active' && (
-                                            <a 
-                                                href={`https://wa.me/${company.phone?.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="w-full py-2.5 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 hover:border-emerald-600 uppercase tracking-widest text-center flex items-center justify-center gap-2"
-                                            >
-                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                                </svg>
-                                                Hubungi WA
-                                            </a>
-                                        )}
+                                        <div className="grid grid-cols-2 gap-2 text-xs py-2.5 px-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                                            <div>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Paket</span>
+                                                <span className="font-semibold text-slate-700 mt-0.5 inline-block">{company.subscription_plan || 'Reguler'}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Telepon / WA</span>
+                                                <span className="font-medium text-slate-600 mt-0.5 inline-block">{company.phone || '-'}</span>
+                                            </div>
+                                        </div>
 
-                                        <Link
-                                            href={route('admin.companies.show', company.id)}
-                                            className="w-full py-2.5 rounded-xl text-[10px] font-black bg-gray-900 text-white hover:bg-orange-600 transition-all uppercase tracking-widest text-center block"
-                                        >
-                                            Lihat Detail Perusahaan
-                                        </Link>
-
-                                        {company.subscription_status === 'active' && (
+                                        <div className="flex items-center gap-2">
                                             <Link
-                                                href={route('admin.invoices.create') + '?company_id=' + company.id}
-                                                className="w-full py-2.5 rounded-xl text-[10px] font-black bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all border border-green-100 uppercase tracking-widest text-center block"
+                                                href={route('admin.companies.show', company.id)}
+                                                className="flex-1 py-2 rounded-lg text-xs font-semibold bg-slate-900 text-white text-center hover:bg-slate-800 transition-colors"
                                             >
-                                                + Buat Invoice
+                                                Lihat Profil Lengkap
                                             </Link>
-                                        )}
+
+                                            {company.phone && (
+                                                <a
+                                                    href={`https://wa.me/${company.phone.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                                    title="Hubungi WhatsApp"
+                                                >
+                                                    <PhoneCall className="w-4 h-4" />
+                                                </a>
+                                            )}
+
+                                            {company.subscription_status === 'active' && (
+                                                <Link
+                                                    href={route('admin.invoices.create') + '?company_id=' + company.id}
+                                                    className="p-2 rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                                    title="Buat Tagihan Invoice"
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                </Link>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                )}
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
         </AdminLayout>
     );

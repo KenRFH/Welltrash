@@ -1,6 +1,24 @@
-import React, { useState } from 'react';
-import { router, useForm, usePage } from '@inertiajs/react';
+import React, { useState, useMemo } from 'react';
+import { router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import {
+    Calendar,
+    Clock,
+    UserCheck,
+    UserX,
+    MapPin,
+    Camera,
+    CheckCircle2,
+    XCircle,
+    AlertCircle,
+    Layers,
+    DollarSign,
+    Filter,
+    ArrowUpRight,
+    Search,
+    ChevronRight,
+    FileText,
+} from 'lucide-react';
 
 const DAILY_RATE     = 67692;
 const MIN_WORK_HOURS = 8;
@@ -95,7 +113,7 @@ function formatTime(dt: string | null) {
 
 function formatDate(dt: string) {
     return new Date(dt).toLocaleDateString('id-ID', {
-        weekday: 'short', day: 'numeric', month: 'short'
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
     });
 }
 
@@ -117,7 +135,7 @@ export default function AttendanceIndex({
     minWorkHours,
     flash,
 }: Props) {
-    const [activeTab, setActiveTab] = useState<'absensi' | 'izin' | 'lembur' | 'permohonan-lembur'>('absensi');
+    const [activeTab, setActiveTab] = useState<'absensi' | 'lembur' | 'izin' | 'permohonan-lembur'>('absensi');
     const [reviewingId, setReviewingId] = useState<number | null>(null);
     const [reviewingOvertimeId, setReviewingOvertimeId] = useState<number | null>(null);
 
@@ -179,48 +197,121 @@ export default function AttendanceIndex({
         });
     };
 
+    // Infographics & Analytics
     const pendingOvertimeCount = overtimeRequests.filter(o => o.status === 'pending').length;
-    const selectedCleanup = selectedCleanupId
-        ? cleanups.find(d => d.id === selectedCleanupId)
-        : null;
-
     const pendingLeaveCount = leaveRequests.filter(l => l.status === 'pending').length;
 
-    return (
-        <AdminLayout title="Absensi CleanUP" activeTab="attendance" subtitle="Rekap kehadiran CleanUP">
-            <div className="space-y-6 pb-10">
+    const totalPresent = attendances.total;
+    const qualifiedCount = useMemo(() => {
+        return attendances.data.filter(a => (a.work_hours || 0) >= (minWorkHours || MIN_WORK_HOURS)).length;
+    }, [attendances.data, minWorkHours]);
 
+    const totalOvertimeHours = useMemo(() => {
+        return overtimes.data.reduce((acc, ot) => acc + (ot.overtime_hours || 0), 0);
+    }, [overtimes.data]);
+
+    const qualifiedRate = attendances.data.length > 0 ? Math.round((qualifiedCount / attendances.data.length) * 100) : 0;
+
+    return (
+        <AdminLayout title="Absensi CleanUP" activeTab="attendance" subtitle="Rekap kehadiran, durasi kerja, dan persetujuan lembur CleanUP">
+            <div className="space-y-6">
                 {/* Flash Messages */}
                 {flash?.success && (
-                    <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 text-sm font-semibold px-4 py-3 rounded-2xl shadow-sm">
-                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {flash.success}
+                    <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-lg shadow-2xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>{flash.success}</span>
                     </div>
                 )}
                 {flash?.error && (
-                    <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold px-4 py-3 rounded-2xl shadow-sm">
-                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        {flash.error}
+                    <div className="flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold px-4 py-3 rounded-lg shadow-2xs">
+                        <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>{flash.error}</span>
                     </div>
                 )}
 
+                {/* 1. Infographic Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kehadiran Tercatat</span>
+                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <UserCheck className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">
+                            {totalPresent}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Driver</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span>Tanggal {formatDate(selectedDate)}</span>
+                        </div>
+                    </div>
 
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Memenuhi Standar</span>
+                            <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                                <Clock className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-teal-700 tracking-tight tabular-nums">
+                            {qualifiedCount}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Driver</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="font-bold text-emerald-600">{qualifiedRate}%</span>
+                            <span>kerja &ge; {minWorkHours} jam</span>
+                        </div>
+                    </div>
 
-                {/* Filters */}
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-                    <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Filter</h2>
-                    <div className="flex flex-wrap gap-4">
-                        <div className="flex flex-col gap-1 min-w-[200px]">
-                            <label className="text-xs font-bold text-gray-500">CleanUP</label>
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Akumulasi Lembur</span>
+                            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <Layers className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-indigo-700 tracking-tight tabular-nums">
+                            {totalOvertimeHours}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Jam</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span>Total {overtimes.total} sesi lembur</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Perlu Tindakan</span>
+                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <AlertCircle className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                            {pendingLeaveCount + pendingOvertimeCount}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Permohonan</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            {pendingLeaveCount + pendingOvertimeCount > 0 ? (
+                                <span className="text-amber-700 font-semibold">{pendingLeaveCount} izin &bull; {pendingOvertimeCount} lembur</span>
+                            ) : (
+                                <span>Semua permohonan diproses</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Minimalist Filter Bar */}
+                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-wrap gap-3 items-center justify-between">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Personel:</span>
                             <select
                                 id="filter-cleanup"
                                 value={selectedCleanupId ?? ''}
                                 onChange={e => handleFilter('cleanup_id', e.target.value)}
-                                className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium bg-gray-50 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 focus:bg-white transition-all"
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
                             >
                                 <option value="">Semua CleanUP</option>
                                 {cleanups.map(d => (
@@ -228,162 +319,237 @@ export default function AttendanceIndex({
                                 ))}
                             </select>
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-bold text-gray-500">Tanggal</label>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tanggal:</span>
                             <input
                                 id="filter-date"
                                 type="date"
                                 value={selectedDate}
                                 onChange={e => handleFilter('date', e.target.value)}
-                                className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium bg-gray-50 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 focus:bg-white transition-all"
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
                             />
                         </div>
                     </div>
+
+                    <div className="text-xs text-slate-400 font-medium">
+                        Standar Kerja: <span className="font-bold text-slate-700">{minWorkHours} Jam</span> &bull; Upah Pokok: <span className="font-bold text-emerald-700">{formatCurrency(dailyRate)}</span>
+                    </div>
                 </div>
 
-
-
-                {/* Tab Navigation */}
+                {/* 3. Segmented Tab Navigation */}
                 <div className="flex gap-2 flex-wrap">
                     <button
                         onClick={() => setActiveTab('absensi')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'absensi' ? 'bg-orange-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-orange-300'}`}
+                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                            activeTab === 'absensi'
+                                ? 'bg-slate-900 text-white shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Rekap Absensi ({attendances.total})
+                        <span>Rekap Kehadiran</span>
+                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                            activeTab === 'absensi' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                            {attendances.total}
+                        </span>
                     </button>
+
                     <button
                         onClick={() => setActiveTab('lembur')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'lembur' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'}`}
+                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                            activeTab === 'lembur'
+                                ? 'bg-indigo-600 text-white shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Rekap Lembur ({overtimes.total})
+                        <span>Rekap Lembur</span>
+                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                            activeTab === 'lembur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                            {overtimes.total}
+                        </span>
                     </button>
+
                     <button
                         onClick={() => setActiveTab('izin')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'izin' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-amber-300'}`}
+                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                            activeTab === 'izin'
+                                ? 'bg-amber-600 text-white shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Pengajuan Izin/Sakit ({leaveRequests.length})
+                        <span>Pengajuan Izin / Sakit</span>
+                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                            activeTab === 'izin' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                            {leaveRequests.length}
+                        </span>
                         {pendingLeaveCount > 0 && (
-                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">{pendingLeaveCount}</span>
+                            <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full animate-pulse">
+                                {pendingLeaveCount}
+                            </span>
                         )}
                     </button>
+
                     <button
                         onClick={() => setActiveTab('permohonan-lembur')}
-                        className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'permohonan-lembur' ? 'bg-violet-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}
+                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                            activeTab === 'permohonan-lembur'
+                                ? 'bg-purple-600 text-white shadow-2xs'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Permohonan Lembur ({overtimeRequests.length})
+                        <span>Permohonan Lembur</span>
+                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                            activeTab === 'permohonan-lembur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                            {overtimeRequests.length}
+                        </span>
                         {pendingOvertimeCount > 0 && (
-                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full">{pendingOvertimeCount}</span>
+                            <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full animate-pulse">
+                                {pendingOvertimeCount}
+                            </span>
                         )}
                     </button>
                 </div>
 
-                {/* Attendance Records Tab */}
+                {/* 4. Tab Contents */}
                 {activeTab === 'absensi' && (
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h2 className="font-bold text-gray-900">Rekap Kehadiran</h2>
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {attendances.total} data — {formatDate(selectedDate)}
+                                <h2 className="text-sm font-bold text-slate-900">Rekap Kehadiran Harian</h2>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                    {attendances.total} data tercatat &bull; {formatDate(selectedDate)}
                                 </p>
                             </div>
                         </div>
+
                         {attendances.data.length === 0 ? (
-                            <div className="px-6 py-16 text-center">
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                            <div className="p-16 text-center">
+                                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                    <UserCheck className="w-6 h-6" />
                                 </div>
-                                <p className="text-gray-500 text-sm font-semibold">Tidak ada data absensi</p>
+                                <h4 className="text-sm font-bold text-slate-800">Tidak ada data absensi</h4>
+                                <p className="text-xs text-slate-400 font-medium mt-1">
+                                    Belum ada presensi yang tercatat untuk tanggal atau filter ini.
+                                </p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="min-w-full divide-y divide-slate-100 text-left">
                                     <thead>
-                                        <tr className="bg-gray-50/80">
-                                            <th className="text-left text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-3">CleanUP</th>
-                                            <th className="text-left text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Tanggal</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Masuk</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Pulang</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Durasi</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Upah Hari</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Lokasi Masuk</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Lokasi Pulang</th>
-                                            <th className="text-center text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-3">Foto</th>
+                                        <tr className="bg-slate-50/75">
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">CleanUP Driver</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jam Masuk</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Jam Pulang</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Durasi Kerja</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Upah Harian</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Lokasi Presensi</th>
+                                            <th className="px-5 py-3.5 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">Foto Masuk/Pulang</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {attendances.data.map(att => {
-                                            const qualified = (att.work_hours ?? 0) >= MIN_WORK_HOURS;
+                                    <tbody className="divide-y divide-slate-100">
+
+                                        {attendances.data.map((att) => {
+                                            const qualified = att.work_hours != null && att.work_hours >= (minWorkHours || MIN_WORK_HOURS);
                                             return (
-                                                <tr key={att.id} className={`transition-colors ${qualified ? 'hover:bg-green-50/30' : 'hover:bg-gray-50/50 bg-gray-50/20'}`}>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2.5">
-                                                            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-700 font-black text-xs border border-orange-200 flex-shrink-0">
-                                                                {att.user.name.charAt(0).toUpperCase()}
+                                                <tr key={att.id} className="hover:bg-slate-50/70 transition-colors">
+                                                    <td className="px-5 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-extrabold text-xs">
+                                                                {att.user.name.substring(0, 2).toUpperCase()}
                                                             </div>
-                                                            <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">{att.user.name}</span>
+                                                            <div>
+                                                                <div className="font-bold text-slate-900 text-xs">{att.user.name}</div>
+                                                                <div className="text-[11px] text-slate-400 font-medium">{formatDate(att.date)}</div>
+                                                            </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
-                                                        {formatDate(att.date)}
+                                                    <td className="px-5 py-4 text-center">
+                                                        <span className="text-xs font-bold text-slate-800">{formatTime(att.clock_in_at)}</span>
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className="text-sm font-bold text-gray-900">{formatTime(att.clock_in_at)}</span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className={`text-sm font-bold ${att.clock_out_at ? 'text-gray-900' : 'text-gray-300 italic'}`}>
+                                                    <td className="px-5 py-4 text-center">
+                                                        <span className={`text-xs font-bold ${att.clock_out_at ? 'text-slate-800' : 'text-slate-300 italic'}`}>
                                                             {formatTime(att.clock_out_at)}
                                                         </span>
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
+                                                    <td className="px-5 py-4 text-center">
                                                         {att.work_hours != null ? (
-                                                            <span className={`text-sm font-bold px-2.5 py-1 rounded-lg ${att.work_hours >= MIN_WORK_HOURS ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                                {att.work_hours} jam
+                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold ${
+                                                                qualified ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70' : 'bg-amber-50 text-amber-700 border border-amber-200/70'
+                                                            }`}>
+                                                                {att.work_hours} Jam
                                                             </span>
                                                         ) : (
-                                                            <span className="text-gray-400 text-sm">-</span>
+                                                            <span className="text-xs text-slate-300">-</span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
+                                                    <td className="px-5 py-4 text-center">
                                                         {qualified ? (
-                                                            <span className="text-sm font-black text-green-700">{formatCurrency(DAILY_RATE)}</span>
+                                                            <span className="text-xs font-extrabold text-emerald-700 tabular-nums">
+                                                                {formatCurrency(dailyRate)}
+                                                            </span>
                                                         ) : (
-                                                            <span className="text-xs text-gray-400 italic">Tidak dihitung</span>
+                                                            <span className="text-[11px] text-slate-400 italic">Belum memenuhi</span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        {att.clock_in_lat ? (
-                                                            <a href={`https://www.google.com/maps?q=${att.clock_in_lat},${att.clock_in_lng}`} target="_blank" rel="noreferrer"
-                                                                className="text-xs font-mono text-blue-600 hover:underline">
-                                                                {parseFloat(att.clock_in_lat).toFixed(4)}, {parseFloat(att.clock_in_lng!).toFixed(4)}
-                                                            </a>
-                                                        ) : <span className="text-gray-400 text-xs">-</span>}
+
+                                                    <td className="px-5 py-4 text-center">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            {att.clock_in_lat ? (
+                                                                <a
+                                                                    href={`https://www.google.com/maps?q=${att.clock_in_lat},${att.clock_in_lng}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors"
+                                                                    title="Lihat Peta Masuk"
+                                                                >
+                                                                    <MapPin className="w-3 h-3 text-emerald-600" />
+                                                                    <span>Masuk</span>
+                                                                </a>
+                                                            ) : null}
+                                                            {att.clock_out_lat ? (
+                                                                <a
+                                                                    href={`https://www.google.com/maps?q=${att.clock_out_lat},${att.clock_out_lng}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 hover:text-teal-700 hover:bg-teal-50 transition-colors"
+                                                                    title="Lihat Peta Pulang"
+                                                                >
+                                                                    <MapPin className="w-3 h-3 text-teal-600" />
+                                                                    <span>Pulang</span>
+                                                                </a>
+                                                            ) : null}
+                                                            {!att.clock_in_lat && !att.clock_out_lat && <span className="text-slate-300 text-xs">-</span>}
+                                                        </div>
                                                     </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        {att.clock_out_lat ? (
-                                                            <a href={`https://www.google.com/maps?q=${att.clock_out_lat},${att.clock_out_lng}`} target="_blank" rel="noreferrer"
-                                                                className="text-xs font-mono text-blue-600 hover:underline">
-                                                                {parseFloat(att.clock_out_lat).toFixed(4)}, {parseFloat(att.clock_out_lng!).toFixed(4)}
-                                                            </a>
-                                                        ) : <span className="text-gray-400 text-xs">-</span>}
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
+                                                    <td className="px-5 py-4 text-center">
                                                         <div className="flex items-center justify-center gap-1.5">
                                                             {att.clock_in_photo && (
-                                                                <a href={`/storage/${att.clock_in_photo}`} target="_blank" rel="noreferrer"
-                                                                    className="text-[11px] font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-2 py-1 rounded-lg">
-                                                                    Masuk
+                                                                <a
+                                                                    href={`/storage/${att.clock_in_photo}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70 hover:bg-emerald-100"
+                                                                >
+                                                                    <Camera className="w-3 h-3" />
+                                                                    <span>Masuk</span>
                                                                 </a>
                                                             )}
                                                             {att.clock_out_photo && (
-                                                                <a href={`/storage/${att.clock_out_photo}`} target="_blank" rel="noreferrer"
-                                                                    className="text-[11px] font-bold text-orange-700 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-2 py-1 rounded-lg">
-                                                                    Pulang
+                                                                <a
+                                                                    href={`/storage/${att.clock_out_photo}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-200/70 hover:bg-teal-100"
+                                                                >
+                                                                    <Camera className="w-3 h-3" />
+                                                                    <span>Pulang</span>
                                                                 </a>
                                                             )}
-                                                            {!att.clock_in_photo && !att.clock_out_photo && <span className="text-gray-400 text-xs">-</span>}
+                                                            {!att.clock_in_photo && !att.clock_out_photo && <span className="text-slate-300 text-xs">-</span>}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -393,20 +559,22 @@ export default function AttendanceIndex({
                                 </table>
                             </div>
                         )}
-                        {attendances.data.length > 0 && (
-                            <div className="px-6 py-4 border-t border-gray-50 flex items-center justify-center">
+
+                        {/* Attendance Pagination */}
+                        {attendances.data.length > 0 && attendances.links.length > 3 && (
+                            <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-center">
                                 <div className="flex flex-wrap gap-1">
                                     {attendances.links.map((link, i) => (
                                         <button
                                             key={i}
                                             onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
                                             disabled={!link.url}
-                                            className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors ${
+                                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
                                                 link.active
-                                                    ? 'bg-orange-500 text-white shadow-sm'
+                                                    ? 'bg-slate-900 text-white shadow-2xs'
                                                     : link.url
-                                                    ? 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200'
-                                                    : 'bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-100'
+                                                    ? 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                                                    : 'bg-slate-50 text-slate-400 cursor-not-allowed border border-slate-100'
                                             }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -419,108 +587,96 @@ export default function AttendanceIndex({
 
                 {/* Overtime Records Tab */}
                 {activeTab === 'lembur' && (
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h2 className="font-bold text-gray-900">Rekap Lembur</h2>
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {overtimes.total} data — {formatDate(selectedDate)}
+                                <h2 className="text-sm font-bold text-slate-900">Rekap Jam Lembur</h2>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                    {overtimes.total} data tercatat &bull; {formatDate(selectedDate)}
                                 </p>
                             </div>
                         </div>
+
                         {overtimes.data.length === 0 ? (
-                            <div className="px-6 py-16 text-center">
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                            <div className="p-16 text-center">
+                                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                    <Clock className="w-6 h-6" />
                                 </div>
-                                <p className="text-gray-500 text-sm font-semibold">Tidak ada data lembur</p>
+                                <h4 className="text-sm font-bold text-slate-800">Tidak ada data lembur</h4>
+                                <p className="text-xs text-slate-400 font-medium mt-1">
+                                    Belum ada catatan lembur pada tanggal atau filter ini.
+                                </p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="min-w-full divide-y divide-slate-100 text-left">
                                     <thead>
-                                        <tr className="bg-indigo-50/50">
-                                            <th className="text-left text-xs font-bold text-indigo-500 uppercase tracking-wider px-6 py-3">CleanUP</th>
-                                            <th className="text-left text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Tanggal</th>
-                                            <th className="text-center text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Mulai Lembur</th>
-                                            <th className="text-center text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Selesai Lembur</th>
-                                            <th className="text-center text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Durasi</th>
-                                            <th className="text-center text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Gaji Lembur</th>
-                                            <th className="text-center text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Lokasi (M/P)</th>
-                                            <th className="text-center text-xs font-bold text-indigo-500 uppercase tracking-wider px-4 py-3">Foto</th>
+                                        <tr className="bg-slate-50/75">
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">CleanUP Driver</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Mulai Lembur</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Selesai Lembur</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Total Durasi</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Estimasi Upah</th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Lokasi & Foto</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-50">
-                                        {overtimes.data.map(att => (
-                                            <tr key={att.id} className="transition-colors hover:bg-indigo-50/20">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 font-black text-xs border border-indigo-200 flex-shrink-0">
-                                                            {att.user.name.charAt(0).toUpperCase()}
+                                    <tbody className="divide-y divide-slate-100">
+
+                                        {overtimes.data.map((att) => (
+                                            <tr key={att.id} className="hover:bg-slate-50/70 transition-colors">
+                                                <td className="px-5 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center justify-center font-extrabold text-xs">
+                                                            {att.user.name.substring(0, 2).toUpperCase()}
                                                         </div>
-                                                        <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">{att.user.name}</span>
+                                                        <div>
+                                                            <div className="font-bold text-slate-900 text-xs">{att.user.name}</div>
+                                                            <div className="text-[11px] text-slate-400 font-medium">{formatDate(att.date)}</div>
+                                                        </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
-                                                    {formatDate(att.date)}
+                                                <td className="px-5 py-4 text-center">
+                                                    <span className="text-xs font-bold text-slate-800">{formatTime(att.overtime_clock_in_at)}</span>
                                                 </td>
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className="text-sm font-bold text-gray-900">{formatTime(att.overtime_clock_in_at)}</span>
-                                                </td>
-                                                <td className="px-4 py-4 text-center">
-                                                    <span className={`text-sm font-bold ${att.overtime_clock_out_at ? 'text-gray-900' : 'text-gray-300 italic'}`}>
+                                                <td className="px-5 py-4 text-center">
+                                                    <span className={`text-xs font-bold ${att.overtime_clock_out_at ? 'text-slate-800' : 'text-slate-300 italic'}`}>
                                                         {formatTime(att.overtime_clock_out_at)}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-4 text-center">
+                                                <td className="px-5 py-4 text-center">
                                                     {att.overtime_hours != null ? (
-                                                        <span className="text-sm font-bold px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-700">
-                                                            {att.overtime_hours} jam
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/70">
+                                                            {att.overtime_hours} Jam
                                                         </span>
                                                     ) : (
-                                                        <span className="text-gray-400 text-sm">-</span>
+                                                        <span className="text-xs text-slate-300">-</span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-4 text-center">
+                                                <td className="px-5 py-4 text-center">
                                                     {att.overtime_hours != null ? (
-                                                        <span className="text-sm font-black text-indigo-700">{formatCurrency(att.overtime_hours * 10000)}</span>
+                                                        <span className="text-xs font-extrabold text-indigo-700 tabular-nums">
+                                                            {formatCurrency(att.overtime_hours * 10000)}
+                                                        </span>
                                                     ) : (
-                                                        <span className="text-gray-400 text-xs">-</span>
+                                                        <span className="text-[11px] text-slate-400">-</span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-4 text-center">
-                                                    <div className="flex flex-col items-center gap-1">
-                                                        {att.overtime_clock_in_lat ? (
-                                                            <a href={`https://www.google.com/maps?q=${att.overtime_clock_in_lat},${att.overtime_clock_in_lng}`} target="_blank" rel="noreferrer"
-                                                                className="text-[10px] font-mono text-blue-600 hover:underline">
-                                                                M: {parseFloat(att.overtime_clock_in_lat).toFixed(3)}, {parseFloat(att.overtime_clock_in_lng!).toFixed(3)}
-                                                            </a>
-                                                        ) : <span className="text-gray-400 text-[10px]">-</span>}
-                                                        {att.overtime_clock_out_lat ? (
-                                                            <a href={`https://www.google.com/maps?q=${att.overtime_clock_out_lat},${att.overtime_clock_out_lng}`} target="_blank" rel="noreferrer"
-                                                                className="text-[10px] font-mono text-blue-600 hover:underline">
-                                                                P: {parseFloat(att.overtime_clock_out_lat).toFixed(3)}, {parseFloat(att.overtime_clock_out_lng!).toFixed(3)}
-                                                            </a>
-                                                        ) : <span className="text-gray-400 text-[10px]">-</span>}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4 text-center">
+
+                                                <td className="px-5 py-4 text-center">
                                                     <div className="flex items-center justify-center gap-1.5">
                                                         {att.overtime_clock_in_photo && (
                                                             <a href={`/storage/${att.overtime_clock_in_photo}`} target="_blank" rel="noreferrer"
-                                                                className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-2 py-1 rounded-lg">
-                                                                Masuk
+                                                                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 hover:bg-indigo-100">
+                                                                Foto Mulai
                                                             </a>
                                                         )}
                                                         {att.overtime_clock_out_photo && (
                                                             <a href={`/storage/${att.overtime_clock_out_photo}`} target="_blank" rel="noreferrer"
-                                                                className="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 px-2 py-1 rounded-lg">
-                                                                Pulang
+                                                                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/70 hover:bg-purple-100">
+                                                                Foto Selesai
                                                             </a>
                                                         )}
-                                                        {!att.overtime_clock_in_photo && !att.overtime_clock_out_photo && <span className="text-gray-400 text-xs">-</span>}
+                                                        {!att.overtime_clock_in_photo && !att.overtime_clock_out_photo && <span className="text-slate-300 text-xs">-</span>}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -529,20 +685,20 @@ export default function AttendanceIndex({
                                 </table>
                             </div>
                         )}
-                        {overtimes.data.length > 0 && (
-                            <div className="px-6 py-4 border-t border-gray-50 flex items-center justify-center">
+                        {overtimes.data.length > 0 && overtimes.links.length > 3 && (
+                            <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-center">
                                 <div className="flex flex-wrap gap-1">
                                     {overtimes.links.map((link, i) => (
                                         <button
                                             key={i}
                                             onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
                                             disabled={!link.url}
-                                            className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors ${
+                                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
                                                 link.active
-                                                    ? 'bg-indigo-500 text-white shadow-sm'
+                                                    ? 'bg-indigo-600 text-white shadow-2xs'
                                                     : link.url
-                                                    ? 'bg-white text-gray-600 hover:bg-indigo-50 border border-gray-200'
-                                                    : 'bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-100'
+                                                    ? 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                                                    : 'bg-slate-50 text-slate-400 cursor-not-allowed border border-slate-100'
                                             }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -555,99 +711,103 @@ export default function AttendanceIndex({
 
                 {/* Leave Requests Tab */}
                 {activeTab === 'izin' && (
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h2 className="font-bold text-gray-900">Pengajuan Izin / Sakit</h2>
-                                <p className="text-xs text-gray-500 mt-0.5">{leaveRequests.length} pengajuan — {formatDate(selectedDate)}</p>
+                                <h2 className="text-sm font-bold text-slate-900">Pengajuan Izin & Sakit CleanUP</h2>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                    Total {leaveRequests.length} pengajuan tercatat
+                                </p>
                             </div>
-                            {pendingLeaveCount > 0 && (
-                                <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
-                                    Menunggu review
-                                </span>
-                            )}
                         </div>
 
                         {leaveRequests.length === 0 ? (
-                            <div className="px-6 py-16 text-center">
-                                <p className="text-gray-500 font-semibold text-sm">Tidak ada pengajuan izin/sakit</p>
+                            <div className="p-16 text-center">
+                                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                    <FileText className="w-6 h-6" />
+                                </div>
+                                <h4 className="text-sm font-bold text-slate-800">Tidak ada pengajuan izin atau sakit</h4>
+                                <p className="text-xs text-slate-400 font-medium mt-1">
+                                    Belum ada personel yang mengajukan surat izin atau keterangan sakit.
+                                </p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-gray-50">
-                                {leaveRequests.map(leave => (
-                                    <div key={leave.id} className={`px-6 py-5 ${leave.status === 'pending' ? 'bg-amber-50/30' : ''}`}>
+                            <div className="divide-y divide-slate-100">
+                                {leaveRequests.map((leave) => (
+                                    <div key={leave.id} className="p-5 hover:bg-slate-50/50 transition-colors">
                                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                                             <div className="flex items-start gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 mt-0.5 ${leave.type === 'izin' ? 'bg-blue-50' : 'bg-red-50'}`}>
-                                                    {leave.type === 'izin' ? 'Izin' : 'Sakit'}
+                                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-extrabold text-xs shrink-0 ${
+                                                    leave.type === 'izin' ? 'bg-blue-50 text-blue-700 border border-blue-200/80' : 'bg-rose-50 text-rose-700 border border-rose-200/80'
+                                                }`}>
+                                                    {leave.type === 'izin' ? 'IZIN' : 'SAKIT'}
                                                 </div>
-                                                <div>
+                                                <div className="space-y-1">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <p className="font-bold text-gray-900 text-sm">{leave.user.name}</p>
-                                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${leave.type === 'izin' ? 'text-blue-700 bg-blue-50 border-blue-200' : 'text-red-700 bg-red-50 border-red-200'}`}>
-                                                            {leave.type === 'izin' ? 'IZIN' : 'SAKIT'}
-                                                        </span>
-                                                        <span className="text-xs text-gray-500">{formatDate(leave.date)}</span>
+                                                        <span className="font-bold text-slate-900 text-xs">{leave.user.name}</span>
+                                                        <span className="text-[11px] text-slate-400 font-medium">&bull;</span>
+                                                        <span className="text-[11px] text-slate-500 font-medium">{formatDate(leave.date)}</span>
                                                     </div>
-                                                    <p className="text-sm text-gray-600 mt-1">{leave.reason}</p>
+                                                    <p className="text-xs text-slate-600 font-medium leading-relaxed">{leave.reason}</p>
                                                     {leave.admin_note && (
-                                                        <p className="text-xs text-gray-400 mt-1.5 italic">Catatan: {leave.admin_note}</p>
+                                                        <p className="text-[11px] text-slate-400 italic">Catatan Admin: {leave.admin_note}</p>
                                                     )}
                                                     {leave.proof_image && (
-                                                        <div className="mt-2">
-                                                            <a href={`/storage/${leave.proof_image}`} target="_blank" rel="noreferrer" className="text-[11px] font-bold text-blue-600 bg-blue-50 border border-blue-200 hover:bg-blue-100 px-2.5 py-1 rounded-lg inline-block">
-                                                                Lihat Bukti Sakit
+                                                        <div className="pt-1">
+                                                            <a href={`/storage/${leave.proof_image}`} target="_blank" rel="noreferrer"
+                                                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+                                                                <FileText className="w-3.5 h-3.5" />
+                                                                <span>Lihat Dokumen / Bukti Medis</span>
                                                             </a>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+
+                                            <div className="flex flex-col items-end gap-2 shrink-0">
                                                 {leave.status === 'pending' && (
                                                     <>
-                                                        <span className="text-[11px] font-bold text-amber-700 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full">
-                                                            Menunggu
+                                                        <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">
+                                                            Menunggu Review
                                                         </span>
                                                         {reviewingId === leave.id ? (
-                                                            <div className="space-y-2 w-56">
+                                                            <div className="space-y-2 w-64 bg-slate-50 p-3 rounded-lg border border-slate-200">
                                                                 <textarea
                                                                     value={reviewData.admin_note}
                                                                     onChange={e => setReviewData('admin_note', e.target.value)}
-                                                                    placeholder="Catatan admin (opsional)"
+                                                                    placeholder="Catatan review admin..."
                                                                     rows={2}
-                                                                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl resize-none focus:ring-1 focus:ring-orange-200 focus:border-orange-400"
+                                                                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
                                                                 />
-                                                                <div className="flex gap-2">
+                                                                <div className="flex gap-1.5">
                                                                     <button
                                                                         onClick={() => submitReview(leave.id)}
                                                                         disabled={reviewProcessing}
-                                                                        className={`flex-1 py-2 text-xs font-bold text-white rounded-xl transition-all disabled:opacity-50 ${
-                                                                            reviewData.status === 'approved'
-                                                                                ? 'bg-green-600 hover:bg-green-700'
-                                                                                : 'bg-red-500 hover:bg-red-600'
+                                                                        className={`flex-1 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors ${
+                                                                            reviewData.status === 'approved' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
                                                                         }`}
                                                                     >
                                                                         {reviewData.status === 'approved' ? 'Setujui' : 'Tolak'}
                                                                     </button>
                                                                     <button
                                                                         onClick={() => setReviewingId(null)}
-                                                                        className="px-3 py-2 text-xs font-bold bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200"
+                                                                        className="px-2.5 py-1.5 text-xs font-semibold bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
                                                                     >
                                                                         Batal
                                                                     </button>
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className="flex gap-2">
+                                                            <div className="flex gap-1.5">
                                                                 <button
                                                                     onClick={() => openReview(leave, 'approved')}
-                                                                    className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-1.5 rounded-xl transition-colors"
+                                                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors"
                                                                 >
                                                                     Setujui
                                                                 </button>
                                                                 <button
                                                                     onClick={() => openReview(leave, 'rejected')}
-                                                                    className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-xl transition-colors"
+                                                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white transition-colors"
                                                                 >
                                                                     Tolak
                                                                 </button>
@@ -655,14 +815,17 @@ export default function AttendanceIndex({
                                                         )}
                                                     </>
                                                 )}
+
                                                 {leave.status === 'approved' && (
-                                                    <span className="text-[11px] font-bold text-green-700 bg-green-100 border border-green-200 px-2.5 py-1 rounded-full">
-                                                        ✅ Disetujui
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                                        <span>Disetujui</span>
                                                     </span>
                                                 )}
                                                 {leave.status === 'rejected' && (
-                                                    <span className="text-[11px] font-bold text-red-700 bg-red-100 border border-red-200 px-2.5 py-1 rounded-full">
-                                                        ❌ Ditolak
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        <XCircle className="w-3.5 h-3.5" />
+                                                        <span>Ditolak</span>
                                                     </span>
                                                 )}
                                             </div>
@@ -673,111 +836,113 @@ export default function AttendanceIndex({
                         )}
                     </div>
                 )}
-                {/* ── TAB PERMOHONAN LEMBUR ── */}
+
+                {/* Overtime Requests Tab */}
                 {activeTab === 'permohonan-lembur' && (
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
-                                <h2 className="font-bold text-gray-900">Permohonan Izin Lembur</h2>
-                                <p className="text-xs text-gray-500 mt-0.5">{overtimeRequests.length} permohonan</p>
+                                <h2 className="text-sm font-bold text-slate-900">Permohonan Kerja Lembur CleanUP</h2>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                    Total {overtimeRequests.length} pengajuan lembur tercatat
+                                </p>
                             </div>
-                            {pendingOvertimeCount > 0 && (
-                                <span className="text-xs font-bold text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-xl">
-                                    {pendingOvertimeCount} menunggu review
-                                </span>
-                            )}
                         </div>
 
                         {overtimeRequests.length === 0 ? (
-                            <div className="px-6 py-16 text-center">
-                                <p className="text-gray-500 font-semibold text-sm">Tidak ada permohonan lembur</p>
+                            <div className="p-16 text-center">
+                                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                    <Clock className="w-6 h-6" />
+                                </div>
+                                <h4 className="text-sm font-bold text-slate-800">Tidak ada permohonan lembur</h4>
+                                <p className="text-xs text-slate-400 font-medium mt-1">
+                                    Belum ada personel yang mengajukan permohonan jadwal kerja lembur.
+                                </p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-gray-50">
-                                {overtimeRequests.map(ot => (
-                                    <div key={ot.id} className={`px-6 py-5 ${ot.status === 'pending' ? 'bg-violet-50/30' : ''}`}>
+                            <div className="divide-y divide-slate-100">
+                                {overtimeRequests.map((ot) => (
+                                    <div key={ot.id} className="p-5 hover:bg-slate-50/50 transition-colors">
                                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                                             <div className="flex items-start gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5 ${
-                                                    ot.status === 'approved' ? 'bg-green-100 text-green-700'
-                                                    : ot.status === 'rejected' ? 'bg-red-100 text-red-700'
-                                                    : 'bg-violet-100 text-violet-700'
-                                                }`}>
-                                                    {ot.status === 'approved' ? '✓' : ot.status === 'rejected' ? '✕' : '⏳'}
+                                                <div className="w-9 h-9 rounded-lg bg-purple-50 text-purple-700 border border-purple-200/80 flex items-center justify-center font-extrabold text-xs shrink-0">
+                                                    LEMBUR
                                                 </div>
-                                                <div>
+                                                <div className="space-y-1">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <p className="font-bold text-gray-900 text-sm">{ot.user.name}</p>
-                                                        <span className="text-xs text-gray-500">{formatDate(ot.date)}</span>
+                                                        <span className="font-bold text-slate-900 text-xs">{ot.user.name}</span>
+                                                        <span className="text-[11px] text-slate-400 font-medium">&bull;</span>
+                                                        <span className="text-[11px] text-slate-500 font-medium">{formatDate(ot.date)}</span>
                                                     </div>
-                                                    <p className="text-sm text-gray-600 mt-1">{ot.reason}</p>
+                                                    <p className="text-xs text-slate-600 font-medium leading-relaxed">{ot.reason}</p>
                                                     {ot.admin_note && (
-                                                        <p className="text-xs text-gray-400 mt-1.5 italic">Catatan: {ot.admin_note}</p>
+                                                        <p className="text-[11px] text-slate-400 italic">Catatan Admin: {ot.admin_note}</p>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                            <div className="flex flex-col items-end gap-2 shrink-0">
                                                 {ot.status === 'pending' && (
                                                     <>
-                                                        <span className="text-[11px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-2.5 py-1 rounded-full">
-                                                            Menunggu
+                                                        <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200/80">
+                                                            Menunggu Review
                                                         </span>
                                                         {reviewingOvertimeId === ot.id ? (
-                                                            <div className="space-y-2 w-56">
+                                                            <div className="space-y-2 w-64 bg-slate-50 p-3 rounded-lg border border-slate-200">
                                                                 <textarea
                                                                     value={overtimeReviewData.admin_note}
                                                                     onChange={e => setOvertimeReviewData('admin_note', e.target.value)}
-                                                                    placeholder="Catatan admin (opsional)"
+                                                                    placeholder="Catatan review lembur..."
                                                                     rows={2}
-                                                                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl resize-none focus:ring-1 focus:ring-violet-200 focus:border-violet-400"
+                                                                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-purple-500/20"
                                                                 />
-                                                                <div className="flex gap-2">
+                                                                <div className="flex gap-1.5">
                                                                     <button
                                                                         onClick={() => submitOvertimeReview(ot.id)}
                                                                         disabled={overtimeReviewProcessing}
-                                                                        className={`flex-1 py-2 text-xs font-bold text-white rounded-xl transition-all disabled:opacity-50 ${
-                                                                            overtimeReviewData.status === 'approved'
-                                                                                ? 'bg-green-600 hover:bg-green-700'
-                                                                                : 'bg-red-500 hover:bg-red-600'
+                                                                        className={`flex-1 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors ${
+                                                                            overtimeReviewData.status === 'approved' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
                                                                         }`}
                                                                     >
                                                                         {overtimeReviewData.status === 'approved' ? 'Setujui' : 'Tolak'}
                                                                     </button>
                                                                     <button
                                                                         onClick={() => setReviewingOvertimeId(null)}
-                                                                        className="px-3 py-2 text-xs font-bold bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200"
+                                                                        className="px-2.5 py-1.5 text-xs font-semibold bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
                                                                     >
                                                                         Batal
                                                                     </button>
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <div className="flex gap-2">
+                                                            <div className="flex gap-1.5">
                                                                 <button
                                                                     onClick={() => openOvertimeReview(ot, 'approved')}
-                                                                    className="text-xs font-bold text-green-700 bg-green-50 border border-green-200 hover:bg-green-100 px-3 py-1.5 rounded-xl transition-colors"
+                                                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors"
                                                                 >
-                                                                    ✓ Setujui
+                                                                    Setujui
                                                                 </button>
                                                                 <button
                                                                     onClick={() => openOvertimeReview(ot, 'rejected')}
-                                                                    className="text-xs font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-xl transition-colors"
+                                                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white transition-colors"
                                                                 >
-                                                                    ✕ Tolak
+                                                                    Tolak
                                                                 </button>
                                                             </div>
                                                         )}
                                                     </>
                                                 )}
+
                                                 {ot.status === 'approved' && (
-                                                    <span className="text-[11px] font-bold text-green-700 bg-green-100 border border-green-200 px-2.5 py-1 rounded-full">
-                                                        ✅ Disetujui
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                                        <span>Disetujui</span>
                                                     </span>
                                                 )}
                                                 {ot.status === 'rejected' && (
-                                                    <span className="text-[11px] font-bold text-red-700 bg-red-100 border border-red-200 px-2.5 py-1 rounded-full">
-                                                        ❌ Ditolak
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        <XCircle className="w-3.5 h-3.5" />
+                                                        <span>Ditolak</span>
                                                     </span>
                                                 )}
                                             </div>

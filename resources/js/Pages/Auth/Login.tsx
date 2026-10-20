@@ -1,7 +1,23 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useState, FormEventHandler } from 'react';
+import Welltrash_logo from '@/assets/img/logowelltrash.webp';
+import {
+    Eye,
+    EyeOff,
+    ArrowRight,
+    ArrowLeft,
+    CheckCircle2,
+    AlertCircle,
+    Sparkles,
+} from 'lucide-react';
 
-export default function Login({ status }: { status?: string }) {
+export default function Login({
+    status,
+    canResetPassword,
+}: {
+    status?: string;
+    canResetPassword?: boolean;
+}) {
     const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -17,109 +33,214 @@ export default function Login({ status }: { status?: string }) {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4 font-sans">
-            <Head title="Company Login" />
-            
-            {/* Logo area */}
-            <div className="w-full max-w-[1000px] mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-black">WellTrash</h1>
-            </div>
+        <div className="min-h-screen bg-[#FBFDFB] flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-sans text-zinc-900 selection:bg-emerald-500 selection:text-white">
+            <Head title="Masuk ke Akun - WellTrash" />
 
-            {/* Main Card */}
-            <div className="w-full max-w-[1000px] bg-[#BBF706] rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                
-                {/* Form Section (Left) */}
-                <div className="z-10">
-                    <h2 className="text-4xl font-bold mb-8 text-black">Masuk</h2>
-                    
+            {/* Top Navigation */}
+            <header className="w-full max-w-md mx-auto flex items-center justify-between">
+                <Link
+                    href={route('beranda')}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-emerald-700 transition-colors py-1 px-2.5 rounded-lg hover:bg-emerald-50/60"
+                >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Kembali ke Beranda</span>
+                </Link>
+                <span className="text-[11px] font-medium text-emerald-700/80 tracking-wide uppercase">
+                    WellTrash ID
+                </span>
+            </header>
+
+            {/* Main Centered Card */}
+            <main className="w-full max-w-md mx-auto my-auto py-6">
+                <div className="bg-white rounded-3xl p-7 sm:p-9 border border-zinc-200/80 shadow-[0_10px_35px_rgba(0,0,0,0.03)]">
+                    {/* Brand Logo & Title */}
+                    <div className="text-center mb-7">
+                        <Link href={route('beranda')} className="inline-block transition-transform hover:opacity-90 mb-4">
+                            <img
+                                src={Welltrash_logo}
+                                alt="WellTrash"
+                                className="h-10 w-auto mx-auto object-contain"
+                            />
+                        </Link>
+                        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
+                            Masuk ke Akun
+                        </h1>
+                        <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed">
+                            Kelola penjemputan dan kebersihan lingkungan Anda dengan mudah.
+                        </p>
+                    </div>
+
+                    {/* Status Message */}
                     {status && (
-                        <div className="mb-4 text-sm font-medium text-green-800">
-                            {status}
+                        <div className="mb-5 p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-xs flex items-center gap-2 font-medium">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>{status}</span>
                         </div>
                     )}
 
+                    {/* Google OAuth Button */}
+                    <a
+                        href={route('google.login')}
+                        className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/70 text-zinc-700 text-sm font-medium transition-all cursor-pointer shadow-xs"
+                    >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24">
+                            <path
+                                fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            />
+                            <path
+                                fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            />
+                            <path
+                                fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                            />
+                            <path
+                                fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                            />
+                        </svg>
+                        <span>Lanjutkan dengan Google</span>
+                    </a>
+
+                    {/* Divider */}
+                    <div className="relative my-5">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-zinc-200/80" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                            <span className="bg-white px-3 text-zinc-400">atau dengan email</span>
+                        </div>
+                    </div>
+
+                    {/* Form */}
                     <form onSubmit={submit} className="space-y-4">
+                        {/* Email */}
                         <div>
+                            <label
+                                htmlFor="email"
+                                className="block text-xs font-medium text-zinc-700 mb-1.5"
+                            >
+                                Alamat Email
+                            </label>
                             <input
                                 id="email"
-                                type="text"
+                                type="email"
                                 name="email"
                                 value={data.email}
-                                className="w-full px-4 py-3 rounded-md border-transparent focus:border-black focus:ring-black bg-white placeholder-gray-400 text-black"
-                                placeholder="Nama / Email"
-                                autoComplete="username"
-                                autoFocus
                                 onChange={(e) => setData('email', e.target.value)}
+                                placeholder="nama@instansi.com"
+                                autoFocus
+                                required
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all"
                             />
-                            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                            {errors.email && (
+                                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{errors.email}</span>
+                                </p>
+                            )}
                         </div>
 
-                        <div className="relative">
-                            <input
-                                id="password"
-                                type={showPassword ? 'text' : 'password'}
-                                name="password"
-                                value={data.password}
-                                className="w-full px-4 py-3 pr-12 rounded-md border-transparent focus:border-black focus:ring-black bg-white placeholder-gray-400 text-black"
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                onChange={(e) => setData('password', e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-black focus:outline-none"
-                            >
-                                {showPassword ? (
-                                    <svg className="h-5 w-5 animate-in fade-in duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                ) : (
-                                    <svg className="h-5 w-5 animate-in fade-in duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.025 10.025 0 012.247-4.025m3.479-2.871A9.957 9.957 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21m-9-9a3 3 0 11-6 0 3 3 0 016 0z" strokeDasharray="3 3"/></svg>
-                                )}
-                            </button>
-                            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                        {/* Password */}
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label
+                                    htmlFor="password"
+                                    className="text-xs font-medium text-zinc-700"
+                                >
+                                    Kata Sandi
+                                </label>
+                                <a
+                                    href="https://wa.me/62819848706?text=Halo%20Admin%20WellTrash,%20saya%20butuh%20bantuan%20login%20akun."
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline"
+                                >
+                                    Lupa sandi?
+                                </a>
+                            </div>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-zinc-600 transition-colors focus:outline-none cursor-pointer"
+                                    title={showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="w-4 h-4" />
+                                    ) : (
+                                        <Eye className="w-4 h-4" />
+                                    )}
+                                </button>
+                            </div>
+                            {errors.password && (
+                                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{errors.password}</span>
+                                </p>
+                            )}
                         </div>
 
+                        {/* Remember Me */}
+                        <div className="flex items-center pt-0.5">
+                            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-600 hover:text-zinc-900">
+                                <input
+                                    type="checkbox"
+                                    name="remember"
+                                    checked={data.remember}
+                                    onChange={(e) => setData('remember', e.target.checked)}
+                                    className="w-4 h-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 transition-colors"
+                                />
+                                <span>Ingat saya</span>
+                            </label>
+                        </div>
+
+                        {/* Submit Button */}
                         <div className="pt-2">
-                             <button
+                            <button
                                 type="submit"
-                                className="w-full justify-center bg-[#0F172A] hover:bg-black text-white py-3 rounded-md text-lg font-medium transition-colors disabled:opacity-50"
                                 disabled={processing}
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-all duration-150 shadow-sm hover:shadow flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
                             >
-                                Masuk
+                                <span>{processing ? 'Memproses Masuk...' : 'Masuk ke Akun'}</span>
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                             </button>
                         </div>
                     </form>
-                </div>
 
-                {/* Divider / Social Section (Right) */}
-                <div className="flex flex-col items-center justify-center space-y-6 z-10">
-                    <p className="text-lg font-medium text-black">Atau</p>
-                    
-                    <a
-                        href={route('google.login')}
-                        className="w-full max-w-xs flex items-center justify-center gap-3 bg-white py-3 px-4 rounded-md shadow-sm hover:shadow-md transition-shadow"
-                    >
-                         <svg className="h-5 w-5" viewBox="0 0 24 24">
-                            <path
-                                fill="#EA4335"
-                                d="M12 10.2v3.6h5.1c-.2 1.3-1.5 3.8-5.1 3.8-3.1 0-5.7-2.6-5.7-5.8s2.6-5.8 5.7-5.8c1.8 0 3 .8 3.7 1.4l2.5-2.4C16.8 3.6 14.6 2.7 12 2.7 6.9 2.7 2.7 6.9 2.7 12s4.2 9.3 9.3 9.3c5.4 0 9-3.8 9-9.2 0-.6-.1-1.2-.2-1.9H12z"
-                            />
-                        </svg>
-                        <span className="text-sm font-bold text-gray-800">Masuk dengan Google</span>
-                    </a>
-
-                    <div className="text-sm text-black">
-                        Belum punya <span className="text-blue-700 font-bold">Akun?</span> Segera <Link href={route('register')} className="text-blue-700 font-bold hover:underline">Daftar</Link>
+                    {/* Bottom Switch Link */}
+                    <div className="mt-6 pt-5 border-t border-zinc-100 text-center text-xs sm:text-sm text-zinc-600">
+                        Belum memiliki akun?{' '}
+                        <Link
+                            href={route('register')}
+                            className="font-semibold text-emerald-700 hover:text-emerald-800 hover:underline"
+                        >
+                            Daftar di sini
+                        </Link>
                     </div>
                 </div>
-            </div>
+            </main>
 
-            {/* Footer */}
-            <div className="w-full max-w-[1000px] mt-8">
-                 <Link href={route('beranda')} className="text-black font-semibold hover:underline flex items-center gap-1">
-                    Kembali ke <span className="text-green-600">Beranda</span>
-                </Link>
-            </div>
+            {/* Clean Minimalist Page Footer */}
+            <footer className="w-full max-w-md mx-auto text-center text-xs text-zinc-400 flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1.5 text-emerald-700/80 font-medium">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Solusi Pengelolaan Sampah Bersih & Berkelanjutan</span>
+                </div>
+                <span>© {new Date().getFullYear()} PT WellTrash Sirkular Indonesia</span>
+            </footer>
         </div>
     );
 }

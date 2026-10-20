@@ -1,5 +1,15 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useState, FormEventHandler } from 'react';
+import Welltrash_logo from '@/assets/img/logowelltrash.webp';
+import {
+    Eye,
+    EyeOff,
+    ArrowRight,
+    ArrowLeft,
+    AlertCircle,
+    CheckCircle2,
+    Shield,
+} from 'lucide-react';
 
 export default function AdminLogin({ status }: { status?: string }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -18,100 +28,154 @@ export default function AdminLogin({ status }: { status?: string }) {
     };
 
     return (
-         <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4 font-sans">
-            <Head title="Admin Login" />
-            
-            {/* Logo area */}
-            <div className="w-full max-w-[1000px] mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-black">WellTrash</h1>
-            </div>
+        <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-between p-4 sm:p-6 lg:p-8 font-sans text-zinc-900 selection:bg-emerald-500 selection:text-white">
+            <Head title="Masuk Admin - WellTrash" />
 
-            {/* Main Card */}
-            <div className="w-full max-w-[1000px] bg-[#BBF706] rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden flex items-center justify-center">
-                
-                {/* Form Section (Centered) */}
-                <div className="z-10 w-full max-w-md">
-                    <h2 className="text-4xl font-bold mb-8 text-black text-center">Admin Masuk</h2>
-                    
+            {/* Top Navigation */}
+            <header className="w-full max-w-md mx-auto flex items-center justify-between">
+                <Link
+                    href={route('login')}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors py-1 px-2.5 rounded-lg hover:bg-zinc-200/50"
+                >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Portal Pengguna</span>
+                </Link>
+                <div className="flex items-center gap-1 text-[11px] font-medium text-zinc-400">
+                    <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Internal Staf</span>
+                </div>
+            </header>
+
+            {/* Main Centered Card */}
+            <main className="w-full max-w-md mx-auto my-auto py-6">
+                <div className="bg-white rounded-3xl p-7 sm:p-9 border border-zinc-200/80 shadow-[0_10px_35px_rgba(0,0,0,0.03)]">
+                    {/* Header */}
+                    <div className="text-center mb-7">
+                        <Link href={route('beranda')} className="inline-block transition-transform hover:opacity-90 mb-4">
+                            <img
+                                src={Welltrash_logo}
+                                alt="WellTrash"
+                                className="h-10 w-auto mx-auto object-contain"
+                            />
+                        </Link>
+                        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
+                            Masuk Administrator
+                        </h1>
+                        <p className="text-xs sm:text-sm text-zinc-500 mt-1.5 leading-relaxed">
+                            Akses internal untuk staf dan operasional sistem WellTrash.
+                        </p>
+                    </div>
+
+                    {/* Status Message */}
                     {status && (
-                        <div className="mb-4 text-sm font-medium text-green-800 text-center">
-                            {status}
+                        <div className="mb-5 p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 text-xs flex items-center gap-2 font-medium">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>{status}</span>
                         </div>
                     )}
 
+                    {/* Form */}
                     <form onSubmit={submit} className="space-y-4">
+                        {/* Email */}
                         <div>
+                            <label
+                                htmlFor="email"
+                                className="block text-xs font-medium text-zinc-700 mb-1.5"
+                            >
+                                Email Administrator
+                            </label>
                             <input
                                 id="email"
-                                type="text"
+                                type="email"
                                 name="email"
                                 value={data.email}
-                                className="w-full px-4 py-3 rounded-md border-transparent focus:border-black focus:ring-black bg-white placeholder-gray-400 text-black"
-                                placeholder="Nama / Email"
-                                autoComplete="username"
-                                autoFocus
                                 onChange={(e) => setData('email', e.target.value)}
+                                placeholder="admin@welltrash.id"
+                                autoFocus
+                                required
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all"
                             />
-                            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                            {errors.email && (
+                                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{errors.email}</span>
+                                </p>
+                            )}
                         </div>
 
-                        <div className="relative">
-                            <input
-                                id="password"
-                                type={showPassword ? 'text' : 'password'}
-                                name="password"
-                                value={data.password}
-                                className="w-full px-4 py-3 pr-12 rounded-md border-transparent focus:border-black focus:ring-black bg-white placeholder-gray-400 text-black"
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                onChange={(e) => setData('password', e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-black focus:outline-none"
+                        {/* Password */}
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="block text-xs font-medium text-zinc-700 mb-1.5"
                             >
-                                {showPassword ? (
-                                    <svg className="h-5 w-5 animate-in fade-in duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                ) : (
-                                    <svg className="h-5 w-5 animate-in fade-in duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.025 10.025 0 012.247-4.025m3.479-2.871A9.957 9.957 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21m-9-9a3 3 0 11-6 0 3 3 0 016 0z" strokeDasharray="3 3"/></svg>
-                                )}
-                            </button>
-                            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                                Kata Sandi
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    name="password"
+                                    value={data.password}
+                                    onChange={(e) => setData('password', e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="w-full px-3.5 py-2.5 pr-10 rounded-xl border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-zinc-600 transition-colors focus:outline-none cursor-pointer"
+                                    title={showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'}
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="w-4 h-4" />
+                                    ) : (
+                                        <Eye className="w-4 h-4" />
+                                    )}
+                                </button>
+                            </div>
+                            {errors.password && (
+                                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                    <span>{errors.password}</span>
+                                </p>
+                            )}
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center">
+                        {/* Remember Me */}
+                        <div className="flex items-center pt-0.5">
+                            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-zinc-600 hover:text-zinc-900">
                                 <input
                                     type="checkbox"
                                     name="remember"
                                     checked={data.remember}
                                     onChange={(e) => setData('remember', e.target.checked)}
-                                    className="rounded border-gray-300 text-black shadow-sm focus:ring-black"
+                                    className="w-4 h-4 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500 focus:ring-offset-0 transition-colors"
                                 />
-                                <span className="ms-2 text-sm text-black">Ingat Saya</span>
+                                <span>Ingat saya</span>
                             </label>
                         </div>
 
+                        {/* Submit Button */}
                         <div className="pt-2">
-                             <button
+                            <button
                                 type="submit"
-                                className="w-full justify-center bg-[#0F172A] hover:bg-black text-white py-3 rounded-md text-lg font-medium transition-colors disabled:opacity-50"
                                 disabled={processing}
+                                className="w-full bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-950 text-white font-medium py-2.5 px-4 rounded-xl text-sm transition-all duration-150 shadow-sm hover:shadow flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
                             >
-                                Masuk
+                                <span>{processing ? 'Mengautentikasi...' : 'Masuk Dashboard Staf'}</span>
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                             </button>
                         </div>
                     </form>
                 </div>
-            </div>
+            </main>
 
-            {/* Footer */}
-            <div className="w-full max-w-[1000px] mt-8">
-                 <Link href="/" className="text-black font-semibold hover:underline flex items-center gap-1">
-                    Kembali ke <span className="text-green-600">Beranda</span>
-                </Link>
-            </div>
+            {/* Clean Minimalist Page Footer */}
+            <footer className="w-full max-w-md mx-auto text-center text-xs text-zinc-400">
+                <span>© {new Date().getFullYear()} PT WellTrash Sirkular Indonesia • Akses Internal</span>
+            </footer>
         </div>
     );
 }

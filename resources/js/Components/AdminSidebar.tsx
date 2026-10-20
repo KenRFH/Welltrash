@@ -1,17 +1,20 @@
 import { Link } from '@inertiajs/react';
 import React from 'react';
-// The source image was removed, so we fallback to the built asset path
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
 import PwaInstallButton from './PwaInstallButton';
-
-const DashboardIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>;
-const CompanyIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>;
-const PendingIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
-const CancelIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>;
-const CleanUPIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>;
-const AccountsIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>;
-const InvoiceIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>;
-const LogoutIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>;
+import {
+    LayoutDashboard,
+    Building2,
+    Users,
+    Clock,
+    Ban,
+    Truck,
+    CalendarCheck2,
+    Receipt,
+    LogOut,
+    X,
+    Sparkles,
+} from 'lucide-react';
 
 export type AdminActiveTab = 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices';
 
@@ -22,68 +25,125 @@ interface Props {
 }
 
 export default function AdminSidebar({ active, isMobileOpen = false, onClose }: Props) {
-    const navItem = (tab: AdminActiveTab, href: string, label: string, Icon: React.FC) => {
+    const navItem = (tab: AdminActiveTab, href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
         const isActive = active === tab;
         return (
             <Link
                 href={href}
-                className={`flex items-center px-4 py-3 rounded-2xl transition-all ${
+                className={`group flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                     isActive
-                        ? 'text-orange-700 bg-orange-50/90 font-semibold shadow-sm'
-                        : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600 font-medium group'
+                        ? 'bg-emerald-50 text-emerald-800 shadow-[inset_0_0_0_1px_rgba(5,150,105,0.2)]'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                 }`}
             >
-                <span className={!isActive ? 'group-hover:text-orange-500 transition-colors' : ''}>
-                    <Icon />
-                </span>
-                {label}
+                <Icon
+                    className={`w-4 h-4 mr-3 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                        isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-emerald-600'
+                    }`}
+                />
+                <span className="truncate">{label}</span>
             </Link>
         );
     };
 
     return (
         <>
+            {/* Mobile Overlay */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 md:hidden transition-opacity"
+                    className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-40 md:hidden transition-opacity"
                     onClick={onClose}
                 />
             )}
 
-            <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-100 flex flex-col justify-between shadow-xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <div>
-                    <div className="h-28 flex items-center justify-center px-6 border-b border-gray-100">
-                        <img src={Welltrash_logo} alt="WellTrash Logo" className="h-20 w-20 object-contain" />
+            <aside
+                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shadow-2xl md:shadow-none flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
+                    isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
+            >
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                    {/* Brand Header */}
+                    <div className="h-20 flex items-center justify-between px-5 border-b border-slate-100">
+                        <Link href={route('admin.dashboard')} className="flex items-center gap-3">
+                            <img
+                                src={Welltrash_logo}
+                                alt="WellTrash Logo"
+                                className="h-9 w-9 object-contain"
+                            />
+                            <div>
+                                <span className="font-extrabold text-sm text-slate-900 tracking-tight flex items-center gap-1">
+                                    WellTrash
+                                    <Sparkles className="w-3 h-3 text-emerald-600" />
+                                </span>
+                                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest block -mt-0.5">
+                                    Admin Console
+                                </span>
+                            </div>
+                        </Link>
+
+                        <button
+                            onClick={onClose}
+                            className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg md:hidden"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
 
-                    <nav className="mt-6 px-4 space-y-1">
-                        <div className="px-4 mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">Menu Utama</div>
-                        {navItem('dashboard', route('admin.dashboard'), 'Dasbor', DashboardIcon)}
-                        {navItem('companies', route('admin.companies.index'), 'Semua Perusahaan', CompanyIcon)}
+                    {/* Nav Categories */}
+                    <nav className="mt-4 px-3 space-y-4">
+                        <div>
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                Menu Utama
+                            </div>
+                            <div className="space-y-1">
+                                {navItem('dashboard', route('admin.dashboard'), 'Dasbor Analitik', LayoutDashboard)}
+                                {navItem('companies', route('admin.companies.index'), 'Semua Perusahaan', Building2)}
+                            </div>
+                        </div>
 
-                        <div className="px-4 pt-4 mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">Manajemen</div>
-                        {navItem('accounts', route('admin.accounts.index'), 'Kelola Akun', AccountsIcon)}
-                        {navItem('pending', route('admin.companies.pending'), 'Menunggu Persetujuan', PendingIcon)}
-                        {navItem('cancellations', route('admin.companies.cancellations'), 'Pembatalan', CancelIcon)}
+                        <div>
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                Manajemen
+                            </div>
+                            <div className="space-y-1">
+                                {navItem('accounts', route('admin.accounts.index'), 'Kelola Akun', Users)}
+                                {navItem('pending', route('admin.companies.pending'), 'Persetujuan Mitra', Clock)}
+                                {navItem('cancellations', route('admin.companies.cancellations'), 'Permintaan Batal', Ban)}
+                            </div>
+                        </div>
 
-                        <div className="px-4 pt-4 mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">Monitoring</div>
-                        {navItem('cleanups', route('admin.cleanups'), 'Monitor CleanUP', CleanUPIcon)}
-                        {navItem('attendance', route('admin.attendance.index'), 'Absensi CleanUP', AccountsIcon)}
+                        <div>
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                Operasional
+                            </div>
+                            <div className="space-y-1">
+                                {navItem('cleanups', route('admin.cleanups'), 'Monitor CleanUP', Truck)}
+                                {navItem('attendance', route('admin.attendance.index'), 'Absensi CleanUP', CalendarCheck2)}
+                            </div>
+                        </div>
 
-                        <div className="px-4 pt-4 mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">Keuangan</div>
-                        {navItem('invoices', route('admin.invoices.index'), 'Invoice Mitra', InvoiceIcon)}
+                        <div>
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                Keuangan
+                            </div>
+                            <div className="space-y-1">
+                                {navItem('invoices', route('admin.invoices.index'), 'Invoice Mitra', Receipt)}
+                            </div>
+                        </div>
                     </nav>
                 </div>
 
-                <div className="p-6 mb-2 border-t border-gray-50 space-y-2.5">
+                {/* Footer Actions */}
+                <div className="p-4 border-t border-slate-100 space-y-2 bg-slate-50/50">
                     <PwaInstallButton variant="sidebar" label="Unduh Aplikasi" />
                     <Link
                         href={route('logout')}
                         method="post"
                         as="button"
-                        className="flex items-center justify-center w-full px-4 py-3 text-gray-600 border border-gray-200 hover:bg-red-50 hover:border-red-100 hover:text-red-600 rounded-2xl font-semibold transition-all shadow-sm group"
+                        className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:text-red-600 bg-white hover:bg-red-50/70 border border-slate-200 hover:border-red-200 rounded-xl transition-all shadow-xs group"
                     >
-                        <LogoutIcon /> Keluar
+                        <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-500 transition-colors" />
+                        <span>Keluar Sistem</span>
                     </Link>
                 </div>
             </aside>

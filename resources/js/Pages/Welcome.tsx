@@ -1,27 +1,36 @@
-import Navbar from "@/Components/Navbar";
-import imgHero from "@/assets/img/karyawanWelltrash.webp";
-import React, { useState } from "react";
-import Why from "@/Components/Why";
-import Mitra from "@/Components/Mitra";
-import WasteFlow from "@/Components/WasteFlow";
-import Footer from "@/Components/Footer";
+import React from "react";
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
+import Navbar from "@/Components/Navbar";
+import Mitra from "@/Components/Mitra";
+import Why from "@/Components/Why";
+import WasteFlow from "@/Components/WasteFlow";
+import ActivitiesSection, { Activity } from "@/Components/ActivitiesSection";
+import NewsSection, { NewsItem } from "@/Components/NewsSection";
+import FaqSection from "@/Components/FaqSection";
+import Footer from "@/Components/Footer";
+import heroWasteTransport from "@/assets/img/hero_waste_transport.webp";
+import {
+    Sparkles,
+    ArrowRight,
+    MessageSquare,
+    Building2,
+    Scale,
+    MapPin,
+    ShieldCheck,
+    Clock,
+    Activity as ActivityIcon,
+    CheckCircle2,
+    Package,
+    Recycle,
+    PackageSearch,
+    PackageOpen,
+    Boxes,
+    FileSpreadsheet,
+    Layers,
+} from "lucide-react";
+import { motion } from "motion/react";
 
-interface Activity {
-    id: number;
-    title: string;
-    description: string;
-    image_path: string | null;
-    date: string | null;
-}
-interface NewsItem {
-    id: number;
-    title: string;
-    content: string;
-    image_path: string | null;
-    published_date: string | null;
-}
 interface KatalogItem {
     id: number;
     name: string;
@@ -29,425 +38,497 @@ interface KatalogItem {
     price: number | null;
     image_path: string | null;
 }
+
 interface Props {
     activities: Activity[];
     news: NewsItem[];
     katalogs: KatalogItem[];
 }
 
-function fmt(d: string | null) {
-    if (!d) return null;
-    return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-}
+const STATS = [
+    { number: "30+", label: "Mitra Bisnis Aktif", icon: Building2, color: "text-emerald-700 bg-emerald-50" },
+    { number: "8.000 kg+", label: "Sampah Teralihkan", icon: Scale, color: "text-orange-600 bg-orange-50" },
+    { number: "100%", label: "Cakupan Kab. Jember", icon: MapPin, color: "text-emerald-700 bg-emerald-50" },
+];
 
-const Welcome = ({ activities, news, katalogs }: Props) => {
-    const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-    const faqItems = [
-        {
-            q: "Apa itu WellTrash?",
-            a: "WellTrash adalah platform layanan pengelolaan limbah digital pertama di Jember yang mengusung konsep ekonomi sirkular. Kami menyediakan solusi pengangkutan sampah terjadwal dan terpadu untuk rumah tangga, institusi, hingga sektor bisnis/industri di Kabupaten Jember."
-        },
-        {
-            q: "Wilayah mana saja yang dilayani oleh WellTrash?",
-            a: "Saat ini, WellTrash melayani seluruh wilayah Kabupaten Jember. Kami mencakup area perumahan, perkantoran, kafe, restoran, instansi pemerintah, hingga sektor komersial/industri."
-        },
-        {
-            q: "Bagaimana cara berlangganan jasa pengangkutan sampah WellTrash?",
-            a: "Anda dapat mendaftar langsung secara online dengan mengklik tombol 'Pesan Layanan Sekarang', mengisi data profil, memilih jadwal penjemputan berkala yang sesuai, serta mengunggah kelengkapan berkas MOU kerja sama untuk memulai."
-        },
-        {
-            q: "Apakah WellTrash mendukung inisiatif ESG perusahaan?",
-            a: "Ya, kami sepenuhnya mendukung pemenuhan ESG (Environmental, Social, and Governance) mitra bisnis melalui sistem pencatatan volume limbah yang kredibel, serta menyajikan laporan pelacakan sampah secara rutin dan transparan."
-        },
-        {
-            q: "Apa saja paket layanan pengangkutan sampah yang tersedia?",
-            a: "Kami menyediakan paket layanan yang fleksibel sesuai kebutuhan Anda, mulai dari paket Reguler, Prime, hingga Premium+ dengan kapasitas frekuensi penjemputan berkala hingga 7 hari dalam seminggu."
-        },
-        {
-            q: "Bagaimana sampah diolah setelah diangkut oleh tim WellTrash?",
-            a: "Sampah yang diangkut oleh tim profesional kami dibawa ke fasilitas WellTrash Farm untuk dipilah, diolah menjadi produk daur ulang bernilai ekonomi, dan meminimalkan residu sampah yang terbuang langsung ke TPA."
-        }
-    ];
-
+const Welcome: React.FC<Props> = ({ activities = [], news = [], katalogs = [] }) => {
     return (
-        <>
-            <SEO 
-                title="Jasa Pengangkutan Sampah Jember" 
-                description="Layanan jasa pengangkutan sampah profesional dan terpercaya di Jember. Solusi kebersihan hemat & cepat untuk rumah tangga hingga bisnis. Pesan WellTrash sekarang!" 
+        <div className="bg-white text-zinc-900 min-h-screen font-sans selection:bg-emerald-100 selection:text-emerald-900">
+            <SEO
+                title="Pengelolaan Sampah Terjadwal untuk Bisnis di Jember"
+                description="Layanan jasa pengangkutan dan pengelolaan sampah komersial B2B di Jember. Terjadwal, bertanggung jawab, dan terukur untuk mendukung pelaporan ESG bisnis Anda."
             />
             <Navbar />
 
-            <section className="relative w-full min-h-screen flex items-center bg-white mt-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 w-full">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        <div className="space-y-8">
-                            <div className="space-y-4 font-poppins">
-                                <h1 className="text-4xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
-                                    Jasa Pengangkutan{" "}
-                                    <span className="bg-clip-text text-transparent bg-gradient-to-br from-green-500 to-green-600">
-                                        Sampah{" "}
-                                        <span className="text-[#FF9A0C]">Profesional</span>
-                                    </span>
-                                    <span className="text-pink-400">{" "}se-Jember</span>
-                                </h1>
-                                <p className="text-lg text-gray-600 max-w-lg">
-                                    <span className="font-bold text-lime-500">Welltrash</span> hadir sebagai penyedia jasa pengangkutan
-                                    sampah profesional dan terpercaya yang melayani
-                                    seluruh wilayah Kabupaten Jember. Layanan terjadwal,
-                                    cepat, dan ramah lingkungan untuk kebutuhan
-                                    pengelolaan sampah rumah tangga dan perusahaan Anda.
-                                </p>
-                            </div>
-
-                            <div className="flex flex-wrap gap-4">
-                                <Link href={route("login")}
-                                    className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full transition-all shadow-lg shadow-green-600/30 flex items-center gap-2 group duration-500">
-                                    Pesan Layanan Sekarang
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                                </Link>
-                                <Link href={route("services")}
-                                    className="px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-full border border-gray-200 transition-all shadow-sm">
-                                    Lihat Layanan
-                                </Link>
-                            </div>
-
-                            <div className="pt-8 flex items-center gap-4 text-sm text-gray-500">
-                                <div className="flex -space-x-3">
-                                    {["SPPG", "Daf", "Res"].map((label, i) => (
-                                        <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600"
-                                            style={{ backgroundColor: `hsl(0,0%,${75 - i * 8}%)` }}>
-                                            {label}
-                                        </div>
-                                    ))}
-                                </div>
-                                <p>Dipercaya <span className="font-bold text-gray-800">30+ Mitra di Jember</span></p>
-                            </div>
-                        </div>
-
-                        <div className="relative w-full max-w-md mx-auto lg:max-w-lg">
-                            <div className="absolute inset-0 -z-10 flex items-center justify-center">
-                                <div className="w-[110%] h-[110%] bg-gradient-to-tr from-blue-200/40 to-purple-300/40 rounded-full blur-3xl" />
-                            </div>
-                            <div className="relative rounded-lg overflow-hidden shadow-2xl bg-white border border-gray-200">
-                                <div className="aspect-[4/5] overflow-hidden">
-                                    <img src={imgHero}
-                                        alt="Jasa Pengangkutan Sampah Profesional Kabupaten Jember - Welltrash"
-                                        fetchPriority="high"
-                                        loading="eager"
-                                        decoding="sync"
-                                        className="w-full h-full object-cover transition-transform duration-700" />
-                                </div>
-                                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md px-5 py-4 rounded-lg shadow-lg border border-gray-200 max-w-[220px]">
-                                    <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Telah Mengelola</p>
-                                    <h4 className="text-2xl font-bold text-lime-500">8000 Kg+</h4>
-                                    <p className="text-xs text-gray-600 mt-1">Sampah di Jember</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <Why />
-            <WasteFlow />
-
-            <section className="py-24 bg-white relative overflow-hidden md:min-h-screen">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-                        <div className="max-w-2xl -mt-17">
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-                                Aksi & <span className="text-lime-500">Kegiatan</span>
-                            </h2>
-                            <p className="text-gray-500 mt-4 text-lg font-medium">Inisiatif kami di lapangan untuk menciptakan lingkungan Jember yang lebih bersih dan berkelanjutan.</p>
-                        </div>
-                        <Link href={route("activity")} className="hidden md:inline-flex group items-center gap-2 text-sm font-bold text-gray-900 border-2 border-gray-100 hover:bg-lime-600 hover:text-white px-8 py-3.5 rounded-full transition-all hover:shadow-lg hover:shadow-[#7CC13B]/20 bg-white duration-500 ">
-                            Eksplorasi Semua
-                            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </Link>
-                    </div>
-
-                    {activities.length === 0 ? (
-                        <div className="py-16 bg-gray-50 text-center rounded-[2rem] border border-dashed border-gray-200">
-                            <p className="text-gray-500 font-medium">Belum ada aktivitas.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-                            {/* Featured (1st item) */}
-                            {activities[0] && (
-                                <Link href={route("activity.show", activities[0].id)} className="lg:col-span-7 lg:row-span-2 group relative rounded-md overflow-hidden min-h-[400px] lg:min-h-[600px] flex items-end shadow-lg hover:shadow-2xl hover:shadow-[#7CC13B]/20 transition-all duration-500">
-                                    <div className="absolute inset-0">
-                                        {activities[0].image_path ? (
-                                            <img src={`/storage/${activities[0].image_path}`} alt={activities[0].title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900" />
-                                        )}
-                                        {/* Gradient overlay for readability */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-500" />
-                                    </div>
-                                    <div className="relative p-8 md:p-12 w-full transform transition-transform duration-500 group-hover:-translate-y-2">
-                                        <div className="flex flex-wrap gap-3 mb-5">
-                                            <span className="inline-block px-4 py-1.5 rounded-full bg-[#7CC13B] text-white text-xs font-black tracking-wide shadow-sm">TERBARU</span>
-                                            {activities[0].date && <span className="inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold">{fmt(activities[0].date)}</span>}
-                                        </div>
-                                        <h3 className="text-3xl md:text-4xl font-black text-white group-hover:text-[#FE961C] transition-colors leading-tight mb-4">{activities[0].title}</h3>
-                                        <p className="text-gray-300 line-clamp-2 md:line-clamp-3 max-w-xl text-sm md:text-base leading-relaxed">{activities[0].description}</p>
-                                        
-                                        <div className="mt-8 flex items-center gap-2 text-sm font-bold text-white opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                                            Baca selengkapnya
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </Link>
-                            )}
-
-                            {/* Remaining items (up to 2) */}
-                            <div className="lg:col-span-5 flex flex-col gap-6 lg:gap-8">
-                                {activities.slice(1, 3).map((a, i) => (
-                                    <Link key={a.id} href={route("activity.show", a.id)} className="group relative rounded-md bg-white border border-gray-100 overflow-hidden flex flex-row sm:flex-col items-center sm:items-start hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-500 hover:-translate-y-1 h-full">
-                                        <div className="relative w-2/5 sm:w-full h-full sm:h-48 overflow-hidden shrink-0">
-                                            {a.image_path ? (
-                                                <img src={`/storage/${a.image_path}`} alt={a.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                            ) : (
-                                                <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                                                    <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                </div>
-                                            )}
-                                            {/* Accent colored bar on left/top */}
-                                            <div className={`absolute top-0 left-0 w-1.5 sm:w-full h-full sm:h-1.5 ${i === 0 ? 'bg-[#FE961C]' : 'bg-[#7CC13B]'}`} />
-                                        </div>
-                                        <div className="p-5 sm:p-7 flex flex-col flex-1 justify-center w-full">
-                                            <div className="flex items-center justify-between mb-3">
-                                                {a.date && <span className="text-xs font-bold text-gray-400">{fmt(a.date)}</span>}
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-gray-50 group-hover:bg-white group-hover:shadow-md transition-all ${i === 0 ? 'group-hover:text-[#FE961C]' : 'group-hover:text-[#7CC13B]'} text-gray-400 hidden sm:flex`}>
-                                                    <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-[-45deg]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <h3 className="text-lg sm:text-xl font-black text-gray-900 group-hover:text-[#7CC13B] transition-colors mb-2 line-clamp-2">{a.title}</h3>
-                                            <p className="text-gray-500 line-clamp-2 text-sm leading-relaxed">{a.description}</p>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    
-                    <div className="mt-10 md:hidden flex justify-center">
-                        <Link href={route("activity")} className="inline-flex items-center gap-2 text-sm font-bold text-white bg-gray-900 px-8 py-3.5 rounded-full shadow-lg">
-                            Eksplorasi Semua
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-24 bg-gray-50 md:min-h-screen">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Berita & Artikel</h2>
-                            <p className="text-gray-500 mt-2 font-medium">Informasi terbaru seputar lingkungan</p>
-                        </div>
-                        <Link href={route("news")} className="inline-flex items-center gap-2 text-sm font-bold text-[#7CC13B] hover:text-green-700 transition-colors">
-                            Lihat semua berita
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </Link>
-                    </div>
-
-                    {news.length === 0 ? (
-                        <p className="text-gray-500 py-10 font-medium">Belum ada berita.</p>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {news.map((item) => (
-                                <Link key={item.id} href={route("news.show", item.id)} className="group flex flex-col bg-white rounded-md p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                                    <div className="relative aspect-[16/10] rounded-md overflow-hidden bg-gray-100 mb-5">
-                                        {item.image_path ? (
-                                            <img src={`/storage/${item.image_path}`} alt={item.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7" />
-                                                </svg>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 flex flex-col">
-                                        {item.published_date && <p className="text-sm text-gray-400 mb-2 font-medium">{fmt(item.published_date)}</p>}
-                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#7CC13B] transition-colors line-clamp-2 mb-2">{item.title}</h3>
-                                        <p className="text-gray-600 line-clamp-2 leading-relaxed flex-1">{item.content}</p>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            <section className="md:min-h-screen py-24 relative overflow-hidden rounded-t-[1.2rem] " style={{ backgroundColor: "#0D1520" }}>
-                <div className="absolute inset-0 opacity-[0.03]"
-                    style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
-
-                <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-14">
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="h-px w-8" style={{ background: "#7CC13B" }} />
-                                <p className="text-xs font-black tracking-[0.4em] uppercase" style={{ color: "#7CC13B" }}>
-                                    Produk Daur Ulang
-                                </p>
-                            </div>
-                            <h2 className="text-5xl font-black leading-tight" style={{ color: "#F0F4FF" }}>
-                                Katalog Produk<br />
-                                <em className="not-italic" style={{ color: "#FE961C" }}>Welltrash</em>
-                            </h2>
-                            <p className="mt-4 max-w-md text-sm leading-relaxed" style={{ color: "rgba(240,244,255,0.4)" }}>
-                                Produk hasil daur ulang berkualitas tinggi — dari bahan baku hingga produk siap pakai dari Kabupaten Jember.
-                            </p>
-                        </div>
-                        <Link href={route("katalog")}
-                            className="self-start md:self-end inline-flex items-center gap-2 px-5 py-3 rounded-full text-sm font-bold transition-all border"
-                            style={{ borderColor: "rgba(124,193,59,0.4)", color: "#7CC13B" }}>
-                            Lihat Semua Katalog
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </Link>
-                    </div>
-
-                    {katalogs.length === 0 ? (
-                        <p className="py-16 text-center font-bold" style={{ color: "rgba(255,255,255,0.1)" }}>Belum ada katalog.</p>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: "rgba(255,255,255,0.05)" }}>
-                            {katalogs.map((item) => (
-                                <Link key={item.id} href={route("katalog")}
-                                    className="group relative flex flex-col bg-[#0D1520] hover:bg-[#141F35] transition-colors duration-300 p-6"
-                                    aria-label={`Produk Welltrash: ${item.name} | Daur Ulang Sampah Jember`}>
-                                    <div className="aspect-square rounded-2xl overflow-hidden mb-5" style={{ backgroundColor: "#0A1020" }}>
-                                        {item.image_path
-                                            ? <img src={`/storage/${item.image_path}`}
-                                                alt={`Produk Welltrash - ${item.name} | Daur Ulang Sampah Jember`}
-                                                loading="lazy"
-                                                decoding="async"
-                                                className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700" />
-                                            : <div className="w-full h-full flex items-center justify-center">
-                                                <svg className="w-12 h-12" style={{ color: "rgba(255,255,255,0.05)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                                </svg>
-                                              </div>
-                                        }
-                                    </div>
-                                    <h3 className="font-black text-base mb-1 group-hover:text-[#FE961C] transition-colors duration-300"
-                                        style={{ color: "#F0F4FF" }}>
-                                        {item.name}
-                                    </h3>
-                                    <p className="text-sm line-clamp-2 leading-relaxed flex-1 mb-4"
-                                        style={{ color: "rgba(240,244,255,0.35)" }}>
-                                        {item.description}
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        {item.price
-                                            ? <span className="text-sm font-black" style={{ color: "#FE961C" }}>
-                                                Rp {Number(item.price).toLocaleString("id-ID")}
-                                              </span>
-                                            : <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#7CC13B" }}>
-                                                Harga bervariasi
-                                              </span>
-                                        }
-                                        <span className="text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ color: "#7CC13B" }}>
-                                            Lihat →
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            <Mitra />
-
-            {/* FAQ SEO Section */}
-            <section className="py-24 bg-white relative overflow-hidden">
-                {/* JSON-LD Schema markup for Google Rich Snippets */}
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            "@context": "https://schema.org",
-                            "@type": "FAQPage",
-                            "mainEntity": faqItems.map(item => ({
-                                "@type": "Question",
-                                "name": item.q,
-                                "acceptedAnswer": {
-                                    "@type": "Answer",
-                                    "text": item.a
-                                }
-                            }))
-                        })
+            {/* Modern Minimalist Hero Section (Dominant White) */}
+            <section className="relative bg-white text-zinc-900 pt-36 pb-20 lg:pt-44 lg:pb-32 overflow-hidden border-b border-zinc-100">
+                {/* Ambient Light Grid Pattern */}
+                <div
+                    className="absolute inset-0 opacity-[0.45] pointer-events-none"
+                    style={{
+                        backgroundImage: `linear-gradient(to right, #f1f5f9 1px, transparent 1px), linear-gradient(to bottom, #f1f5f9 1px, transparent 1px)`,
+                        backgroundSize: "40px 40px",
                     }}
                 />
+                {/* Soft ambient radial glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-emerald-50/50 rounded-full blur-3xl pointer-events-none -z-0" />
 
-                <div className="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight">
-                            FAQ Pengangkutan <span className="text-[#FE961C]">Sampah Jember</span>
-                        </h2>
-                        <p className="text-gray-500 mt-4 text-base font-light max-w-2xl mx-auto leading-relaxed">
-                            Temukan jawaban lengkap atas pertanyaan umum mengenai layanan jasa pengangkut sampah profesional, tata cara berlangganan, serta pengolahan limbah daur ulang dari WellTrash.
-                        </p>
+                {/* Hero Content Container */}
+                <div className="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-12 w-full text-center">
+                    {/* Operational Status Pill */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-zinc-50 border border-zinc-200/80 rounded-full font-mono text-xs text-zinc-700 mb-8 shadow-2xs backdrop-blur-sm"
+                    >
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                        </span>
+                        <span className="tracking-tight font-medium">Layanan Pengelolaan Sampah Komersial Terpadu • Jember</span>
+                    </motion.div>
+
+                    {/* Headline & Description */}
+                    <div className="max-w-4xl mx-auto">
+                        <motion.h1
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.1 }}
+                            className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold tracking-tight text-zinc-900 leading-[1.08] mb-6"
+                        >
+                            Pengelolaan sampah terjadwal untuk bisnis &amp;{" "}
+                            <span className="font-serif italic text-emerald-800 font-normal">
+                                institusi di Jember.
+                            </span>
+                        </motion.h1>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="text-zinc-600 font-sans text-base sm:text-lg lg:text-xl leading-relaxed mb-10 max-w-2xl mx-auto font-normal"
+                        >
+                            Layanan penjemputan berkala terstandarisasi, pemilahan bertanggung jawab di fasilitas WellTrash Farm, dan pelaporan kepatuhan ESG yang transparan.
+                        </motion.p>
+
+                        {/* CTA Buttons */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.3 }}
+                            className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-14 sm:mb-16"
+                        >
+                            <Link
+                                href={route("login")}
+                                className="w-full sm:w-auto bg-zinc-900 text-white hover:bg-zinc-800 font-sans font-medium text-sm px-7 py-3.5 rounded-xl transition-all duration-200 inline-flex items-center justify-center gap-2.5 shadow-sm hover:shadow group"
+                            >
+                                <span>Konsultasi Kebutuhan Bisnis</span>
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                            <a
+                                href="https://wa.me/62819848706"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="w-full sm:w-auto border border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300 px-7 py-3.5 rounded-xl font-sans font-medium text-sm transition-all duration-200 inline-flex items-center justify-center gap-2 shadow-2xs"
+                            >
+                                <MessageSquare className="w-4 h-4 text-emerald-700" />
+                                <span>WhatsApp Tim Bisnis</span>
+                            </a>
+                        </motion.div>
                     </div>
 
-                    <div className="space-y-4">
-                        {faqItems.map((item, idx) => {
-                            const isOpen = openFaq === idx;
-                            return (
-                                <div
-                                    key={idx}
-                                    className="border border-gray-100 rounded-2xl bg-white hover:border-gray-200 transition-all duration-300 shadow-sm"
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() => setOpenFaq(isOpen ? null : idx)}
-                                        className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
-                                        aria-expanded={isOpen}
-                                    >
-                                        <span className="text-lg font-bold text-gray-900 pr-4 group-hover:text-[#7CC13B] transition-colors">
-                                            {item.q}
-                                        </span>
-                                        <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-50 text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-[#7CC13B]/10 text-[#7CC13B]' : ''}`}>
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                            </svg>
-                                        </span>
-                                    </button>
-                                    
+                    {/* Operational Showcase Card (Clean White Surface) */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7, delay: 0.35 }}
+                        className="max-w-4xl mx-auto bg-white rounded-2xl border border-zinc-200/80 shadow-xl shadow-zinc-900/5 p-6 sm:p-8 relative text-left"
+                    >
+                        {/* Status bar */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-zinc-100 gap-3">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                                    <ActivityIcon className="w-4 h-4" />
+                                </div>
+                                <div>
+                                    <div className="text-xs font-semibold text-zinc-900">WellTrash Operational Telemetry</div>
+                                    <div className="text-[11px] text-zinc-500 font-mono">Sistem Penjadwalan &amp; Logistik Terintegrasi</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-mono text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 self-start sm:self-auto">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                                <span>Armada &amp; MRF Aktif</span>
+                            </div>
+                        </div>
+
+                        {/* Consolidated Stats Grid with Logo Harmony */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+                            {STATS.map((stat, i) => {
+                                const IconComponent = stat.icon;
+                                return (
                                     <div
-                                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[300px] border-t border-gray-50' : 'max-h-0'}`}
+                                        key={stat.label}
+                                        className={i !== 0 ? "sm:border-l sm:border-zinc-100 sm:pl-6 lg:pl-8" : ""}
                                     >
-                                        <div className="px-6 py-5 text-gray-600 text-sm leading-relaxed font-light">
-                                            {item.a}
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${stat.color}`}>
+                                                <IconComponent className="w-3.5 h-3.5" />
+                                            </div>
+                                            <span className="font-sans text-xs text-zinc-500 font-medium">
+                                                {stat.label}
+                                            </span>
+                                        </div>
+                                        <div className="font-mono text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900 tabular-nums">
+                                            {stat.number}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* Trust Bar (Grayscale Partner Logos) */}
+            <Mitra />
+
+            {/* B2B Solutions */}
+            <Why />
+
+            {/* 4-Step Operational Flow */}
+            <WasteFlow />
+
+            {/* Mengapa WellTrash (Keunggulan Operasional) */}
+            <section id="keunggulan" className="scroll-mt-24 bg-zinc-50/50 text-zinc-900 py-20 lg:py-28 border-b border-zinc-200/60">
+                <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="lg:col-span-7"
+                        >
+                            <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
+                                KEUNGGULAN OPERASIONAL
+                            </span>
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 leading-[1.15] mb-5">
+                                Partner operasional yang dapat Anda andalkan.
+                            </h2>
+                            <p className="text-zinc-600 font-sans text-base lg:text-lg leading-relaxed mb-9 max-w-2xl">
+                                Kami memahami reputasi dan kepatuhan institusi Anda. WellTrash hadir bukan sebagai perantara, melainkan mitra pengelola limbah profesional dengan integritas layanan tinggi di Jember.
+                            </p>
+
+                            <div className="space-y-4">
+                                <div className="border border-zinc-200/80 bg-white p-5 sm:p-6 rounded-2xl hover:border-zinc-300 hover:shadow-xs transition-all duration-200">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center shrink-0">
+                                            <Clock className="w-5 h-5 text-emerald-700" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-sans font-bold text-base sm:text-lg text-zinc-900 mb-1">
+                                                Terjadwal dan tepat waktu
+                                            </h3>
+                                            <p className="font-sans text-xs sm:text-sm text-zinc-500 leading-relaxed">
+                                                Pilihan frekuensi penjemputan fleksibel dengan jaminan ketepatan jadwal armada logistik tanpa mengganggu kelancaran operasional bisnis Anda.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-                            );
-                        })}
+
+                                <div className="border border-zinc-200/80 bg-white p-5 sm:p-6 rounded-2xl hover:border-zinc-300 hover:shadow-xs transition-all duration-200">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center shrink-0">
+                                            <ShieldCheck className="w-5 h-5 text-emerald-700" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-sans font-bold text-base sm:text-lg text-zinc-900 mb-1">
+                                                Proses aman dan transparan
+                                            </h3>
+                                            <p className="font-sans text-xs sm:text-sm text-zinc-500 leading-relaxed">
+                                                Standar operasional higienis, tim terlatih dengan kelengkapan APD resmi, serta kepastian legalitas melalui surat perjanjian kerja sama (MOU) resmi.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="border border-zinc-200/80 bg-white p-5 sm:p-6 rounded-2xl hover:border-zinc-300 hover:shadow-xs transition-all duration-200">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 flex items-center justify-center shrink-0">
+                                            <Recycle className="w-5 h-5 text-emerald-700" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-sans font-bold text-base sm:text-lg text-zinc-900 mb-1">
+                                                Berorientasi pada dampak nyata
+                                            </h3>
+                                            <p className="font-sans text-xs sm:text-sm text-zinc-500 leading-relaxed">
+                                                Komitmen pemulihan material bernilai di WellTrash Farm untuk menekan timbulan residu yang berakhir di Tempat Pembuangan Akhir (TPA) Pakusari.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Operational Ecosystem Showcase Card with Real Photography & Telemetry */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="lg:col-span-5"
+                        >
+                            <div className="border border-zinc-200/80 rounded-2xl bg-white shadow-xl shadow-zinc-900/5 p-5 sm:p-6">
+                                <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-100">
+                                    <div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="font-mono text-xs uppercase text-zinc-900 font-bold block">
+                                                SISTEM TERINTEGRASI
+                                            </span>
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                                        </div>
+                                        <span className="font-sans text-xs text-zinc-500">Ekosistem Pengelolaan Limbah Jember</span>
+                                    </div>
+                                    <span className="font-mono text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-1 rounded-full font-semibold">
+                                        End-to-End
+                                    </span>
+                                </div>
+
+                                {/* Real Transport Fleet Photo with Dynamic Overlay */}
+                                <div className="relative rounded-xl overflow-hidden aspect-[16/10] mb-4 border border-zinc-200/70 shadow-2xs">
+                                    <img
+                                        src={heroWasteTransport}
+                                        alt="Armada pengangkutan komersial WellTrash Jember"
+                                        loading="lazy"
+                                        className="w-full h-full object-cover filter brightness-[0.97]"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                    <div className="absolute bottom-3 left-3 right-3 text-white flex items-center justify-between">
+                                        <div>
+                                            <span className="font-mono text-[10px] uppercase text-white/80 block">
+                                                Armada Resmi Berizin
+                                            </span>
+                                            <p className="font-sans text-xs sm:text-sm font-bold">
+                                                Logistik Terjadwal Seluruh Jember
+                                            </p>
+                                        </div>
+                                        <span className="font-mono text-[10px] bg-emerald-600/90 backdrop-blur-md px-2 py-0.5 rounded-md font-medium">
+                                            Aktif Harian
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Telemetry Badges with Logo Color Accents */}
+                                <div className="space-y-2.5">
+                                    <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/70 flex items-center justify-between text-xs font-sans">
+                                        <div className="flex items-center gap-2 text-zinc-700">
+                                            <Clock className="w-4 h-4 text-emerald-700" />
+                                            <span>Rute Terjadwal &amp; Zero-Spill</span>
+                                        </div>
+                                        <span className="font-mono font-semibold text-emerald-800 text-[11px]">SLA On-Time</span>
+                                    </div>
+
+                                    <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/70 flex items-center justify-between text-xs font-sans">
+                                        <div className="flex items-center gap-2 text-zinc-700">
+                                            <FileSpreadsheet className="w-4 h-4 text-orange-600" />
+                                            <span>Pencatatan Manifest Tonase Digital</span>
+                                        </div>
+                                        <span className="font-mono font-semibold text-orange-700 text-[11px]">Audit DLH</span>
+                                    </div>
+
+                                    <div className="p-2.5 rounded-xl bg-zinc-50 border border-zinc-200/70 flex items-center justify-between text-xs font-sans">
+                                        <div className="flex items-center gap-2 text-zinc-700">
+                                            <Layers className="w-4 h-4 text-emerald-700" />
+                                            <span>Pemilahan Hilir di WellTrash Farm</span>
+                                        </div>
+                                        <span className="font-mono font-semibold text-emerald-800 text-[11px]">100% Sirkular</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
+                </div>
+            </section>
+
+            {/* Circular Economy Catalog */}
+            <section className="bg-white py-20 lg:py-28 border-b border-zinc-100">
+                <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14"
+                    >
+                        <div>
+                            <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
+                                EKONOMI SIRKULAR
+                            </span>
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 leading-tight">
+                                Dari sampah menjadi produk bernilai.
+                            </h2>
+                            <p className="text-zinc-600 font-sans text-base max-w-xl mt-3 leading-relaxed">
+                                Wujud nyata rantai nilai sirkular dari sampah terpilah yang kami olah kembali menjadi material dan produk bernilai guna di Kabupaten Jember.
+                            </p>
+                        </div>
+
+                        <Link
+                            href={route("katalog")}
+                            className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-zinc-900 hover:text-emerald-700 transition-colors shrink-0 group"
+                        >
+                            <span>Lihat Semua Katalog</span>
+                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
+                    </motion.div>
+
+                    {katalogs.length === 0 ? (
+                        <div className="py-14 px-6 text-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/70 flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 rounded-2xl bg-white border border-zinc-200/80 flex items-center justify-center mb-4 text-emerald-800 shadow-2xs">
+                                <Boxes className="w-8 h-8 text-emerald-700" />
+                            </div>
+                            <h4 className="font-sans font-bold text-zinc-900 text-base mb-1">
+                                Portofolio Produk Daur Ulang WellTrash Farm
+                            </h4>
+                            <p className="text-zinc-500 font-sans text-xs sm:text-sm max-w-md">
+                                WellTrash Farm memproses material organik menjadi pupuk hayati &amp; pakan maggot BSF, serta membaling limbah anorganik bernilai ekonomis untuk industri daur ulang.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {katalogs.slice(0, 3).map((item, idx) => (
+                                <motion.div
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                                >
+                                    <Link
+                                        href={route("katalog")}
+                                        className="group bg-white border border-zinc-200/80 rounded-2xl p-6 flex flex-col justify-between h-full hover:border-zinc-300 hover:shadow-lg transition-all duration-300"
+                                    >
+                                        <div>
+                                            <div className="aspect-[4/3] bg-zinc-50 rounded-xl overflow-hidden mb-5 border border-zinc-100 flex items-center justify-center">
+                                                {item.image_path ? (
+                                                    <img
+                                                        src={`/storage/${item.image_path}`}
+                                                        alt={item.name}
+                                                        loading="lazy"
+                                                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                                                    />
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center p-6 text-zinc-400">
+                                                        <PackageOpen className="w-10 h-10 text-zinc-300 mb-1.5" />
+                                                        <span className="font-mono text-[11px] text-zinc-400">Produk Daur Ulang</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <h3 className="font-sans font-bold text-lg text-zinc-900 mb-2 group-hover:text-emerald-700 transition-colors">
+                                                {item.name}
+                                            </h3>
+                                            <p className="font-sans text-xs sm:text-sm text-zinc-500 line-clamp-2 leading-relaxed mb-6">
+                                                {item.description}
+                                            </p>
+                                        </div>
+
+                                        <div className="pt-4 border-t border-zinc-100 flex items-center justify-between">
+                                            <span className="font-mono text-sm font-bold text-zinc-900">
+                                                {item.price && Number(item.price) > 0
+                                                    ? `Rp ${Number(item.price).toLocaleString("id-ID")}`
+                                                    : "Hubungi kami untuk penawaran"}
+                                            </span>
+                                            <span className="text-xs font-sans font-semibold text-zinc-500 group-hover:text-emerald-700 inline-flex items-center gap-1 transition-colors">
+                                                Detail <ArrowRight className="w-3.5 h-3.5" />
+                                            </span>
+                                        </div>
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Field Activities */}
+            <ActivitiesSection activities={activities} />
+
+            {/* News and Insights */}
+            <NewsSection news={news} />
+
+            {/* FAQ Accordion with JSON-LD */}
+            <FaqSection />
+
+            {/* Final Conversion CTA: Minimalist Modern Card with Logo Green & Orange Accents */}
+            <section className="bg-white py-20 lg:py-28 relative overflow-hidden">
+                <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98, y: 20 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="max-w-5xl mx-auto rounded-3xl bg-zinc-950 text-white p-8 sm:p-14 lg:p-16 relative overflow-hidden shadow-2xl border border-zinc-800/80 text-center"
+                    >
+                        {/* Dual Ambient Glow: Green on left, Orange on right (matching WellTrash logo) */}
+                        <div className="absolute -top-24 -left-16 w-80 h-80 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -right-16 w-80 h-80 bg-orange-600/15 rounded-full blur-3xl pointer-events-none" />
+
+                        <div className="relative z-10">
+                            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 text-xs font-mono font-medium mb-6">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                <span>KEMITRAAN OPERASIONAL BISNIS</span>
+                                <span className="text-orange-400 font-bold ml-1">• JEMBER</span>
+                            </span>
+
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight max-w-2xl mx-auto mb-5">
+                                Operasional lebih bersih dimulai dari satu percakapan.
+                            </h2>
+
+                            <p className="text-zinc-400 font-sans text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-9">
+                                Konsultasikan volume sampah dan pola operasional bisnis Anda bersama tim WellTrash. Dapatkan skema penjemputan berkala dan estimasi penanganan limbah terpadu se-Kabupaten Jember.
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-8">
+                                <Link
+                                    href={route("login")}
+                                    className="w-full sm:w-auto bg-white text-zinc-900 hover:bg-zinc-100 rounded-xl font-sans font-semibold text-sm px-8 py-4 transition-all duration-200 inline-flex items-center justify-center gap-2 shadow-sm group"
+                                >
+                                    <span>Hubungi Tim Bisnis</span>
+                                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                </Link>
+                                <a
+                                    href="https://wa.me/62819848706"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="w-full sm:w-auto border border-zinc-800 text-zinc-200 hover:bg-zinc-900 hover:border-zinc-700 rounded-xl font-sans font-medium text-sm px-8 py-4 transition-all duration-200 inline-flex items-center justify-center gap-2"
+                                >
+                                    <MessageSquare className="w-4 h-4 text-emerald-400" />
+                                    <span>Konsultasi via WhatsApp</span>
+                                </a>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-zinc-400 pt-6 border-t border-zinc-800/80">
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                    <span>Surat Perjanjian Kerja Sama (MOU)</span>
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-orange-400" />
+                                    <span>Laporan Timbangan Terverifikasi</span>
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                    <span>Dukungan Pelaporan ESG</span>
+                                </span>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             </section>
 
             <Footer />
-        </>
+        </div>
     );
 };
 

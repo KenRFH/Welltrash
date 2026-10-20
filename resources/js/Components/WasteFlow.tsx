@@ -1,107 +1,143 @@
 import React from "react";
+import {
+    ClipboardCheck,
+    CalendarClock,
+    Truck,
+    FileSpreadsheet,
+} from "lucide-react";
+import { motion } from "motion/react";
 
-const steps = [
+interface Step {
+    num: string;
+    title: string;
+    desc: string;
+    icon: React.ComponentType<{ className?: string }>;
+    accentColor: "green" | "orange";
+    points: string[];
+}
+
+const steps: Step[] = [
     {
-        id: 1,
-        title: "Penjemputan Sampah",
-        description: "Sampah anda dijemput oleh armada logistik kami yang terpercaya dan tepat waktu.",
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-            </svg>
-        ),
+        num: "01",
+        title: "Waste Assessment",
+        desc: "Memetakan volume timbulan, proporsi material organik & anorganik, dan ritme operasional perusahaan Anda.",
+        icon: ClipboardCheck,
+        accentColor: "green",
+        points: ["Audit estimasi kilogram harian", "Klasifikasi fraksi material", "Penentuan titik penjemputan"],
     },
     {
-        id: 2,
-        title: "Penyortiran Terpusat",
-        description: "Sampah diterima dan dipilah secara profesional di PT Sarana Utama Welltrash Farm.",
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
-            </svg>
-        ),
+        num: "02",
+        title: "Tailored Plan",
+        desc: "Menentukan frekuensi penjemputan armada logistik, penyediaan wadah pemilahan, dan kontrak kemitraan resmi.",
+        icon: CalendarClock,
+        accentColor: "orange",
+        points: ["Jadwal fleksibel (2x s.d 7x/minggu)", "Armada terdedikasi se-Jember", "Perjanjian Kerjasama (MOU) resmi"],
     },
     {
-        id: 3,
-        title: "Pengolahan Organik",
-        description: "Limbah organik diolah menjadi pakan maggot (BSF) untuk ekosistem yang berkelanjutan.",
-        icon: (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
-            </svg>
-        ),
+        num: "03",
+        title: "Reliable Collection",
+        desc: "Pengangkutan tepat waktu dan higienis oleh petugas terlatih berstandar APD lengkap serta timbangan digital.",
+        icon: Truck,
+        accentColor: "green",
+        points: ["Petugas berseragam & APD standar", "Protokol zero-spill higienis", "Pencatatan timbangan di lokasi"],
     },
     {
-        id: 4,
-        title: "Daur Ulang Anorganik",
-        description: "Limbah anorganik disalurkan dan dijual kepada Creative Preneur untuk didaur ulang.",
-        icon: (
-             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-        ),
+        num: "04",
+        title: "Impact Reporting",
+        desc: "Laporan rekapitulasi manifest tonase bulanan transparan untuk audit kepatuhan DLH dan pelaporan ESG.",
+        icon: FileSpreadsheet,
+        accentColor: "orange",
+        points: ["Manifest digital terverifikasi", "Jejak riwayat penjemputan", "Sertifikat reduksi sampah TPA"],
     },
 ];
 
 const WasteFlow: React.FC = () => {
     return (
-        <section className="py-24 bg-gray-50 -mt-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="cara-kerja" className="scroll-mt-24 bg-zinc-50/50 py-20 lg:py-28 border-b border-zinc-200/60">
+            <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
                 {/* Header */}
-                <div className="text-center mb-16">
-                     <div className="inline-flex items-center space-x-2 bg-emerald-50 rounded-full px-4 py-2 border border-emerald-100 mb-4">
-                        <span className="text-sm font-medium text-emerald-700">
-                            Proses Kami
-                        </span>
-                    </div>
-                    <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl font-poppins">
-                        Alur Pengelolaan Sampah
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className="max-w-3xl mb-14 lg:mb-16"
+                >
+                    <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
+                        ALUR SISTEMATIS
+                    </span>
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 leading-tight mb-4">
+                        Sederhana untuk Anda. Terukur untuk bisnis.
                     </h2>
-                    <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                        Kami memastikan setiap sampah dikelola dengan transparan dan bertanggung jawab demi lingkungan yang lebih baik.
+                    <p className="text-zinc-600 font-sans text-base lg:text-lg leading-relaxed">
+                        Kami merancang alur kerja yang terstruktur agar bisnis Anda dapat fokus pada operasional utama, sementara pengelolaan sampah ditangani secara tuntas dan bertanggung jawab.
                     </p>
-                </div>
+                </motion.div>
 
-                {/* Flow Diagram */}
-                <div className="relative">
-                    {/* Horizontal Connecting Line (Desktop) */}
-                    <div className="hidden lg:block absolute top-12 left-0 w-full h-1 bg-gray-200 -z-0 transform -translate-y-1/2" />
-                    
-                    {/* Vertical Connecting Line (Mobile) */}
-                    <div className="lg:hidden absolute top-0 bottom-0 left-8 w-1 bg-gray-200 -z-0" />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-                        {steps.map((step, index) => (
-                            <div key={step.id} className="relative flex lg:flex-col items-start lg:items-center text-left lg:text-center group">
-                                {/* Step Number Badge (Mobile/Desktop) */}
-                                <div className="absolute -top-3 left-6 lg:-top-4 lg:-right-4 lg:left-auto lg:top-0 lg:right-1/4 bg-green-500 text-white w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center font-bold text-xs lg:text-sm shadow-md border-2 border-white z-20">
-                                    {step.id}
-                                </div>
-
-                                {/* Icon Circle */}
-                                <div className="relative w-16 h-16 lg:w-24 lg:h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-white mb-0 lg:mb-6 mr-6 lg:mr-0 z-10 transition-transform duration-300 group-hover:scale-110 group-hover:border-green-100 flex-shrink-0">
-                                    <div className="text-green-600 group-hover:text-green-700 transition-colors">
-                                        {/* Scale icon down for mobile */}
-                                        {React.cloneElement(step.icon as React.ReactElement, { className: "w-6 h-6 lg:w-8 lg:h-8" })}
-                                    </div>
-                                    
-                                    {/* Pulse Effect */}
-                                    <div className="absolute inset-0 rounded-full bg-green-50 opacity-0 group-hover:animate-ping" />
-                                </div>
-
-                                {/* Content */}
+                {/* 4 Process Columns with Modern Web Icons & Workflow Telemetry */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {steps.map((step, idx) => {
+                        const IconComponent = step.icon;
+                        const isOrange = step.accentColor === "orange";
+                        return (
+                            <motion.div
+                                key={step.num}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                                whileHover={{ y: -4 }}
+                                className="bg-white border border-zinc-200/80 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/40 transition-all duration-300 group"
+                            >
                                 <div>
-                                    <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-1 lg:mb-2 font-poppins">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="font-mono text-xs font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors">
+                                            LANGKAH {step.num}
+                                        </span>
+                                        <span
+                                            className={`w-2 h-2 rounded-full ${
+                                                isOrange ? "bg-orange-500" : "bg-emerald-600"
+                                            }`}
+                                        />
+                                    </div>
+
+                                    {/* Web Icon Visual Badge */}
+                                    <div className="w-14 h-14 rounded-2xl bg-zinc-50 border border-zinc-200/70 p-3 mb-5 flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-2xs">
+                                        <div
+                                            className={`w-full h-full rounded-xl flex items-center justify-center ${
+                                                isOrange
+                                                    ? "bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white"
+                                                    : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white"
+                                            } transition-colors duration-200`}
+                                        >
+                                            <IconComponent className="w-6 h-6" />
+                                        </div>
+                                    </div>
+
+                                    <h3 className="font-sans font-bold text-lg text-zinc-900 mb-2 tracking-tight">
                                         {step.title}
                                     </h3>
-                                    <p className="text-gray-600 text-sm leading-relaxed">
-                                        {step.description}
+                                    <p className="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed mb-4">
+                                        {step.desc}
                                     </p>
+
+                                    {/* Action Points / Checklist */}
+                                    <div className="pt-3 border-t border-zinc-100 space-y-1.5">
+                                        {step.points.map((pt) => (
+                                            <div key={pt} className="flex items-center gap-2 text-xs font-sans text-zinc-500">
+                                                <span
+                                                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                        isOrange ? "bg-orange-400" : "bg-emerald-500"
+                                                    }`}
+                                                />
+                                                <span>{pt}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </div>
         </section>

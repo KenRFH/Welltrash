@@ -326,7 +326,7 @@ export default function Index({ teams, auth, flash }: Props) {
                             </div>
 
                             {/* Actions */}
-                            <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3 font-poppins">
+                            <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3 font-sans">
                                 <button 
                                     type="button" 
                                     onClick={closeModal}

@@ -3,9 +3,10 @@ import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
+import { CtaBackgroundIllustration } from "@/Components/Illustrations/CtaBackgroundIllustration";
 import videoDemo from "@/assets/img/mini_demo.mp4";
 
-const DAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+const DAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 
 const DayPicker = ({ maxDays, disabled }: { maxDays: number; disabled?: boolean }) => {
     const [selected, setSelected] = useState<number[]>([]);
@@ -21,18 +22,23 @@ const DayPicker = ({ maxDays, disabled }: { maxDays: number; disabled?: boolean 
 
     if (disabled) {
         return (
-            <div className="mt-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Jadwal Fleksibel</p>
-                <p className="text-[10px] text-slate-400 font-semibold">Hubungi kami untuk mengatur jadwal</p>
+            <div className="mt-4 pt-3 border-t border-black/10">
+                <p className="font-mono text-[11px] uppercase tracking-wider text-muted mb-1">Ritase Panggilan</p>
+                <p className="font-sans text-xs text-muted">Jadwal fleksibel disesuaikan panggilan fasilitas</p>
             </div>
         );
     }
 
     return (
-        <div className="mt-4">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-                Pilih Hari ({selected.length}/{maxDays} hari)
-            </p>
+        <div className="mt-4 pt-3 border-t border-black/10">
+            <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-muted">
+                    Simulasi Hari Ritase
+                </span>
+                <span className="font-mono text-[11px] text-green-forest">
+                    {selected.length}/{maxDays} Hari
+                </span>
+            </div>
             <div className="flex gap-1.5 flex-wrap">
                 {DAYS.map((day, i) => {
                     const isSelected = selected.includes(i);
@@ -40,15 +46,16 @@ const DayPicker = ({ maxDays, disabled }: { maxDays: number; disabled?: boolean 
                     return (
                         <button
                             key={i}
+                            type="button"
                             onClick={() => toggle(i)}
                             disabled={isDisabled}
-                            className={`w-9 h-9 rounded-lg text-[10px] font-black transition-all duration-200 border
-                                ${isSelected
-                                    ? "bg-lime-500 text-white border-lime-500 shadow-md shadow-lime-500/30 scale-105"
+                            className={`h-7 px-2.5 rounded-sm font-mono text-[11px] font-medium transition-colors border ${
+                                isSelected
+                                    ? "bg-green-forest text-lime border-green-forest"
                                     : isDisabled
-                                    ? "bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed"
-                                    : "bg-white text-slate-600 border-slate-200 hover:border-lime-400 hover:text-lime-600"
-                                }`}
+                                    ? "bg-black/5 text-muted/40 border-transparent cursor-not-allowed"
+                                    : "bg-white text-ink border-black/15 hover:border-green-forest"
+                            }`}
                         >
                             {day}
                         </button>
@@ -58,268 +65,385 @@ const DayPicker = ({ maxDays, disabled }: { maxDays: number; disabled?: boolean 
         </div>
     );
 };
-
 const Services = () => {
+    const [activeTab, setActiveTab] = useState<"all" | "commercial" | "ondemand">("all");
+
     const packages = [
         {
-            name: "Paket Request (By Call)",
-            price: "500k",
-            priceDetail: "Biaya mulai dari",
-            pickup: "Sekali Angkut",
+            id: "reguler",
+            category: "commercial",
+            name: "Paket Reguler Komersial",
+            target: "Kafe, Resto & Usaha Menengah",
+            price: "2.500.000",
+            priceDetail: "Estimasi mulai dari / bln",
+            pickup: "5 Hari / Minggu",
+            capacity: "Maks. 4m³ per ritase",
+            maxDays: 5,
+            description: "Solusi pengangkutan teratur untuk bisnis menengah yang membutuhkan keteraturan ritase dan manifest lingkungan.",
+            features: [
+                "Ideal untuk kafe, resto, dan ruko",
+                "Kapasitas muat s.d. 4m³ per ritase",
+                "Pilihan 5 hari kerja terjadwal",
+                "Akses Dashboard & Manifest Digital",
+                "Sertifikat Kemitraan Ramah Lingkungan",
+            ],
+        },
+        {
+            id: "prime",
+            category: "commercial",
+            isFeatured: true,
+            name: "Paket Prime Korporat",
+            target: "Hotel, RS, SPPG & Fasilitas Besar",
+            price: "3.200.000",
+            priceDetail: "Estimasi mulai dari / bln",
+            pickup: "Hingga 7 Hari / Minggu",
+            capacity: "Maks. 4m³ per ritase",
+            maxDays: 7,
+            description: "Layanan prioritas harian untuk institusi dengan timbulan sampah tinggi dan audit kebersihan ketat.",
+            features: [
+                "Prioritas armada pagi / malam",
+                "Pilihan ritase harian fleksibel (Sen - Min)",
+                "Kapasitas muat s.d. 4m³ per ritase",
+                "Pelaporan tonase berkala untuk audit ESG",
+                "Dedicated Customer Support Officer",
+            ],
+        },
+        {
+            id: "premium-plus",
+            category: "commercial",
+            name: "Paket Industri Premium+",
+            target: "Kawasan Industri, Mall & Pabrik",
+            price: "5.200.000",
+            priceDetail: "Estimasi mulai dari / bln",
+            pickup: "Setiap Hari (7 Hari)",
+            capacity: "Maks. 4m³ per ritase (Multi-trip)",
+            maxDays: 7,
+            description: "Pengelolaan limbah terpadu skala industri tanpa perlu memilah di hulu dengan komitmen recovery sirkular maksimal.",
+            features: [
+                "Layanan residu tanpa pemilahan awal",
+                "Jadwal fleksibel multi-ritase per hari",
+                "Sertifikat Penyerapan Residu & ESG Report",
+                "Kunjungan audit kebersihan berkala",
+                "Akses penuh analitik limbah real-time",
+            ],
+        },
+        {
+            id: "request",
+            category: "ondemand",
+            name: "Paket Request (On-Demand)",
+            target: "Event, Renovasi & Insidental",
+            price: "500.000",
+            priceDetail: "Mulai dari / penjemputan",
+            pickup: "Sekali Angkut (Sesuai Panggilan)",
+            capacity: "Sesuai armada yang dipesan",
             maxDays: 0,
             dayPickerDisabled: true,
-            description: "Jasa angkut sampah on-demand yang fleksibel untuk kebutuhan mendadak atau frekuensi tidak rutin.",
+            description: "Layanan penjemputan sampah on-call yang cepat dan fleksibel untuk kebutuhan penanganan mendadak.",
             features: [
-                "Layanan Jemput Sesuai Panggilan",
-                "Jadwal Fleksibel & Cepat",
-                "Pemilahan Sampah Standar",
-                "Konsultasi via WhatsApp",
+                "Layanan jemput cepat berdasarkan panggilan",
+                "Jadwal fleksibel (Booking sesuai kebutuhan)",
+                "Armada pickup / truk boks resmi",
+                "Konsultasi estimasi via WhatsApp",
             ],
         },
         {
-            name: "Paket Rumah Tangga (> 10km)",
-            price: "1.000k",
-            priceDetail: "Per bulan",
+            id: "household-suburban",
+            category: "ondemand",
+            name: "Paket Klaster Residensial",
+            target: "Klaster Hunian & Radius >10km",
+            price: "1.000.000",
+            priceDetail: "Mulai dari / bln",
             pickup: "Maks. 5 Hari / Minggu",
+            capacity: "Maks. 1m³ (4 kantong besar)",
             maxDays: 5,
-            description: "Penjemputan sampah harian untuk area dengan radius lebih dari 10km.",
+            description: "Penjemputan rutin untuk area klaster hunian atau lokasi dengan jarak logistik lebih dari 10 km dari fasilitas pusat.",
             features: [
-                "Max 1m³ (4 kantong trashbag) / sekali angkut",
-                "Pilih 5 hari dari Senin – Minggu",
-                "Akses penuh Dashboard Aplikasi",
-            ],
-        },
-        {
-            name: "Paket Reguler",
-            price: "2.500k",
-            priceDetail: "Biaya mulai dari",
-            pickup: "Maks. 5 Hari / Minggu",
-            maxDays: 5,
-            description: "Solusi pengolahan limbah untuk bisnis kecil dan menengah dengan jadwal pengambilan teratur.",
-            features: [
-                "Ideal untuk Kafe, Restoran atau bagian non-klinis RS",
-                "Maks 4m³ / sekali angkut",
-                "Pilih 5 hari dari Senin – Minggu",
-                "Akses penuh Dashboard Aplikasi",
-                "Sertifikat Mitra Ramah Lingkungan",
-            ],
-        },
-        {
-            name: "Paket Prime (Bisnis)",
-            price: "3.200k",
-            priceDetail: "Biaya mulai dari",
-            pickup: "Maks. 7 Hari / Minggu",
-            maxDays: 7,
-            isFeatured: true,
-            description: "Layanan pengolahan sampah prioritas untuk perusahaan yang fokus pada standar kebersihan tinggi.",
-            features: [
-                "Ideal untuk SPPG, Gudang, Hotel & operasional besar",
-                "Maks 4m³ / sekali angkut",
-                "Pilih hingga 7 hari (Senin – Minggu)",
-                "Akses penuh Dashboard Aplikasi",
-                "Sertifikat Mitra Ramah Lingkungan",
-            ],
-        },
-        {
-            name: "Paket Premium+",
-            price: "5.200k",
-            priceDetail: "Biaya mulai dari",
-            pickup: "Maks. 7 Hari / Minggu",
-            maxDays: 7,
-            description: "Solusi pengelolaan limbah industri skala besar dengan sistem pelaporan audit yang mendalam.",
-            features: [
-                "Tanpa perlu pilah sampah",
-                "Maks 4m³ / sekali angkut",
-                "Pilih hingga 7 hari (Senin – Minggu)",
-                "Akses penuh Dashboard Aplikasi",
-                "Sertifikat Mitra Ramah Lingkungan",
+                "Maksimal 1m³ per jadwal ritase",
+                "Pilihan 5 hari penjemputan per minggu",
+                "Armada berjadwal berkala",
+                "Akses pencatatan jadwal aplikasi",
             ],
         },
     ];
+
+    const filteredPackages = packages.filter((pkg) => {
+        if (activeTab === "all") return true;
+        return pkg.category === activeTab;
+    });
+
     return (
-        <div className="bg-white min-h-screen font-sans selection:bg-lime-100">
+        <div className="bg-[#F8FAF8] min-h-screen font-sans text-ink selection:bg-lime selection:text-ink">
             <SEO
-                title="Harga Jasa Angkut Sampah & Pengolahan Limbah"
-                description="Cari jasa angkut sampah terpercaya? WellTrash menyediakan layanan penjemputan sampah rumah tangga dan industri dengan harga terjangkau dan ramah lingkungan."
+                title="Layanan & Paket Pengelolaan Sampah - WellTrash"
+                description="Pilihan skema jasa pengangkutan limbah komersial terjadwal, legalitas resmi, dan pelaporan ESG transparan untuk bisnis di Kabupaten Jember."
             />
             <Navbar />
 
-            <section className="pt-40 pb-24 px-6">
-                <div className="max-w-5xl mx-auto text-center">
-                    <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight mb-8">
-                        Layanan <span className="text-lime-500 italic font-serif">Penjemputan</span> Sampah <br />
-                        Terbaik & Terpercaya
-                    </h1>
-                    <p className="text-lg text-slate-400 max-w-2xl mx-auto font-medium leading-relaxed">
-                        Pilih paket yang sesuai dan atur hari penjemputan Anda — Senin hingga Minggu, sesuai kebutuhan bisnis Anda.
-                    </p>
+            {/* Hero Section: Green Deep Editorial Background per design.md */}
+            <section className="bg-green-deep text-white pt-36 md:pt-44 pb-20 md:pb-28 px-6 lg:px-12 border-b border-white/10 relative overflow-hidden">
+                <div className="max-w-[1440px] mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end mb-12">
+                        <div className="lg:col-span-8">
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-white tracking-tight leading-[1.05]">
+                                Pengelolaan sampah terjadwal &amp;{" "}
+                                <span className="font-serif italic font-normal text-lime">
+                                    legalitas lengkap.
+                                </span>
+                            </h1>
+                        </div>
+                        <div className="lg:col-span-4">
+                            <p className="font-sans text-base sm:text-lg text-white/80 leading-relaxed">
+                                Dirancang khusus untuk operasional bisnis, fasilitas kesehatan non-B3, hotel, dan restoran di Kabupaten Jember dengan jaminan SLA dan ketepatan ritase.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Operational Highlights */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-10 border-t border-white/10">
+                        <div>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">99.2%</span>
+                            <span className="font-sans text-xs text-white/75 font-medium">Ketepatan SLA Ritase</span>
+                        </div>
+                        <div>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">100%</span>
+                            <span className="font-sans text-xs text-white/75 font-medium">Manifest Terverifikasi</span>
+                        </div>
+                        <div>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">5-7 Hari</span>
+                            <span className="font-sans text-xs text-white/75 font-medium">Fleksibilitas Penjemputan</span>
+                        </div>
+                        <div>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">Audit ESG</span>
+                            <span className="font-sans text-xs text-white/75 font-medium">Laporan Tonase Bulanan</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
-            <section className="pb-40 px-6">
+            {/* Segmented Control & Packages Section */}
+            <section className="py-16 md:py-24 px-6 lg:px-12">
                 <div className="max-w-[1440px] mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {packages.map((pkg, idx) => {
-                            const isPremiumPlus = pkg.name.includes("Premium+");
+                    {/* Segmented Control Bar */}
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 pb-6 border-b border-black/10">
+                        <div>
+                            <h2 className="text-2xl sm:text-3xl font-sans font-bold text-ink tracking-tight mb-1">
+                                Skema Kemitraan Fasilitas
+                            </h2>
+                            <p className="font-sans text-xs sm:text-sm text-muted">
+                                Sesuaikan jenis kontrak dengan frekuensi dan karakteristik timbulan limbah fasilitas Anda.
+                            </p>
+                        </div>
+
+                        {/* Segmented Control Pill */}
+                        <div className="inline-flex p-1 bg-white border border-black/15 rounded-full self-start sm:self-auto shadow-sm">
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("all")}
+                                className={`px-4 py-1.5 rounded-full font-sans text-xs font-medium transition-colors ${
+                                    activeTab === "all" ? "bg-green-forest text-white" : "text-muted hover:text-ink"
+                                }`}
+                            >
+                                Semua Paket
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("commercial")}
+                                className={`px-4 py-1.5 rounded-full font-sans text-xs font-medium transition-colors ${
+                                    activeTab === "commercial" ? "bg-green-forest text-white" : "text-muted hover:text-ink"
+                                }`}
+                            >
+                                Rutin Komersial
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("ondemand")}
+                                className={`px-4 py-1.5 rounded-full font-sans text-xs font-medium transition-colors ${
+                                    activeTab === "ondemand" ? "bg-green-forest text-white" : "text-muted hover:text-ink"
+                                }`}
+                            >
+                                On-Demand & Khusus
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 3-Column Grid per design.md */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+
+                        {filteredPackages.map((pkg) => {
+                            const isFeatured = pkg.isFeatured;
                             return (
                                 <div
-                                    key={idx}
-                                    className={`group relative flex flex-col rounded-[40px] p-8 transition-all duration-700 hover:-translate-y-2 ${
-                                        isPremiumPlus
-                                            ? "bg-slate-900 border-2 border-lime-500 shadow-2xl shadow-lime-500/20 text-white"
-                                            : pkg.isFeatured
-                                            ? "bg-white border-2 border-lime-500 shadow-2xl shadow-lime-500/10"
-                                            : "bg-white border border-slate-100 hover:border-lime-200 shadow-sm hover:shadow-xl"
+                                    key={pkg.id}
+                                    className={`relative flex flex-col justify-between bg-white rounded-sm p-6 sm:p-8 transition-colors ${
+                                        isFeatured
+                                            ? "border-2 border-green-forest shadow-md"
+                                            : "border border-black/10 hover:border-black/25"
                                     }`}
                                 >
-                                    {(pkg.isFeatured || isPremiumPlus) && (
-                                        <div
-                                            className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-[9px] font-black uppercase tracking-[0.3em] px-5 py-1.5 rounded-full shadow-lg whitespace-nowrap ${
-                                                isPremiumPlus ? "bg-slate-900 border border-lime-500" : "bg-lime-500 shadow-lime-500/30"
-                                            }`}
-                                        >
-                                            {isPremiumPlus ? "Paket Eksklusif" : "Pilihan Populer"}
+                                    {isFeatured && (
+                                        <div className="absolute -top-3.5 left-6 bg-green-forest text-lime font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-medium">
+                                            ★ PILIHAN UTAMA MITRA
                                         </div>
                                     )}
 
-                                    <div className="mb-6">
-                                        <h3 className={`text-xl font-black leading-tight mb-3 transition-colors ${isPremiumPlus ? "text-white" : "text-slate-900 group-hover:text-lime-600"}`}>
+                                    <div>
+                                        <span className="font-mono text-xs uppercase tracking-wider text-muted block mb-1">
+                                            {pkg.target}
+                                        </span>
+                                        <h3 className="font-sans font-semibold text-xl text-ink mb-2">
                                             {pkg.name}
                                         </h3>
-                                        <p className={`text-sm font-semibold leading-relaxed h-14 overflow-hidden ${isPremiumPlus ? "text-slate-400" : "text-slate-400"}`}>
+                                        <p className="font-sans text-xs text-muted leading-relaxed mb-6">
                                             {pkg.description}
                                         </p>
-                                    </div>
 
-                                    <div className="mb-6">
-                                        <p className={`text-xs font-black uppercase tracking-[0.2em] mb-2 ${isPremiumPlus ? "text-lime-500" : "text-slate-400"}`}>
-                                            {pkg.priceDetail}
-                                        </p>
-                                        <div className="flex items-baseline gap-1.5">
-                                            <span className={`text-xs font-bold ${isPremiumPlus ? "text-slate-500" : "text-slate-300"}`}>Rp</span>
-                                            <span className={`text-4xl lg:text-5xl font-black tracking-tighter ${isPremiumPlus ? "text-white" : "text-slate-900"}`}>
-                                                {pkg.price}
+                                        {/* Price block */}
+                                        <div className="pt-4 pb-4 border-t border-black/10">
+                                            <span className="font-mono text-[11px] uppercase tracking-wider text-muted block mb-1">
+                                                {pkg.priceDetail}
                                             </span>
-                                        </div>
-                                        <div className={`mt-3 flex items-center gap-2.5 px-4 py-2 rounded-2xl border w-fit ${isPremiumPlus ? "bg-white/5 border-white/10" : "bg-slate-50 border-slate-100"}`}>
-                                            <svg className="w-3.5 h-3.5 text-lime-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <span className={`text-xs font-black uppercase tracking-widest ${isPremiumPlus ? "text-white" : "text-slate-900"}`}>
-                                                {pkg.pickup}
-                                            </span>
-                                        </div>
-
-                                        {/* Day Picker */}
-                                        <DayPicker maxDays={pkg.maxDays} disabled={pkg.dayPickerDisabled} />
-                                    </div>
-
-                                    <div className={`w-full h-px mb-6 ${isPremiumPlus ? "bg-white/10" : "bg-slate-100"}`} />
-
-                                    <ul className="space-y-4 mb-12 flex-grow">
-                                        {pkg.features.map((feature, fIdx) => (
-                                            <li key={fIdx} className="flex items-start gap-4">
-                                                <div className="mt-1 flex-shrink-0 w-4 h-4 rounded-full bg-lime-50 text-lime-600 flex items-center justify-center">
-                                                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                </div>
-                                                <span className={`text-sm font-bold leading-tight ${isPremiumPlus ? "text-slate-300" : "text-slate-600"}`}>
-                                                    {feature}
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="font-mono text-xs text-muted">Rp</span>
+                                                <span className="font-mono text-3xl sm:text-4xl font-medium text-green-forest tracking-tight">
+                                                    {pkg.price}
                                                 </span>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                            </div>
+                                            <p className="font-sans text-[11px] text-muted/75 italic mt-1 leading-snug">
+                                                *Nilai final disesuaikan dengan audit volume & ritase timbulan.
+                                            </p>
+                                        </div>
 
-                                    {pkg.name.includes("Request") ? (
-                                        <a
-                                            href="https://wa.me/62819848706?text=Halo%20WellTrash,%20saya%20tertarik%20dengan%20Paket%20Request%20(By%20Call)"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className={`w-full block py-4 rounded-2xl text-sm font-black uppercase tracking-wider text-center transition-all active:scale-[0.98] ${
-                                                isPremiumPlus
-                                                    ? "bg-lime-500 text-white hover:bg-lime-400 shadow-lg shadow-lime-500/30"
-                                                    : pkg.isFeatured
-                                                    ? "bg-lime-500 text-white hover:bg-lime-600 shadow-lg shadow-lime-500/20"
-                                                    : "bg-slate-900 text-white hover:bg-lime-600"
-                                            }`}
-                                        >
-                                            Hubungi WhatsApp
-                                        </a>
-                                    ) : (
-                                        <Link
-                                            href={route("register")}
-                                            className={`w-full block py-4 rounded-2xl text-sm font-black uppercase tracking-wider text-center transition-all active:scale-[0.98] ${
-                                                isPremiumPlus
-                                                    ? "bg-lime-500 text-white hover:bg-lime-400 shadow-lg shadow-lime-500/30"
-                                                    : pkg.isFeatured
-                                                    ? "bg-lime-500 text-white hover:bg-lime-600 shadow-lg shadow-lime-500/20"
-                                                    : "bg-slate-900 text-white hover:bg-lime-600"
-                                            }`}
-                                        >
-                                            Pilih Paket
-                                        </Link>
-                                    )}
+                                        {/* Capacity & Pickup Details */}
+                                        <div className="grid grid-cols-2 gap-2 py-3 border-y border-black/10 text-xs">
+                                            <div>
+                                                <span className="font-mono text-[10px] text-muted block uppercase">Kapasitas</span>
+                                                <span className="font-sans font-medium text-ink">{pkg.capacity}</span>
+                                            </div>
+                                            <div>
+                                                <span className="font-mono text-[10px] text-muted block uppercase">Frekuensi</span>
+                                                <span className="font-sans font-medium text-ink">{pkg.pickup}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Interactive Day Picker */}
+                                        <DayPicker maxDays={pkg.maxDays} disabled={pkg.dayPickerDisabled} />
+
+                                        {/* Feature Checklist */}
+                                        <ul className="space-y-2.5 my-6 text-xs font-sans text-ink">
+                                            {pkg.features.map((feat, fIdx) => (
+                                                <li key={fIdx} className="flex items-start gap-2.5">
+                                                    <svg className="w-4 h-4 text-green-forest shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                    </svg>
+                                                    <span className="leading-tight text-ink/90">{feat}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Action CTA */}
+                                    <div className="pt-4 border-t border-black/10">
+                                        {pkg.id === "request" ? (
+                                            <a
+                                                href="https://wa.me/62819848706?text=Halo%20WellTrash,%20saya%20ingin%20konsultasi%20Paket%20Request%20On-Demand%20untuk%20fasilitas%20kami"
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="w-full block py-3 rounded-sm font-sans text-xs font-semibold uppercase tracking-wider text-center transition-colors bg-white border border-green-forest text-green-forest hover:bg-green-forest hover:text-white"
+                                            >
+                                                Hubungi WhatsApp Bisnis
+                                            </a>
+                                        ) : (
+                                            <Link
+                                                href={route("register")}
+                                                className={`w-full block py-3 rounded-sm font-sans text-xs font-semibold uppercase tracking-wider text-center transition-colors ${
+                                                    isFeatured
+                                                        ? "bg-green-forest text-lime hover:bg-black"
+                                                        : "bg-green-forest text-white hover:bg-black"
+                                                }`}
+                                            >
+                                                Pilih Paket Kemitraan
+                                            </Link>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
                 </div>
             </section>
-            
-            <section className="bg-white py-12 md:py-20 px-4 md:px-6">
-  <div className="max-w-5xl mx-auto">
 
-    {/* Header */}
-    <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-8 md:mb-12 gap-3 md:gap-6">
-      <h2 className="text-5xl md:text-6xl font-black text-slate-900 leading-tight text-center">
-        Kenapa <br />
-        <span className="text-lime-500">Well<span className="text-amber-500">Trash?</span></span>
-      </h2>
-      <p className="text-xs font-semibold text-slate-400 leading-loose md:text-right text-center">
-        Komitmen kami adalah <br /> lingkungan yang bersih & sehat.
-      </p>
-    </div>
+            {/* Video & Komitmen Operasional */}
+            <section className="bg-white border-y py-20 md:py-28 px-6 lg:px-12">
+                <div className="max-w-[1440px] mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                        <div className="lg:col-span-5">
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-ink tracking-tight leading-tight mb-6">
+                                Mengapa fasilitas bisnis mempercayakan limbah kepada{" "}
+                                <span className="font-serif italic font-normal text-green-forest">
+                                    WellTrash.
+                                </span>
+                            </h2>
+                            <p className="font-sans text-base text-muted leading-relaxed mb-6">
+                                Pengelolaan limbah komersial dijalankan melalui tata kelola terukur. Setiap ritase dikelola dengan SOP kebersihan ketat, armada berizin resmi, dan pelaporan terstandarisasi untuk audit lingkungan korporat.
+                            </p>
+                            <div className="space-y-4 pt-4 border-t border-black/10">
+                                {[
+                                    { title: "Manifest & Timbangan Digital", desc: "Data tonase real-time tercatat transparan untuk pemenuhan ESG." },
+                                    { title: "Zero Spill Commitment", desc: "Armada tertutup dengan wadah terstandar mencegah ceceran bau & cairan." },
+                                    { title: "Pemulihan Hilir Berkelanjutan", desc: "Material diarahkan ke biokonversi maggot BSF & daur ulang industri." },
+                                ].map((item, i) => (
+                                    <div key={i} className="flex gap-3 items-start">
+                                        <span className="w-2 h-2 rounded-full bg-green-forest shrink-0 mt-1.5" />
+                                        <div>
+                                            <h4 className="font-sans font-semibold text-sm text-ink">{item.title}</h4>
+                                            <p className="font-sans text-xs text-muted leading-relaxed">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
 
-    {/* Video dengan fade edges */}
-    <div className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-slate-100">
-      <video
-        autoPlay={true}
-        muted={true}
-        loop={true}
-        playsInline={true}
-        className="w-full object-cover max-h-[220px] md:max-h-none"
-        src={videoDemo}
-      />
+                        <div className="lg:col-span-7">
+                            <div className="relative rounded-sm overflow-hidden">
+                                <video
+                                    autoPlay
+                                    muted
+                                    loop
+                                    playsInline
+                                    className="w-full aspect-video object-cover"
+                                    src={videoDemo}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-      {/* Fade bawah — selalu ada */}
-      <div className="absolute inset-x-0 bottom-0 h-20 md:h-24 bg-gradient-to-t from-white to-transparent" />
-
-      {/* Fade atas, kiri, kanan — hanya desktop */}
-      <div className="hidden md:block absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white to-transparent" />
-      <div className="hidden md:block absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent" />
-      <div className="hidden md:block absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent" />
-    </div>
-
-  </div>
-</section>
-
-            <section className="py-40 px-6 bg-white text-center relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] bg-lime-50/30 rounded-full blur-[140px] pointer-events-none" />
-                <div className="max-w-3xl mx-auto relative z-10">
-                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter mb-10">
-                        Mulai Hidup Bersih <br /> Bersama WellTrash.
+            {/* Final CTA Section - Lime Background */}
+            <section className="bg-lime text-green-deep py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden">
+                <CtaBackgroundIllustration />
+                <div className="max-w-4xl mx-auto text-center relative z-10">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep tracking-tight leading-tight mb-6">
+                        Dapatkan Asesmen Volume & Penawaran Resmi
                     </h2>
+                    <p className="font-sans text-base sm:text-lg text-green-deep/90 max-w-2xl mx-auto leading-relaxed mb-10">
+                        Tim spesialis kami siap mengunjungi fasilitas bisnis Anda di Jember untuk menghitung estimasi timbulan sampah dan merancang jadwal ritase paling efisien.
+                    </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             href={route("register")}
-                            className="px-12 py-5 bg-none text-black border border-lime-500 font-black uppercase tracking-[0.2em] rounded-full hover:bg-lime-500 hover:shadow-2xl hover:text-white duration-500 text-[10px]"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep text-white hover:bg-black font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
-                            Daftar Sekarang
+                            Daftar Kemitraan Sekarang
                         </Link>
-                        <button className="px-12 py-5 bg-white text-slate-900 font-black uppercase tracking-[0.2em] rounded-full border border-slate-100 hover:bg-slate-50 transition-all active:scale-[0.98] text-[10px]">
-                            Hubungi Kami
-                        </button>
+                        <a
+                            href="https://wa.me/62819848706?text=Halo%20WellTrash,%20kami%20ingin%20jadwalkan%20survei%20dan%20asesmen%20limbah%20fasilitas%20kami"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 text-green-deep hover:border-green-deep font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                        >
+                            Hubungi Tim Bisnis (WhatsApp)
+                        </a>
                     </div>
                 </div>
             </section>
@@ -330,3 +454,4 @@ const Services = () => {
 };
 
 export default Services;
+

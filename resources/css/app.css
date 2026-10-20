@@ -1,7 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Instrument+Serif:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Themed Browser Surfaces */
+::selection {
+    background-color: #B7E35C;
+    color: #0C3325;
+}
+
+::-moz-selection {
+    background-color: #B7E35C;
+    color: #0C3325;
+}
+
+html {
+    scroll-behavior: smooth;
+    caret-color: #103C2B;
+}
+
+/* Custom Themed Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0C3325;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #17462F;
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #B7E35C;
+}
+
+/* Tabular Numbers for Metrics */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
 
 

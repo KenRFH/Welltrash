@@ -1,6 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link, router } from '@inertiajs/react';
+import {
+    Receipt,
+    CheckCircle2,
+    Clock,
+    AlertCircle,
+    Search,
+    Filter,
+    PlusCircle,
+    FileText,
+    ExternalLink,
+    Send,
+    Trash2,
+    Eye,
+    MessageSquare,
+    DollarSign,
+    Layers,
+    X,
+    Building2,
+    ArrowUpRight,
+    RefreshCw,
+} from 'lucide-react';
 
 interface Company {
     id: number;
@@ -85,420 +106,633 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
         }
     };
 
-    const waBadge = (invoice: Invoice) => {
-        if (invoice.wa_status === 'sent') {
-            return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black bg-green-50 text-green-700 border border-green-100">📱 WA Terkirim</span>;
-        }
-        if (invoice.wa_status === 'pending') {
-            const sendAt = invoice.wa_send_at ? new Date(invoice.wa_send_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
-            return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black bg-amber-50 text-amber-700 border border-amber-100" title={`Dijadwalkan: ${sendAt}`}>🕐 WA {sendAt}</span>;
-        }
-        if (invoice.wa_status === 'failed') {
-            return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9px] font-black bg-red-50 text-red-600 border border-red-100">❌ WA Gagal</span>;
-        }
-        return null;
-    };
-
     const handleDelete = (invoice: Invoice) => {
         if (confirm(`Hapus invoice ${invoice.invoice_number}? Tindakan ini tidak bisa dibatalkan.`)) {
             router.delete(route('admin.invoices.destroy', invoice.id), { preserveScroll: true });
         }
     };
 
+    const waBadge = (invoice: Invoice) => {
+        if (invoice.wa_status === 'sent') {
+            return (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    <span>WA Terkirim</span>
+                </span>
+            );
+        }
+        if (invoice.wa_status === 'pending') {
+            const sendAt = invoice.wa_send_at ? new Date(invoice.wa_send_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+            return (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/70" title={`Jadwal: ${sendAt}`}>
+                    <Clock className="w-3 h-3 text-amber-600" />
+                    <span>WA Dijadwalkan</span>
+                </span>
+            );
+        }
+        if (invoice.wa_status === 'failed') {
+            return (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/70">
+                    <AlertCircle className="w-3 h-3 text-rose-600" />
+                    <span>WA Gagal</span>
+                </span>
+            );
+        }
+        return null;
+    };
+
+    // Financial Infographics Calculations
+    const totalRevenueSum = useMemo(() => {
+        return invoices.data.reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0);
+    }, [invoices.data]);
+
+    const paidSum = useMemo(() => {
+        return invoices.data
+            .filter(inv => inv.status === 'paid')
+            .reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0);
+    }, [invoices.data]);
+
+    const unpaidSum = useMemo(() => {
+        return invoices.data
+            .filter(inv => inv.status === 'unpaid')
+            .reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0);
+    }, [invoices.data]);
+
+    const paidCount = useMemo(() => invoices.data.filter(inv => inv.status === 'paid').length, [invoices.data]);
+    const unpaidCount = useMemo(() => invoices.data.filter(inv => inv.status === 'unpaid').length, [invoices.data]);
+    const proofCount = useMemo(() => invoices.data.filter(inv => inv.status === 'unpaid' && inv.payment_proof_path).length, [invoices.data]);
+
+    const settlementRate = invoices.data.length > 0 ? Math.round((paidCount / invoices.data.length) * 100) : 0;
+
     return (
         <AdminLayout
-            title="Manajemen Invoice"
-            subtitle="Tagihan Mitra Welltrash"
+            title="Manajemen Invoice & Billing"
+            subtitle="Penerbitan tagihan retribusi limbah industri dan verifikasi bukti bayar mitra"
             activeTab="invoices"
-        >
-            {/* Top bar */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <div>
-                    <h2 className="text-lg font-black text-gray-900">Daftar Invoice</h2>
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                        Total {invoices.total} Invoice
-                    </p>
-                </div>
+            headerAction={
                 <Link
                     href={route('admin.invoices.create')}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-2xl text-sm font-black transition-all shadow-md shadow-green-100"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
                 >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Buat Invoice Baru
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Buat Invoice Baru</span>
                 </Link>
-            </div>
-
-            {/* Filters */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap gap-3 items-end">
-                <div className="flex flex-col gap-1 min-w-[180px]">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Filter Mitra</label>
-                    <select
-                        value={companyFilter}
-                        onChange={e => setCompanyFilter(e.target.value)}
-                        className="pl-3 pr-8 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 bg-gray-50 focus:ring-2 focus:ring-green-100 focus:border-green-400 transition-all"
-                    >
-                        <option value="">Semua Mitra</option>
-                        {companies.map(c => (
-                            <option key={c.id} value={c.id}>{c.company_name}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="flex flex-col gap-1 min-w-[150px]">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status Invoice</label>
-                    <select
-                        value={statusFilter}
-                        onChange={e => setStatusFilter(e.target.value)}
-                        className="pl-3 pr-8 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 bg-gray-50 focus:ring-2 focus:ring-green-100 focus:border-green-400 transition-all"
-                    >
-                        <option value="">Semua Status</option>
-                        <option value="unpaid">Belum Lunas</option>
-                        <option value="paid">Lunas</option>
-                    </select>
-                </div>
-                <div className="flex flex-col gap-1 min-w-[150px]">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Status WA</label>
-                    <select
-                        value={waStatusFilter}
-                        onChange={e => setWaStatusFilter(e.target.value)}
-                        className="pl-3 pr-8 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 bg-gray-50 focus:ring-2 focus:ring-green-100 focus:border-green-400 transition-all"
-                    >
-                        <option value="">Semua Status WA</option>
-                        <option value="pending">Dijadwalkan</option>
-                        <option value="sent">Terkirim</option>
-                        <option value="failed">Gagal</option>
-                        <option value="skipped">Manual (Skipped)</option>
-                    </select>
-                </div>
-                <button
-                    onClick={applyFilters}
-                    className="px-4 py-2 bg-gray-900 hover:bg-green-600 text-white rounded-xl text-xs font-black transition-all"
-                >
-                    Terapkan Filter
-                </button>
-                {(companyFilter || statusFilter || waStatusFilter) && (
-                    <button
-                        onClick={clearFilters}
-                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-black transition-all"
-                    >
-                        Reset
-                    </button>
-                )}
-            </div>
-
-            {/* Table */}
-            <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-                {invoices.data.length === 0 ? (
-                    <div className="p-20 text-center">
-                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-10 h-10 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+            }
+        >
+            <div className="space-y-6">
+                {/* 1. Infographic Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tagihan</span>
+                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                                <Receipt className="w-4.5 h-4.5" />
+                            </div>
                         </div>
-                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Belum ada invoice</p>
-                        <Link href={route('admin.invoices.create')} className="mt-4 inline-block text-xs font-black text-green-600 hover:underline">
-                            + Buat invoice pertama
-                        </Link>
+                        <div className="text-xl font-extrabold text-slate-900 tracking-tight tabular-nums">
+                            {formatRupiah(totalRevenueSum)}
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="w-2 h-2 rounded-full bg-slate-400" />
+                            <span>Dari {invoices.total} total invoice</span>
+                        </div>
                     </div>
-                ) : (
-                    <>
-                        {/* Desktop Table */}
-                        <div className="hidden lg:block overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-50">
-                                <thead>
-                                    <tr className="bg-gray-50/50">
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">No. Invoice</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Mitra</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Periode</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Jatuh Tempo</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Total</th>
-                                        <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
-                                        <th className="px-6 py-4 text-right text-[10px] font-black text-gray-400 uppercase tracking-widest">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {invoices.data.map(invoice => (
-                                        <tr key={invoice.id} className="hover:bg-gray-50/80 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <span className="font-black text-gray-900 text-xs font-mono">{invoice.invoice_number}</span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-gray-900 text-sm">{invoice.company.company_name}</span>
-                                                    <span className="text-xs text-gray-400">{invoice.company.pic_name}</span>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tagihan Lunas</span>
+                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <CheckCircle2 className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
+                            {formatRupiah(paidSum)}
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="font-bold text-emerald-600">{settlementRate}%</span>
+                            <span>({paidCount} invoice lunas)</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Belum Lunas</span>
+                            <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                                <AlertCircle className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-xl font-extrabold text-rose-700 tracking-tight tabular-nums">
+                            {formatRupiah(unpaidSum)}
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <span className="text-rose-600 font-bold">{unpaidCount} invoice</span>
+                            <span>tertunggak</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Verifikasi Bukti</span>
+                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <Clock className="w-4.5 h-4.5" />
+                            </div>
+                        </div>
+                        <div className="text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                            {proofCount}
+                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Dokumen</span>
+                        </div>
+                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            {proofCount > 0 ? (
+                                <span className="text-amber-700 font-semibold">Perlu dicek & verifikasi</span>
+                            ) : (
+                                <span>Semua bukti telah ditinjau</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Visual Settlement & WA Status Meter */}
+                <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2">
+                            <Layers className="w-4 h-4 text-emerald-600" />
+                            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                                Progres Pelunasan & Penagihan Retribusi
+                            </h3>
+                        </div>
+                        <span className="text-xs font-semibold text-slate-500">
+                            Rasio Lunas: <span className="font-extrabold text-emerald-700">{settlementRate}%</span>
+                        </span>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="h-2.5 w-full bg-slate-100 rounded-md overflow-hidden flex">
+                            {invoices.data.length > 0 ? (
+                                <>
+                                    <div
+                                        style={{ width: `${(paidCount / invoices.data.length) * 100}%` }}
+                                        className="bg-emerald-500 transition-all duration-500"
+                                        title={`Lunas: ${paidCount}`}
+                                    />
+                                    <div
+                                        style={{ width: `${(proofCount / invoices.data.length) * 100}%` }}
+                                        className="bg-amber-400 transition-all duration-500"
+                                        title={`Bukti Diunggah: ${proofCount}`}
+                                    />
+                                    <div
+                                        style={{ width: `${((unpaidCount - proofCount) / invoices.data.length) * 100}%` }}
+                                        className="bg-rose-400 transition-all duration-500"
+                                        title={`Belum Lunas: ${unpaidCount - proofCount}`}
+                                    />
+                                </>
+                            ) : null}
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 pt-1">
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
+                                <span>Lunas ({paidCount})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-amber-400" />
+                                <span>Verifikasi Bukti ({proofCount})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-rose-400" />
+                                <span>Belum Lunas ({unpaidCount - proofCount})</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Minimalist Filter Bar */}
+                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-wrap gap-3 items-center justify-between">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <select
+                            value={companyFilter}
+                            onChange={e => setCompanyFilter(e.target.value)}
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
+                        >
+                            <option value="">Semua Mitra Industri</option>
+                            {companies.map(c => (
+                                <option key={c.id} value={c.id}>{c.company_name}</option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={statusFilter}
+                            onChange={e => setStatusFilter(e.target.value)}
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
+                        >
+                            <option value="">Semua Status Bayar</option>
+                            <option value="unpaid">Belum Lunas</option>
+                            <option value="paid">Lunas</option>
+                        </select>
+
+                        <select
+                            value={waStatusFilter}
+                            onChange={e => setWaStatusFilter(e.target.value)}
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20"
+                        >
+                            <option value="">Semua Status WA</option>
+                            <option value="sent">WA Terkirim</option>
+                            <option value="pending">WA Dijadwalkan</option>
+                            <option value="failed">WA Gagal</option>
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={applyFilters}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
+                        >
+                            Terapkan Filter
+                        </button>
+                        {(companyFilter || statusFilter || waStatusFilter) && (
+                            <button
+                                onClick={clearFilters}
+                                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                            >
+                                Reset
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* 4. Invoices Table Container */}
+                <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-sm font-bold text-slate-900">
+                                Daftar Tagihan Invoice Mitra
+                            </h2>
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                Menampilkan {invoices.data.length} dari {invoices.total} total invoice
+                            </p>
+                        </div>
+                    </div>
+
+                    {invoices.data.length === 0 ? (
+                        <div className="p-16 text-center">
+                            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                <Receipt className="w-6 h-6" />
+                            </div>
+                            <h4 className="text-sm font-bold text-slate-800">Tidak ada invoice ditemukan</h4>
+                            <p className="text-xs text-slate-400 font-medium mt-1">
+                                Belum ada tagihan dibuat atau sesuaikan filter di atas.
+                            </p>
+                            <Link
+                                href={route('admin.invoices.create')}
+                                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-2xs"
+                            >
+                                <PlusCircle className="w-3.5 h-3.5" />
+                                <span>Buat Invoice Baru</span>
+                            </Link>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Desktop Table View */}
+                            <div className="hidden lg:block overflow-x-auto">
+                                <table className="min-w-full divide-y divide-slate-100 text-left">
+                                    <thead>
+                                        <tr className="bg-slate-50/75">
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                No. Invoice
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Mitra Industri
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Periode Layanan
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Jatuh Tempo
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Nominal Tagihan
+                                            </th>
+                                            <th className="px-5 py-3.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Status Pembayaran
+                                            </th>
+                                            <th className="px-5 py-3.5 text-right text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                                Tindakan
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+
+                                        {invoices.data.map((invoice) => {
+                                            const isOverdue = new Date(invoice.due_date) < new Date() && invoice.status === 'unpaid';
+                                            return (
+                                                <tr key={invoice.id} className="hover:bg-slate-50/70 transition-colors group">
+                                                    <td className="px-5 py-4">
+                                                        <span className="font-mono font-bold text-xs text-slate-900 group-hover:text-emerald-700 transition-colors">
+                                                            {invoice.invoice_number}
+                                                        </span>
+                                                        <div className="text-[11px] text-slate-400 font-medium">
+                                                            Diterbitkan {formatDate(invoice.created_at)}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-5 py-4">
+                                                        <div className="font-bold text-slate-900 text-xs">
+                                                            {invoice.company.company_name}
+                                                        </div>
+                                                        <div className="text-xs text-slate-400 font-medium mt-0.5">
+                                                            PIC: <span className="text-slate-600">{invoice.company.pic_name}</span> &bull; {invoice.company.phone}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-5 py-4 text-xs font-medium text-slate-600">
+                                                        {formatDate(invoice.period_start)} – {formatDate(invoice.period_end)}
+                                                    </td>
+                                                    <td className="px-5 py-4">
+                                                        <span className={`text-xs font-bold ${isOverdue ? 'text-rose-600' : 'text-slate-700'}`}>
+                                                            {formatDate(invoice.due_date)}
+                                                        </span>
+                                                        {isOverdue && (
+                                                            <span className="block text-[10px] font-bold text-rose-500 uppercase tracking-wider mt-0.5">
+                                                                Lewat Tempo
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-4">
+                                                        <span className="font-extrabold text-slate-900 text-xs tabular-nums">
+                                                            {formatRupiah(invoice.amount)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-5 py-4">
+                                                        <div className="flex flex-col items-start gap-1">
+                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold border ${
+                                                                invoice.status === 'paid'
+                                                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                                                                    : invoice.payment_proof_path
+                                                                    ? 'bg-amber-50 text-amber-700 border-amber-200/80 animate-pulse'
+                                                                    : 'bg-rose-50 text-rose-700 border-rose-200/80'
+                                                            }`}>
+                                                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                                                    invoice.status === 'paid' ? 'bg-emerald-500' : invoice.payment_proof_path ? 'bg-amber-500' : 'bg-rose-500'
+                                                                }`} />
+                                                                {invoice.status === 'paid' ? 'Lunas' : invoice.payment_proof_path ? 'Verifikasi Bukti' : 'Belum Lunas'}
+                                                            </span>
+                                                            {waBadge(invoice)}
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="px-5 py-4 text-right">
+                                                        <div className="inline-flex items-center gap-1.5">
+                                                            {/* Preview PDF */}
+                                                            <a
+                                                                href={route('admin.invoices.show', invoice.id)}
+                                                                target="_blank"
+                                                                className="p-1.5 rounded-lg text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                                                title="Preview PDF Invoice"
+                                                            >
+                                                                <FileText className="w-3.5 h-3.5" />
+                                                            </a>
+
+                                                            {/* WA Kirim */}
+                                                            <a
+                                                                href={route('admin.invoices.whatsapp', invoice.id)}
+                                                                target="_blank"
+                                                                className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-colors"
+                                                                title="Kirim ke WhatsApp PIC"
+                                                            >
+                                                                <MessageSquare className="w-3.5 h-3.5" />
+                                                            </a>
+
+                                                            {/* Resend WA */}
+                                                            {(invoice.wa_status === 'failed' || invoice.wa_status === 'sent' || invoice.wa_status === 'skipped') && (
+                                                                <button
+                                                                    onClick={() => handleResendWa(invoice)}
+                                                                    className="p-1.5 rounded-lg text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-colors"
+                                                                    title="Kirim Ulang WA Otomatis"
+                                                                >
+                                                                    <RefreshCw className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            )}
+
+                                                            {/* Bukti Pembayaran */}
+                                                            {invoice.status === 'unpaid' && invoice.payment_proof_path && (
+                                                                <button
+                                                                    onClick={() => setViewingProofInvoice(invoice)}
+                                                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-600 hover:text-white transition-colors"
+                                                                >
+                                                                    Bukti Bayar
+                                                                </button>
+                                                            )}
+
+                                                            {/* Tandai Lunas */}
+                                                            {invoice.status === 'unpaid' && (
+                                                                <button
+                                                                    onClick={() => handleMarkPaid(invoice)}
+                                                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors"
+                                                                >
+                                                                    Tandai Lunas
+                                                                </button>
+                                                            )}
+
+                                                            {/* Hapus */}
+                                                            <button
+                                                                onClick={() => handleDelete(invoice)}
+                                                                className="p-1.5 rounded-lg text-slate-600 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 transition-colors"
+                                                                title="Hapus Invoice"
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Mobile Card Feed View */}
+                            <div className="lg:hidden divide-y divide-slate-100">
+                                {invoices.data.map((invoice) => {
+                                    const isOverdue = new Date(invoice.due_date) < new Date() && invoice.status === 'unpaid';
+                                    return (
+                                        <div key={invoice.id} className="p-4 sm:p-5 hover:bg-slate-50/50 transition-colors">
+                                            <div className="flex items-start justify-between gap-3 mb-2.5">
+                                                <div>
+                                                    <span className="font-mono font-bold text-xs text-slate-900">{invoice.invoice_number}</span>
+                                                    <h3 className="font-bold text-slate-800 text-sm mt-0.5">{invoice.company.company_name}</h3>
+                                                    <p className="text-xs text-slate-400 font-medium">PIC: {invoice.company.pic_name}</p>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-xs text-gray-600">
-                                                {formatDate(invoice.period_start)} – {formatDate(invoice.period_end)}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`text-xs font-bold ${new Date(invoice.due_date) < new Date() && invoice.status === 'unpaid' ? 'text-red-600' : 'text-gray-600'}`}>
-                                                    {formatDate(invoice.due_date)}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="font-black text-gray-900 text-sm">{formatRupiah(invoice.amount)}</span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col gap-1">
-                                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                                                <div className="flex flex-col items-end gap-1">
+                                                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold border ${
                                                         invoice.status === 'paid'
-                                                            ? 'bg-green-50 text-green-700 border-green-100'
+                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
                                                             : invoice.payment_proof_path
-                                                                ? 'bg-amber-50 text-amber-700 border-amber-100 animate-pulse'
-                                                                : 'bg-red-50 text-red-600 border-red-100'
+                                                            ? 'bg-amber-50 text-amber-700 border-amber-200/80 animate-pulse'
+                                                            : 'bg-rose-50 text-rose-700 border-rose-200/80'
                                                     }`}>
-                                                        {invoice.status === 'paid' ? '✓ Lunas' : invoice.payment_proof_path ? '⚠ Bukti Diunggah' : '⚠ Belum Lunas'}
+                                                        {invoice.status === 'paid' ? 'Lunas' : invoice.payment_proof_path ? 'Verifikasi' : 'Belum Lunas'}
                                                     </span>
                                                     {waBadge(invoice)}
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                                                    {/* Preview PDF */}
-                                                    <a
-                                                        href={route('admin.invoices.show', invoice.id)}
-                                                        target="_blank"
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all border border-blue-100 hover:border-blue-600"
-                                                        title="Preview PDF"
-                                                    >
-                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                        PDF
-                                                    </a>
+                                            </div>
 
-                                                    {/* Kirim WhatsApp */}
-                                                    <a
-                                                        href={route('admin.invoices.whatsapp', invoice.id)}
-                                                        target="_blank"
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 hover:border-emerald-600"
-                                                        title="Kirim via WhatsApp"
-                                                    >
-                                                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                                        </svg>
-                                                        WA
-                                                    </a>
-
-                                                    {/* Resend WA Otomatis */}
-                                                    {(invoice.wa_status === 'failed' || invoice.wa_status === 'sent' || invoice.wa_status === 'skipped') && (
-                                                        <button
-                                                            onClick={() => handleResendWa(invoice)}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 hover:border-emerald-600"
-                                                            title="Kirim WA Sekarang"
-                                                        >
-                                                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                                            </svg>
-                                                            Kirim WA
-                                                        </button>
-                                                    )}
-
-                                                    {/* Lihat Bukti */}
-                                                    {invoice.status === 'unpaid' && invoice.payment_proof_path && (
-                                                        <button
-                                                            onClick={() => setViewingProofInvoice(invoice)}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-all border border-amber-100 hover:border-amber-600"
-                                                            title="Lihat Bukti Pembayaran"
-                                                        >
-                                                            👁 Bukti
-                                                        </button>
-                                                    )}
-
-                                                    {/* Tandai Lunas */}
-                                                    {invoice.status === 'unpaid' && (
-                                                        <button
-                                                            onClick={() => handleMarkPaid(invoice)}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all border border-green-100 hover:border-green-600"
-                                                            title="Tandai Lunas"
-                                                        >
-                                                            ✓ Lunas
-                                                        </button>
-                                                    )}
-
-                                                    {/* Hapus */}
-                                                    <button
-                                                        onClick={() => handleDelete(invoice)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all border border-red-100 hover:border-red-600"
-                                                        title="Hapus Invoice"
-                                                    >
-                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
+                                            <div className="grid grid-cols-2 gap-2 text-xs py-2 px-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jatuh Tempo</span>
+                                                    <span className={`font-semibold mt-0.5 inline-block ${isOverdue ? 'text-rose-600 font-bold' : 'text-slate-700'}`}>
+                                                        {formatDate(invoice.due_date)}
+                                                    </span>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Tagihan</span>
+                                                    <span className="font-extrabold text-slate-900 mt-0.5 inline-block">{formatRupiah(invoice.amount)}</span>
+                                                </div>
+                                            </div>
 
-                        {/* Mobile Cards */}
-                        <div className="lg:hidden divide-y divide-gray-50">
-                            {invoices.data.map(invoice => (
-                                <div key={invoice.id} className="p-5">
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div>
-                                            <p className="font-mono font-black text-gray-900 text-xs">{invoice.invoice_number}</p>
-                                            <p className="font-bold text-gray-800 mt-0.5">{invoice.company.company_name}</p>
-                                            <p className="text-xs text-gray-400">{invoice.company.pic_name}</p>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <a
+                                                    href={route('admin.invoices.show', invoice.id)}
+                                                    target="_blank"
+                                                    className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 text-center transition-colors"
+                                                >
+                                                    Preview PDF
+                                                </a>
+                                                <a
+                                                    href={route('admin.invoices.whatsapp', invoice.id)}
+                                                    target="_blank"
+                                                    className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-center transition-colors"
+                                                >
+                                                    Kirim WA
+                                                </a>
+                                                {invoice.status === 'unpaid' && invoice.payment_proof_path && (
+                                                    <button
+                                                        onClick={() => setViewingProofInvoice(invoice)}
+                                                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 text-center transition-colors"
+                                                    >
+                                                        Bukti Bayar
+                                                    </button>
+                                                )}
+                                                {invoice.status === 'unpaid' && (
+                                                    <button
+                                                        onClick={() => handleMarkPaid(invoice)}
+                                                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 text-center transition-colors shadow-2xs"
+                                                    >
+                                                        Tandai Lunas
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                                            invoice.status === 'paid'
-                                                ? 'bg-green-50 text-green-700 border-green-100'
-                                                : invoice.payment_proof_path
-                                                    ? 'bg-amber-50 text-amber-700 border-amber-100 animate-pulse'
-                                                    : 'bg-red-50 text-red-600 border-red-100'
-                                        }`}>
-                                            {invoice.status === 'paid' ? '✓ Lunas' : invoice.payment_proof_path ? '⚠ Bukti Diunggah' : '⚠ Belum Lunas'}
-                                        </span>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-                                        <div>
-                                            <p className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Periode</p>
-                                            <p className="text-gray-700 font-medium">{formatDate(invoice.period_start)} – {formatDate(invoice.period_end)}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-400 font-bold uppercase tracking-widest text-[9px]">Total</p>
-                                            <p className="text-gray-900 font-black">{formatRupiah(invoice.amount)}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2">
-                                        <a href={route('admin.invoices.show', invoice.id)} target="_blank"
-                                            className="flex-1 py-2 rounded-xl text-[10px] font-black bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all border border-blue-100 text-center">
-                                            Preview PDF
-                                        </a>
-                                        <a href={route('admin.invoices.whatsapp', invoice.id)} target="_blank"
-                                            className="flex-1 py-2 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 text-center">
-                                            Kirim WA
-                                        </a>
-                                        {invoice.status === 'unpaid' && invoice.payment_proof_path && (
-                                            <button onClick={() => setViewingProofInvoice(invoice)}
-                                                className="flex-1 py-2 rounded-xl text-[10px] font-black bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-all border border-amber-100 text-center">
-                                                👁 Lihat Bukti
-                                            </button>
-                                        )}
-                                        {invoice.status === 'unpaid' && (
-                                            <button onClick={() => handleMarkPaid(invoice)}
-                                                className="flex-1 py-2 rounded-xl text-[10px] font-black bg-green-50 text-green-700 hover:bg-green-600 hover:text-white transition-all border border-green-100">
-                                                ✓ Tandai Lunas
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Pagination */}
-                        {invoices.last_page > 1 && (
-                            <div className="px-6 py-4 border-t border-gray-50 flex items-center justify-between">
-                                <p className="text-xs text-gray-400 font-medium">
-                                    Halaman {invoices.current_page} dari {invoices.last_page}
-                                </p>
-                                <div className="flex gap-1">
-                                    {invoices.links.map((link, i) => (
-                                        link.url ? (
-                                            <Link
-                                                key={i}
-                                                href={link.url}
-                                                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
-                                                    link.active
-                                                        ? 'bg-green-600 text-white'
-                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                                }`}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        ) : (
-                                            <span key={i} className="px-3 py-1.5 rounded-xl text-xs font-black text-gray-300 bg-gray-50"
-                                                dangerouslySetInnerHTML={{ __html: link.label }} />
-                                        )
-                                    ))}
-                                </div>
+                                    );
+                                })}
                             </div>
-                        )}
-                    </>
-                )}
-            </div>
 
-            {/* Modal Detail Bukti Pembayaran */}
+                            {/* Pagination */}
+                            {invoices.last_page > 1 && (
+                                <div className="px-5 py-3.5 border-t border-slate-100 flex items-center justify-between">
+                                    <p className="text-xs text-slate-400 font-medium">
+                                        Halaman {invoices.current_page} dari {invoices.last_page}
+                                    </p>
+                                    <div className="flex gap-1">
+                                        {invoices.links.map((link, i) => (
+                                            link.url ? (
+                                                <Link
+                                                    key={i}
+                                                    href={link.url}
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                                                        link.active
+                                                            ? 'bg-slate-900 text-white'
+                                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                                    }`}
+                                                    dangerouslySetInnerHTML={{ __html: link.label }}
+                                                />
+                                            ) : (
+                                                <span key={i} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 bg-slate-50 cursor-not-allowed"
+                                                    dangerouslySetInnerHTML={{ __html: link.label }} />
+                                            )
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
+            {/* Payment Proof Modal */}
             {viewingProofInvoice && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-gray-100 shadow-2xl relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+                    <div className="bg-white rounded-xl p-6 max-w-xl w-full border border-slate-200 shadow-xl relative animate-in fade-in zoom-in-95">
                         <button
                             onClick={() => setViewingProofInvoice(null)}
-                            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-50 transition-colors"
+                            className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <X className="w-4 h-4" />
                         </button>
 
-                        <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2">Bukti Pembayaran Invoice</h3>
-                        <p className="text-xs text-gray-500 font-medium mb-6">
-                            Mitra: <span className="font-bold text-gray-800">{viewingProofInvoice.company.company_name}</span> · 
-                            Invoice: <span className="font-mono font-bold text-green-600">{viewingProofInvoice.invoice_number}</span> · 
-                            Total: <span className="font-bold text-gray-950">{formatRupiah(viewingProofInvoice.amount)}</span>
-                        </p>
+                        <div className="flex items-center gap-2.5 mb-2">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                                <Receipt className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900">Bukti Pembayaran Invoice</h3>
+                                <p className="text-xs text-slate-400 font-medium">
+                                    Mitra: <span className="font-semibold text-slate-700">{viewingProofInvoice.company.company_name}</span> &bull; {viewingProofInvoice.invoice_number}
+                                </p>
+                            </div>
+                        </div>
 
-                        <div className="bg-gray-50 rounded-2xl p-4 flex justify-center items-center min-h-[300px] border border-gray-100 mb-6 overflow-hidden">
+                        <div className="my-4 p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                            <span className="text-slate-500">Nominal Tagihan:</span>
+                            <span className="font-extrabold text-slate-900 text-sm">{formatRupiah(viewingProofInvoice.amount)}</span>
+                        </div>
+
+                        <div className="bg-slate-100 rounded-lg p-3 flex justify-center items-center min-h-[260px] max-h-[400px] border border-slate-200 overflow-hidden mb-5">
                             {viewingProofInvoice.payment_proof_path ? (
                                 viewingProofInvoice.payment_proof_path.endsWith('.pdf') ? (
-                                    <div className="text-center space-y-4">
-                                        <div className="p-6 bg-red-50 rounded-3xl text-red-600 inline-block">
-                                            <span className="text-4xl">📄</span>
+                                    <div className="text-center space-y-3">
+                                        <div className="p-4 bg-rose-50 rounded-xl text-rose-600 inline-block">
+                                            <FileText className="w-8 h-8" />
                                         </div>
-                                        <p className="text-sm text-gray-600 font-bold">Bukti Pembayaran berupa PDF</p>
+                                        <p className="text-xs text-slate-600 font-semibold">Bukti Pembayaran berupa Dokumen PDF</p>
                                         <a
                                             href={`/storage/${viewingProofInvoice.payment_proof_path}`}
                                             target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black transition-all"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
                                         >
-                                            Buka PDF di Tab Baru
+                                            <ExternalLink className="w-3.5 h-3.5" />
+                                            <span>Buka PDF di Tab Baru</span>
                                         </a>
                                     </div>
                                 ) : (
                                     <img
                                         src={`/storage/${viewingProofInvoice.payment_proof_path}`}
-                                        alt="Bukti Transfer"
-                                        className="max-h-[400px] object-contain rounded-xl shadow-sm bg-white"
+                                        alt="Bukti Bayar"
+                                        className="max-h-[360px] w-auto object-contain rounded-lg shadow-2xs"
                                     />
                                 )
-                             ) : (
-                                <p className="text-sm text-gray-400 font-medium">Bukti pembayaran tidak ditemukan.</p>
-                             )}
+                            ) : (
+                                <p className="text-xs text-slate-400 italic">Bukti transfer belum diunggah</p>
+                            )}
                         </div>
 
-                        <div className="flex gap-3 justify-end">
+                        <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                             <button
-                                type="button"
                                 onClick={() => setViewingProofInvoice(null)}
-                                className="px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-2xl text-xs font-black transition-all"
+                                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
                             >
                                 Tutup
                             </button>
                             <button
-                                type="button"
                                 onClick={() => {
-                                    const inv = viewingProofInvoice;
+                                    handleMarkPaid(viewingProofInvoice);
                                     setViewingProofInvoice(null);
-                                    handleMarkPaid(inv);
                                 }}
-                                className="px-5 py-3 border border-transparent rounded-2xl shadow-sm text-xs font-bold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 transition-all"
+                                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
                             >
-                                Konfirmasi Lunas
+                                Konfirmasi & Tandai Lunas
                             </button>
-                         </div>
+                        </div>
                     </div>
                 </div>
             )}
-        </AdminLayout>
+        </div>
+    </AdminLayout>
     );
 }
