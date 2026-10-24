@@ -21,6 +21,7 @@ class AuthenticatedSessionController extends Controller
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
+            'isDemo' => app()->environment('local', 'testing', 'staging') || config('app.debug') || (bool) env('DEMO_LOGIN', false),
         ]);
     }
 
@@ -31,6 +32,7 @@ class AuthenticatedSessionController extends Controller
     {
         return Inertia::render('Auth/AdminLogin', [
             'status' => session('status'),
+            'isDemo' => app()->environment('local', 'testing', 'staging') || config('app.debug') || (bool) env('DEMO_LOGIN', false),
         ]);
     }
 
@@ -44,14 +46,22 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        // Jika login dari admin/login
+        // Pemisahan otorisasi berdasarkan portal login (Aktor Staf vs Mitra)
         if ($request->is('admin/*')) {
-
             if (!in_array($user->role, ['admin', 'web_admin', 'CleanUP'])) {
                 Auth::logout();
 
                 return back()->withErrors([
-                    'email' => 'Unauthorized access.',
+                    'email' => 'Halaman ini khusus untuk staf internal (Admin, Web Admin, CleanUP). Akun Mitra silakan masuk melalui portal mitra.',
+                ]);
+            }
+        } else {
+            // Portal login umum (/login) hanya untuk akun Mitra
+            if ($user->role !== 'company') {
+                Auth::logout();
+
+                return back()->withErrors([
+                    'email' => 'Halaman ini khusus untuk akun Mitra Bisnis. Staf dan Administrator silakan masuk melalui portal admin (/admin/login).',
                 ]);
             }
         }

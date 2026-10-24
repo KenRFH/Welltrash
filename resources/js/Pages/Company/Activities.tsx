@@ -1,6 +1,20 @@
-import { Head, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
-import CompanySidebar from '@/Components/CompanySidebar';
+import { Head, Link } from '@inertiajs/react';
+import CompanyLayout from '@/Layouts/CompanyLayout';
+import {
+    Camera,
+    Video,
+    Calendar,
+    FileText,
+    Sparkles,
+    CheckCircle2,
+    X,
+    ChevronLeft,
+    ChevronRight,
+    Leaf,
+    Recycle,
+    Sprout,
+} from 'lucide-react';
 
 interface Activity {
     id: number;
@@ -21,151 +35,271 @@ interface Props {
     };
     plan: string;
     auth: {
-        user: { name: string }
+        user: { name: string };
     };
 }
 
 export default function Activities({ auth, company, activities, plan }: Props) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
+
+    const formatDateIndo = (dateStr: string) => {
+        try {
+            return new Intl.DateTimeFormat('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }).format(new Date(dateStr));
+        } catch {
+            return dateStr;
+        }
+    };
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Kegiatan & Dokumentasi" />
-
-            <CompanySidebar 
-                active="kegiatan" 
-                isMobileOpen={isSidebarOpen}
-                onClose={() => setIsSidebarOpen(false)}
-                plan={plan}
-            />
-
-            <div className="flex-1 flex flex-col overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
-
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1">
-                        <button 
-                            onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                        </button>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 hidden sm:block">Kegiatan & Dokumentasi</h1>
-                    </div>
-                </header>
-
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-8 sm:px-10">
-                    <div className="max-w-4xl mx-auto">
-                        
-                        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative z-10 mb-8 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-1">Log Dokumentasi Pemanfaatan</h3>
-                                <p className="text-gray-500 font-medium text-sm">Dokumentasi kegiatan pemanfaatan sampah yang dilakukan oleh tim WellTrash.</p>
+        <CompanyLayout
+            activeTab="kegiatan"
+            title="Kegiatan & Dokumentasi Pemanfaatan"
+            subtitle="Arsip visual proses biokonversi maggot BSF dan pemilahan sirkuler di fasilitas WellTrash Farm."
+            company={company}
+            userName={auth.user?.name}
+        >
+            {/* 1. FACILITY & CIRCULAR DOWNSTREAM INFOGRAPHIC */}
+            <div className="bg-gradient-to-r from-emerald-900 via-slate-900 to-slate-950 text-white rounded-2xl p-6 sm:p-7 border border-emerald-950 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="relative z-10">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5 pb-5 border-b border-white/10">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
+                                <Sparkles className="w-3 h-3 text-emerald-400" />
+                                <span>WellTrash Farm Hub &bull; Jember MRF</span>
                             </div>
-                            <div className="hidden md:flex p-3 bg-green-50 rounded-2xl text-green-600">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                            </div>
+                            <h2 className="text-lg sm:text-xl font-extrabold tracking-tight">
+                                Alur Hilir Pemanfaatan Sampah Mitra
+                            </h2>
+                            <p className="text-xs text-slate-300 mt-1 max-w-2xl">
+                                Setiap kilogram material yang dijemput dari bisnis Anda diproses transparan melalui 3 siklus ekonomi sirkuler.
+                            </p>
                         </div>
 
-                        {activities.data.length === 0 ? (
-                            <div className="bg-white rounded-3xl p-10 text-center border border-dashed border-gray-300">
-                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">Belum Ada Riwayat</h3>
-                                <p className="text-gray-500 text-sm mt-2 max-w-sm mx-auto">Kami akan menampilkan dokumentasi proses pengangkutan saat tim kami selesai melayani titik Anda.</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
-                                {activities.data.map((activity, index) => (
-                                    <div key={activity.id} className="relative flex items-start justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                                        
-                                        {/* Timeline marker */}
-                                        <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-green-100 text-green-600 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 relative z-10 font-bold text-xs ring-4 ring-white">
-                                            {new Date(activity.activity_date).getDate()}
-                                        </div>
-                                        
-                                        {/* Card Content */}
-                                        <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-5 rounded-2xl bg-white shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 group-hover:border-green-200 transition-colors">
-                                            <div className="flex items-center justify-between mb-4 border-b border-gray-50 pb-3">
-                                                <div>
-                                                    <time className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                                                        {new Date(activity.activity_date).toLocaleDateString('id-ID', { weekday: 'long', month: 'short', year: 'numeric' })}
-                                                    </time>
-                                                </div>
-                                                <div className="bg-green-500 rounded-full p-2 text-white shadow-sm">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex flex-col gap-4">
-                                                {activity.media_path && (
-                                                    <div className="w-full rounded-xl overflow-hidden bg-gray-50 relative border border-gray-100">
-                                                        {activity.media_type === 'video' ? (
-                                                            <video src={`/storage/${activity.media_path}`} className="w-full object-contain max-h-64" controls preload="metadata" />
-                                                        ) : (
-                                                            <div className="w-full group/img relative cursor-pointer">
-                                                                 <img src={`/storage/${activity.media_path}`} className="w-full object-contain max-h-64 transition-transform group-hover/img:scale-105" alt="Media Kegiatan" />
-                                                                 <a href={`/storage/${activity.media_path}`} target="_blank" className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 flex items-center justify-center transition-colors">
-                                                                    <span className="text-white text-xs font-bold opacity-0 group-hover/img:opacity-100 backdrop-blur-sm px-3 py-1.5 bg-black/40 rounded-full">Lihat Penuh</span>
-                                                                 </a>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                <div className="w-full">
-                                                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Catatan Kegiatan</h4>
-                                                    {activity.note ? (
-                                                        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap p-4 bg-gray-50 rounded-xl border border-gray-100">{activity.note}</p>
-                                                    ) : (
-                                                        <p className="text-gray-400 text-sm italic p-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed">Tidak ada catatan tertulis.</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Pagination */}
-                        {activities.last_page > 1 && (
-                            <div className="flex justify-center mt-12 mb-4">
-                                <div className="flex flex-wrap gap-2 justify-center bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                    {activities.links.map((link, i) => {
-                                        const isPrevious = link.label.includes('Previous');
-                                        const isNext = link.label.includes('Next');
-                                        let label = link.label;
-                                        if (isPrevious) label = '«';
-                                        if (isNext) label = '»';
-
-                                        return link.url ? (
-                                            <Link
-                                                key={i}
-                                                href={link.url}
-                                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                                    link.active
-                                                        ? 'bg-green-600 text-white shadow-md shadow-green-200'
-                                                        : 'bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-700'
-                                                }`}
-                                                dangerouslySetInnerHTML={{ __html: label }}
-                                            />
-                                        ) : (
-                                            <span
-                                                key={i}
-                                                className="px-4 py-2 rounded-xl text-sm font-bold bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed"
-                                                dangerouslySetInnerHTML={{ __html: label }}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
+                                {activities.total} Dokumentasi Tersimpan
+                            </span>
+                        </div>
                     </div>
-                </main>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="bg-white/5 backdrop-blur-xs rounded-xl p-3.5 border border-white/10">
+                            <div className="flex items-center gap-2 mb-1.5 text-amber-300 font-bold">
+                                <Leaf className="w-4 h-4" />
+                                <span>1. Biokonversi Maggot BSF</span>
+                            </div>
+                            <p className="text-[11px] text-slate-300 leading-relaxed">
+                                Sampah organik dicacah higienis sebagai pakan larva Black Soldier Fly penghasil protein tinggi.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 backdrop-blur-xs rounded-xl p-3.5 border border-white/10">
+                            <div className="flex items-center gap-2 mb-1.5 text-teal-300 font-bold">
+                                <Recycle className="w-4 h-4" />
+                                <span>2. Pemilahan Sirkuler</span>
+                            </div>
+                            <p className="text-[11px] text-slate-300 leading-relaxed">
+                                Anorganik bernilai (kardus, plastik, logam) disortir per kategori dan disalurkan ke industri daur ulang.
+                            </p>
+                        </div>
+
+                        <div className="bg-white/5 backdrop-blur-xs rounded-xl p-3.5 border border-white/10">
+                            <div className="flex items-center gap-2 mb-1.5 text-emerald-300 font-bold">
+                                <Sprout className="w-4 h-4" />
+                                <span>3. Pupuk Kasgot Alami</span>
+                            </div>
+                            <p className="text-[11px] text-slate-300 leading-relaxed">
+                                Residu feses maggot (kasgot) diolah menjadi pupuk hayati kaya nutrisi bagi pertanian regeneratif.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            {/* 2. ACTIVITY LOG FEED */}
+            <div className="space-y-4 mt-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                        Log Dokumentasi Kegiatan
+                    </h3>
+                    <span className="text-xs text-slate-400">
+                        Foto & Video Verifikasi Lapangan
+                    </span>
+                </div>
+
+                {activities.data.length === 0 ? (
+                    <div className="bg-white rounded-2xl p-12 text-center border border-slate-200/80 shadow-2xs">
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
+                            <Camera className="w-6 h-6" />
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-700">Belum Ada Dokumentasi Kegiatan</h4>
+                        <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                            Dokumentasi pemilahan dan biokonversi dari batch sampah perusahaan Anda akan diunggah berkala oleh tim operasional.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {activities.data.map((act) => {
+                            const isVideo = act.media_type === 'video';
+
+                            return (
+                                <div
+                                    key={act.id}
+                                    className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden flex flex-col justify-between hover:shadow-xs transition-shadow"
+                                >
+                                    <div>
+                                        {act.media_path ? (
+                                            <div className="relative aspect-video bg-slate-900 flex items-center justify-center overflow-hidden group">
+                                                {isVideo ? (
+                                                    <video
+                                                        src={`/storage/${act.media_path}`}
+                                                        controls
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        <img
+                                                            src={`/storage/${act.media_path}`}
+                                                            alt="Dokumentasi"
+                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSelectedMedia(`/storage/${act.media_path}`)}
+                                                            className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                                                        >
+                                                            <span className="px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-xs text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                                                                <Camera className="w-3.5 h-3.5" />
+                                                                Perbesar
+                                                            </span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-900/80 text-white backdrop-blur-xs flex items-center gap-1">
+                                                    {isVideo ? <Video className="w-3 h-3 text-emerald-400" /> : <Camera className="w-3 h-3 text-emerald-400" />}
+                                                    <span>{isVideo ? 'Video' : 'Foto'}</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="aspect-video bg-slate-50 flex flex-col items-center justify-center text-slate-400 border-b border-slate-100">
+                                                <Camera className="w-8 h-8 stroke-1 mb-1" />
+                                                <span className="text-[11px]">Tanpa lampiran media</span>
+                                            </div>
+                                        )}
+
+                                        <div className="p-4 sm:p-5">
+                                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-2">
+                                                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                                                <span>{formatDateIndo(act.activity_date)}</span>
+                                            </div>
+
+                                            <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap line-clamp-3">
+                                                {act.note || 'Tidak ada catatan tertulis untuk kegiatan ini.'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="px-4 py-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                                        <span>Status: Terverifikasi Batch</span>
+                                        <span className="font-semibold text-emerald-700">WellTrash Jember</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* 3. PAGINATION */}
+            {activities.last_page > 1 && (
+                <div className="flex items-center justify-between mt-6 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                    <span className="text-xs text-slate-500 font-medium">
+                        Halaman <strong>{activities.current_page}</strong> dari <strong>{activities.last_page}</strong>
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                        {activities.links.map((link, i) => {
+                            const isPrev = link.label.includes('Previous') || link.label.includes('&laquo;');
+                            const isNext = link.label.includes('Next') || link.label.includes('&raquo;');
+                            const content = isPrev ? <ChevronLeft className="w-4 h-4" /> : isNext ? <ChevronRight className="w-4 h-4" /> : link.label;
+
+                            if (!link.url) {
+                                return (
+                                    <span
+                                        key={i}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold text-slate-300 cursor-not-allowed"
+                                    >
+                                        {content}
+                                    </span>
+                                );
+                            }
+
+                            return (
+                                <Link
+                                    key={i}
+                                    href={link.url}
+                                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${
+                                        link.active
+                                            ? 'bg-emerald-600 text-white shadow-xs'
+                                            : 'text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    {content}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* LIGHTBOX MODAL */}
+            {selectedMedia && (
+                <div
+                    className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+                    onClick={() => setSelectedMedia(null)}
+                >
+                    <div
+                        className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                            <h4 className="text-xs font-bold text-slate-900">
+                                Foto Dokumentasi Pemanfaatan Sampah
+                            </h4>
+                            <button
+                                onClick={() => setSelectedMedia(null)}
+                                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-4 bg-slate-950 flex items-center justify-center max-h-[70vh]">
+                            <img
+                                src={selectedMedia}
+                                alt="Dokumentasi Full"
+                                className="max-h-full max-w-full object-contain rounded-lg"
+                            />
+                        </div>
+                        <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+                            <span className="text-slate-500 font-medium">Fasilitas WellTrash Farm Jember</span>
+                            <a
+                                href={selectedMedia}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-bold text-emerald-700 hover:underline"
+                            >
+                                Buka Tab Baru
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </CompanyLayout>
     );
 }
+

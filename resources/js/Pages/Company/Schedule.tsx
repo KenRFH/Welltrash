@@ -1,9 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
-
-import CompanySidebar from '@/Components/CompanySidebar';
-
-const CalendarIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
+import CompanyLayout from '@/Layouts/CompanyLayout';
+import {
+    CalendarDays,
+    Check,
+    Clock,
+    AlertCircle,
+    Truck,
+    Info,
+    ChevronLeft,
+    ChevronRight,
+    Save,
+    CalendarCheck,
+} from 'lucide-react';
 
 interface Pickup {
     id: number;
@@ -33,21 +42,31 @@ interface Props {
     };
 }
 
-const DAYS_OF_WEEK = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+const DAYS_OF_WEEK = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
 export default function Schedule({ company, pickups }: Props) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const isRestrictedPlan =
+        company.subscription_plan?.includes('Rumah Tangga') ||
+        company.subscription_plan === 'Reguler';
+    const maxDays = isRestrictedPlan ? 5 : 7;
+
     const { data, setData, post, processing, errors } = useForm({
         pickup_schedule: company.pickup_schedule || [],
     });
 
     const toggleDay = (day: string) => {
-        const isRestrictedPlan = company.subscription_plan.includes('Rumah Tangga') || company.subscription_plan === 'Reguler';
         if (data.pickup_schedule.includes(day)) {
-            setData('pickup_schedule', data.pickup_schedule.filter(d => d !== day));
+            setData('pickup_schedule', data.pickup_schedule.filter((d) => d !== day));
         } else {
             if (isRestrictedPlan && data.pickup_schedule.length >= 5) {
-                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: `Paket ${company.subscription_plan} maksimal hanya dapat memilih 5 hari penjemputan.` } }));
+                window.dispatchEvent(
+                    new CustomEvent('toast', {
+                        detail: {
+                            type: 'error',
+                            message: `Paket ${company.subscription_plan} maksimal hanya dapat memilih 5 hari penjemputan per minggu.`,
+                        },
+                    })
+                );
                 return;
             }
             setData('pickup_schedule', [...data.pickup_schedule, day]);
@@ -57,225 +76,301 @@ export default function Schedule({ company, pickups }: Props) {
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('company.schedule.update'), {
-            preserveScroll: true
+            preserveScroll: true,
         });
     };
 
-    const StatusBadge = ({ status }: { status: string }) => {
-        switch (status) {
-            case 'completed': return <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-green-100 text-green-700 border border-green-200">Selesai</span>;
-            case 'scheduled': return <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-gray-100 text-gray-700 border border-gray-200">Terjadwal</span>;
-            case 'on_the_way': return <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-yellow-100 text-yellow-700 border border-yellow-200">Menuju Lokasi</span>;
-            case 'failed': return <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-100 text-red-700 border border-red-200">Batal / Gagal</span>;
-            default: return null;
+    const formatDateIndo = (dateStr: string) => {
+        try {
+            return new Intl.DateTimeFormat('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            }).format(new Date(dateStr));
+        } catch {
+            return dateStr;
         }
     };
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Jadwal Pengambilan" />
+        <CompanyLayout
+            activeTab="schedule"
+            title="Jadwal & Agenda Pengambilan"
+            subtitle="Atur hari rutin penjemputan sampah dan pantau jadwal agenda armada CleanUP mendatang."
+            company={company}
+        >
+            {/* 1. SCHEDULE CONFIGURATION CARD */}
+            <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <CalendarDays className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                                Pengaturan Hari Rutin Penjemputan
+                            </h3>
+                            <p className="text-xs text-slate-400">
+                                Pilih hari operasional saat armada WellTrash CleanUP datang ke lokasi drop point bisnis Anda.
+                            </p>
+                        </div>
+                    </div>
 
-             {/* Sidebar Component */}
-             <CompanySidebar 
-                 active="schedule" 
-                 isMobileOpen={isSidebarOpen}
-                 onClose={() => setIsSidebarOpen(false)}
-             />
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                            {data.pickup_schedule.length} dari {maxDays} Hari Dipilih
+                        </span>
+                    </div>
+                </div>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden relative">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
+                <form onSubmit={submit} className="mt-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+                        {DAYS_OF_WEEK.map((day) => {
+                            const isSelected = data.pickup_schedule.includes(day);
+                            return (
+                                <button
+                                    type="button"
+                                    key={day}
+                                    onClick={() => toggleDay(day)}
+                                    className={`p-3.5 sm:p-4 rounded-xl text-center border transition-all duration-200 flex flex-col items-center justify-center gap-2 cursor-pointer ${
+                                        isSelected
+                                            ? 'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-2xs font-extrabold'
+                                            : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50/50 font-medium'
+                                    }`}
+                                >
+                                    <div
+                                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+                                            isSelected
+                                                ? 'bg-emerald-600 text-white'
+                                                : 'border border-slate-300'
+                                        }`}
+                                    >
+                                        {isSelected && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                                    </div>
+                                    <span className="text-xs">{day}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
 
-                {/* Header Navbar */}
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1">
-                        {/* Mobile Menu Toggle */}
-                        <button 
-                            onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                    {errors.pickup_schedule && (
+                        <p className="text-xs text-rose-600 bg-rose-50 p-3 rounded-xl border border-rose-100 mb-4">
+                            {errors.pickup_schedule}
+                        </p>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                        <p className="text-[11px] text-slate-400">
+                            Perubahan jadwal akan diterapkan otomatis pada siklus agenda armada mulai minggu berikutnya.
+                        </p>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            <Save className="w-3.5 h-3.5" />
+                            <span>{processing ? 'Menyimpan...' : 'Simpan Jadwal Rutin'}</span>
                         </button>
-                        <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Manajemen Jadwal</h2>
                     </div>
-                    
-                    <div className="flex items-center space-x-6">
-                        <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
-                                <span className="text-green-700 font-bold text-sm">{company.company_name.substring(0, 2).toUpperCase()}</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-gray-800 leading-none mb-1">{company.company_name}</span>
-                                <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Hub Perusahaan</span>
-                            </div>
-                        </div>
-                    </div>
-                </header>
+                </form>
+            </div>
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-8 pb-24 relative z-10 w-full max-w-5xl mx-auto">
-                    
-                    {/* Section 1: Manage Schedule Profile */}
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 mb-8 transition-all hover:shadow-lg">
-                        <div className="flex items-start mb-6 border-b border-gray-100 pb-5">
-                            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mr-4 flex-shrink-0">
-                                <CalendarIcon />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-extrabold text-gray-900 mb-1">Pengaturan Hari Penjemputan</h2>
-                                <p className="text-gray-500 text-sm">Pilih jadwal rutin penjemputan sampah. Sistem akan otomatis menjadwalkan armada pada hari yang dipilih.</p>
-                            </div>
+            {/* 2. SOP & PANDUAN PENGAMBILAN INFOGRAPHIC */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                <div className="bg-white rounded-2xl p-4.5 border border-slate-200/80 shadow-2xs flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <h4 className="text-xs font-bold text-slate-900">Jam Operasional Ritase</h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                            Armada CleanUP beroperasi antara pukul <strong>07:00 – 15:00 WIB</strong> pada hari yang telah dipilih.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4.5 border border-slate-200/80 shadow-2xs flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <Info className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <h4 className="text-xs font-bold text-slate-900">Pemisahan di Drop Point</h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                            Pisahkan wadah organik dan anorganik sebelum armada tiba untuk efisiensi penimbangan.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-4.5 border border-slate-200/80 shadow-2xs flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                        <Truck className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <h4 className="text-xs font-bold text-slate-900">Verifikasi Timbangan Digital</h4>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                            Setiap penjemputan ditimbang dan difoto oleh driver secara realtime ke sistem WellTrash.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. AGENDA & UPCOMING PICKUPS TABLE */}
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden mt-6">
+                <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                            Agenda Penjemputan Terjadwal
+                        </h3>
+                        <p className="text-xs text-slate-400">
+                            Daftar jadwal penjemputan armada CleanUP yang terencana
+                        </p>
+                    </div>
+                    <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg self-start sm:self-auto">
+                        Total {pickups.total} Agenda
+                    </span>
+                </div>
+
+                {pickups.data.length === 0 ? (
+                    <div className="py-16 text-center">
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
+                            <CalendarCheck className="w-6 h-6" />
                         </div>
-                        
-                        <form onSubmit={submit}>
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
-                                {DAYS_OF_WEEK.map((day) => {
-                                    const isSelected = data.pickup_schedule.includes(day);
+                        <h4 className="text-sm font-bold text-slate-700">Belum Ada Agenda</h4>
+                        <p className="text-xs text-slate-400 mt-1">Sistem belum membuat agenda ritase untuk perusahaan Anda.</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th className="py-3 px-5">Tanggal</th>
+                                    <th className="py-3 px-5">Status Armada</th>
+                                    <th className="py-3 px-5 text-center">Organik</th>
+                                    <th className="py-3 px-5 text-center">Anorganik</th>
+                                    <th className="py-3 px-5 text-center">Residu</th>
+                                    <th className="py-3 px-5">Catatan</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 text-xs">
+                                {pickups.data.map((pickup) => {
+                                    const isCompleted = pickup.status === 'completed';
+                                    const isFailed = pickup.status === 'failed';
+                                    const isOnTheWay = pickup.status === 'on_the_way';
+
                                     return (
-                                        <button
-                                            type="button"
-                                            key={day}
-                                            onClick={() => toggleDay(day)}
-                                            className={`p-4 rounded-2xl text-center border-2 transition-all font-bold flex flex-col items-center justify-center gap-2 ${
-                                                isSelected 
-                                                    ? 'bg-green-50 border-green-500 text-green-700 shadow-sm shadow-green-100 transform -translate-y-1' 
-                                                    : 'bg-white border-gray-200 text-gray-400 hover:border-green-300 hover:bg-green-50/30'
-                                            }`}
-                                        >
-                                            {isSelected && (
-                                                <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white shadow-sm">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-                                                </div>
-                                            )}
-                                            {!isSelected && (
-                                                 <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
-                                            )}
-                                            {day}
-                                        </button>
+                                        <tr key={pickup.id} className="hover:bg-slate-50/50 transition-colors">
+                                            <td className="py-3.5 px-5 font-semibold text-slate-800">
+                                                {formatDateIndo(pickup.pickup_date)}
+                                            </td>
+                                            <td className="py-3.5 px-5">
+                                                {isCompleted ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                        <Check className="w-3 h-3 text-emerald-600" /> Selesai
+                                                    </span>
+                                                ) : isOnTheWay ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+                                                        <Truck className="w-3 h-3 text-amber-600" /> Menuju Lokasi
+                                                    </span>
+                                                ) : isFailed ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Batal / Gagal
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                                        <Clock className="w-3 h-3 text-slate-400" /> Terjadwal
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="py-3.5 px-5 text-center font-mono font-semibold">
+                                                {isCompleted ? (
+                                                    <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
+                                                        {pickup.organic_weight} kg
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-300">-</span>
+                                                )}
+                                            </td>
+                                            <td className="py-3.5 px-5 text-center font-mono font-semibold">
+                                                {isCompleted ? (
+                                                    <span className="text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100">
+                                                        {pickup.anorganic_weight} kg
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-300">-</span>
+                                                )}
+                                            </td>
+                                            <td className="py-3.5 px-5 text-center font-mono font-semibold">
+                                                {isCompleted ? (
+                                                    <span className="text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                                                        {pickup.residue_weight} kg
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-slate-300">-</span>
+                                                )}
+                                            </td>
+                                            <td className="py-3.5 px-5 text-slate-500">
+                                                {isFailed && pickup.cancellation_reason ? (
+                                                    <span className="text-rose-600 font-medium">
+                                                        {pickup.cancellation_reason}
+                                                    </span>
+                                                ) : isCompleted ? (
+                                                    <span className="text-emerald-700 font-medium">Selesai terverifikasi</span>
+                                                ) : (
+                                                    <span className="text-slate-400">Menunggu jadwal</span>
+                                                )}
+                                            </td>
+                                        </tr>
                                     );
                                 })}
-                            </div>
-                            {errors.pickup_schedule && <p className="text-red-500 text-sm mt-1 mb-4 p-3 bg-red-50 rounded-xl">{errors.pickup_schedule}</p>}
-
-                            <div className="flex justify-end pt-4 border-t border-gray-50">
-                                <button 
-                                    type="submit" 
-                                    disabled={processing}
-                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-[0_4px_14px_rgba(22,163,74,0.3)] transition-all flex items-center disabled:opacity-50 hover:-translate-y-0.5"
-                                >
-                                    {processing ? 'Menyimpan...' : 'Perbarui Jadwal & Terapkan'}
-                                    {!processing && <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>}
-                                </button>
-                            </div>
-                        </form>
+                            </tbody>
+                        </table>
                     </div>
-
-                    {/* Section 2: History and Upcoming Pickups */}
-                    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 transition-all hover:shadow-lg">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                            <div>
-                                <h2 className="text-xl font-extrabold text-gray-900 mb-1">Agenda</h2>
-                                <p className="text-gray-500 text-sm">Daftar jadwal terencana yang dibuat otomatis untuk masa mendatang.</p>
-                            </div>
-                            <div className="mt-4 sm:mt-0 px-4 py-2 bg-gray-50 rounded-xl text-sm font-bold text-gray-600 border border-gray-200">
-                                Total Data: {pickups.total}
-                            </div>
-                        </div>
-
-                        {pickups.data.length === 0 ? (
-                            <div className="text-center py-16 bg-gray-50 rounded-3xl border border-dashed border-gray-300">
-                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900">Belum Ada Agenda</h3>
-                                <p className="text-gray-500 text-sm mt-1">Sistem belum menjadwalkan pengambilan untuk perusahaan Anda.</p>
-                            </div>
-                        ) : (
-                            <div className="overflow-hidden border border-gray-100 rounded-2xl">
-                                <div className="overflow-x-auto custom-scrollbar">
-                                    <table className="w-full text-left text-sm whitespace-nowrap">
-                                        <thead>
-                                            <tr className="border-b border-gray-200 text-gray-500 bg-gray-50/80">
-                                                <th className="font-bold py-4 pr-4 pl-6 uppercase tracking-wider text-xs">Tanggal Pengambilan</th>
-                                                <th className="font-bold py-4 pr-4 uppercase tracking-wider text-xs">Status Penjemputan</th>
-                                                <th className="font-bold py-4 pr-4 uppercase tracking-wider text-xstext-center text-xs">Organik</th>
-                                                <th className="font-bold py-4 pr-4 uppercase tracking-wider text-xs text-center">Anorganik</th>
-                                                <th className="font-bold py-4 pr-6 uppercase tracking-wider text-xs text-center">Residu</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-50 bg-white">
-                                            {pickups.data.map(pickup => (
-                                                <tr key={pickup.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="py-4 font-bold text-gray-800 tracking-tight pl-6 flex items-center">
-                                                        <div className="w-2 h-2 rounded-full bg-green-500 mr-3"></div>
-                                                        {new Date(pickup.pickup_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                                                    </td>
-                                                    <td className="py-4"><StatusBadge status={pickup.status} /></td>
-                                                    <td className="py-4 font-mono font-medium text-gray-600 bg-gray-50/30 text-center">
-                                                        {pickup.status === 'completed' ? (
-                                                            <span className="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-100">{pickup.organic_weight} kg</span>
-                                                        ) : <span className="text-gray-400">-</span>}
-                                                    </td>
-                                                    <td className="py-4 font-mono font-medium text-gray-600 text-center">
-                                                        {pickup.status === 'completed' ? (
-                                                            <span className="bg-teal-50 text-teal-700 px-2.5 py-1 rounded-lg border border-teal-100">{pickup.anorganic_weight} kg</span>
-                                                        ) : <span className="text-gray-400">-</span>}
-                                                    </td>
-                                                    <td className="py-4 font-mono font-medium text-gray-600 bg-gray-50/30 text-center pr-6">
-                                                        {pickup.status === 'completed' ? (
-                                                            <span className="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg border border-gray-200">{pickup.residue_weight} kg</span>
-                                                        ) : <span className="text-gray-400">-</span>}
-                                                        
-                                                        {pickup.status === 'failed' && pickup.cancellation_reason && (
-                                                            <span className="block text-xs text-red-600 mt-2 bg-red-50 p-2 rounded-lg border border-red-100 text-left whitespace-normal min-w-[150px]" title={pickup.cancellation_reason}>
-                                                                <strong>Alasan:</strong> {pickup.cancellation_reason}
-                                                            </span>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Pagination */}
-                        {pickups.last_page > 1 && (
-                            <div className="flex justify-center mt-8 mb-4">
-                                <div className="flex flex-wrap gap-2 justify-center bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
-                                    {pickups.links.map((link, i) => {
-                                        const isPrevious = link.label.includes('Previous');
-                                        const isNext = link.label.includes('Next');
-                                        let label = link.label;
-                                        if (isPrevious) label = '«';
-                                        if (isNext) label = '»';
-
-                                        return link.url ? (
-                                            <Link
-                                                key={i}
-                                                href={link.url}
-                                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
-                                                    link.active
-                                                        ? 'bg-green-600 text-white shadow-md shadow-green-200'
-                                                        : 'bg-gray-50 text-gray-600 hover:bg-green-50 hover:text-green-700'
-                                                }`}
-                                                dangerouslySetInnerHTML={{ __html: label }}
-                                            />
-                                        ) : (
-                                            <span
-                                                key={i}
-                                                className="px-4 py-2 rounded-xl text-sm font-bold bg-gray-50 text-gray-400 opacity-50 cursor-not-allowed"
-                                                dangerouslySetInnerHTML={{ __html: label }}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </main>
+                )}
             </div>
-        </div>
+
+
+            {/* PAGINATION */}
+            {pickups.last_page > 1 && (
+                <div className="flex items-center justify-between mt-6 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+                    <span className="text-xs text-slate-500 font-medium">
+                        Halaman <strong>{pickups.current_page}</strong> dari <strong>{pickups.last_page}</strong>
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                        {pickups.links.map((link, i) => {
+                            const isPrev = link.label.includes('Previous') || link.label.includes('&laquo;');
+                            const isNext = link.label.includes('Next') || link.label.includes('&raquo;');
+                            const content = isPrev ? <ChevronLeft className="w-4 h-4" /> : isNext ? <ChevronRight className="w-4 h-4" /> : link.label;
+
+                            if (!link.url) {
+                                return (
+                                    <span
+                                        key={i}
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold text-slate-300 cursor-not-allowed"
+                                    >
+                                        {content}
+                                    </span>
+                                );
+                            }
+
+                            return (
+                                <Link
+                                    key={i}
+                                    href={link.url}
+                                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${
+                                        link.active
+                                            ? 'bg-emerald-600 text-white shadow-xs'
+                                            : 'text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    {content}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </CompanyLayout>
     );
 }
+

@@ -45,12 +45,20 @@ Route::get('/', function () {
     $activities = \App\Models\Activity::orderBy('date', 'desc')->take(3)->get();
     $news       = \App\Models\News::orderBy('published_date', 'desc')->take(3)->get();
     $katalogs   = \App\Models\Katalog::orderBy('created_at', 'desc')->take(3)->get();
+    $solutions  = \App\Models\Solution::orderBy('order_num', 'asc')->orderBy('created_at', 'asc')->get();
+    $solutionSettings = [
+        'badge'    => \App\Models\SiteSetting::get('solution_badge', 'SOLUSI B2B TERPADU'),
+        'title'    => \App\Models\SiteSetting::get('solution_title', 'Dirancang untuk skala operasional bisnis Anda.'),
+        'subtitle' => \App\Models\SiteSetting::get('solution_subtitle', 'Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.'),
+    ];
     return Inertia::render('Welcome', [
-        'canLogin'   => Route::has('login'),
-        'canRegister'=> Route::has('register'),
-        'activities' => $activities,
-        'news'       => $news,
-        'katalogs'   => $katalogs,
+        'canLogin'         => Route::has('login'),
+        'canRegister'      => Route::has('register'),
+        'activities'       => $activities,
+        'news'             => $news,
+        'katalogs'         => $katalogs,
+        'solutions'        => $solutions,
+        'solutionSettings' => $solutionSettings,
     ]);
 })->name('beranda');
 
@@ -186,6 +194,8 @@ Route::middleware(['auth', 'role:web_admin'])
     ->name('webadmin.')
     ->group(function () {
         Route::get('/dashboard', [WebAdminController::class, 'dashboard'])->name('dashboard');
+        Route::put('/solutions/settings', [App\Http\Controllers\WebAdmin\SolutionController::class, 'updateSettings'])->name('solutions.settings');
+        Route::resource('solutions', App\Http\Controllers\WebAdmin\SolutionController::class)->except(['show', 'create', 'edit']);
         Route::resource('activities', App\Http\Controllers\WebAdmin\ActivityController::class)->except(['show']);
         Route::resource('katalogs', App\Http\Controllers\WebAdmin\KatalogController::class)->except(['show']);
         Route::resource('news', App\Http\Controllers\WebAdmin\NewsController::class)->except(['show']);
@@ -251,6 +261,7 @@ use App\Http\Controllers\CleanUPController;
 
 Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function () {
     Route::get('/dashboard', [CleanUPController::class, 'dashboard'])->name('cleanup.dashboard');
+    Route::get('/sync', [CleanUPController::class, 'sync'])->name('cleanup.sync');
     Route::get('/sync-status', [CleanUPController::class, 'syncStatus'])->name('cleanup.syncStatus');
     Route::put('/update-status/{pickup}', [CleanUPController::class, 'updateStatus'])->name('cleanup.updateStatus');
     Route::post('/submit-pickup/{pickup}', [CleanUPController::class, 'submitPickup'])->name('cleanup.submitPickup');

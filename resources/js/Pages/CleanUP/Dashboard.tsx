@@ -218,7 +218,20 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                         <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Tugas Hari Ini</h2>
                     </div>
                     
-                    <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-3">
+                        <Link
+                            href={route('cleanup.sync')}
+                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition shadow-xs"
+                            title="Sinkronisasi Data Manual"
+                        >
+                            <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            <span className="hidden md:inline">Sinkronisasi</span>
+                            {pendingPickupIds.length > 0 && (
+                                <span className="bg-amber-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+                                    {pendingPickupIds.length}
+                                </span>
+                            )}
+                        </Link>
                         <div className="hidden sm:block">
                             <PwaInstallButton variant="header" label="Unduh App" />
                         </div>

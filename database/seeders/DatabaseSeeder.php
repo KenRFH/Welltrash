@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CompanySeeder::class,
             TeamSeeder::class,
             KatalogSeeder::class,
+            SolutionSeeder::class,
         ]);
     }
 }

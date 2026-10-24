@@ -11,6 +11,7 @@ import {
     ArrowRight,
     Sparkles,
     ShieldCheck,
+    Layers,
 } from 'lucide-react';
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
     activitiesCount: number;
     katalogCount: number;
     newsCount: number;
+    solutionsCount?: number;
 }
 
 const containerVariants: Variants = {
@@ -81,7 +83,7 @@ const WebStatCard: React.FC<WebStatCardProps> = ({ icon: Icon, title, count, uni
     );
 };
 
-export default function Dashboard({ auth, activitiesCount, katalogCount, newsCount }: Props) {
+export default function Dashboard({ auth, activitiesCount, katalogCount, newsCount, solutionsCount = 0 }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
@@ -156,7 +158,17 @@ export default function Dashboard({ auth, activitiesCount, katalogCount, newsCou
                         </motion.div>
 
                         {/* Metric Cards Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <WebStatCard
+                                icon={Layers}
+                                title="Solusi B2B"
+                                count={solutionsCount}
+                                unit="Layanan"
+                                href={route('webadmin.solutions.index')}
+                                cta="Kelola Solusi"
+                                color="emerald"
+                            />
+
                             <WebStatCard
                                 icon={Calendar}
                                 title="Aktivitas Publik"

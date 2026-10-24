@@ -8,19 +8,20 @@ import {
     Store,
     Newspaper,
     Users,
+    Layers,
     LogOut,
     X,
     Sparkles,
 } from 'lucide-react';
 
 interface Props {
-    active: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams';
+    active: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams' | 'solutions';
     isMobileOpen?: boolean;
     onClose?: () => void;
 }
 
 export default function WebAdminSidebar({ active, isMobileOpen = false, onClose }: Props) {
-    const navItem = (tab: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams', href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
+    const navItem = (tab: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams' | 'solutions', href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
         const isActive = active === tab;
         return (
             <Link
@@ -73,6 +74,7 @@ export default function WebAdminSidebar({ active, isMobileOpen = false, onClose 
                     <nav className="mt-4 px-3 space-y-1">
                         <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Konten Publik</div>
                         {navItem('dashboard', route('webadmin.dashboard'), 'Beranda Admin', LayoutDashboard)}
+                        {navItem('solutions', route('webadmin.solutions.index'), 'Solusi B2B', Layers)}
                         {navItem('activities', route('webadmin.activities.index'), 'Aktivitas Publik', Calendar)}
                         {navItem('katalogs', route('webadmin.katalogs.index'), 'Katalog Produk', Store)}
                         {navItem('news', route('webadmin.news.index'), 'Berita / Artikel', Newspaper)}

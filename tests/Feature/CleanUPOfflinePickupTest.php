@@ -42,6 +42,14 @@ class CleanUPOfflinePickupTest extends TestCase
         ]);
     }
 
+    public function test_cleanup_operator_can_access_manual_sync_page()
+    {
+        $response = $this->actingAs($this->cleanupUser)
+            ->get(route('cleanup.sync'));
+
+        $response->assertOk();
+    }
+
     public function test_cleanup_sync_status_endpoint_returns_json_credentials()
     {
         $response = $this->actingAs($this->cleanupUser)

@@ -5,7 +5,7 @@ import {
     getOfflinePickupIds,
     SyncResult
 } from '../utils/offlinePickupQueue';
-import { router } from '@inertiajs/react';
+import { router, Link } from '@inertiajs/react';
 
 interface CleanUPOfflineSyncProps {
     onPendingListChange?: (pendingIds: number[]) => void;
@@ -221,22 +221,58 @@ export default function CleanUPOfflineSync({ onPendingListChange }: CleanUPOffli
         );
     }
 
+    if (bannerStatus.type === 'error') {
+        return (
+            <div className="bg-red-500/10 border border-red-300 text-red-900 px-4 py-3 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm mb-6">
+                <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0" />
+                    <span>
+                        <strong>Kendala Sinkronisasi:</strong> {bannerStatus.message}
+                    </span>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                    <button
+                        onClick={runSync}
+                        disabled={isSyncing}
+                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-700 transition shadow disabled:opacity-50"
+                    >
+                        {isSyncing ? 'Sinkronisasi...' : 'Coba Lagi'}
+                    </button>
+                    <Link
+                        href={route('cleanup.sync')}
+                        className="bg-white border border-red-200 text-red-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-50 transition shadow-xs"
+                    >
+                        Sinkronisasi Manual
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     if (pendingCount > 0) {
         return (
-            <div className="bg-amber-500/10 border border-amber-300 text-amber-900 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between text-sm mb-6">
+            <div className="bg-amber-500/10 border border-amber-300 text-amber-900 px-4 py-3 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm mb-6">
                 <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shrink-0" />
                     <span>
                         Ada <strong>{pendingCount}</strong> penjemputan tersimpan di HP yang belum disinkronkan.
                     </span>
                 </div>
-                <button
-                    onClick={runSync}
-                    disabled={isSyncing}
-                    className="bg-amber-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-700 transition shadow disabled:opacity-50 flex items-center gap-1.5"
-                >
-                    {isSyncing ? 'Sinkronisasi...' : 'Sinkronkan Sekarang'}
-                </button>
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                    <button
+                        onClick={runSync}
+                        disabled={isSyncing}
+                        className="bg-amber-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-700 transition shadow disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                        {isSyncing ? 'Sinkronisasi...' : 'Sinkronkan Sekarang'}
+                    </button>
+                    <Link
+                        href={route('cleanup.sync')}
+                        className="bg-white border border-amber-300 text-amber-800 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-50 transition shadow-xs"
+                    >
+                        Kelola Manual
+                    </Link>
+                </div>
             </div>
         );
     }

@@ -3,21 +3,57 @@ import { Link } from "@inertiajs/react";
 import imgTransport from "@/assets/img/hero_waste_transport.webp";
 import imgSorting from "@/assets/img/hero_waste_sorting.webp";
 import imgTeam from "@/assets/img/karyawanWelltrash.webp";
-import { Building2, Factory, Recycle, ArrowRight, ShieldCheck, CheckCircle2, Sparkles } from "lucide-react";
+import {
+    Building2,
+    Factory,
+    Recycle,
+    ArrowRight,
+    ShieldCheck,
+    CheckCircle2,
+    Sparkles,
+    Truck,
+    Leaf,
+    Package,
+    Warehouse,
+} from "lucide-react";
 import { motion } from "motion/react";
 
-interface SolutionItem {
-    segment: string;
+export interface SolutionData {
+    id?: number;
     title: string;
-    desc: string;
-    icon: React.ComponentType<{ className?: string }>;
-    image: string;
-    imageAlt: string;
+    segment: string;
     tag: string;
-    accentColor: "green" | "orange";
+    desc: string;
+    icon?: string;
+    accent_color?: "green" | "orange";
+    image_path?: string | null;
+    link_url?: string | null;
 }
 
-const solutions: SolutionItem[] = [
+export interface SolutionSettingsData {
+    badge?: string;
+    title?: string;
+    subtitle?: string;
+}
+
+interface WhyProps {
+    solutions?: SolutionData[];
+    settings?: SolutionSettingsData;
+}
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+    Building2,
+    Factory,
+    Recycle,
+    Truck,
+    ShieldCheck,
+    Leaf,
+    Package,
+    Warehouse,
+    Sparkles,
+};
+
+const DEFAULT_SOLUTIONS = [
     {
         segment: "Komersial & Ritel",
         title: "Corporate Waste",
@@ -26,7 +62,8 @@ const solutions: SolutionItem[] = [
         image: imgTransport,
         imageAlt: "Armada logistik pengangkutan komersial WellTrash",
         tag: "Logistik Terjadwal",
-        accentColor: "green",
+        accentColor: "green" as const,
+        linkUrl: "/layanan",
     },
     {
         segment: "Industri Non-B3",
@@ -36,7 +73,8 @@ const solutions: SolutionItem[] = [
         image: imgSorting,
         imageAlt: "Fasilitas pemilahan material industri WellTrash Farm",
         tag: "Kepatuhan Regulasi",
-        accentColor: "orange",
+        accentColor: "orange" as const,
+        linkUrl: "/layanan",
     },
     {
         segment: "Ekonomi Sirkular",
@@ -46,7 +84,8 @@ const solutions: SolutionItem[] = [
         image: imgTeam,
         imageAlt: "Tim pemrosesan dan daur ulang WellTrash Jember",
         tag: "Biokonversi & Daur Ulang",
-        accentColor: "green",
+        accentColor: "green" as const,
+        linkUrl: "/layanan",
     },
 ];
 
@@ -71,7 +110,25 @@ const tiers = [
     },
 ];
 
-const Why: React.FC = () => {
+const Why: React.FC<WhyProps> = ({ solutions: dbSolutions, settings }) => {
+    const badgeText = settings?.badge || "SOLUSI B2B TERPADU";
+    const titleText = settings?.title || "Dirancang untuk skala operasional bisnis Anda.";
+    const subtitleText = settings?.subtitle || "Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.";
+
+    const items = dbSolutions && dbSolutions.length > 0
+        ? dbSolutions.map((item, idx) => ({
+            title: item.title,
+            segment: item.segment,
+            tag: item.tag,
+            desc: item.desc,
+            icon: (item.icon && ICON_MAP[item.icon]) ? ICON_MAP[item.icon] : Building2,
+            image: item.image_path ? `/storage/${item.image_path}` : (idx === 1 ? imgSorting : idx === 2 ? imgTeam : imgTransport),
+            imageAlt: item.title,
+            accentColor: item.accent_color || "green",
+            linkUrl: item.link_url || "/layanan",
+        }))
+        : DEFAULT_SOLUTIONS;
+
     return (
         <section id="solusi" className="scroll-mt-24 bg-white py-20 lg:py-28 border-b border-zinc-100">
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
@@ -83,24 +140,24 @@ const Why: React.FC = () => {
                     className="max-w-3xl mb-14 lg:mb-16"
                 >
                     <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
-                        SOLUSI B2B TERPADU
+                        {badgeText}
                     </span>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 leading-tight mb-4">
-                        Dirancang untuk skala operasional bisnis Anda.
+                        {titleText}
                     </h2>
                     <p className="text-zinc-600 font-sans text-base lg:text-lg leading-relaxed">
-                        Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.
+                        {subtitleText}
                     </p>
                 </motion.div>
 
-                {/* 3 Solution Columns with Real Operational Photography */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-14">
-                    {solutions.map((item, idx) => {
+                {/* Solution Columns with Real Operational Photography */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-14">
+                    {items.map((item, idx) => {
                         const IconComponent = item.icon;
                         const isOrange = item.accentColor === "orange";
                         return (
                             <motion.div
-                                key={item.title}
+                                key={item.title + idx}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -152,7 +209,7 @@ const Why: React.FC = () => {
                                 </div>
 
                                 <Link
-                                    href={route("services")}
+                                    href={item.linkUrl && (item.linkUrl.startsWith('http') || item.linkUrl.startsWith('/')) ? item.linkUrl : route("services")}
                                     className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-zinc-900 group-hover:text-emerald-700 transition-colors pt-4 border-t border-zinc-100"
                                 >
                                     <span>Pelajari solusi</span>

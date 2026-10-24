@@ -271,40 +271,98 @@ export function getCsrfToken(): string {
 }
 
 /**
+ * Fetch fresh CSRF token from the server and update meta tag.
+ */
+export async function refreshCsrfToken(): Promise<string> {
+    try {
+        const pingRes = await fetch('/cleanup/sync-status', {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        });
+
+        if (pingRes.ok) {
+            const data = await pingRes.json().catch(() => null);
+            if (data?.csrf) {
+                const meta = document.querySelector('meta[name="csrf-token"]');
+                if (meta) {
+                    meta.setAttribute('content', data.csrf);
+                }
+                return data.csrf;
+            }
+        }
+    } catch {}
+    return getCsrfToken();
+}
+
+/**
+ * Clear all pending records in IndexedDB.
+ */
+export async function clearAllOfflinePickups(): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        try {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const req = store.clear();
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
+/**
  * Synchronize a single record to the server.
  */
 export async function syncSinglePickup(
     record: OfflinePickupRecord
 ): Promise<{ success: boolean; sessionExpired?: boolean; error?: string }> {
-    const csrf = getCsrfToken();
+    let csrf = getCsrfToken();
+    if (!csrf) {
+        csrf = await refreshCsrfToken();
+    }
     const numericPickupId = Number(record.pickupId);
 
-    const formData = new FormData();
-    formData.append('organic_weight', String(record.organic_weight));
-    formData.append('anorganic_weight', String(record.anorganic_weight));
-    formData.append('residue_weight', String(record.residue_weight));
-    formData.append('offline_recorded_at', record.offline_recorded_at);
-
-    const file = new File(
-        [record.evidence_blob],
-        record.evidence_filename || `evidence_${numericPickupId}.jpg`,
-        { type: record.evidence_blob.type || 'image/jpeg' }
-    );
-    formData.append('evidence_pickup_path', file);
+    const buildFormData = () => {
+        const formData = new FormData();
+        formData.append('organic_weight', String(record.organic_weight));
+        formData.append('anorganic_weight', String(record.anorganic_weight));
+        formData.append('residue_weight', String(record.residue_weight));
+        formData.append('offline_recorded_at', record.offline_recorded_at);
+        formData.append(
+            'evidence_pickup_path',
+            record.evidence_blob,
+            record.evidence_filename || `evidence_${numericPickupId}.jpg`
+        );
+        return formData;
+    };
 
     const targetUrl = `/cleanup/submit-pickup/${numericPickupId}`;
 
-    try {
-        const response = await fetch(targetUrl, {
+    const executePost = async (token: string) => {
+        return await fetch(targetUrl, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': csrf,
+                'X-CSRF-TOKEN': token,
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-Background-Sync': 'true',
                 'Accept': 'application/json',
             },
-            body: formData,
+            body: buildFormData(),
         });
+    };
+
+    try {
+        let response = await executePost(csrf);
+
+        // Auto retry once if session CSRF expired
+        if (response.status === 419) {
+            const freshToken = await refreshCsrfToken();
+            if (freshToken) {
+                csrf = freshToken;
+                response = await executePost(csrf);
+            }
+        }
 
         if (response.ok) {
             await removeOfflinePickupByPickupId(numericPickupId);

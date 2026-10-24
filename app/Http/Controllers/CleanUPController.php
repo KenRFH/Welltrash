@@ -88,6 +88,22 @@ class CleanUPController extends Controller
 
    
     /**
+     * Display the manual offline sync management page for CleanUP operator.
+     */
+    public function sync(Request $request)
+    {
+        return Inertia::render('CleanUP/Sync', [
+            'auth' => [
+                'user' => [
+                    'id' => Auth::id(),
+                    'name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * Check authentication and get fresh CSRF token for offline sync.
      */
     public function syncStatus(Request $request)
@@ -115,9 +131,10 @@ class CleanUPController extends Controller
         $isGraceAllowed = false;
         if ($request->filled('offline_recorded_at')) {
             try {
-                $recordedAt = Carbon::parse($request->offline_recorded_at);
-                // Allow if recorded on the pickup_date and synced within 48 hours
-                if ($recordedAt->isSameDay($pickupDate) && $recordedAt->diffInHours(Carbon::now()) <= 48) {
+                $recordedAt = Carbon::parse($request->offline_recorded_at)->setTimezone(config('app.timezone', 'Asia/Jakarta'));
+                $hourDiff = abs($recordedAt->diffInHours(Carbon::now()));
+                // Allow if recorded within 48h and on or near the scheduled pickup date
+                if (($recordedAt->isSameDay($pickupDate) || $recordedAt->diffInDays($pickupDate) <= 1) && $hourDiff <= 48) {
                     $isGraceAllowed = true;
                 }
             } catch (\Exception $e) {

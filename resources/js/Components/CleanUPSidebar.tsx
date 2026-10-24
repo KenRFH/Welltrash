@@ -1,20 +1,41 @@
 import { Link } from '@inertiajs/react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PwaInstallButton from './PwaInstallButton';
+import { countOfflinePickups } from '../utils/offlinePickupQueue';
 
 const HistoryIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
 const CalendarIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>;
 const ActivitiesIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
 const AttendanceIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>;
+const SyncIcon = () => <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>;
 const LogoutIcon = () => <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>;
 
 interface Props {
-    active: 'dashboard' | 'history' | 'kegiatan' | 'attendance';
+    active: 'dashboard' | 'history' | 'kegiatan' | 'attendance' | 'sync';
     isMobileOpen?: boolean;
     onClose?: () => void;
 }
 
 export default function CleanUPSidebar({ active, isMobileOpen = false, onClose }: Props) {
+    const [pendingCount, setPendingCount] = useState<number>(0);
+
+    useEffect(() => {
+        let isMounted = true;
+        const updateCount = () => {
+            countOfflinePickups()
+                .then(cnt => {
+                    if (isMounted) setPendingCount(cnt);
+                })
+                .catch(() => {});
+        };
+
+        updateCount();
+        window.addEventListener('welltrash:refresh-offline-queue', updateCount);
+        return () => {
+            isMounted = false;
+            window.removeEventListener('welltrash:refresh-offline-queue', updateCount);
+        };
+    }, []);
     return (
         <>
             {/* Mobile Overlay */}
@@ -42,6 +63,17 @@ export default function CleanUPSidebar({ active, isMobileOpen = false, onClose }
                     
                     <Link href={route('cleanup.dashboard')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'dashboard' ? 'text-green-700 bg-green-50/80 font-semibold shadow-sm' : 'text-gray-500 hover:bg-gray-50 hover:text-green-600 font-medium group'}`}>
                         <span className={active !== 'dashboard' ? 'group-hover:text-green-500 transition-colors' : ''}><CalendarIcon /></span> Jadwal & Tugas
+                    </Link>
+
+                    <Link href={route('cleanup.sync')} className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${active === 'sync' ? 'text-green-700 bg-green-50/80 font-semibold shadow-sm' : 'text-gray-500 hover:bg-gray-50 hover:text-green-600 font-medium group'}`}>
+                        <span className="flex items-center">
+                            <span className={active !== 'sync' ? 'group-hover:text-green-500 transition-colors' : ''}><SyncIcon /></span> Sinkronisasi
+                        </span>
+                        {pendingCount > 0 && (
+                            <span className="bg-amber-500 text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full animate-pulse shadow-xs">
+                                {pendingCount}
+                            </span>
+                        )}
                     </Link>
 
                     <Link href={route('cleanup.kegiatan')} className={`flex items-center px-4 py-3 rounded-2xl transition-all ${active === 'kegiatan' ? 'text-green-700 bg-green-50/80 font-semibold shadow-sm' : 'text-gray-500 hover:bg-gray-50 hover:text-green-600 font-medium group'}`}>

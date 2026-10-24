@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useState, FormEventHandler } from 'react';
 import Welltrash_logo from '@/assets/img/logowelltrash.webp';
+import QuickLoginDemo from '@/Components/QuickLoginDemo';
 import {
     Eye,
     EyeOff,
@@ -11,7 +12,7 @@ import {
     Shield,
 } from 'lucide-react';
 
-export default function AdminLogin({ status }: { status?: string }) {
+export default function AdminLogin({ status, isDemo = false }: { status?: string; isDemo?: boolean }) {
     const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
@@ -73,6 +74,15 @@ export default function AdminLogin({ status }: { status?: string }) {
                             <span>{status}</span>
                         </div>
                     )}
+
+                    {/* Quick Demo Credentials */}
+                    <QuickLoginDemo
+                        isDemo={isDemo}
+                        onFill={(email, password) => setData((prev) => ({ ...prev, email, password }))}
+                        activeEmail={data.email}
+                        submitRoute={route('admin.login')}
+                        actorScope="staff"
+                    />
 
                     {/* Form */}
                     <form onSubmit={submit} className="space-y-4">

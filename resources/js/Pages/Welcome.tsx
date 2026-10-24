@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 import Navbar from "@/Components/Navbar";
 import Mitra from "@/Components/Mitra";
-import Why from "@/Components/Why";
+import Why, { SolutionData, SolutionSettingsData } from "@/Components/Why";
 import WasteFlow from "@/Components/WasteFlow";
 import ActivitiesSection, { Activity } from "@/Components/ActivitiesSection";
 import NewsSection, { NewsItem } from "@/Components/NewsSection";
@@ -43,6 +43,8 @@ interface Props {
     activities: Activity[];
     news: NewsItem[];
     katalogs: KatalogItem[];
+    solutions?: SolutionData[];
+    solutionSettings?: SolutionSettingsData;
 }
 
 const STATS = [
@@ -51,7 +53,13 @@ const STATS = [
     { number: "100%", label: "Cakupan Kab. Jember", icon: MapPin, color: "text-emerald-700 bg-emerald-50" },
 ];
 
-const Welcome: React.FC<Props> = ({ activities = [], news = [], katalogs = [] }) => {
+const Welcome: React.FC<Props> = ({
+    activities = [],
+    news = [],
+    katalogs = [],
+    solutions = [],
+    solutionSettings,
+}) => {
     return (
         <div className="bg-white text-zinc-900 min-h-screen font-sans selection:bg-emerald-100 selection:text-emerald-900">
             <SEO
@@ -194,7 +202,7 @@ const Welcome: React.FC<Props> = ({ activities = [], news = [], katalogs = [] })
             <Mitra />
 
             {/* B2B Solutions */}
-            <Why />
+            <Why solutions={solutions} settings={solutionSettings} />
 
             {/* 4-Step Operational Flow */}
             <WasteFlow />

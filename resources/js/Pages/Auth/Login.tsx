@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useState, FormEventHandler } from 'react';
 import Welltrash_logo from '@/assets/img/logowelltrash.webp';
+import QuickLoginDemo from '@/Components/QuickLoginDemo';
 import {
     Eye,
     EyeOff,
@@ -14,9 +15,11 @@ import {
 export default function Login({
     status,
     canResetPassword,
+    isDemo = false,
 }: {
     status?: string;
     canResetPassword?: boolean;
+    isDemo?: boolean;
 }) {
     const [showPassword, setShowPassword] = useState(false);
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -113,6 +116,15 @@ export default function Login({
                             <span className="bg-white px-3 text-zinc-400">atau dengan email</span>
                         </div>
                     </div>
+
+                    {/* Quick Demo Credentials */}
+                    <QuickLoginDemo
+                        isDemo={isDemo}
+                        onFill={(email, password) => setData((prev) => ({ ...prev, email, password }))}
+                        activeEmail={data.email}
+                        submitRoute={route('login')}
+                        actorScope="mitra"
+                    />
 
                     {/* Form */}
                     <form onSubmit={submit} className="space-y-4">
