@@ -79,24 +79,28 @@ export default function Activities({ companies, activities }: Props) {
             />
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1">
+                <header className="h-16 sm:h-20 flex items-center justify-between px-4 sm:px-10 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button 
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                            className="p-2 -ml-1.5 text-gray-600 hover:text-green-600 md:hidden focus:outline-none rounded-xl hover:bg-gray-100/70 transition-colors"
+                            aria-label="Buka Menu"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 hidden sm:block">Log Kegiatan Pemanfaatan</h1>
+                        <div className="min-w-0">
+                            <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight text-gray-900 truncate">Log Kegiatan Pemanfaatan</h1>
+                            <p className="text-[11px] text-gray-500 font-medium hidden sm:block truncate">Dokumentasikan proses pemanfaatan sampah setiap mitra</p>
+                        </div>
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-8 sm:px-10">
-                    <div className="max-w-6xl mx-auto flex flex-col xl:flex-row gap-8">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-5 sm:py-8 pb-32 md:pb-24">
+                    <div className="max-w-6xl mx-auto flex flex-col xl:flex-row gap-6 sm:gap-8">
                         
                         {/* Upload Form */}
                         <div className="xl:w-1/3 xl:sticky xl:top-8 h-fit">
-                            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative z-10">
+                            <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-sm border border-gray-100 relative z-10">
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">Tambah Kegiatan</h3>
                                 <p className="text-gray-500 font-medium text-sm mb-6">Dokumentasikan proses pemanfaatan sampah setiap mitra.</p>
                                 

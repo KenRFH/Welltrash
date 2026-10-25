@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
+use Database\Seeders\UserSeeder;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +40,13 @@ class LoginRequest extends FormRequest
 
         $loginValue = $this->input('email');
         $field = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+
+        // ponytail: Auto-seed demo users in local development if demo account is missing
+        if (app()->environment('local') && !User::where('email', $loginValue)->exists()) {
+            if (in_array($loginValue, ['admin@welltrash.com', 'cleanup@welltrash.com', 'cleanup2@welltrash.com', 'company@welltrash.com', 'webadmin@welltrash.com'])) {
+                (new UserSeeder())->run();
+            }
+        }
 
         $credentials = [
             $field => $loginValue,

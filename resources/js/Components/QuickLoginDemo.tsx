@@ -12,7 +12,12 @@ export interface QuickAccount {
 }
 
 // ponytail: Hardcoded seeded demo credentials; upgrade to dynamic seeder-driven config if auth schema changes.
-const DEMO_ACCOUNTS: Record<'staff' | 'mitra', QuickAccount[]> = {
+const DEMO_ACCOUNTS: Record<'staff' | 'mitra' | 'local', QuickAccount[]> = {
+    local: [
+        { role: 'admin', label: 'Admin', actorTitle: 'Admin Sistem', email: 'admin@welltrash.com', password: 'admin123', dotColor: 'bg-violet-500' },
+        { role: 'CleanUP', label: 'Operator', actorTitle: 'Armada CleanUP', email: 'cleanup@welltrash.com', password: 'cleanup123', dotColor: 'bg-teal-500' },
+        { role: 'company', label: 'Mitra', actorTitle: 'PT WellTrash (B2B)', email: 'company@welltrash.com', password: 'company123', dotColor: 'bg-emerald-500' },
+    ],
     staff: [
         { role: 'admin', label: 'Admin', actorTitle: 'Hak Akses & Sistem', email: 'admin@welltrash.com', password: 'admin123', dotColor: 'bg-violet-500' },
         { role: 'web_admin', label: 'Web Admin', actorTitle: 'Kelola Tampilan', email: 'webadmin@welltrash.com', password: 'webadmin123', dotColor: 'bg-sky-500' },
@@ -28,7 +33,7 @@ interface Props {
     onFill: (email: string, password: string) => void;
     activeEmail?: string;
     submitRoute?: string;
-    actorScope?: 'staff' | 'mitra';
+    actorScope?: 'staff' | 'mitra' | 'local';
 }
 
 export default function QuickLoginDemo({
@@ -36,19 +41,19 @@ export default function QuickLoginDemo({
     onFill,
     activeEmail,
     submitRoute,
-    actorScope = 'mitra',
+    actorScope = 'local',
 }: Props) {
     const [submittingRole, setSubmittingRole] = useState<string | null>(null);
 
     if (!isDemo) return null;
 
-    const accounts = DEMO_ACCOUNTS[actorScope] || DEMO_ACCOUNTS.mitra;
+    const accounts = DEMO_ACCOUNTS[actorScope] || DEMO_ACCOUNTS.local;
 
     const handleDirectLogin = (account: QuickAccount) => {
         setSubmittingRole(account.role);
         onFill(account.email, account.password);
 
-        const targetRoute = submitRoute || (actorScope === 'mitra' ? route('login') : route('admin.login'));
+        const targetRoute = submitRoute || route('login');
 
         router.post(
             targetRoute,
@@ -62,7 +67,11 @@ export default function QuickLoginDemo({
             <div className="flex items-center justify-between mb-2.5 px-0.5">
                 <span className="flex items-center gap-1.5 text-[11px] font-semibold text-zinc-700 tracking-wide uppercase">
                     <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                    {actorScope === 'mitra' ? 'Kredensial Demo Mitra' : 'Kredensial Demo Staf Internal'}
+                    {actorScope === 'staff'
+                        ? 'Kredensial Demo Staf Internal'
+                        : actorScope === 'local'
+                        ? 'Kredensial Login Mode Lokal'
+                        : 'Kredensial Demo Mitra'}
                 </span>
                 <span className="text-[10px] text-zinc-400 font-mono">klik ⚡ login instan</span>
             </div>
@@ -76,7 +85,7 @@ export default function QuickLoginDemo({
                         <div
                             key={acc.role}
                             onClick={() => onFill(acc.email, acc.password)}
-                            title={`Isi otomatis kredensial ${acc.label}`}
+                            title={`Isi otomatis kredensial ${acc.label} (${acc.email} / ${acc.password})`}
                             className={`group relative flex items-center justify-between p-2.5 rounded-xl border text-left cursor-pointer transition-all ${
                                 isActive
                                     ? 'border-emerald-500 bg-white shadow-xs ring-1 ring-emerald-500/20'
@@ -95,6 +104,9 @@ export default function QuickLoginDemo({
                                 </p>
                                 <p className="text-[10px] text-zinc-400 truncate mt-0.5 font-mono">
                                     {acc.email}
+                                </p>
+                                <p className="text-[9px] text-zinc-400 font-mono truncate">
+                                    sandi: <span className="text-zinc-600 font-semibold">{acc.password}</span>
                                 </p>
                             </div>
 

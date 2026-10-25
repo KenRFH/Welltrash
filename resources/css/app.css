@@ -22,21 +22,33 @@ html {
 
 /* Custom Themed Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #0C3325;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #17462F;
-    border-radius: 2px;
+    background: rgba(16, 39, 29, 0.2);
+    border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #B7E35C;
+    background: rgba(16, 39, 29, 0.4);
+}
+
+/* Utility to completely hide scrollbars while preserving scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 /* Tabular Numbers for Metrics */

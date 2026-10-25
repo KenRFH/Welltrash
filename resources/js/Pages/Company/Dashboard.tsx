@@ -215,11 +215,6 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                 </div>
             </div>
 
-    const circumference = 2 * Math.PI * radius;
-    const organicStroke = (organicPercent / 100) * circumference;
-    const anorganicStroke = (anorganicPercent / 100) * circumference;
-    const residueStroke = (residuePercent / 100) * circumference;
-
             {/* 3. SUSTAINABILITY IMPACT SCORECARD INFOGRAPHIC */}
             <div className="bg-gradient-to-r from-emerald-50 via-teal-50/50 to-slate-50 rounded-2xl p-5 sm:p-6 border border-emerald-100/80 mt-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
@@ -300,6 +295,8 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                     <span className="text-slate-600">Anorganik</span>
                                 </div>
                             </div>
+                        </div>
+
                         <div className="relative h-64 w-full">
                             <div className="absolute inset-0 flex flex-col justify-between pointer-events-none border-b border-slate-200 pb-6">
                                 {[1, 0.75, 0.5, 0.25, 0].map((step, idx) => (
@@ -316,8 +313,8 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                                 {weekly_statistics.map((w, idx) => {
                                     const orgVal = Number(w.organic || 0);
                                     const anorgVal = Number(w.anorganic || 0);
-                                    const orgH = Math.max((orgVal / maxWeeklyVal) * 100, 3);
-                                    const anorgH = Math.max((anorgVal / maxWeeklyVal) * 100, 3);
+                                    const orgH = orgVal > 0 ? Math.max((orgVal / maxWeeklyVal) * 100, 4) : 0;
+                                    const anorgH = anorgVal > 0 ? Math.max((anorgVal / maxWeeklyVal) * 100, 4) : 0;
                                     const isHovered = hoveredWeek === idx;
 
                                     return (
@@ -360,11 +357,6 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                     </div>
                 </div>
 
-                        </div>
-
-    const organicOffset = 0;
-    const anorganicOffset = -organicStroke;
-    const residueOffset = -(organicStroke + anorganicStroke);
                 {/* COMPOSITION DONUT CHART */}
                 <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
                     <div>

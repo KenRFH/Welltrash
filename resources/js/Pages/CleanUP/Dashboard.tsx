@@ -206,26 +206,30 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
 
                 {/* Header Navbar */}
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1">
+                <header className="h-16 sm:h-20 flex items-center justify-between px-4 sm:px-10 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         {/* Mobile Menu Toggle */}
                         <button 
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                            className="p-2 -ml-1.5 text-gray-600 hover:text-green-600 md:hidden focus:outline-none rounded-xl hover:bg-gray-100/70 transition-colors"
+                            aria-label="Buka Menu"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Tugas Hari Ini</h2>
+                        <div className="min-w-0">
+                            <h2 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight truncate">Tugas Hari Ini</h2>
+                            <p className="text-[11px] text-gray-500 font-medium hidden sm:block truncate">Kelola jadwal dan konfirmasi penjemputan sampah</p>
+                        </div>
                     </div>
                     
-                    <div className="flex items-center space-x-2 sm:space-x-3">
+                    <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
                         <Link
                             href={route('cleanup.sync')}
-                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition shadow-xs"
+                            className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition shadow-xs"
                             title="Sinkronisasi Data Manual"
                         >
                             <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                            <span className="hidden md:inline">Sinkronisasi</span>
+                            <span>Sinkronisasi</span>
                             {pendingPickupIds.length > 0 && (
                                 <span className="bg-amber-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
                                     {pendingPickupIds.length}
@@ -235,19 +239,24 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                         <div className="hidden sm:block">
                             <PwaInstallButton variant="header" label="Unduh App" />
                         </div>
-                        <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
+                        <button
+                            type="button"
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer p-1 sm:p-1.5 sm:pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                            title="Profil & Pengaturan"
+                        >
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
                                 <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=16a34a&bold=true`} alt="CleanUP avatar" />
                             </div>
-                            <div className="flex flex-col">
+                            <div className="flex flex-col text-left hidden sm:flex">
                                 <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
                                 <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Mitra CleanUP</span>
                             </div>
-                        </div>
+                        </button>
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-8 pb-24 relative z-10 w-full max-w-5xl mx-auto">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-5 sm:py-8 pb-32 md:pb-24 relative z-10 w-full max-w-5xl mx-auto">
 
                      {/* Offline Synchronization Banner */}
                      <CleanUPOfflineSync onPendingListChange={ids => setPendingPickupIds(ids)} />
@@ -282,14 +291,17 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                      )}
 
                      {/* Day Selector Area */}
-                     <div className="mb-8">
-                        <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Pilih Hari Operasional</h3>
-                        <div className="flex flex-wrap gap-2">
+                     <div className="mb-6 sm:mb-8">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wider">Pilih Hari Operasional</h3>
+                            <span className="text-[11px] font-semibold text-emerald-600 sm:hidden">Geser hari →</span>
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
                             {daysOfWeek.map((day) => (
                                 <button
                                     key={day}
                                     onClick={() => handleDayClick(day)}
-                                    className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm ${
+                                    className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all shadow-sm whitespace-nowrap shrink-0 sm:shrink ${
                                         selectedDay === day
                                             ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-green-500/30'
                                              : 'bg-white border text-gray-500 hover:bg-gray-50 hover:text-green-600 border-gray-200'
@@ -302,19 +314,19 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                     </div>
 
                     {/* Pickups Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3 sm:gap-4">
                         <div>
-                            <h2 className="text-2xl font-extrabold text-gray-900">Jadwal: {selectedDay}</h2>
-                            <p className="text-gray-500 text-sm mt-1">Daftar lokasi untuk <span className="font-bold">{targetDate}</span>.</p>
-                            {!isToday && <p className="text-xs font-bold text-red-500 mt-2 bg-red-50 inline-block px-3 py-1 rounded-md border border-red-100">⚠️ Anda hanya dapat memproses pengambilan untuk jadwal hari ini.</p>}
+                            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">Jadwal: {selectedDay}</h2>
+                            <p className="text-gray-500 text-xs sm:text-sm mt-0.5 sm:mt-1">Daftar lokasi untuk <span className="font-bold">{targetDate}</span>.</p>
+                            {!isToday && <p className="text-[11px] sm:text-xs font-bold text-red-500 mt-2 bg-red-50 inline-block px-2.5 py-1 rounded-md border border-red-100">⚠️ Anda hanya dapat memproses pengambilan untuk jadwal hari ini.</p>}
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:block">Filter:</span>
                             {(['all', 'pending', 'completed'] as const).map((f) => (
                                 <button
                                     key={f}
                                     onClick={() => setStatusFilter(f)}
-                                    className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                                    className={`px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap shrink-0 ${
                                         statusFilter === f
                                             ? f === 'completed' ? 'bg-green-600 text-white border-green-600'
                                               : f === 'pending' ? 'bg-amber-500 text-white border-amber-500'
@@ -495,6 +507,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                             <div className="flex-1 relative">
                                                 <input 
                                                     type="number" step="0.01" min="0" required 
+                                                    inputMode="decimal"
                                                     placeholder="0.00"
                                                     value={data.organic_weight}
                                                     onChange={e => setData('organic_weight', e.target.value)}
@@ -515,6 +528,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                             <div className="flex-1 relative">
                                                 <input 
                                                     type="number" step="0.01" min="0" required 
+                                                    inputMode="decimal"
                                                     placeholder="0.00"
                                                     value={data.anorganic_weight}
                                                     onChange={e => setData('anorganic_weight', e.target.value)}
@@ -535,6 +549,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                             <div className="flex-1 relative">
                                                 <input 
                                                     type="number" step="0.01" min="0" required 
+                                                    inputMode="decimal"
                                                     placeholder="0.00"
                                                     value={data.residue_weight}
                                                     onChange={e => setData('residue_weight', e.target.value)}
@@ -565,7 +580,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                 </div>
                                             )}
                                             <input 
-                                                type="file" accept="image/*" className="hidden" 
+                                                type="file" accept="image/*" capture="environment" className="hidden" 
                                                 onChange={e => handleImageChange(e.target.files ? e.target.files[0] : null)}
                                             />
                                         </label>

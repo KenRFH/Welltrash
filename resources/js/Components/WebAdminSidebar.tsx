@@ -52,7 +52,7 @@ export default function WebAdminSidebar({ active, isMobileOpen = false, onClose 
                 />
             )}
 
-            <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between shadow-2xl md:shadow-none flex-shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col shadow-2xl md:shadow-none flex-shrink-0 transition-transform duration-300 ease-in-out md:sticky md:top-0 md:h-screen md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="flex-1 min-h-0 overflow-y-auto">
                     <div className="h-20 flex items-center justify-between px-5 border-b border-slate-100">
                         <Link href={route('webadmin.dashboard')} className="flex items-center gap-3">
@@ -71,28 +71,38 @@ export default function WebAdminSidebar({ active, isMobileOpen = false, onClose 
                         </button>
                     </div>
                 
-                    <nav className="mt-4 px-3 space-y-1">
-                        <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Konten Publik</div>
-                        {navItem('dashboard', route('webadmin.dashboard'), 'Beranda Admin', LayoutDashboard)}
-                        {navItem('solutions', route('webadmin.solutions.index'), 'Solusi B2B', Layers)}
-                        {navItem('activities', route('webadmin.activities.index'), 'Aktivitas Publik', Calendar)}
-                        {navItem('katalogs', route('webadmin.katalogs.index'), 'Katalog Produk', Store)}
-                        {navItem('news', route('webadmin.news.index'), 'Berita / Artikel', Newspaper)}
-                        {navItem('teams', route('webadmin.teams.index'), 'Tim & Profil', Users)}
-                    </nav>
-                </div>
+                    <nav className="mt-4 px-3 space-y-4 pb-6">
+                        <div>
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">Konten Publik</div>
+                            <div className="space-y-1">
+                                {navItem('dashboard', route('webadmin.dashboard'), 'Beranda Admin', LayoutDashboard)}
+                                {navItem('solutions', route('webadmin.solutions.index'), 'Solusi B2B', Layers)}
+                                {navItem('activities', route('webadmin.activities.index'), 'Aktivitas Publik', Calendar)}
+                                {navItem('katalogs', route('webadmin.katalogs.index'), 'Katalog Produk', Store)}
+                                {navItem('news', route('webadmin.news.index'), 'Berita / Artikel', Newspaper)}
+                                {navItem('teams', route('webadmin.teams.index'), 'Tim & Profil', Users)}
+                            </div>
+                        </div>
 
-                <div className="p-4 border-t border-slate-100 space-y-2 bg-slate-50/50">
-                    <PwaInstallButton variant="sidebar" label="Unduh Aplikasi" />
-                    <Link
-                        href={route('logout')}
-                        method="post"
-                        as="button"
-                        className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 text-xs font-semibold text-slate-600 hover:text-red-600 bg-white hover:bg-red-50/70 border border-slate-200 hover:border-red-200 rounded-xl transition-all shadow-xs group"
-                    >
-                        <LogOut className="w-4 h-4 text-slate-400 group-hover:text-red-500 transition-colors" />
-                        <span>Keluar Sistem</span>
-                    </Link>
+                        {/* Akses & Sesi Sistem */}
+                        <div className="pt-2">
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                Akses & Sesi
+                            </div>
+                            <div className="space-y-1.5">
+                                <PwaInstallButton variant="sidebar" label="Unduh Aplikasi PWA" />
+                                <Link
+                                    href={route('logout')}
+                                    method="post"
+                                    as="button"
+                                    className="group flex items-center w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200/80 hover:border-rose-600 transition-all duration-200 shadow-2xs"
+                                >
+                                    <LogOut className="w-4 h-4 mr-3 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5 text-rose-500 group-hover:text-white" />
+                                    <span>Keluar Sistem</span>
+                                </Link>
+                            </div>
+                        </div>
+                    </nav>
                 </div>
             </aside>
         </>

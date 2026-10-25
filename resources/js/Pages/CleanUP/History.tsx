@@ -46,33 +46,42 @@ export default function History({ pickups, auth }: Props) {
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-green-50 to-emerald-50 opacity-50 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none"></div>
 
                 {/* Header Navbar */}
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1">
+                <header className="h-16 sm:h-20 flex items-center justify-between px-4 sm:px-10 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         {/* Mobile Menu Toggle */}
                         <button 
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                            className="p-2 -ml-1.5 text-gray-600 hover:text-green-600 md:hidden focus:outline-none rounded-xl hover:bg-gray-100/70 transition-colors"
+                            aria-label="Buka Menu"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Riwayat Pengambilan</h2>
+                        <div className="min-w-0">
+                            <h2 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight truncate">Riwayat Pengambilan</h2>
+                            <p className="text-[11px] text-gray-500 font-medium hidden sm:block truncate">Daftar penjemputan sampah yang telah selesai</p>
+                        </div>
                     </div>
                     
-                    <div className="flex items-center space-x-6">
-                        <div className="flex items-center space-x-3 cursor-pointer p-1.5 pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
+                    <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="flex items-center space-x-2 sm:space-x-3 cursor-pointer p-1 sm:p-1.5 sm:pr-4 rounded-full border border-gray-100 bg-white hover:bg-gray-50 hover:shadow-sm transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                            title="Profil & Pengaturan"
+                        >
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-green-100 to-emerald-100 flex items-center justify-center p-0.5">
                                 <img className="rounded-full w-full h-full object-cover" src={`https://ui-avatars.com/api/?name=${encodeURIComponent(auth.user.name)}&background=ffffff&color=16a34a&bold=true`} alt="CleanUP avatar" />
                             </div>
-                            <div className="flex flex-col">
+                            <div className="flex flex-col text-left hidden sm:flex">
                                 <span className="text-sm font-bold text-gray-800 leading-none mb-1">{auth.user.name}</span>
                                 <span className="text-[10px] font-bold text-green-500 uppercase tracking-wider leading-none">Mitra CleanUP</span>
                             </div>
-                        </div>
+                        </button>
                     </div>
                 </header>
 
                 {/* Body Content */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-8 pb-24 relative z-10 w-full max-w-5xl mx-auto">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-5 sm:py-8 pb-32 md:pb-24 relative z-10 w-full max-w-5xl mx-auto">
                     
                     {pickups.length === 0 ? (
                         <div className="bg-white rounded-3xl p-10 mt-6 text-center border border-dashed border-gray-300 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">

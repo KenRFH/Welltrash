@@ -95,19 +95,23 @@ export default function Sync({ auth }: Props) {
             <CleanUPSidebar active="sync" isMobileOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 md:hidden" aria-label="Menu">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <header className="h-16 sm:h-20 flex items-center justify-between px-4 sm:px-10 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => setIsSidebarOpen(true)} 
+                            className="p-2 -ml-1.5 text-gray-600 hover:text-green-600 md:hidden focus:outline-none rounded-xl hover:bg-gray-100/70 transition-colors" 
+                            aria-label="Buka Menu"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">Sinkronisasi Data Manual</h2>
+                        <h2 className="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight truncate">Sinkronisasi Data Manual</h2>
                     </div>
-                    <Link href={route('cleanup.dashboard')} className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 shadow-xs">
+                    <Link href={route('cleanup.dashboard')} className="text-xs font-bold px-3 py-1.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 shadow-xs shrink-0">
                         ← Jadwal
                     </Link>
                 </header>
 
-                <main className="flex-1 overflow-y-auto px-4 sm:px-10 py-6 max-w-4xl mx-auto w-full space-y-4">
+                <main className="flex-1 overflow-y-auto px-4 sm:px-10 py-5 sm:py-6 pb-32 md:pb-24 max-w-4xl mx-auto w-full space-y-4">
                     {statusMsg && (
                         <div className={`p-4 rounded-xl text-sm font-semibold flex justify-between ${statusMsg.type === 'ok' ? 'bg-green-50 text-green-800 border border-green-200' : statusMsg.type === 'err' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-blue-50 text-blue-800 border border-blue-200'}`}>
                             <span>{statusMsg.text}</span>

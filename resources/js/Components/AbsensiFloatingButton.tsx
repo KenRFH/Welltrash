@@ -103,8 +103,8 @@ export default function AbsensiFloatingButton() {
         if (isDone) {
             if (isOvertimeDone) {
                 return (
-                    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-                        <div className="bg-white/90 backdrop-blur-md border border-green-200 rounded-2xl shadow-lg px-4 py-2 text-xs font-bold text-green-700 flex items-center gap-2">
+                    <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30 flex flex-col items-end gap-2">
+                        <div className="bg-white/95 backdrop-blur-md border border-green-200 rounded-2xl shadow-lg px-3.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-xs font-bold text-green-700 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
                             Absen & Lembur selesai hari ini
                         </div>
@@ -114,82 +114,82 @@ export default function AbsensiFloatingButton() {
 
             if (hasOvertimeClockedIn) {
                 return (
-                    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-                        <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-2xl shadow px-3 py-1.5 text-[11px] font-bold text-gray-500">
+                    <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30 flex flex-col items-end gap-1.5">
+                        <div className="bg-white/90 backdrop-blur-sm border border-gray-100 rounded-2xl shadow px-3 py-1 text-[10px] md:text-[11px] font-bold text-gray-500">
                             Mulai Lembur: <span className="text-gray-800">{formatTime(attendance_today!.overtime_clock_in_at!)}</span>
                         </div>
                         <button
                             onClick={() => openModal('overtime-out')}
-                            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 shadow-[0_8px_24px_rgba(244,63,94,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 shadow-[0_8px_24px_rgba(244,63,94,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
                             title="Lembur Pulang"
                         >
-                            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </button>
-                        <span className="text-[10px] font-black tracking-wider text-rose-600 uppercase mr-1">Selesai Lembur</span>
+                        <span className="text-[9px] md:text-[10px] font-black tracking-wider text-rose-600 uppercase mr-1">Selesai Lembur</span>
                     </div>
                 );
             }
 
             return (
-                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-                    <div className="bg-white/90 backdrop-blur-md border border-green-200 rounded-2xl shadow-lg px-4 py-2 text-xs font-bold text-green-700 flex items-center gap-2">
+                <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30 flex flex-col items-end gap-1.5">
+                    <div className="bg-white/95 backdrop-blur-md border border-green-200 rounded-2xl shadow-lg px-3.5 py-1.5 md:px-4 md:py-2 text-[11px] md:text-xs font-bold text-green-700 flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
                         Absen shift selesai
                     </div>
                     <button
                         onClick={() => openModal('overtime-in')}
-                        className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 shadow-[0_8px_24px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-pulse-slow mt-1"
+                        className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 shadow-[0_8px_24px_rgba(79,70,229,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-pulse-slow mt-1"
                         title="Lembur Masuk"
                     >
-                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
                     </button>
-                    <span className="text-[10px] font-black tracking-wider text-indigo-600 uppercase mr-1">Mulai Lembur</span>
+                    <span className="text-[9px] md:text-[10px] font-black tracking-wider text-indigo-600 uppercase mr-1">Mulai Lembur</span>
                 </div>
             );
         }
 
         if (hasClockedIn) {
             return (
-                <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-                    <div className="bg-white/80 backdrop-blur-sm border border-gray-100 rounded-2xl shadow px-3 py-1.5 text-[11px] font-bold text-gray-500">
+                <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30 flex flex-col items-end gap-1.5">
+                    <div className="bg-white/90 backdrop-blur-sm border border-gray-100 rounded-2xl shadow px-3 py-1 text-[10px] md:text-[11px] font-bold text-gray-500">
                         Masuk: <span className="text-gray-800">{formatTime(attendance_today!.clock_in_at)}</span>
                     </div>
                     <button
                         onClick={() => openModal('clock-out')}
-                        className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-[0_8px_24px_rgba(249,115,22,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+                        className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-[0_8px_24px_rgba(249,115,22,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
                         title="Absen Pulang"
                     >
                         {/* Moon/End icon */}
-                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                 d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </button>
-                    <span className="text-[10px] font-black tracking-wider text-orange-600 uppercase mr-1">Absen Pulang</span>
+                    <span className="text-[9px] md:text-[10px] font-black tracking-wider text-orange-600 uppercase mr-1">Absen Pulang</span>
                 </div>
             );
         }
 
         return (
-            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-1">
+            <div className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-30 flex flex-col items-end gap-1">
                 <button
                     onClick={() => openModal('clock-in')}
-                    className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-[0_8px_24px_rgba(22,163,74,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-pulse-slow"
+                    className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-[0_8px_24px_rgba(22,163,74,0.4)] flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-pulse-slow"
                     title="Absen Masuk"
                 >
                     {/* Fingerprint / check-in icon */}
-                    <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                             d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                 </button>
-                <span className="text-[10px] font-black tracking-wider text-green-600 uppercase mr-1">Absen Masuk</span>
+                <span className="text-[9px] md:text-[10px] font-black tracking-wider text-green-600 uppercase mr-1">Absen Masuk</span>
             </div>
         );
     };

@@ -150,32 +150,33 @@ export default function CleanUPAttendance({
 
             <div className="flex-1 flex flex-col overflow-hidden relative">
                 {/* Header */}
-                <header className="h-24 flex items-center justify-between px-6 sm:px-10 bg-white/60 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4 flex-1">
+                <header className="h-16 sm:h-20 flex items-center justify-between px-4 sm:px-10 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
                         <button
                             onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 -ml-2 text-gray-500 hover:text-green-600 md:hidden focus:outline-none"
+                            className="p-2 -ml-1.5 text-gray-600 hover:text-green-600 md:hidden focus:outline-none rounded-xl hover:bg-gray-100/70 transition-colors"
+                            aria-label="Buka Menu"
                         >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        <div>
-                            <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Absensi & Gaji</h1>
-                            <p className="text-xs text-gray-500 font-medium hidden sm:block">Transparansi kehadiran dan perhitungan upah</p>
+                        <div className="min-w-0">
+                            <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight truncate">Absensi & Gaji</h1>
+                            <p className="text-[11px] text-gray-500 font-medium hidden sm:block truncate">Transparansi kehadiran dan perhitungan upah</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                         <input
                             type="month"
                             value={selectedMonth}
                             onChange={e => handleMonthChange(e.target.value)}
-                            className="px-3 py-2 rounded-xl border border-gray-200 text-sm font-medium bg-white focus:ring-2 focus:ring-green-100 focus:border-green-400 transition-all shadow-sm"
+                            className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-gray-200 text-xs sm:text-sm font-semibold bg-white focus:ring-2 focus:ring-green-100 focus:border-green-400 transition-all shadow-xs"
                         />
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-6 pb-28">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-5 sm:py-6 pb-32 md:pb-24">
 
                     {/* Flash Messages */}
                     {flash?.success && (
@@ -258,16 +259,16 @@ export default function CleanUPAttendance({
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex gap-2 mb-5 flex-wrap">
+                    <div className="flex gap-2 mb-5 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap">
                         <button
                             onClick={() => setActiveTab('absensi')}
-                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'absensi' ? 'bg-green-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-green-300'}`}
+                            className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap shrink-0 sm:shrink ${activeTab === 'absensi' ? 'bg-green-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-green-300'}`}
                         >
                             Riwayat Absensi ({attendances.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('izin')}
-                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'izin' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-amber-300'}`}
+                            className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 sm:shrink ${activeTab === 'izin' ? 'bg-amber-500 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-amber-300'}`}
                         >
                             Izin/Sakit ({leaveRequests.length})
                             {leaveRequests.some(l => l.status === 'pending') && (
@@ -276,7 +277,7 @@ export default function CleanUPAttendance({
                         </button>
                         <button
                             onClick={() => setActiveTab('lembur')}
-                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'lembur' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'}`}
+                            className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap shrink-0 sm:shrink ${activeTab === 'lembur' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'}`}
                         >
                             Pengajuan Lembur ({overtimeRequests.length})
                             {overtimeRequests.some(o => o.status === 'pending') && (

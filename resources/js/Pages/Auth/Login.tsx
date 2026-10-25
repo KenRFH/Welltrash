@@ -123,7 +123,7 @@ export default function Login({
                         onFill={(email, password) => setData((prev) => ({ ...prev, email, password }))}
                         activeEmail={data.email}
                         submitRoute={route('login')}
-                        actorScope="mitra"
+                        actorScope="local"
                     />
 
                     {/* Form */}

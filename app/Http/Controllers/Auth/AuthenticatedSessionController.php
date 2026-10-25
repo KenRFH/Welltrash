@@ -46,22 +46,13 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        // Pemisahan otorisasi berdasarkan portal login (Aktor Staf vs Mitra)
+        // Portal admin (/admin/login) khusus untuk staf internal
         if ($request->is('admin/*')) {
             if (!in_array($user->role, ['admin', 'web_admin', 'CleanUP'])) {
                 Auth::logout();
 
                 return back()->withErrors([
                     'email' => 'Halaman ini khusus untuk staf internal (Admin, Web Admin, CleanUP). Akun Mitra silakan masuk melalui portal mitra.',
-                ]);
-            }
-        } else {
-            // Portal login umum (/login) hanya untuk akun Mitra
-            if ($user->role !== 'company') {
-                Auth::logout();
-
-                return back()->withErrors([
-                    'email' => 'Halaman ini khusus untuk akun Mitra Bisnis. Staf dan Administrator silakan masuk melalui portal admin (/admin/login).',
                 ]);
             }
         }
