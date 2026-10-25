@@ -93,4 +93,18 @@ class QuickLoginDemoTest extends TestCase
         $res->assertRedirect(route('admin.dashboard'));
         $this->assertDatabaseHas('users', ['email' => 'admin@welltrash.com']);
     }
+
+    public function test_is_demo_is_always_false_in_production(): void
+    {
+        app()->detectEnvironment(fn () => 'production');
+        config(['app.debug' => true]);
+
+        $this->get('/login')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('isDemo', false));
+
+        $this->get('/admin/login')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('isDemo', false));
+    }
 }

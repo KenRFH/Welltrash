@@ -21,7 +21,7 @@ class AuthenticatedSessionController extends Controller
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
-            'isDemo' => app()->environment('local', 'testing', 'staging') || config('app.debug') || (bool) env('DEMO_LOGIN', false),
+            'isDemo' => !app()->isProduction() && (app()->environment('local', 'testing', 'staging') || (bool) env('DEMO_LOGIN', false)),
         ]);
     }
 
@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
     {
         return Inertia::render('Auth/AdminLogin', [
             'status' => session('status'),
-            'isDemo' => app()->environment('local', 'testing', 'staging') || config('app.debug') || (bool) env('DEMO_LOGIN', false),
+            'isDemo' => !app()->isProduction() && (app()->environment('local', 'testing', 'staging') || (bool) env('DEMO_LOGIN', false)),
         ]);
     }
 
