@@ -8,12 +8,17 @@ import { compressImage } from '@/utils/compressImage';
 import { saveOfflinePickup, syncSinglePickup, getOfflinePickupIds } from '@/utils/offlinePickupQueue';
 
 // Icons
-const CameraIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
+const CameraIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
+const GalleryIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
 
 interface Pickup {
     id: number;
     status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
     organic_weight: number | null;
+    anorganic_weight?: number | null;
+    residue_weight?: number | null;
+    trash_bag_count?: number | null;
+    evidence_pickup_path?: string | null;
     pickup_date: string;
     company: {
         id: number;
@@ -51,6 +56,11 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const [pendingPickupIds, setPendingPickupIds] = useState<number[]>([]);
     const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [inputMode, setInputMode] = useState<'trashbag_only' | 'weight_and_trashbag'>('trashbag_only');
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
+    const galleryInputRef = React.useRef<HTMLInputElement | null>(null);
 
     React.useEffect(() => {
         getOfflinePickupIds().then(ids => setPendingPickupIds(ids));
@@ -62,11 +72,22 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const handleImageChange = async (file: File | null) => {
         if (!file) {
             setData('evidence_pickup_path', null);
+            setImagePreview(null);
             setFileSizeError(null);
             return;
         }
+
+        if (file.size > MAX_FILE_BYTES) {
+            setFileSizeError(`Ukuran foto terlalu besar (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimal ${MAX_FILE_MB} MB.`);
+            setData('evidence_pickup_path', null);
+            setImagePreview(null);
+            return;
+        }
+
         setFileSizeError(null);
         try {
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
             const compressed = await compressImage(file, 1280, 1280, 0.78);
             setData('evidence_pickup_path', compressed);
         } catch {
@@ -78,6 +99,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const { post: postStatus, processing: processingStatus } = useForm();
     
     const { data, setData, post: postSubmit, processing: processingSubmit, errors, reset } = useForm({
+        trash_bag_count: '',
         organic_weight: '',
         anorganic_weight: '',
         residue_weight: '',
@@ -96,7 +118,9 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
 
     const handleOpenSubmitModal = (pickupId: number) => {
         reset();
+        setImagePreview(null);
         setFileSizeError(null);
+        setInputMode('trashbag_only');
         setActiveModal(pickupId);
     };
 
@@ -104,13 +128,22 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
         e.preventDefault();
         if (fileSizeError || isSubmitting) return;
 
-        if (!data.organic_weight || !data.anorganic_weight || !data.residue_weight) {
-            alert('Harap isi semua berat sampah (organik, anorganik, residu).');
-            return;
+        if (inputMode === 'trashbag_only') {
+            if (!data.trash_bag_count || Number(data.trash_bag_count) <= 0) {
+                alert('Harap masukkan jumlah total trashbag (minimal 1 kantong).');
+                return;
+            }
+        } else {
+            const hasWeight = (Number(data.organic_weight) > 0 || Number(data.anorganic_weight) > 0 || Number(data.residue_weight) > 0);
+            const hasBags = Number(data.trash_bag_count) > 0;
+            if (!hasWeight && !hasBags) {
+                alert('Harap isi jumlah trashbag atau berat sampah.');
+                return;
+            }
         }
 
         if (!data.evidence_pickup_path) {
-            alert('Harap sertakan foto bukti pengambilan sampah.');
+            alert('Harap sertakan foto bukti pengambilan sampah (dari kamera atau galeri).');
             return;
         }
 
@@ -123,9 +156,10 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
         const offlinePayload = {
             pickupId: numericPickupId,
             companyName,
-            organic_weight: data.organic_weight,
-            anorganic_weight: data.anorganic_weight,
-            residue_weight: data.residue_weight,
+            trash_bag_count: data.trash_bag_count ? Number(data.trash_bag_count) : null,
+            organic_weight: inputMode === 'trashbag_only' ? '0' : (data.organic_weight || '0'),
+            anorganic_weight: inputMode === 'trashbag_only' ? '0' : (data.anorganic_weight || '0'),
+            residue_weight: inputMode === 'trashbag_only' ? '0' : (data.residue_weight || '0'),
             evidence_blob: data.evidence_pickup_path,
             evidence_filename: data.evidence_pickup_path.name || `evidence_${numericPickupId}.jpg`,
             offline_recorded_at: new Date().toISOString(),
@@ -138,6 +172,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                 setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
                 setActiveModal(null);
                 reset();
+                setImagePreview(null);
                 setOfflineNotice(`Mode Offline: Data penjemputan ${companyName} tersimpan di HP. Akan otomatis diunggah saat terhubung ke internet.`);
                 window.dispatchEvent(new Event('welltrash:refresh-offline-queue'));
             } catch (err: any) {
@@ -162,25 +197,28 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
             if (res.success) {
                 setActiveModal(null);
                 reset();
+                setImagePreview(null);
                 setPendingPickupIds(prev => prev.filter(id => id !== numericPickupId));
                 router.reload();
             } else if (res.sessionExpired) {
                 setActiveModal(null);
                 reset();
+                setImagePreview(null);
                 setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
                 setOfflineNotice('Sesi Anda berakhir. Data tersimpan aman di HP. Silakan login kembali untuk melanjutkan pengiriman.');
             } else {
                 // Network issue or server error - keep safely in IndexedDB
                 setActiveModal(null);
                 reset();
+                setImagePreview(null);
                 setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
                 setOfflineNotice(`Jaringan tidak stabil. Data penjemputan ${companyName} tersimpan di HP dan akan diunggah otomatis.`);
                 window.dispatchEvent(new Event('welltrash:refresh-offline-queue'));
             }
         } catch {
-            // Unexpected network failure: keep in IndexedDB
             setActiveModal(null);
             reset();
+            setImagePreview(null);
             setPendingPickupIds(prev => Array.from(new Set([...prev, numericPickupId])));
             setOfflineNotice(`Koneksi terputus. Data tersimpan aman di HP dan akan diunggah saat sinyal kembali.`);
             window.dispatchEvent(new Event('welltrash:refresh-offline-queue'));
@@ -499,91 +537,167 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                         </div>
                                     )}
                                     {/* Organic */}
-                                    <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-100/60 shadow-sm relative group mb-4">
-                                        <h4 className="font-bold text-amber-900 flex items-center mb-3">
-                                            <span className="w-6 h-6 bg-amber-200 text-amber-700 rounded-lg flex items-center justify-center mr-2 text-sm">O</span> Organik
-                                        </h4>
-                                        <div className="flex gap-4">
-                                            <div className="flex-1 relative">
-                                                <input 
-                                                    type="number" step="0.01" min="0" required 
-                                                    inputMode="decimal"
-                                                    placeholder="0.00"
-                                                    value={data.organic_weight}
-                                                    onChange={e => setData('organic_weight', e.target.value)}
-                                                    className="w-full text-right pr-12 pl-4 py-3.5 bg-white border-amber-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 font-bold text-lg shadow-inner"
-                                                />
-                                                <span className="absolute right-4 top-[14px] text-gray-400 font-bold">Kg</span>
-                                                {errors.organic_weight && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{errors.organic_weight}</p>}
-                                            </div>
+                                    {/* Mode Selector Tabs */}
+                                    <div className="p-1 bg-gray-100 rounded-2xl grid grid-cols-2 gap-1 border border-gray-200 mb-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setInputMode('trashbag_only')}
+                                            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                                                inputMode === 'trashbag_only'
+                                                    ? 'bg-white text-emerald-800 shadow-sm border border-emerald-100'
+                                                    : 'text-gray-500 hover:text-gray-800'
+                                            }`}
+                                        >
+                                            <span>🗑️</span>
+                                            <span>Trashbag Saja</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setInputMode('weight_and_trashbag')}
+                                            className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                                                inputMode === 'weight_and_trashbag'
+                                                    ? 'bg-white text-emerald-800 shadow-sm border border-emerald-100'
+                                                    : 'text-gray-500 hover:text-gray-800'
+                                            }`}
+                                        >
+                                            <span>⚖️</span>
+                                            <span>Tonase & Trashbag</span>
+                                        </button>
+                                    </div>
+
+                                    {/* TRASHBAG INPUT */}
+                                    <div className="bg-blue-50/70 p-4 rounded-2xl border border-blue-100 shadow-xs mb-4">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-bold text-blue-900 text-sm flex items-center">
+                                                <span className="w-5 h-5 bg-blue-200 text-blue-800 rounded-md flex items-center justify-center mr-1.5 text-xs font-black">TB</span>
+                                                Total Trashbag
+                                            </h4>
+                                            <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
+                                                {inputMode === 'trashbag_only' ? 'Wajib' : 'Opsional'}
+                                            </span>
+                                        </div>
+
+                                        <div className="relative mt-1">
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                step="1"
+                                                inputMode="numeric"
+                                                placeholder="0"
+                                                value={data.trash_bag_count}
+                                                onChange={e => setData('trash_bag_count', e.target.value)}
+                                                className="w-full text-right pr-20 pl-4 py-2.5 bg-white border-blue-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 font-extrabold text-lg shadow-inner text-gray-900"
+                                            />
+                                            <span className="absolute right-3.5 top-[11px] text-gray-400 font-bold text-xs uppercase">Kantong</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-1.5 mt-2">
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase">Cepat:</span>
+                                            {[1, 2, 5, 10].map(n => (
+                                                <button
+                                                    key={n}
+                                                    type="button"
+                                                    onClick={() => setData('trash_bag_count', String(Number(data.trash_bag_count || 0) + n))}
+                                                    className="px-2 py-0.5 text-xs font-bold bg-white text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100"
+                                                >
+                                                    +{n}
+                                                </button>
+                                            ))}
                                         </div>
                                     </div>
 
-                                    {/* Anorganic */}
-                                    <div className="bg-teal-50/50 p-5 rounded-2xl border border-teal-100/60 shadow-sm relative group mb-4">
-                                        <h4 className="font-bold text-teal-900 flex items-center mb-3">
-                                            <span className="w-6 h-6 bg-teal-200 text-teal-700 rounded-lg flex items-center justify-center mr-2 text-sm">A</span> Anorganik
-                                        </h4>
-                                        <div className="flex gap-4">
-                                            <div className="flex-1 relative">
-                                                <input 
-                                                    type="number" step="0.01" min="0" required 
-                                                    inputMode="decimal"
-                                                    placeholder="0.00"
-                                                    value={data.anorganic_weight}
-                                                    onChange={e => setData('anorganic_weight', e.target.value)}
-                                                    className="w-full text-right pr-12 pl-4 py-3.5 bg-white border-teal-200 rounded-xl focus:ring-teal-500 focus:border-teal-500 font-bold text-lg shadow-inner"
-                                                />
-                                                <span className="absolute right-4 top-[14px] text-gray-400 font-bold">Kg</span>
-                                                {errors.anorganic_weight && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{errors.anorganic_weight}</p>}
+                                    {inputMode === 'weight_and_trashbag' && (
+                                        <div className="space-y-3 mb-4">
+                                            <div className="flex items-center justify-between px-1">
+                                                <span className="text-xs font-bold text-gray-600">Timbangan Sampah</span>
+                                                <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                                    Total: {(Number(data.organic_weight || 0) + Number(data.anorganic_weight || 0) + Number(data.residue_weight || 0)).toFixed(2)} Kg
+                                                </span>
                                             </div>
-                                        </div>
-                                    </div>
 
-                                    {/* Residue */}
-                                    <div className="bg-gray-50/80 p-5 rounded-2xl border border-gray-200 shadow-sm relative group">
-                                        <h4 className="font-bold text-gray-800 flex items-center mb-3">
-                                            <span className="w-6 h-6 bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center mr-2 text-sm">R</span> Residu
-                                        </h4>
-                                        <div className="flex gap-4">
-                                            <div className="flex-1 relative">
-                                                <input 
-                                                    type="number" step="0.01" min="0" required 
-                                                    inputMode="decimal"
-                                                    placeholder="0.00"
-                                                    value={data.residue_weight}
-                                                    onChange={e => setData('residue_weight', e.target.value)}
-                                                    className="w-full text-right pr-12 pl-4 py-3.5 bg-white border-gray-300 rounded-xl focus:ring-gray-500 focus:border-gray-500 font-bold text-lg shadow-inner"
-                                                />
-                                                <span className="absolute right-4 top-[14px] text-gray-400 font-bold">Kg</span>
-                                                {errors.residue_weight && <p className="text-red-500 text-xs mt-1 absolute -bottom-5 left-1">{errors.residue_weight}</p>}
+                                            {/* Organic */}
+                                            <div className="bg-amber-50/60 p-3 rounded-2xl border border-amber-100 shadow-xs">
+                                                <h4 className="font-bold text-amber-900 text-xs mb-1.5 flex items-center">
+                                                    <span className="w-5 h-5 bg-amber-200 text-amber-800 rounded-md flex items-center justify-center mr-1.5 text-xs font-black">O</span> Organik
+                                                </h4>
+                                                <div className="relative">
+                                                    <input 
+                                                        type="number" step="0.01" min="0" inputMode="decimal" placeholder="0.00"
+                                                        value={data.organic_weight} onChange={e => setData('organic_weight', e.target.value)}
+                                                        className="w-full text-right pr-12 pl-4 py-2 bg-white border-amber-200 rounded-xl font-bold text-base shadow-inner"
+                                                    />
+                                                    <span className="absolute right-3.5 top-[9px] text-gray-400 font-bold text-xs">Kg</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Anorganic */}
+                                            <div className="bg-teal-50/60 p-3 rounded-2xl border border-teal-100 shadow-xs">
+                                                <h4 className="font-bold text-teal-900 text-xs mb-1.5 flex items-center">
+                                                    <span className="w-5 h-5 bg-teal-200 text-teal-800 rounded-md flex items-center justify-center mr-1.5 text-xs font-black">A</span> Anorganik
+                                                </h4>
+                                                <div className="relative">
+                                                    <input 
+                                                        type="number" step="0.01" min="0" inputMode="decimal" placeholder="0.00"
+                                                        value={data.anorganic_weight} onChange={e => setData('anorganic_weight', e.target.value)}
+                                                        className="w-full text-right pr-12 pl-4 py-2 bg-white border-teal-200 rounded-xl font-bold text-base shadow-inner"
+                                                    />
+                                                    <span className="absolute right-3.5 top-[9px] text-gray-400 font-bold text-xs">Kg</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Residue */}
+                                            <div className="bg-gray-50/80 p-3 rounded-2xl border border-gray-200 shadow-xs">
+                                                <h4 className="font-bold text-gray-800 text-xs mb-1.5 flex items-center">
+                                                    <span className="w-5 h-5 bg-gray-200 text-gray-700 rounded-md flex items-center justify-center mr-1.5 text-xs font-black">R</span> Residu
+                                                </h4>
+                                                <div className="relative">
+                                                    <input 
+                                                        type="number" step="0.01" min="0" inputMode="decimal" placeholder="0.00"
+                                                        value={data.residue_weight} onChange={e => setData('residue_weight', e.target.value)}
+                                                        className="w-full text-right pr-12 pl-4 py-2 bg-white border-gray-300 rounded-xl font-bold text-base shadow-inner"
+                                                    />
+                                                    <span className="absolute right-3.5 top-[9px] text-gray-400 font-bold text-xs">Kg</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     {/* Evidence Upload */}
-                                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/60 shadow-sm relative group mt-4">
-                                        <h4 className="font-bold text-blue-900 flex items-center mb-3">
-                                            <span className="w-6 h-6 bg-blue-200 text-blue-700 rounded-lg flex items-center justify-center mr-2 text-sm">📸</span> Bukti Pengambilan
-                                        </h4>
-                                        <label className="flex flex-col items-center justify-center w-full h-32 bg-white border-2 border-dashed border-blue-200 hover:bg-blue-50 hover:border-blue-300 text-blue-600 rounded-xl cursor-pointer transition-colors shadow-sm relative overflow-hidden">
-                                            {data.evidence_pickup_path ? (
-                                                <div className="absolute inset-0 bg-blue-500 flex flex-col items-center justify-center text-white">
-                                                    <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                    <span className="text-sm font-bold">FOTO TERPILIH</span>
-                                                    <span className="text-[10px] mt-1 text-blue-100">Klik untuk mengganti</span>
+                                    <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 shadow-xs mt-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-bold text-emerald-950 text-xs flex items-center">
+                                                <span className="w-5 h-5 bg-emerald-200 text-emerald-800 rounded-md flex items-center justify-center mr-1.5 text-xs">📸</span> Bukti Foto
+                                            </h4>
+                                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Wajib</span>
+                                        </div>
+                                        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleImageChange(e.target.files ? e.target.files[0] : null)} />
+                                        <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={e => handleImageChange(e.target.files ? e.target.files[0] : null)} />
+                                        {imagePreview ? (
+                                            <div className="rounded-xl border border-emerald-200 bg-white p-2 flex items-center gap-3">
+                                                <img src={imagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-lg border shrink-0" />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-emerald-700 font-extrabold text-xs">✓ Foto Terpilih</div>
+                                                    <div className="flex gap-2 mt-1">
+                                                        <button type="button" onClick={() => cameraInputRef.current?.click()} className="text-[10px] font-bold text-emerald-700 hover:underline">Kamera</button>
+                                                        <span className="text-gray-300">•</span>
+                                                        <button type="button" onClick={() => galleryInputRef.current?.click()} className="text-[10px] font-bold text-blue-700 hover:underline">Galeri</button>
+                                                    </div>
                                                 </div>
-                                            ) : (
-                                                <div className="flex flex-col items-center justify-center">
-                                                    <svg className="w-8 h-8 mb-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                                    <span className="text-sm font-bold">PILIH ATAU AMBIL FOTO</span>
-                                                </div>
-                                            )}
-                                            <input 
-                                                type="file" accept="image/*" capture="environment" className="hidden" 
-                                                onChange={e => handleImageChange(e.target.files ? e.target.files[0] : null)}
-                                            />
-                                        </label>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-2 mt-1">
+                                                <button type="button" onClick={() => cameraInputRef.current?.click()} className="flex flex-col items-center justify-center py-3 bg-white border border-emerald-200 hover:bg-emerald-50 rounded-xl transition active:scale-95 group">
+                                                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-1"><CameraIcon /></div>
+                                                    <span className="text-xs font-bold text-gray-800">Buka Kamera</span>
+                                                    <span className="text-[10px] text-gray-400">Foto Langsung</span>
+                                                </button>
+                                                <button type="button" onClick={() => galleryInputRef.current?.click()} className="flex flex-col items-center justify-center py-3 bg-white border border-blue-200 hover:bg-blue-50 rounded-xl transition active:scale-95 group">
+                                                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mb-1"><GalleryIcon /></div>
+                                                    <span className="text-xs font-bold text-gray-800">Buka Galeri</span>
+                                                    <span className="text-[10px] text-gray-400">Pilih dari HP</span>
+                                                </button>
+                                            </div>
+                                        )}
                                         {errors.evidence_pickup_path && <p className="text-red-500 text-xs mt-2">{errors.evidence_pickup_path}</p>}
                                     </div>
                                 </form>

@@ -164,10 +164,21 @@ export default function Sync({ auth }: Props) {
                                             <span className="font-bold text-sm text-gray-900">{item.companyName}</span>
                                             <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono">#{item.pickupId}</span>
                                         </div>
-                                        <div className="text-xs text-gray-500 flex gap-2">
-                                            <span>Org: {item.organic_weight}kg</span>
-                                            <span>Anorg: {item.anorganic_weight}kg</span>
-                                            <span>Res: {item.residue_weight}kg</span>
+                                        <div className="text-xs text-gray-500 flex flex-wrap gap-2 items-center">
+                                            {item.trash_bag_count && Number(item.trash_bag_count) > 0 && (
+                                                <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                                                    📦 {item.trash_bag_count} Trashbag
+                                                </span>
+                                            )}
+                                            {(Number(item.organic_weight || 0) > 0 || Number(item.anorganic_weight || 0) > 0 || Number(item.residue_weight || 0) > 0) ? (
+                                                <>
+                                                    <span>Org: {item.organic_weight || 0}kg</span>
+                                                    <span>Anorg: {item.anorganic_weight || 0}kg</span>
+                                                    <span>Res: {item.residue_weight || 0}kg</span>
+                                                </>
+                                            ) : (
+                                                <span className="text-gray-400 italic">Hanya Trashbag</span>
+                                            )}
                                         </div>
                                         {item.lastError && (
                                             <p className="text-[11px] text-red-600 bg-red-50 p-1.5 rounded">⚠ {item.lastError}</p>

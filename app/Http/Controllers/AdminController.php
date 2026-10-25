@@ -121,6 +121,7 @@ class AdminController extends Controller
                 'organic'        => round($c->pickups->sum('organic_weight'), 2),
                 'anorganic'      => round($c->pickups->sum('anorganic_weight'), 2),
                 'residue'        => round($c->pickups->sum('residue_weight'), 2),
+                'trash_bags'     => (int) $c->pickups->sum('trash_bag_count'),
                 'total_pickups'  => $c->pickups->count(),
             ];
         });
@@ -129,6 +130,7 @@ class AdminController extends Controller
             'organic'       => round($trashStats->sum('organic'), 2),
             'anorganic'     => round($trashStats->sum('anorganic'), 2),
             'residue'       => round($trashStats->sum('residue'), 2),
+            'trash_bags'    => (int) $trashStats->sum('trash_bags'),
             'total_pickups' => $trashStats->sum('total_pickups'),
             'total_companies' => $companies->count(),
             'active_companies' => $companies->where('subscription_status', 'active')->count(),
@@ -184,6 +186,8 @@ class AdminController extends Controller
                     'organic_weight'      => (float) $p->organic_weight,
                     'anorganic_weight'    => (float) $p->anorganic_weight,
                     'residue_weight'      => (float) $p->residue_weight,
+                    'trash_bag_count'     => $p->trash_bag_count !== null ? (int) $p->trash_bag_count : null,
+                    'evidence_pickup_path'=> $p->evidence_pickup_path,
                     'cancellation_reason' => $p->cancellation_reason,
                     'company'             => $p->company ? [
                         'id'           => $p->company->id,

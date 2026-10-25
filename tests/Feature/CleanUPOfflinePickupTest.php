@@ -181,4 +181,106 @@ class CleanUPOfflinePickupTest extends TestCase
         $pickup->refresh();
         $this->assertEquals('scheduled', $pickup->status);
     }
+
+    public function test_cleanup_can_submit_pickup_with_trashbag_only()
+    {
+        $pickup = Pickup::create([
+            'company_id' => $this->company->id,
+            'pickup_date' => Carbon::today()->toDateString(),
+            'status' => 'scheduled',
+        ]);
+
+        $image = UploadedFile::fake()->image('evidence_tb.jpg');
+
+        $response = $this->actingAs($this->cleanupUser)
+            ->withHeaders([
+                'X-Background-Sync' => 'true',
+                'Accept' => 'application/json',
+            ])
+            ->post(route('cleanup.submitPickup', $pickup->id), [
+                'trash_bag_count' => 6,
+                'evidence_pickup_path' => $image,
+            ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'pickup_id' => $pickup->id,
+            ]);
+
+        $this->assertDatabaseHas('pickups', [
+            'id' => $pickup->id,
+            'cleanup_id' => $this->cleanupUser->id,
+            'status' => 'completed',
+            'trash_bag_count' => 6,
+            'organic_weight' => 0,
+            'anorganic_weight' => 0,
+            'residue_weight' => 0,
+        ]);
+    }
+
+    public function test_cleanup_can_submit_pickup_with_both_tonase_and_trashbag()
+    {
+        $pickup = Pickup::create([
+            'company_id' => $this->company->id,
+            'pickup_date' => Carbon::today()->toDateString(),
+            'status' => 'scheduled',
+        ]);
+
+        $image = UploadedFile::fake()->image('evidence_both.jpg');
+
+        $response = $this->actingAs($this->cleanupUser)
+            ->withHeaders([
+                'X-Background-Sync' => 'true',
+                'Accept' => 'application/json',
+            ])
+            ->post(route('cleanup.submitPickup', $pickup->id), [
+                'trash_bag_count' => 8,
+                'organic_weight' => '10.50',
+                'anorganic_weight' => '5.20',
+                'residue_weight' => '1.80',
+                'evidence_pickup_path' => $image,
+            ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'pickup_id' => $pickup->id,
+            ]);
+
+        $this->assertDatabaseHas('pickups', [
+            'id' => $pickup->id,
+            'cleanup_id' => $this->cleanupUser->id,
+            'status' => 'completed',
+            'trash_bag_count' => 8,
+            'organic_weight' => 10.50,
+            'anorganic_weight' => 5.20,
+            'residue_weight' => 1.80,
+        ]);
+    }
+
+    public function test_cleanup_cannot_submit_pickup_without_trashbag_or_weight()
+    {
+        $pickup = Pickup::create([
+            'company_id' => $this->company->id,
+            'pickup_date' => Carbon::today()->toDateString(),
+            'status' => 'scheduled',
+        ]);
+
+        $image = UploadedFile::fake()->image('evidence_empty.jpg');
+
+        $response = $this->actingAs($this->cleanupUser)
+            ->withHeaders([
+                'X-Background-Sync' => 'true',
+                'Accept' => 'application/json',
+            ])
+            ->post(route('cleanup.submitPickup', $pickup->id), [
+                'evidence_pickup_path' => $image,
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+            ]);
+    }
 }

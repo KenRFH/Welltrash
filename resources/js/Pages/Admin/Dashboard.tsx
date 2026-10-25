@@ -33,6 +33,7 @@ interface TrashStat {
     organic: number;
     anorganic: number;
     residue: number;
+    trash_bags?: number;
     total_pickups: number;
 }
 
@@ -40,6 +41,7 @@ interface Totals {
     organic: number;
     anorganic: number;
     residue: number;
+    trash_bags?: number;
     total_pickups: number;
     total_companies: number;
     active_companies: number;
@@ -328,7 +330,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                         label="Total Penjemputan"
                         value={totals.total_pickups}
                         unit="Trip"
-                        badge="Terverifikasi"
+                        badge={totals.trash_bags && totals.trash_bags > 0 ? `${totals.trash_bags} Trashbag` : "Terverifikasi"}
                         color="teal"
                         subtext={
                             <div className="flex items-center gap-1.5">
@@ -573,9 +575,16 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                                     {stat.residue.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">Kg</span>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-right">
-                                                    <span className="font-black text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded-md">
-                                                        {companyTotal.toLocaleString('id-ID')} Kg
-                                                    </span>
+                                                    <div className="flex flex-col items-end gap-0.5">
+                                                        <span className="font-black text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded-md">
+                                                            {companyTotal.toLocaleString('id-ID')} Kg
+                                                        </span>
+                                                        {stat.trash_bags && stat.trash_bags > 0 ? (
+                                                            <span className="text-[10px] text-blue-700 font-bold">
+                                                                {stat.trash_bags} Trashbag
+                                                            </span>
+                                                        ) : null}
+                                                    </div>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-center">
                                                     <span className="text-xs font-bold text-slate-600">

@@ -9,6 +9,8 @@ interface Pickup {
     organic_weight: number | string | null;
     anorganic_weight: number | string | null;
     residue_weight: number | string | null;
+    trash_bag_count?: number | null;
+    evidence_pickup_path?: string | null;
     cancellation_reason: string | null;
     company: {
         id: number;
@@ -147,19 +149,40 @@ export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
                                     </div>
 
                                     {isCompleted ? (
-                                        <div className="grid grid-cols-3 gap-3 flex-shrink-0 lg:w-72">
-                                            <div className="bg-amber-50 rounded-2xl px-3 py-3 text-center border border-amber-100">
-                                                <p className="text-[10px] font-black text-amber-600 mb-1 uppercase tracking-widest">Org</p>
-                                                <p className="text-base font-black text-gray-900">{Number(pickup.organic_weight || 0)}<span className="text-[10px] ml-0.5 opacity-40">kg</span></p>
-                                            </div>
-                                            <div className="bg-teal-50 rounded-2xl px-3 py-3 text-center border border-teal-100">
-                                                <p className="text-[10px] font-black text-teal-600 mb-1 uppercase tracking-widest">Anorg</p>
-                                                <p className="text-base font-black text-gray-900">{Number(pickup.anorganic_weight || 0)}<span className="text-[10px] ml-0.5 opacity-40">kg</span></p>
-                                            </div>
-                                            <div className="bg-gray-50 rounded-2xl px-3 py-3 text-center border border-gray-100">
-                                                <p className="text-[10px] font-black text-gray-400 mb-1 uppercase tracking-widest">Res</p>
-                                                <p className="text-base font-black text-gray-900">{Number(pickup.residue_weight || 0)}<span className="text-[10px] ml-0.5 opacity-40">kg</span></p>
-                                            </div>
+                                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                            {pickup.trash_bag_count && Number(pickup.trash_bag_count) > 0 && (
+                                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                                                    📦 {pickup.trash_bag_count} Trashbag
+                                                </span>
+                                            )}
+                                            {(Number(pickup.organic_weight || 0) > 0 || Number(pickup.anorganic_weight || 0) > 0 || Number(pickup.residue_weight || 0) > 0) ? (
+                                                <div className="grid grid-cols-3 gap-2 w-64">
+                                                    <div className="bg-amber-50 rounded-xl px-2.5 py-2 text-center border border-amber-100">
+                                                        <p className="text-[9px] font-black text-amber-600 mb-0.5 uppercase">Org</p>
+                                                        <p className="text-sm font-black text-gray-900">{Number(pickup.organic_weight || 0)}<span className="text-[9px] ml-0.5 opacity-40">kg</span></p>
+                                                    </div>
+                                                    <div className="bg-teal-50 rounded-xl px-2.5 py-2 text-center border border-teal-100">
+                                                        <p className="text-[9px] font-black text-teal-600 mb-0.5 uppercase">Anorg</p>
+                                                        <p className="text-sm font-black text-gray-900">{Number(pickup.anorganic_weight || 0)}<span className="text-[9px] ml-0.5 opacity-40">kg</span></p>
+                                                    </div>
+                                                    <div className="bg-gray-50 rounded-xl px-2.5 py-2 text-center border border-gray-100">
+                                                        <p className="text-[9px] font-black text-gray-400 mb-0.5 uppercase">Res</p>
+                                                        <p className="text-sm font-black text-gray-900">{Number(pickup.residue_weight || 0)}<span className="text-[9px] ml-0.5 opacity-40">kg</span></p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-gray-400 font-medium">Berdasarkan Trashbag</span>
+                                            )}
+                                            {pickup.evidence_pickup_path && (
+                                                <a 
+                                                    href={`/storage/${pickup.evidence_pickup_path}`} 
+                                                    target="_blank" 
+                                                    rel="noreferrer"
+                                                    className="text-[11px] font-bold text-blue-600 hover:underline inline-flex items-center gap-1"
+                                                >
+                                                    📸 Lihat Bukti Foto
+                                                </a>
+                                            )}
                                         </div>
                                     ) : pickup.status === 'failed' && pickup.cancellation_reason ? (
                                         <div className="bg-red-50 rounded-2xl px-5 py-4 border border-red-100 lg:w-72">

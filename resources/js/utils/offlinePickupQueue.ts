@@ -8,9 +8,10 @@ export interface OfflinePickupRecord {
     id?: number;
     pickupId: number;
     companyName: string;
-    organic_weight: string | number;
-    anorganic_weight: string | number;
-    residue_weight: string | number;
+    trash_bag_count?: string | number | null;
+    organic_weight?: string | number | null;
+    anorganic_weight?: string | number | null;
+    residue_weight?: string | number | null;
     evidence_blob: Blob;
     evidence_filename: string;
     offline_recorded_at: string; // ISO string
@@ -325,9 +326,18 @@ export async function syncSinglePickup(
 
     const buildFormData = () => {
         const formData = new FormData();
-        formData.append('organic_weight', String(record.organic_weight));
-        formData.append('anorganic_weight', String(record.anorganic_weight));
-        formData.append('residue_weight', String(record.residue_weight));
+        if (record.trash_bag_count !== undefined && record.trash_bag_count !== null && String(record.trash_bag_count).trim() !== '') {
+            formData.append('trash_bag_count', String(record.trash_bag_count));
+        }
+        if (record.organic_weight !== undefined && record.organic_weight !== null && String(record.organic_weight).trim() !== '') {
+            formData.append('organic_weight', String(record.organic_weight));
+        }
+        if (record.anorganic_weight !== undefined && record.anorganic_weight !== null && String(record.anorganic_weight).trim() !== '') {
+            formData.append('anorganic_weight', String(record.anorganic_weight));
+        }
+        if (record.residue_weight !== undefined && record.residue_weight !== null && String(record.residue_weight).trim() !== '') {
+            formData.append('residue_weight', String(record.residue_weight));
+        }
         formData.append('offline_recorded_at', record.offline_recorded_at);
         formData.append(
             'evidence_pickup_path',

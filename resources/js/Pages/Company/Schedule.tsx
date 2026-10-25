@@ -21,6 +21,7 @@ interface Pickup {
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
+    trash_bag_count?: number | null;
     cancellation_reason: string | null;
 }
 
@@ -315,7 +316,14 @@ export default function Schedule({ company, pickups }: Props) {
                                                         {pickup.cancellation_reason}
                                                     </span>
                                                 ) : isCompleted ? (
-                                                    <span className="text-emerald-700 font-medium">Selesai terverifikasi</span>
+                                                    <span className="text-emerald-700 font-medium flex items-center gap-1.5">
+                                                        <span>Selesai</span>
+                                                        {pickup.trash_bag_count && Number(pickup.trash_bag_count) > 0 && (
+                                                            <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded font-bold">
+                                                                {pickup.trash_bag_count} TB
+                                                            </span>
+                                                        )}
+                                                    </span>
                                                 ) : (
                                                     <span className="text-slate-400">Menunggu jadwal</span>
                                                 )}

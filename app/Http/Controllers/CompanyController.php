@@ -55,6 +55,7 @@ class CompanyController extends Controller
         $totalOrganic = $company->pickups()->where('status', 'completed')->sum('organic_weight') ?? 0;
         $totalAnorganic = $company->pickups()->where('status', 'completed')->sum('anorganic_weight') ?? 0;
         $totalResidue = $company->pickups()->where('status', 'completed')->sum('residue_weight') ?? 0;
+        $totalTrashBags = (int) ($company->pickups()->where('status', 'completed')->sum('trash_bag_count') ?? 0);
 
         // Calculate Weekly Statistics for the current month
         $currentMonthPickups = $company->pickups()
@@ -84,6 +85,7 @@ class CompanyController extends Controller
                 'total_organic' => $totalOrganic,
                 'total_anorganic' => $totalAnorganic,
                 'total_residue' => $totalResidue,
+                'total_trash_bags' => $totalTrashBags,
             ],
             'weekly_statistics' => $weeklyStatistics,
         ]);

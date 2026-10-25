@@ -344,6 +344,7 @@
         $totalOrganic   = $pickups->where('status', 'completed')->sum('organic_weight');
         $totalAnorganic = $pickups->where('status', 'completed')->sum('anorganic_weight');
         $totalResidue   = $pickups->where('status', 'completed')->sum('residue_weight');
+        $totalTrashBags = $pickups->where('status', 'completed')->sum('trash_bag_count');
         $totalSemua     = $totalOrganic + $totalAnorganic + $totalResidue;
     @endphp
     <div class="summary-row">
@@ -362,6 +363,9 @@
         <div class="summary-card card-total">
             <div class="card-label">Total Sampah</div>
             <div class="card-value">{{ number_format($totalSemua, 1) }} <span class="card-unit">kg</span></div>
+            @if($totalTrashBags > 0)
+                <div style="font-size: 8px; color: #9ca3af; margin-top: 2px; font-weight: bold;">📦 {{ $totalTrashBags }} Trashbag</div>
+            @endif
         </div>
     </div>
 
@@ -375,13 +379,14 @@
         <thead>
             <tr>
                 <th style="width:4%">No</th>
-                <th style="width:15%">Tanggal</th>
-                <th class="center" style="width:14%">Organik (kg)</th>
-                <th class="center" style="width:15%">Anorganik (kg)</th>
-                <th class="center" style="width:12%">Residu (kg)</th>
-                <th class="center" style="width:13%">Total (kg)</th>
-                <th style="width:15%">CleanUP</th>
-                <th class="center" style="width:12%">Status</th>
+                <th style="width:14%">Tanggal</th>
+                <th class="center" style="width:12%">Organik</th>
+                <th class="center" style="width:12%">Anorganik</th>
+                <th class="center" style="width:11%">Residu</th>
+                <th class="center" style="width:12%">Trashbag</th>
+                <th class="center" style="width:12%">Total (kg)</th>
+                <th style="width:13%">CleanUP</th>
+                <th class="center" style="width:10%">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -395,6 +400,7 @@
                 <td class="center organic-val">{{ number_format($pickup->organic_weight ?? 0, 1) }}</td>
                 <td class="center anorganic-val">{{ number_format($pickup->anorganic_weight ?? 0, 1) }}</td>
                 <td class="center residue-val">{{ number_format($pickup->residue_weight ?? 0, 1) }}</td>
+                <td class="center" style="font-weight: bold; color: #2563eb;">{{ $pickup->trash_bag_count ? $pickup->trash_bag_count . ' ktg' : '-' }}</td>
                 <td class="center total-val">{{ number_format($berat, 1) }}</td>
                 <td>{{ $pickup->cleanup->name ?? '-' }}</td>
                 <td class="center">

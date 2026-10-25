@@ -155,12 +155,32 @@ class CleanUPController extends Controller
         }
 
         $request->validate([
-            'organic_weight' => 'required|numeric|min:0',
-            'anorganic_weight' => 'required|numeric|min:0',
-            'residue_weight' => 'required|numeric|min:0',
+            'trash_bag_count' => 'nullable|integer|min:0',
+            'organic_weight' => 'nullable|numeric|min:0',
+            'anorganic_weight' => 'nullable|numeric|min:0',
+            'residue_weight' => 'nullable|numeric|min:0',
             'evidence_pickup_path' => 'required|image|max:5120',
             'offline_recorded_at' => 'nullable|string',
         ]);
+
+        $trashBagCount = $request->filled('trash_bag_count') ? (int) $request->trash_bag_count : null;
+        $hasTrashBag = $trashBagCount !== null && $trashBagCount > 0;
+
+        $hasWeightInput = $request->filled('organic_weight') || $request->filled('anorganic_weight') || $request->filled('residue_weight');
+        $organicWeight = $request->filled('organic_weight') ? (float) $request->organic_weight : 0.0;
+        $anorganicWeight = $request->filled('anorganic_weight') ? (float) $request->anorganic_weight : 0.0;
+        $residueWeight = $request->filled('residue_weight') ? (float) $request->residue_weight : 0.0;
+
+        if (!$hasTrashBag && !$hasWeightInput) {
+            $errorMessage = 'Harap masukkan jumlah trashbag atau berat tonase sampah.';
+            if ($request->expectsJson() || $request->header('X-Background-Sync') === 'true') {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                ], 422);
+            }
+            return back()->with('error', $errorMessage);
+        }
 
         $cleanup = Auth::user();
 
@@ -169,9 +189,10 @@ class CleanUPController extends Controller
         $pickup->update([
             'cleanup_id' => $cleanup->id,
             'status' => 'completed',
-            'organic_weight' => $request->organic_weight,
-            'anorganic_weight' => $request->anorganic_weight,
-            'residue_weight' => $request->residue_weight,
+            'organic_weight' => $organicWeight,
+            'anorganic_weight' => $anorganicWeight,
+            'residue_weight' => $residueWeight,
+            'trash_bag_count' => $trashBagCount,
             'evidence_pickup_path' => $evidencePickupPath,
         ]);
 

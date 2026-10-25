@@ -15,7 +15,15 @@ class Pickup extends Model
         'organic_weight',
         'anorganic_weight',
         'residue_weight',
+        'trash_bag_count',
         'evidence_pickup_path',
+    ];
+
+    protected $casts = [
+        'trash_bag_count' => 'integer',
+        'organic_weight' => 'float',
+        'anorganic_weight' => 'float',
+        'residue_weight' => 'float',
     ];
 
     public function company()

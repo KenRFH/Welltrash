@@ -22,6 +22,7 @@ interface Pickup {
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
+    trash_bag_count?: number | null;
     evidence_pickup_path: string | null;
     cancellation_reason: string | null;
     pickup_date: string;
@@ -230,7 +231,9 @@ export default function History({ auth, company, pickups }: Props) {
                                                 </span>
                                                 {isCompleted && (
                                                     <span className="font-semibold text-emerald-700">
-                                                        Total Muatan: {totalWeight.toLocaleString('id-ID')} Kg
+                                                        Total Muatan: {totalWeight > 0 ? `${totalWeight.toLocaleString('id-ID')} Kg` : ''}
+                                                        {totalWeight > 0 && pickup.trash_bag_count ? ' • ' : ''}
+                                                        {pickup.trash_bag_count ? `${pickup.trash_bag_count} Trashbag` : (totalWeight === 0 ? '0 Kg' : '')}
                                                     </span>
                                                 )}
                                             </div>
@@ -247,18 +250,28 @@ export default function History({ auth, company, pickups }: Props) {
                                     {isCompleted && (
                                         <div className="flex flex-wrap items-center gap-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="px-3 py-1.5 rounded-xl bg-amber-50/80 border border-amber-100 text-center">
-                                                    <span className="text-[10px] uppercase font-bold text-amber-700 block">Organik</span>
-                                                    <span className="text-xs font-black text-amber-900">{pickup.organic_weight || 0} kg</span>
-                                                </div>
-                                                <div className="px-3 py-1.5 rounded-xl bg-teal-50/80 border border-teal-100 text-center">
-                                                    <span className="text-[10px] uppercase font-bold text-teal-700 block">Anorganik</span>
-                                                    <span className="text-xs font-black text-teal-900">{pickup.anorganic_weight || 0} kg</span>
-                                                </div>
-                                                <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                                                    <span className="text-[10px] uppercase font-bold text-slate-500 block">Residu</span>
-                                                    <span className="text-xs font-black text-slate-800">{pickup.residue_weight || 0} kg</span>
-                                                </div>
+                                                {pickup.trash_bag_count && Number(pickup.trash_bag_count) > 0 && (
+                                                    <div className="px-3 py-1.5 rounded-xl bg-blue-50/80 border border-blue-200 text-center">
+                                                        <span className="text-[10px] uppercase font-bold text-blue-700 block">Trashbag</span>
+                                                        <span className="text-xs font-black text-blue-900">{pickup.trash_bag_count} Ktg</span>
+                                                    </div>
+                                                )}
+                                                {(totalWeight > 0 || !pickup.trash_bag_count) && (
+                                                    <>
+                                                        <div className="px-3 py-1.5 rounded-xl bg-amber-50/80 border border-amber-100 text-center">
+                                                            <span className="text-[10px] uppercase font-bold text-amber-700 block">Organik</span>
+                                                            <span className="text-xs font-black text-amber-900">{pickup.organic_weight || 0} kg</span>
+                                                        </div>
+                                                        <div className="px-3 py-1.5 rounded-xl bg-teal-50/80 border border-teal-100 text-center">
+                                                            <span className="text-[10px] uppercase font-bold text-teal-700 block">Anorganik</span>
+                                                            <span className="text-xs font-black text-teal-900">{pickup.anorganic_weight || 0} kg</span>
+                                                        </div>
+                                                        <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                                                            <span className="text-[10px] uppercase font-bold text-slate-500 block">Residu</span>
+                                                            <span className="text-xs font-black text-slate-800">{pickup.residue_weight || 0} kg</span>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
 
                                             {pickup.evidence_pickup_path && (

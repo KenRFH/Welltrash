@@ -32,6 +32,7 @@ interface Props {
         total_organic: number;
         total_anorganic: number;
         total_residue: number;
+        total_trash_bags?: number;
     };
     weekly_statistics: Array<{
         week: string;
@@ -46,6 +47,7 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
     const totalOrganic = Number(statistics.total_organic || 0);
     const totalAnorganic = Number(statistics.total_anorganic || 0);
     const totalResidue = Number(statistics.total_residue || 0);
+    const totalTrashBags = Number(statistics.total_trash_bags || 0);
     const grandTotal = totalOrganic + totalAnorganic + totalResidue;
 
     // Percentages
@@ -147,7 +149,9 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                         <span className="text-xs font-bold text-slate-400 uppercase">Kg</span>
                     </div>
                     <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-medium">Diversi TPA</span>
+                        <span className="text-slate-500 font-medium">
+                            {totalTrashBags > 0 ? `📦 ${totalTrashBags.toLocaleString('id-ID')} Trashbag` : 'Diversi TPA'}
+                        </span>
                         <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
                             {diversionRate.toFixed(1)}% Sirkuler
                         </span>

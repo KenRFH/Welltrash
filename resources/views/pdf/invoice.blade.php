@@ -398,6 +398,7 @@
                 <th>Organik (kg)</th>
                 <th>Anorganik (kg)</th>
                 <th>Residu (kg)</th>
+                <th>Trashbag</th>
                 <th>Total (kg)</th>
                 <th>Status</th>
             </tr>
@@ -410,6 +411,7 @@
                 <td>{{ number_format($pickup->organic_weight ?? 0, 1) }}</td>
                 <td>{{ number_format($pickup->anorganic_weight ?? 0, 1) }}</td>
                 <td>{{ number_format($pickup->residue_weight ?? 0, 1) }}</td>
+                <td>{{ $pickup->trash_bag_count ? $pickup->trash_bag_count . ' ktg' : '-' }}</td>
                 <td>
                     {{ number_format(($pickup->organic_weight ?? 0) + ($pickup->anorganic_weight ?? 0) + ($pickup->residue_weight ?? 0), 1) }}
                 </td>
