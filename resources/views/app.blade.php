@@ -37,13 +37,28 @@
         <meta name="keywords" content="jasa pengangkutan sampah jember, pengelolaan limbah bisnis jember, b2b waste management jember, welltrash">
         <link rel="canonical" href="https://welltrash.com/">
 
+        <!-- Theme Initialization Script (prevents theme flicker) -->
+        <script>
+            (function () {
+                try {
+                    var theme = localStorage.getItem('theme');
+                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (theme === 'dark' || (!theme && prefersDark)) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                } catch (e) {}
+            })();
+        </script>
+
         <!-- Scripts -->
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/Pages/{$page['component']}.tsx"])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-150">
         @inertia
     </body>
 </html>

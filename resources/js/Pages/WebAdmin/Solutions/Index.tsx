@@ -81,6 +81,7 @@ export default function Index({ solutions, settings, auth, flash }: Props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [viewingSolution, setViewingSolution] = useState<SolutionItem | null>(null);
 
     const headerForm = useForm({
         badge: settings?.badge || 'SOLUSI B2B TERPADU',
@@ -332,7 +333,7 @@ export default function Index({ solutions, settings, auth, flash }: Props) {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="cards-grid">
                                 {solutions.map((item) => (
                                     <div key={item.id} className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-all group">
-                                        <div>
+                                        <div className="cursor-pointer" onClick={() => setViewingSolution(item)}>
                                             <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden border-b border-slate-100">
                                                 {item.image_path ? (
                                                     <img src={`/storage/${item.image_path}`} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -397,6 +398,55 @@ export default function Index({ solutions, settings, auth, flash }: Props) {
                         onSubmit={handleCardSubmit}
                         availableIcons={AVAILABLE_ICONS}
                     />
+
+                    {viewingSolution && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" onClick={() => setViewingSolution(null)}>
+                            <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 z-10 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                                <div className="relative aspect-[16/9] bg-slate-100 overflow-hidden">
+                                    {viewingSolution.image_path ? (
+                                        <img src={`/storage/${viewingSolution.image_path}`} alt={viewingSolution.title} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                            <ImageIcon className="w-12 h-12 opacity-30" />
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                    <span className="absolute top-4 left-4 font-mono text-xs text-white bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                                        {viewingSolution.segment}
+                                    </span>
+                                    <span className="absolute top-4 right-4 font-mono text-xs font-bold text-white bg-slate-900/80 px-2.5 py-1 rounded-md">
+                                        Urutan #{viewingSolution.order_num}
+                                    </span>
+                                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                                        <span className={`text-xs font-semibold px-3 py-1 rounded-lg backdrop-blur-md ${viewingSolution.accent_color === 'orange' ? 'bg-orange-500/90 text-white' : 'bg-emerald-600/90 text-white'}`}>
+                                            {viewingSolution.tag}
+                                        </span>
+                                        <div className="w-9 h-9 rounded-lg bg-white/95 text-slate-900 flex items-center justify-center shadow-xs">
+                                            {React.createElement(getSolutionIcon(viewingSolution.icon), { className: 'w-4 h-4' })}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-6 overflow-y-auto space-y-4">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-900">{viewingSolution.title}</h3>
+                                        <p className="text-xs font-mono text-slate-400 mt-0.5">Icon: {viewingSolution.icon} • Target: {viewingSolution.link_url || '/layanan'}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-1">Deskripsi Lengkap:</span>
+                                        <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">{viewingSolution.desc}</p>
+                                    </div>
+                                </div>
+                                <div className="p-4 sm:px-6 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                                    <button type="button" onClick={() => setViewingSolution(null)} className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl cursor-pointer">
+                                        Tutup
+                                    </button>
+                                    <button type="button" onClick={() => { const item = viewingSolution; setViewingSolution(null); openEditModal(item); }} className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer">
+                                        <Pencil className="w-3.5 h-3.5" /> Edit Kartu Ini
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

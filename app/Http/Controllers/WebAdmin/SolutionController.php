@@ -18,6 +18,7 @@ class SolutionController extends Controller
             'badge' => SiteSetting::get('solution_badge', 'SOLUSI B2B TERPADU'),
             'title' => SiteSetting::get('solution_title', 'Dirancang untuk skala operasional bisnis Anda.'),
             'subtitle' => SiteSetting::get('solution_subtitle', 'Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.'),
+            'is_visible' => SiteSetting::get('solution_visible', '1') !== '0',
         ];
 
         return Inertia::render('WebAdmin/Solutions/Index', [
@@ -32,13 +33,28 @@ class SolutionController extends Controller
             'badge' => 'required|string|max:100',
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string|max:1000',
+            'is_visible' => 'nullable|boolean',
         ]);
 
         SiteSetting::set('solution_badge', $validated['badge']);
         SiteSetting::set('solution_title', $validated['title']);
         SiteSetting::set('solution_subtitle', $validated['subtitle']);
+        if ($request->has('is_visible')) {
+            SiteSetting::set('solution_visible', $request->boolean('is_visible') ? '1' : '0');
+        }
 
         return redirect()->route('webadmin.solutions.index')->with('success', 'Pengaturan teks bagian solusi berhasil diperbarui.');
+    }
+
+    public function toggleVisibility()
+    {
+        $current = SiteSetting::get('solution_visible', '1') !== '0';
+        SiteSetting::set('solution_visible', $current ? '0' : '1');
+        $msg = $current
+            ? 'Bagian Solusi B2B berhasil dinonaktifkan (disembunyikan dari halaman depan).'
+            : 'Bagian Solusi B2B berhasil diaktifkan (ditampilkan di halaman depan).';
+
+        return redirect()->route('webadmin.solutions.index')->with('success', $msg);
     }
 
     public function store(Request $request)

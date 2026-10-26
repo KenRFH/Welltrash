@@ -116,8 +116,8 @@ const row2List = [...row2Partners, ...row2Partners, ...row2Partners];
 
 const PartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
     return (
-        <div className="flex-shrink-0 group/card flex items-center gap-3.5 px-4 sm:px-5 py-3 rounded-2xl bg-zinc-50/80 border border-zinc-200/80 hover:bg-white hover:border-emerald-500/50 hover:shadow-md hover:shadow-emerald-950/5 transition-all duration-300 select-none cursor-default">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white border border-zinc-200/70 p-2 flex items-center justify-center shrink-0 shadow-2xs group-hover/card:scale-105 transition-transform duration-300">
+        <div className="flex-shrink-0 group/card flex items-center gap-3.5 px-4 sm:px-5 py-3 rounded-2xl bg-zinc-50/80 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-850 hover:border-emerald-500/50 hover:shadow-md hover:shadow-emerald-950/5 dark:hover:shadow-black/40 transition-all duration-300 select-none cursor-default">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200/70 dark:border-zinc-700 p-2 flex items-center justify-center shrink-0 shadow-2xs group-hover/card:scale-105 transition-transform duration-300">
                 <img
                     src={partner.icon}
                     alt={partner.name}
@@ -126,12 +126,12 @@ const PartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
                 />
             </div>
             <div className="flex flex-col text-left">
-                <span className="font-sans font-bold text-xs sm:text-sm text-zinc-900 group-hover/card:text-emerald-950 transition-colors whitespace-nowrap">
+                <span className="font-sans font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 group-hover/card:text-emerald-950 dark:group-hover/card:text-emerald-400 transition-colors whitespace-nowrap">
                     {partner.name}
                 </span>
                 <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    <span className="font-mono text-[10px] sm:text-[11px] text-zinc-500 group-hover/card:text-emerald-700 transition-colors uppercase tracking-wider whitespace-nowrap">
+                    <span className="font-mono text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 group-hover/card:text-emerald-700 dark:group-hover/card:text-emerald-400 transition-colors uppercase tracking-wider whitespace-nowrap">
                         {partner.badge}
                     </span>
                 </div>
@@ -142,7 +142,7 @@ const PartnerCard: React.FC<{ partner: Partner }> = ({ partner }) => {
 
 const Mitra: React.FC = () => {
     return (
-        <section className="bg-white border-b border-zinc-100 py-16 lg:py-24 overflow-hidden">
+        <section className="bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800 py-16 lg:py-24 overflow-hidden">
             <style>{`
                 @keyframes marqueeLeft {
                     0% { transform: translateX(0%); }
@@ -187,17 +187,11 @@ const Mitra: React.FC = () => {
                     transition={{ duration: 0.5 }}
                     className="text-center max-w-3xl mx-auto mb-10 sm:mb-12"
                 >
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-xs font-mono font-medium mb-3.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>KEMITRAAN RESMI &amp; TERVERIFIKASI</span>
-                        <span className="text-orange-600 font-bold ml-1">• JEMBER</span>
-                    </div>
-
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-sans font-bold text-zinc-900 tracking-tight leading-tight mb-3">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-sans font-bold text-zinc-900 dark:text-white tracking-tight leading-tight mb-3">
                         Dipercaya oleh Rumah Sakit, Instansi Publik, &amp; Bisnis Terkemuka
                     </h2>
 
-                    <p className="text-zinc-600 font-sans text-sm sm:text-base leading-relaxed">
+                    <p className="text-zinc-600 dark:text-zinc-300 font-sans text-sm sm:text-base leading-relaxed">
                         Kolaborasi strategis pengelolaan limbah bertanggung jawab bersama fasilitas kesehatan rujukan, regulator daerah, dan sektor komersial di Kabupaten Jember.
                     </p>
                 </motion.div>
@@ -206,8 +200,8 @@ const Mitra: React.FC = () => {
             {/* 2-Row Running Marquee (Edge-to-Edge) */}
             <div className="relative w-full overflow-hidden flex flex-col gap-4 sm:gap-5 py-2">
                 {/* Edge fade gradients for smooth entrance/exit */}
-                <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 lg:w-44 z-10 bg-gradient-to-r from-white via-white/80 to-transparent" />
-                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 lg:w-44 z-10 bg-gradient-to-l from-white via-white/80 to-transparent" />
+                <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 lg:w-44 z-10 bg-gradient-to-r from-white dark:from-zinc-950 via-white/80 dark:via-zinc-950/80 to-transparent" />
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 lg:w-44 z-10 bg-gradient-to-l from-white dark:from-zinc-950 via-white/80 dark:via-zinc-950/80 to-transparent" />
 
                 {/* Baris 1: Running ke Kiri */}
                 <div className="marquee-row flex overflow-hidden select-none">

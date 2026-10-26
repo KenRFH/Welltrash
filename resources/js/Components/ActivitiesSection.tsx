@@ -26,7 +26,7 @@ function formatDate(d: string | null) {
 
 const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => {
     return (
-        <section id="kegiatan" className="scroll-mt-24 bg-white py-20 lg:py-28 border-b border-zinc-100">
+        <section id="kegiatan" className="scroll-mt-24 bg-white dark:bg-zinc-950 py-20 lg:py-28 border-b border-zinc-100 dark:border-zinc-800">
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -36,20 +36,20 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                     className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14"
                 >
                     <div>
-                        <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
+                        <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
                             DOKUMENTASI OPERASIONAL
                         </span>
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 leading-tight">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
                             Kegiatan di lapangan.
                         </h2>
-                        <p className="text-zinc-600 font-sans text-base max-w-xl mt-3 leading-relaxed">
+                        <p className="text-zinc-600 dark:text-zinc-300 font-sans text-base max-w-xl mt-3 leading-relaxed">
                             Dokumentasi komitmen berkelanjutan dan keterlibatan tim WellTrash dalam menjaga standar kebersihan di berbagai sektor industri.
                         </p>
                     </div>
 
                     <Link
                         href={route("activity")}
-                        className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-zinc-900 hover:text-emerald-700 transition-colors shrink-0 group"
+                        className="inline-flex items-center gap-2 text-sm font-sans font-semibold text-zinc-900 dark:text-zinc-200 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors shrink-0 group"
                     >
                         <span>Lihat Semua Kegiatan</span>
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -57,8 +57,8 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                 </motion.div>
 
                 {activities.length === 0 ? (
-                    <div className="py-16 text-center rounded-2xl border border-dashed border-zinc-200 bg-zinc-50">
-                        <p className="text-zinc-500 font-sans text-sm">Belum ada dokumentasi kegiatan yang dipublikasikan.</p>
+                    <div className="py-16 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
+                        <p className="text-zinc-500 dark:text-zinc-400 font-sans text-sm">Belum ada dokumentasi kegiatan yang dipublikasikan.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -124,23 +124,23 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                 >
                                     <Link
                                         href={route("activity.show", act.id)}
-                                        className="group bg-zinc-50/60 hover:bg-white border border-zinc-200/80 rounded-2xl p-6 flex flex-col justify-between h-full hover:border-zinc-300 hover:shadow-md transition-all duration-300"
+                                        className="group bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 flex flex-col justify-between h-full hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md transition-all duration-300"
                                     >
                                         <div>
                                             {act.date && (
-                                                <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-mono mb-2">
-                                                    <Calendar className="w-3.5 h-3.5 text-emerald-700" />
+                                                <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-mono mb-2">
+                                                    <Calendar className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />
                                                     <span>{formatDate(act.date)}</span>
                                                 </div>
                                             )}
-                                            <h3 className="font-sans font-bold text-lg text-zinc-900 mb-2 group-hover:text-emerald-700 transition-colors">
+                                            <h3 className="font-sans font-bold text-lg text-zinc-900 dark:text-white mb-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
                                                 {act.title}
                                             </h3>
-                                            <p className="font-sans text-xs sm:text-sm text-zinc-600 line-clamp-2 leading-relaxed">
+                                            <p className="font-sans text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 line-clamp-2 leading-relaxed">
                                                 {act.description}
                                             </p>
                                         </div>
-                                        <span className="font-sans text-xs font-semibold text-zinc-900 group-hover:text-emerald-700 mt-4 inline-flex items-center gap-1 group-hover:translate-x-1 transition-all">
+                                        <span className="font-sans text-xs font-semibold text-zinc-900 dark:text-zinc-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 mt-4 inline-flex items-center gap-1 group-hover:translate-x-1 transition-all">
                                             Baca selengkapnya <ArrowRight className="w-3.5 h-3.5" />
                                         </span>
                                     </Link>

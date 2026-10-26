@@ -47,9 +47,10 @@ Route::get('/', function () {
     $katalogs   = \App\Models\Katalog::orderBy('created_at', 'desc')->take(3)->get();
     $solutions  = \App\Models\Solution::orderBy('order_num', 'asc')->orderBy('created_at', 'asc')->get();
     $solutionSettings = [
-        'badge'    => \App\Models\SiteSetting::get('solution_badge', 'SOLUSI B2B TERPADU'),
-        'title'    => \App\Models\SiteSetting::get('solution_title', 'Dirancang untuk skala operasional bisnis Anda.'),
-        'subtitle' => \App\Models\SiteSetting::get('solution_subtitle', 'Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.'),
+        'badge'      => \App\Models\SiteSetting::get('solution_badge', 'SOLUSI B2B TERPADU'),
+        'title'      => \App\Models\SiteSetting::get('solution_title', 'Dirancang untuk skala operasional bisnis Anda.'),
+        'subtitle'   => \App\Models\SiteSetting::get('solution_subtitle', 'Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.'),
+        'is_visible' => \App\Models\SiteSetting::get('solution_visible', '1') !== '0',
     ];
     return Inertia::render('Welcome', [
         'canLogin'         => Route::has('login'),
@@ -195,6 +196,7 @@ Route::middleware(['auth', 'role:web_admin'])
     ->group(function () {
         Route::get('/dashboard', [WebAdminController::class, 'dashboard'])->name('dashboard');
         Route::put('/solutions/settings', [App\Http\Controllers\WebAdmin\SolutionController::class, 'updateSettings'])->name('solutions.settings');
+        Route::post('/solutions/toggle-visibility', [App\Http\Controllers\WebAdmin\SolutionController::class, 'toggleVisibility'])->name('solutions.toggle-visibility');
         Route::resource('solutions', App\Http\Controllers\WebAdmin\SolutionController::class)->except(['show', 'create', 'edit']);
         Route::resource('activities', App\Http\Controllers\WebAdmin\ActivityController::class)->except(['show']);
         Route::resource('katalogs', App\Http\Controllers\WebAdmin\KatalogController::class)->except(['show']);

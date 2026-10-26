@@ -53,7 +53,7 @@ const steps: Step[] = [
 
 const WasteFlow: React.FC = () => {
     return (
-        <section id="cara-kerja" className="scroll-mt-24 bg-zinc-50/50 py-20 lg:py-28 border-b border-zinc-200/60">
+        <section id="cara-kerja" className="scroll-mt-24 bg-zinc-50/50 dark:bg-zinc-900/40 py-20 lg:py-28 border-b border-zinc-200/60 dark:border-zinc-800">
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
                 {/* Header */}
                 <motion.div
@@ -63,13 +63,13 @@ const WasteFlow: React.FC = () => {
                     transition={{ duration: 0.5 }}
                     className="max-w-3xl mb-14 lg:mb-16"
                 >
-                    <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 bg-emerald-50 border border-emerald-200/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
+                    <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
                         ALUR SISTEMATIS
                     </span>
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 leading-tight mb-4">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 dark:text-white leading-tight mb-4">
                         Sederhana untuk Anda. Terukur untuk bisnis.
                     </h2>
-                    <p className="text-zinc-600 font-sans text-base lg:text-lg leading-relaxed">
+                    <p className="text-zinc-600 dark:text-zinc-300 font-sans text-base lg:text-lg leading-relaxed">
                         Kami merancang alur kerja yang terstruktur agar bisnis Anda dapat fokus pada operasional utama, sementara pengelolaan sampah ditangani secara tuntas dan bertanggung jawab.
                     </p>
                 </motion.div>
@@ -87,47 +87,47 @@ const WasteFlow: React.FC = () => {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                                 whileHover={{ y: -4 }}
-                                className="bg-white border border-zinc-200/80 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-300 hover:shadow-lg hover:shadow-zinc-200/40 transition-all duration-300 group"
+                                className="bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-zinc-200/40 dark:hover:shadow-black/40 transition-all duration-300 group"
                             >
                                 <div>
                                     <div className="flex items-center justify-between mb-4">
-                                        <span className="font-mono text-xs font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors">
+                                        <span className="font-mono text-xs font-bold text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
                                             LANGKAH {step.num}
                                         </span>
                                         <span
                                             className={`w-2 h-2 rounded-full ${
-                                                isOrange ? "bg-orange-500" : "bg-emerald-600"
+                                                isOrange ? "bg-orange-500" : "bg-emerald-600 dark:bg-emerald-400"
                                             }`}
                                         />
                                     </div>
 
                                     {/* Web Icon Visual Badge */}
-                                    <div className="w-14 h-14 rounded-2xl bg-zinc-50 border border-zinc-200/70 p-3 mb-5 flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-2xs">
+                                    <div className="w-14 h-14 rounded-2xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-200/70 dark:border-zinc-700/60 p-3 mb-5 flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-2xs">
                                         <div
                                             className={`w-full h-full rounded-xl flex items-center justify-center ${
                                                 isOrange
-                                                    ? "bg-orange-50 text-orange-600 group-hover:bg-orange-500 group-hover:text-white"
-                                                    : "bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white"
+                                                    ? "bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 group-hover:bg-orange-500 group-hover:text-white"
+                                                    : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white"
                                             } transition-colors duration-200`}
                                         >
                                             <IconComponent className="w-6 h-6" />
                                         </div>
                                     </div>
 
-                                    <h3 className="font-sans font-bold text-lg text-zinc-900 mb-2 tracking-tight">
+                                    <h3 className="font-sans font-bold text-lg text-zinc-900 dark:text-white mb-2 tracking-tight">
                                         {step.title}
                                     </h3>
-                                    <p className="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed mb-4">
+                                    <p className="font-sans text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed mb-4">
                                         {step.desc}
                                     </p>
 
                                     {/* Action Points / Checklist */}
-                                    <div className="pt-3 border-t border-zinc-100 space-y-1.5">
+                                    <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
                                         {step.points.map((pt) => (
-                                            <div key={pt} className="flex items-center gap-2 text-xs font-sans text-zinc-500">
+                                            <div key={pt} className="flex items-center gap-2 text-xs font-sans text-zinc-500 dark:text-zinc-400">
                                                 <span
                                                     className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                                        isOrange ? "bg-orange-400" : "bg-emerald-500"
+                                                        isOrange ? "bg-orange-400" : "bg-emerald-500 dark:bg-emerald-400"
                                                     }`}
                                                 />
                                                 <span>{pt}</span>

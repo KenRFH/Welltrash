@@ -15,9 +15,27 @@
     color: #0C3325;
 }
 
+html.dark {
+    color-scheme: dark;
+}
+
+html.dark ::selection {
+    background-color: #059669;
+    color: #ffffff;
+}
+
+html.dark ::-moz-selection {
+    background-color: #059669;
+    color: #ffffff;
+}
+
 html {
     scroll-behavior: smooth;
     caret-color: #103C2B;
+}
+
+html.dark {
+    caret-color: #34d399;
 }
 
 /* Custom Themed Scrollbar */
@@ -37,6 +55,14 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(16, 39, 29, 0.4);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
 }
 
 /* Utility to completely hide scrollbars while preserving scroll functionality */
