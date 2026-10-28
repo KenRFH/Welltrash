@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Pickup;
@@ -201,5 +202,47 @@ class AdminController extends Controller
             'cleanup'  => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
             'pickups' => $pickups,
         ]);
+    }
+
+    /**
+     * Get real-time coordinates of all active operators.
+     */
+    // ponytail: active fleet live coordinates endpoint; add geofencing alerts when scale exceeds 50 trucks.
+    public function liveLocations()
+    {
+        $today = Carbon::today()->toDateString();
+        $cleanups = User::where('role', 'CleanUP')
+            ->whereNotNull('current_lat')
+            ->whereNotNull('current_lng')
+            ->select('id', 'name', 'email', 'current_lat', 'current_lng', 'last_location_at')
+            ->with(['pickups' => function ($q) use ($today) {
+                $q->whereDate('pickup_date', $today)
+                  ->whereIn('status', ['on_the_way', 'scheduled'])
+                  ->with('company:id,company_name,address,latitude,longitude');
+            }])
+            ->get()
+            ->map(function ($cleanup) {
+                $activeTask = $cleanup->pickups->firstWhere('status', 'on_the_way')
+                    ?? $cleanup->pickups->firstWhere('status', 'scheduled');
+
+                return [
+                    'id'               => $cleanup->id,
+                    'name'             => $cleanup->name,
+                    'current_lat'      => $cleanup->current_lat,
+                    'current_lng'      => $cleanup->current_lng,
+                    'last_location_at' => $cleanup->last_location_at?->diffForHumans(),
+                    'is_online'        => $cleanup->last_location_at && $cleanup->last_location_at->gt(Carbon::now()->subMinutes(15)),
+                    'active_task'      => $activeTask ? [
+                        'id'           => $activeTask->id,
+                        'status'       => $activeTask->status,
+                        'company_name' => $activeTask->company?->company_name,
+                        'address'      => $activeTask->company?->address,
+                        'dest_lat'     => $activeTask->company?->latitude,
+                        'dest_lng'     => $activeTask->company?->longitude,
+                    ] : null,
+                ];
+            });
+
+        return response()->json(['cleanups' => $cleanups]);
     }
 }

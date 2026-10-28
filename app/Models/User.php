@@ -24,6 +24,9 @@ class User extends Authenticatable
         'password',
         'role',
         'daily_salary',
+        'current_lat',
+        'current_lng',
+        'last_location_at',
     ];
 
     /**
@@ -46,6 +49,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'last_location_at'  => 'datetime',
+            'current_lat'       => 'float',
+            'current_lng'       => 'float',
         ];
     }
 

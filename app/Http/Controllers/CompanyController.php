@@ -455,4 +455,54 @@ class CompanyController extends Controller
             'plan' => $company->subscription_plan
         ]);
     }
+
+    /**
+     * Get live GPS tracking for today's pickup if currently on the way.
+     */
+    // ponytail: single active OTW operator tracking per company; expand to multi-route if company has multiple daily pickups.
+    public function activeTracking()
+    {
+        $company = Auth::user()->company;
+        if (!$company) {
+            return response()->json(['tracking_active' => false]);
+        }
+
+        $today = Carbon::today()->toDateString();
+        $activePickup = $company->pickups()
+            ->with(['cleanup' => function ($q) {
+                $q->select('id', 'name', 'current_lat', 'current_lng', 'last_location_at');
+            }])
+            ->whereDate('pickup_date', $today)
+            ->where('status', 'on_the_way')
+            ->latest()
+            ->first();
+
+        if (!$activePickup || !$activePickup->cleanup) {
+            return response()->json(['tracking_active' => false]);
+        }
+
+        $cleanup = $activePickup->cleanup;
+
+        return response()->json([
+            'tracking_active' => true,
+            'pickup' => [
+                'id'          => $activePickup->id,
+                'status'      => $activePickup->status,
+                'pickup_date' => $activePickup->pickup_date,
+            ],
+            'driver' => [
+                'name'             => $cleanup->name,
+                'lat'              => $cleanup->current_lat,
+                'lng'              => $cleanup->current_lng,
+                'last_updated'     => $cleanup->last_location_at?->diffForHumans(),
+                'is_recent'        => $cleanup->last_location_at && $cleanup->last_location_at->gt(Carbon::now()->subMinutes(15)),
+            ],
+            'destination' => [
+                'company_name' => $company->company_name,
+                'address'      => $company->address,
+                'lat'          => $company->latitude,
+                'lng'          => $company->longitude,
+            ],
+        ]);
+    }
 }

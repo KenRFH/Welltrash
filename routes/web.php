@@ -160,6 +160,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
 
         Route::get('/cleanups', [AdminController::class, 'cleanups'])->name('cleanups');
+        Route::get('/cleanups/live-locations', [AdminController::class, 'liveLocations'])->name('cleanups.liveLocations');
         Route::get('/cleanups/{user}', [AdminController::class, 'cleanupDetail'])->name('cleanups.show');
 
         // Absensi
@@ -247,6 +248,7 @@ Route::middleware(['auth', 'role:company'])
         Route::post('/billing/pay', [CompanyController::class, 'uploadPayment'])->name('billing.pay');
 
         Route::get('/kegiatan', [CompanyController::class, 'activities'])->name('kegiatan');
+        Route::get('/tracking/active', [CompanyController::class, 'activeTracking'])->name('tracking.active');
 
         // Invoice (Mitra)
         Route::get('/invoices', [InvoiceController::class, 'companyInvoices'])->name('invoices.index');
@@ -270,6 +272,7 @@ Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function (
     Route::get('/history', [CleanUPController::class, 'history'])->name('cleanup.history');
     Route::get('/kegiatan', [CleanUPController::class, 'activities'])->name('cleanup.kegiatan');
     Route::post('/kegiatan', [CleanUPController::class, 'storeActivity'])->name('cleanup.kegiatan.store');
+    Route::post('/location', [CleanUPController::class, 'updateLocation'])->name('cleanup.location.update');
 
     // Absensi
     Route::get('/attendance', [AttendanceController::class, 'myAttendance'])->name('cleanup.attendance');

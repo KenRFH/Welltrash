@@ -16,6 +16,8 @@ class Company extends Model
         'pic_name',
         'company_name',
         'address',
+        'latitude',
+        'longitude',
         'phone',
         'business_category',
         'subscription_plan',
@@ -31,6 +33,8 @@ class Company extends Model
     protected $casts = [
         'pickup_schedule' => 'array',
         'subscription_end_date' => 'datetime',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function user()

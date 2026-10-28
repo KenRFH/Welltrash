@@ -145,6 +145,30 @@ class OperatorApiController extends Controller
             'pickup'  => $pickup->fresh(['company']),
         ]);
     }
+    /**
+     * Update operator GPS location.
+     */
+    // ponytail: operator mobile GPS ping; upgrade to background telemetry stream if native app tracks continuous paths.
+    public function updateLocation(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
+        ]);
+
+        $request->user()->update([
+            'current_lat'      => $validated['lat'],
+            'current_lng'      => $validated['lng'],
+            'last_location_at' => Carbon::now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lokasi operator berhasil diperbarui.',
+        ]);
+    }
+
+
 
     /**
      * Submit pickup completion details with evidence photo & weights.

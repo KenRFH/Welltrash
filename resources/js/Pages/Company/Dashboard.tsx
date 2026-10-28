@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import CompanyLayout from '@/Layouts/CompanyLayout';
+import CompanyTrackingCard from '@/Components/CompanyTrackingCard';
 import {
     Leaf,
     Recycle,
@@ -131,6 +132,12 @@ export default function Dashboard({ auth, company, statistics, weekly_statistics
                     </div>
                 </div>
             </div>
+
+            {/* Live GPS Operator Tracking Card (Appears automatically when driver is on the way) */}
+            <div className="mt-6">
+                <CompanyTrackingCard />
+            </div>
+
 
             {/* 2. STATISTIC KPI CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">

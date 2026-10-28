@@ -282,4 +282,24 @@ class CleanUPController extends Controller
 
         return back()->with('success', 'Kegiatan pemanfaatan sampah berhasil didokumentasikan.');
     }
+    /**
+     * Update current operator GPS coordinate.
+     */
+    // ponytail: single direct user coordinate update; switch to telemetry store if history/breadcrumbs requested.
+    public function updateLocation(Request $request)
+    {
+        $validated = $request->validate([
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
+        ]);
+
+        Auth::user()->update([
+            'current_lat'      => $validated['lat'],
+            'current_lng'      => $validated['lng'],
+            'last_location_at' => Carbon::now(),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
 }

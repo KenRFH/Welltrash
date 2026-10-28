@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import CompanyLayout from '@/Layouts/CompanyLayout';
+import CompanyTrackingCard from '@/Components/CompanyTrackingCard';
 import {
     CalendarDays,
     Check,
@@ -101,6 +102,10 @@ export default function Schedule({ company, pickups }: Props) {
             subtitle="Atur hari rutin penjemputan sampah dan pantau jadwal agenda armada CleanUP mendatang."
             company={company}
         >
+            {/* Live GPS Driver Tracking */}
+            <CompanyTrackingCard />
+
+
             {/* 1. SCHEDULE CONFIGURATION CARD */}
             <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">

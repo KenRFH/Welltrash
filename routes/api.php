@@ -54,6 +54,7 @@ Route::prefix('operator')->group(function () {
         Route::get('/pickups', [OperatorApiController::class, 'pickups'])->name('api.operator.pickups');
         Route::put('/pickups/{pickup}/status', [OperatorApiController::class, 'updatePickupStatus'])->name('api.operator.pickups.status');
         Route::post('/pickups/{pickup}/submit', [OperatorApiController::class, 'submitPickup'])->name('api.operator.pickups.submit');
+        Route::post('/location', [OperatorApiController::class, 'updateLocation'])->name('api.operator.location');
         Route::get('/pickups/history', [OperatorApiController::class, 'history'])->name('api.operator.pickups.history');
 
         // Companies & Activities

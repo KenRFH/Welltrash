@@ -1,5 +1,6 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import React, { useState } from 'react';
+import axios from 'axios';
 import CleanUPSidebar from '@/Components/CleanUPSidebar';
 import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
 import PwaInstallButton from '@/Components/PwaInstallButton';
@@ -65,6 +66,37 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     React.useEffect(() => {
         getOfflinePickupIds().then(ids => setPendingPickupIds(ids));
     }, []);
+
+    // ponytail: periodic GPS broadcast while on the way; stops automatically when finished.
+    const hasActiveOnTheWay = pickups.some(p => p.status === 'on_the_way');
+    const [isGpsSharing, setIsGpsSharing] = useState(false);
+
+    React.useEffect(() => {
+        if (!hasActiveOnTheWay || !navigator.geolocation) {
+            setIsGpsSharing(false);
+            return;
+        }
+
+        const sendCurrentLocation = () => {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    setIsGpsSharing(true);
+                    axios.post(route('cleanup.location.update'), {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                    }).catch(() => {});
+                },
+                () => {
+                    setIsGpsSharing(false);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+            );
+        };
+
+        sendCurrentLocation();
+        const timer = setInterval(sendCurrentLocation, 20000);
+        return () => clearInterval(timer);
+    }, [hasActiveOnTheWay]);
 
     const MAX_FILE_MB = 10;
     const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
@@ -377,6 +409,24 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                             ))}
                         </div>
                     </div>
+
+                    {/* Live GPS Broadcast Indicator */}
+                    {hasActiveOnTheWay && (
+                        <div className="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs font-semibold text-emerald-800 shadow-2xs">
+                            <div className="flex items-center gap-2.5">
+                                <span className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                </span>
+                                <span>
+                                    <strong>GPS Aktif:</strong> Lokasi armada Anda sedang dibagikan secara real-time ke Mitra & Admin.
+                                </span>
+                            </div>
+                            <span className="hidden sm:inline-block text-[11px] font-bold text-emerald-600 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                                Update otomatis
+                            </span>
+                        </div>
+                    )}
 
                     {/* Pickup Cards */}
                     {pickups.length === 0 ? (

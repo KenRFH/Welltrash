@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminFleetGpsCard from '@/Components/AdminFleetGpsCard';
 import { Link } from '@inertiajs/react';
 import {
     Truck,
@@ -157,6 +158,10 @@ export default function Index({ cleanups }: Props) {
                         </div>
                     </div>
                 </div>
+
+                {/* 2. Live GPS Fleet Tracking Map */}
+                <AdminFleetGpsCard />
+
 
                 {/* 2. Visual Trip Distribution & Driver Performance Chart */}
                 {cleanups.length > 0 && totalPickups > 0 && (
