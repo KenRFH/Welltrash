@@ -212,26 +212,36 @@ class AdminController extends Controller
     {
         $today = Carbon::today()->toDateString();
         $cleanups = User::where('role', 'CleanUP')
-            ->whereNotNull('current_lat')
-            ->whereNotNull('current_lng')
             ->select('id', 'name', 'email', 'current_lat', 'current_lng', 'last_location_at')
-            ->with(['pickups' => function ($q) use ($today) {
-                $q->whereDate('pickup_date', $today)
-                  ->whereIn('status', ['on_the_way', 'scheduled'])
-                  ->with('company:id,company_name,address,latitude,longitude');
-            }])
+            ->with([
+                'attendances' => function ($q) use ($today) {
+                    $q->whereDate('date', $today);
+                },
+                'pickups' => function ($q) use ($today) {
+                    $q->whereDate('pickup_date', $today)
+                      ->whereIn('status', ['on_the_way', 'scheduled'])
+                      ->with('company:id,company_name,address,latitude,longitude');
+                },
+            ])
             ->get()
             ->map(function ($cleanup) {
+                $todayAttendance = $cleanup->attendances->first();
+                $lat = $cleanup->current_lat ?? ($todayAttendance?->clock_in_lat ? (float) $todayAttendance->clock_in_lat : null);
+                $lng = $cleanup->current_lng ?? ($todayAttendance?->clock_in_lng ? (float) $todayAttendance->clock_in_lng : null);
+
                 $activeTask = $cleanup->pickups->firstWhere('status', 'on_the_way')
                     ?? $cleanup->pickups->firstWhere('status', 'scheduled');
+
+                $isOnline = ($cleanup->last_location_at && $cleanup->last_location_at->gt(Carbon::now()->subMinutes(30)))
+                    || ($todayAttendance !== null);
 
                 return [
                     'id'               => $cleanup->id,
                     'name'             => $cleanup->name,
-                    'current_lat'      => $cleanup->current_lat,
-                    'current_lng'      => $cleanup->current_lng,
-                    'last_location_at' => $cleanup->last_location_at?->diffForHumans(),
-                    'is_online'        => $cleanup->last_location_at && $cleanup->last_location_at->gt(Carbon::now()->subMinutes(15)),
+                    'current_lat'      => $lat,
+                    'current_lng'      => $lng,
+                    'last_location_at' => $cleanup->last_location_at?->diffForHumans() ?? ($todayAttendance ? 'Hadir hari ini' : 'Belum aktif'),
+                    'is_online'        => (bool) $isOnline,
                     'active_task'      => $activeTask ? [
                         'id'           => $activeTask->id,
                         'status'       => $activeTask->status,

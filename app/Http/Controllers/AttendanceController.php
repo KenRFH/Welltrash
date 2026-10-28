@@ -143,6 +143,14 @@ class AttendanceController extends Controller
             'status'         => 'incomplete',
         ]);
 
+        if ($request->filled('lat') && $request->filled('lng')) {
+            $user->update([
+                'current_lat'      => (float) $request->lat,
+                'current_lng'      => (float) $request->lng,
+                'last_location_at' => Carbon::now(),
+            ]);
+        }
+
         return back()->with('success', 'Absen masuk berhasil dicatat!');
     }
 

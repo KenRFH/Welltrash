@@ -67,6 +67,22 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
         getOfflinePickupIds().then(ids => setPendingPickupIds(ids));
     }, []);
 
+    // Send initial location ping on mount so driver immediately appears as Standby/Active on Admin map.
+    React.useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    axios.post(route('cleanup.location.update'), {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                    }).catch(() => {});
+                },
+                () => {},
+                { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+            );
+        }
+    }, []);
+
     // ponytail: periodic GPS broadcast while on the way; stops automatically when finished.
     const hasActiveOnTheWay = pickups.some(p => p.status === 'on_the_way');
     const [isGpsSharing, setIsGpsSharing] = useState(false);
@@ -143,6 +159,26 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     };
 
     const handleUpdateStatus = (pickupId: number, status: string, reason?: string) => {
+        if (status === 'on_the_way' && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    router.put(route('cleanup.updateStatus', pickupId), {
+                        status,
+                        cancellation_reason: reason,
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                    }, { preserveScroll: true });
+                },
+                () => {
+                    router.put(route('cleanup.updateStatus', pickupId), { status, cancellation_reason: reason }, {
+                        preserveScroll: true
+                    });
+                },
+                { enableHighAccuracy: true, timeout: 3000, maximumAge: 10000 }
+            );
+            return;
+        }
+
         router.put(route('cleanup.updateStatus', pickupId), { status, cancellation_reason: reason }, {
             preserveScroll: true
         });

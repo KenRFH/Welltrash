@@ -85,6 +85,45 @@ class OperatorApiTest extends TestCase
                 ],
             ]);
     }
+    public function test_admin_can_login_to_operator_app_and_access_routes(): void
+    {
+        $admin = User::create([
+            'name'     => 'Admin Operasional',
+            'email'    => 'admin.ops@welltrash.test',
+            'password' => Hash::make('admin123'),
+            'role'     => 'admin',
+        ]);
+
+        $loginResponse = $this->postJson('/api/operator/login', [
+            'email'    => 'admin.ops@welltrash.test',
+            'password' => 'admin123',
+        ]);
+
+        $loginResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'user'    => [
+                    'id'    => $admin->id,
+                    'email' => 'admin.ops@welltrash.test',
+                    'role'  => 'admin',
+                ],
+            ]);
+
+        $token = $loginResponse->json('token');
+
+        $meResponse = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->getJson('/api/operator/me');
+
+        $meResponse->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'user'    => [
+                    'id'    => $admin->id,
+                    'role'  => 'admin',
+                ],
+            ]);
+    }
+
 
     public function test_operator_can_view_pickups_and_submit_completion(): void
     {

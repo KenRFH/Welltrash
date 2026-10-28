@@ -46,7 +46,7 @@ Route::get('/mitra', function (Request $request) {
 Route::prefix('operator')->group(function () {
     Route::post('/login', [OperatorApiController::class, 'login'])->name('api.operator.login');
 
-    Route::middleware(['auth:sanctum', 'role:CleanUP'])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:CleanUP,operator,admin,Admin,Superadmin,superadmin,management'])->group(function () {
         Route::get('/me', [OperatorApiController::class, 'me'])->name('api.operator.me');
         Route::post('/logout', [OperatorApiController::class, 'logout'])->name('api.operator.logout');
 

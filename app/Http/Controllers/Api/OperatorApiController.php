@@ -42,10 +42,11 @@ class OperatorApiController extends Controller
             ], 401);
         }
 
-        if ($user->role !== 'CleanUP') {
+        $allowedRoles = ['CleanUP', 'operator', 'admin', 'Admin', 'Superadmin', 'superadmin', 'management'];
+        if (! in_array($user->role, $allowedRoles)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak. Akun ini bukan akun operator CleanUP.',
+                'message' => 'Akses ditolak. Akun ini tidak memiliki akses aplikasi operasional.',
             ], 403);
         }
 
@@ -131,6 +132,8 @@ class OperatorApiController extends Controller
         $request->validate([
             'status'              => 'required|in:on_the_way,completed,failed',
             'cancellation_reason' => 'required_if:status,failed|nullable|string|max:1000',
+            'lat'                 => 'nullable|numeric|between:-90,90',
+            'lng'                 => 'nullable|numeric|between:-180,180',
         ]);
 
         $pickup->update([
@@ -138,6 +141,14 @@ class OperatorApiController extends Controller
             'status'              => $request->status,
             'cancellation_reason' => $request->status === 'failed' ? $request->cancellation_reason : null,
         ]);
+
+        if ($request->filled('lat') && $request->filled('lng')) {
+            $request->user()->update([
+                'current_lat'      => (float) $request->lat,
+                'current_lng'      => (float) $request->lng,
+                'last_location_at' => Carbon::now(),
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -448,6 +459,14 @@ class OperatorApiController extends Controller
             'clock_in_lng'   => $request->lng,
             'status'         => 'incomplete',
         ]);
+
+        if ($request->filled('lat') && $request->filled('lng')) {
+            $user->update([
+                'current_lat'      => (float) $request->lat,
+                'current_lng'      => (float) $request->lng,
+                'last_location_at' => Carbon::now(),
+            ]);
+        }
 
         return response()->json([
             'success'    => true,

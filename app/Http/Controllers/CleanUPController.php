@@ -72,7 +72,9 @@ class CleanUPController extends Controller
 
         $request->validate([
             'status' => 'required|in:on_the_way,completed,failed',
-            'cancellation_reason' => 'required_if:status,failed|string|max:1000'
+            'cancellation_reason' => 'required_if:status,failed|string|max:1000',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
         ]);
 
         $cleanup = Auth::user();
@@ -82,6 +84,14 @@ class CleanUPController extends Controller
             'status' => $request->status,
             'cancellation_reason' => $request->status === 'failed' ? $request->cancellation_reason : null,
         ]);
+
+        if ($request->filled('lat') && $request->filled('lng')) {
+            $cleanup->update([
+                'current_lat'      => (float) $request->lat,
+                'current_lng'      => (float) $request->lng,
+                'last_location_at' => Carbon::now(),
+            ]);
+        }
 
         return back()->with('success', 'Status updated successfully.');
     }

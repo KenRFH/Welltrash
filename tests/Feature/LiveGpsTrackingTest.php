@@ -163,4 +163,95 @@ class LiveGpsTrackingTest extends TestCase
         $response->assertOk()
             ->assertJson(['tracking_active' => false]);
     }
+
+    public function test_admin_can_see_cleanup_even_without_gps_coordinates(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $operatorWithoutGps = User::factory()->create([
+            'role'             => 'CleanUP',
+            'current_lat'      => null,
+            'current_lng'      => null,
+            'last_location_at' => null,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->getJson(route('admin.cleanups.liveLocations'));
+
+        $response->assertOk();
+        $this->assertTrue(
+            collect($response->json('cleanups'))->contains('id', $operatorWithoutGps->id)
+        );
+    }
+
+    public function test_cleanup_update_status_records_gps_coordinates(): void
+    {
+        $operator = User::factory()->create(['role' => 'CleanUP']);
+        $companyUser = User::factory()->create(['role' => 'company']);
+        $company = Company::create([
+            'user_id'              => $companyUser->id,
+            'company_name'         => 'PT Sumber Makmur',
+            'pic_name'             => 'Bambang',
+            'address'              => 'Jl. Mastrip No 5, Jember',
+            'phone'                => '08123456789',
+            'subscription_plan'    => 'Prime',
+            'subscription_status'  => 'active',
+            'signed_mou_path'      => 'documents/mous/sample.pdf',
+        ]);
+
+        $pickup = Pickup::create([
+            'company_id'  => $company->id,
+            'pickup_date' => Carbon::today()->toDateString(),
+            'status'      => 'scheduled',
+        ]);
+
+        $response = $this->actingAs($operator)
+            ->put(route('cleanup.updateStatus', $pickup->id), [
+                'status' => 'on_the_way',
+                'lat'    => -8.1755,
+                'lng'    => 113.7022,
+            ]);
+
+        $response->assertRedirect();
+        $operator->refresh();
+        $this->assertEquals(-8.1755, round($operator->current_lat, 4));
+        $this->assertEquals(113.7022, round($operator->current_lng, 4));
+    }
+
+    public function test_operator_api_update_pickup_status_records_gps_coordinates(): void
+    {
+        $operator = User::factory()->create(['role' => 'CleanUP']);
+        $token = $operator->createToken('test-token')->plainTextToken;
+
+        $companyUser = User::factory()->create(['role' => 'company']);
+        $company = Company::create([
+            'user_id'              => $companyUser->id,
+            'company_name'         => 'PT Makmur Jaya',
+            'pic_name'             => 'Andi',
+            'address'              => 'Jl. Riau No 2',
+            'phone'                => '08123456781',
+            'subscription_plan'    => 'Reguler',
+            'subscription_status'  => 'active',
+            'signed_mou_path'      => 'documents/mous/sample.pdf',
+        ]);
+
+        $pickup = Pickup::create([
+            'company_id'  => $company->id,
+            'pickup_date' => Carbon::today()->toDateString(),
+            'status'      => 'scheduled',
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->putJson(route('api.operator.pickups.status', $pickup->id), [
+                'status' => 'on_the_way',
+                'lat'    => -8.1810,
+                'lng'    => 113.7150,
+            ]);
+
+        $response->assertOk()
+            ->assertJson(['success' => true]);
+
+        $operator->refresh();
+        $this->assertEquals(-8.1810, round($operator->current_lat, 4));
+        $this->assertEquals(113.7150, round($operator->current_lng, 4));
+    }
 }
