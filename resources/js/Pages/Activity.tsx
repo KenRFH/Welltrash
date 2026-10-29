@@ -27,7 +27,7 @@ function formatDate(d: string | null) {
 
 export default function ActivityPage({ activities }: Props) {
     return (
-        <div className="min-h-screen bg-[#F8FAF8] font-sans text-ink selection:bg-lime selection:text-ink">
+        <div className="min-h-screen bg-[#F8FAF8] dark:bg-zinc-950 font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
             <SEO 
                 title="Aktivitas & Jurnal Lapangan - WellTrash" 
                 description="Dokumentasi kegiatan operasional, aksi nyata pemilahan sampah, dan edukasi keberlanjutan bersama komunitas di Kabupaten Jember." 
@@ -35,19 +35,19 @@ export default function ActivityPage({ activities }: Props) {
             <Navbar />
 
             {/* Editorial Page Header */}
-            <section className="pt-36 md:pt-44 pb-16 md:pb-24 px-6 lg:px-12 border-b border-black/10 bg-white">
+            <section className="pt-36 md:pt-44 pb-16 md:pb-24 px-6 lg:px-12 border-b border-black/10 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
                         <div className="lg:col-span-8">
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-ink tracking-tight leading-[1.05]">
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-ink dark:text-white tracking-tight leading-[1.05]">
                                 Jurnal operasional &amp;{" "}
-                                <span className="font-serif italic font-normal text-green-forest">
+                                <span className="font-serif italic font-normal text-green-forest dark:text-emerald-400">
                                     edukasi lapangan.
                                 </span>
                             </h1>
                         </div>
                         <div className="lg:col-span-4">
-                            <p className="font-sans text-base sm:text-lg text-muted leading-relaxed">
+                            <p className="font-sans text-base sm:text-lg text-muted dark:text-zinc-400 leading-relaxed">
                                 Dokumentasi inisiatif operasional WellTrash bersama mitra industri, komunitas, dan institusi pendidikan dalam pengelolaan lingkungan di Kabupaten Jember.
                             </p>
                         </div>
@@ -58,23 +58,23 @@ export default function ActivityPage({ activities }: Props) {
             {/* Alternating Editorial Journal List */}
             <section className="max-w-[1440px] mx-auto px-6 lg:px-12 py-12 md:py-20">
                 {activities.length === 0 ? (
-                    <div className="py-32 text-center border border-black/10 rounded-sm bg-white p-8">
-                        <p className="font-mono text-xs uppercase tracking-widest text-muted mb-2">// ARSIP AKTIVITAS</p>
-                        <p className="font-sans text-base text-muted">Belum ada dokumentasi aktivitas yang dipublikasikan saat ini.</p>
+                    <div className="py-32 text-center border border-black/10 dark:border-zinc-800 rounded-sm bg-white dark:bg-zinc-900 p-8">
+                        <p className="font-mono text-xs uppercase tracking-widest text-muted dark:text-zinc-500 mb-2">// ARSIP AKTIVITAS</p>
+                        <p className="font-sans text-base text-muted dark:text-zinc-400">Belum ada dokumentasi aktivitas yang dipublikasikan saat ini.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-black/10 border-y border-black/10 bg-white">
+                    <div className="divide-y divide-black/10 dark:divide-zinc-800 border-y border-black/10 dark:border-zinc-800 bg-white dark:bg-zinc-900">
                         {activities.map((activity, i) => {
                             const isEven = i % 2 === 0;
                             return (
                                 <Link
                                     key={activity.id}
                                     href={route("activity.show", activity.id)}
-                                    className="group grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center py-10 md:py-14 px-6 md:px-10 hover:bg-[#F4F6EF]/60 transition-colors"
+                                    className="group grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center py-10 md:py-14 px-6 md:px-10 hover:bg-[#F4F6EF]/60 dark:hover:bg-zinc-850/60 transition-colors"
                                 >
                                     {/* Image side */}
                                     <div className={`md:col-span-5 ${isEven ? "md:order-1" : "md:order-2"}`}>
-                                        <div className="w-full aspect-[16/10] rounded-sm overflow-hidden border border-black/10 bg-paper relative">
+                                        <div className="w-full aspect-[16/10] rounded-sm overflow-hidden border border-black/10 dark:border-zinc-800 bg-paper dark:bg-zinc-800 relative">
                                             {activity.image_path ? (
                                                 <img
                                                     src={`/storage/${activity.image_path}`}
@@ -84,7 +84,7 @@ export default function ActivityPage({ activities }: Props) {
                                                     className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full p-4 flex items-center justify-center bg-[#F4F6EF]">
+                                                <div className="w-full h-full p-4 flex items-center justify-center bg-[#F4F6EF] dark:bg-zinc-800">
                                                     <EditorialPlaceholderIllustration label="Dokumentasi Aktivitas" />
                                                 </div>
                                             )}
@@ -94,28 +94,28 @@ export default function ActivityPage({ activities }: Props) {
                                     {/* Content side */}
                                     <div className={`md:col-span-7 ${isEven ? "md:order-2" : "md:order-1"}`}>
                                         <div className="flex items-center gap-3 mb-4">
-                                            <span className="font-mono text-2xl font-medium text-green-forest">
+                                            <span className="font-mono text-2xl font-medium text-green-forest dark:text-emerald-400">
                                                 {String(i + 1).padStart(2, "0")}.
                                             </span>
                                             {activity.date && (
-                                                <span className="font-mono text-xs uppercase tracking-wider text-muted border-l border-black/15 pl-3">
+                                                <span className="font-mono text-xs uppercase tracking-wider text-muted dark:text-zinc-400 border-l border-black/15 dark:border-zinc-700 pl-3">
                                                     {formatDate(activity.date)}
                                                 </span>
                                             )}
-                                            <span className="font-mono text-[10px] uppercase tracking-wider text-green-forest bg-lime/30 px-2 py-0.5 rounded-sm">
+                                            <span className="font-mono text-[10px] uppercase tracking-wider text-green-forest dark:text-emerald-400 bg-lime/30 dark:bg-emerald-950/60 px-2 py-0.5 rounded-sm">
                                                 DOKUMENTASI
                                             </span>
                                         </div>
 
-                                        <h2 className="text-2xl sm:text-3xl font-sans font-medium text-ink leading-tight mb-3 group-hover:text-green-forest transition-colors">
+                                        <h2 className="text-2xl sm:text-3xl font-sans font-medium text-ink dark:text-white leading-tight mb-3 group-hover:text-green-forest dark:group-hover:text-emerald-400 transition-colors">
                                             {activity.title}
                                         </h2>
 
-                                        <p className="font-sans text-sm text-muted leading-relaxed line-clamp-3 mb-6">
+                                        <p className="font-sans text-sm text-muted dark:text-zinc-400 leading-relaxed line-clamp-3 mb-6">
                                             {activity.description}
                                         </p>
 
-                                        <div className="inline-flex items-center gap-2 font-sans font-semibold text-xs uppercase tracking-wider text-green-forest">
+                                        <div className="inline-flex items-center gap-2 font-sans font-semibold text-xs uppercase tracking-wider text-green-forest dark:text-emerald-400">
                                             <span>Baca Laporan Dokumentasi</span>
                                             <svg
                                                 className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
@@ -136,13 +136,13 @@ export default function ActivityPage({ activities }: Props) {
             </section>
 
             {/* Final CTA Section - Lime Background per design.md */}
-            <section className="bg-lime text-green-deep py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden">
+            <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep tracking-tight leading-tight mb-6">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Bermitra untuk Aksi Keberlanjutan Nyata
                     </h2>
-                    <p className="font-sans text-base sm:text-lg text-green-deep/90 max-w-2xl mx-auto leading-relaxed mb-10">
+                    <p className="font-sans text-base sm:text-lg text-green-deep/90 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed mb-10">
                         Tertarik mengadakan workshop pemilahan sampah, kunjungan studi biokonversi maggot BSF, atau program CSR lingkungan bersama WellTrash di institusi Anda?
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -150,13 +150,13 @@ export default function ActivityPage({ activities }: Props) {
                             href="https://wa.me/62819848706?text=Halo%20WellTrash,%20kami%20tertarik%20mengajukan%20kolaborasi%20edukasi%20atau%20studi%20lapangan"
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep text-white hover:bg-black font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Ajukan Kolaborasi / Kunjungan
                         </a>
                         <Link
                             href={route("services")}
-                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 text-green-deep hover:border-green-deep font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 dark:border-zinc-700 text-green-deep dark:text-zinc-200 hover:border-green-deep dark:hover:border-zinc-500 dark:hover:bg-zinc-800/60 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Lihat Layanan Operasional
                         </Link>

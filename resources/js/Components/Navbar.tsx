@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
-import PwaInstallButton from "./PwaInstallButton";
 import ThemeToggle from "./ThemeToggle";
 import { Menu, X, User, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -97,12 +96,6 @@ const Navbar: React.FC<NavbarProps> = ({ dark = false }) => {
                 <div className="hidden md:flex items-center gap-3">
                     <ThemeToggle />
 
-                    <PwaInstallButton
-                        variant="header"
-                        label="Pasang Aplikasi"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-xs transition-all border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-white shadow-xs"
-                    />
-
                     {user ? (
                         <Link
                             href="/dashboard"
@@ -137,12 +130,6 @@ const Navbar: React.FC<NavbarProps> = ({ dark = false }) => {
                 {/* Mobile Menu Button */}
                 <div className="flex items-center gap-2 md:hidden">
                     <ThemeToggle />
-
-                    <PwaInstallButton
-                        variant="header"
-                        label="Pasang"
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full font-medium text-[11px] transition-all border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
-                    />
 
                     <button
                         type="button"

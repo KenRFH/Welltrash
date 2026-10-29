@@ -70,7 +70,7 @@ const About: React.FC<Props> = () => {
     ];
 
     return (
-        <div className="bg-[#F8FAF8] min-h-screen font-sans text-ink selection:bg-lime selection:text-ink">
+        <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
             <SEO 
                 title="Tentang Kami - WellTrash" 
                 description="Pelajari visi, misi, dan operasional WellTrash, pelopor manajemen limbah komersial dan ekonomi sirkular terpadu di Kabupaten Jember." 
@@ -78,20 +78,20 @@ const About: React.FC<Props> = () => {
             <Navbar />
 
             {/* Editorial Page Header */}
-            <section className="pt-36 md:pt-44 pb-16 md:pb-24 px-6 lg:px-12 border-b border-black/10 bg-white">
+            <section className="pt-36 md:pt-44 pb-16 md:pb-24 px-6 lg:px-12 border-b border-black/10 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
                         <div className="lg:col-span-8">
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-ink tracking-tight leading-[1.05]">
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-ink dark:text-white tracking-tight leading-[1.05]">
                                 Membangun ekosistem pengelolaan sampah{" "}
-                                <span className="font-serif italic font-normal text-green-forest">
+                                <span className="font-serif italic font-normal text-green-forest dark:text-emerald-400">
                                     berkelanjutan
                                 </span>{" "}
                                 di Jember.
                             </h1>
                         </div>
                         <div className="lg:col-span-4">
-                            <p className="font-sans text-base sm:text-lg text-muted leading-relaxed">
+                            <p className="font-sans text-base sm:text-lg text-muted dark:text-zinc-400 leading-relaxed">
                                 WellTrash hadir sebagai mitra operasional limbah komersial dan industri non-B3, menggabungkan logistik terjadwal, pelaporan ESG akurat, serta pengolahan sirkular berbasis biokonversi.
                             </p>
                         </div>
@@ -102,7 +102,7 @@ const About: React.FC<Props> = () => {
             {/* Video Parallax Hero Section */}
             <section
                 ref={heroRef}
-                className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-green-deep border-b border-black/10"
+                className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-green-deep dark:bg-zinc-900 border-b border-black/10 dark:border-zinc-800"
             >
                 <video
                     ref={videoRef}
@@ -131,18 +131,18 @@ const About: React.FC<Props> = () => {
             </section>
 
             {/* Operational Metrics Bar */}
-            <section className="bg-white border-b border-black/10 py-12 md:py-16 px-6 lg:px-12">
+            <section className="bg-white dark:bg-zinc-900/60 border-b border-black/10 dark:border-zinc-800 py-12 md:py-16 px-6 lg:px-12">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                         {stats.map((s, idx) => (
-                            <div key={idx} className="border-l border-black/10 pl-6">
-                                <span className="font-mono text-3xl sm:text-4xl lg:text-5xl font-bold text-green-forest tracking-tight block mb-2 tabular-nums">
+                            <div key={idx} className="border-l border-black/10 dark:border-zinc-800 pl-6">
+                                <span className="font-mono text-3xl sm:text-4xl lg:text-5xl font-bold text-green-forest dark:text-emerald-400 tracking-tight block mb-2 tabular-nums">
                                     {s.value}
                                 </span>
-                                <h3 className="font-sans font-semibold text-sm sm:text-base text-ink mb-1">
+                                <h3 className="font-sans font-semibold text-sm sm:text-base text-ink dark:text-white mb-1">
                                     {s.label}
                                 </h3>
-                                <p className="font-sans text-xs text-muted leading-relaxed">
+                                <p className="font-sans text-xs text-muted dark:text-zinc-400 leading-relaxed">
                                     {s.sub}
                                 </p>
                             </div>
@@ -156,16 +156,16 @@ const About: React.FC<Props> = () => {
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
                         <div className="lg:col-span-5">
-                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-ink tracking-tight leading-tight mb-6">
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-ink dark:text-white tracking-tight leading-tight mb-6">
                                 Dari inisiatif lokal menjadi partner{" "}
-                                <span className="font-serif italic font-normal text-green-forest">
+                                <span className="font-serif italic font-normal text-green-forest dark:text-emerald-400">
                                     keberlanjutan korporat.
                                 </span>
                             </h2>
-                            <p className="font-sans text-base text-muted leading-relaxed mb-6">
+                            <p className="font-sans text-base text-muted dark:text-zinc-400 leading-relaxed mb-6">
                                 Didirikan di bawah naungan PT Sarana Utama Welltrash Farm, kami bertekad menjawab krisis pengelolaan sampah di kawasan Jawa Timur bagian timur melalui pendekatan yang transparan, modern, dan bernilai ekonomis.
                             </p>
-                            <p className="font-sans text-base text-muted leading-relaxed">
+                            <p className="font-sans text-base text-muted dark:text-zinc-400 leading-relaxed">
                                 Guna meminimalkan residu ke tempat pemrosesan akhir (TPA), kami mengintegrasikan rantai pasok pemilahan hulu di fasilitas mitra dengan proses biokonversi maggot BSF dan daur ulang polimer di hilir.
                             </p>
                         </div>
@@ -175,15 +175,15 @@ const About: React.FC<Props> = () => {
                                 {coreValues.map((val) => (
                                     <div
                                         key={val.num}
-                                        className="bg-white border border-black/10 rounded-sm p-6 sm:p-8 hover:border-green-forest/40 transition-colors duration-200"
+                                        className="bg-white dark:bg-zinc-900 border border-black/10 dark:border-zinc-800 rounded-sm p-6 sm:p-8 hover:border-green-forest/40 dark:hover:border-zinc-700 transition-colors duration-200"
                                     >
-                                        <span className="font-mono text-xs text-muted block mb-4">
+                                        <span className="font-mono text-xs text-muted dark:text-zinc-500 block mb-4">
                                             // {val.num}
                                         </span>
-                                        <h3 className="font-sans font-semibold text-lg text-ink mb-2">
+                                        <h3 className="font-sans font-semibold text-lg text-ink dark:text-white mb-2">
                                             {val.title}
                                         </h3>
-                                        <p className="font-sans text-sm text-muted leading-relaxed">
+                                        <p className="font-sans text-sm text-muted dark:text-zinc-400 leading-relaxed">
                                             {val.desc}
                                         </p>
                                     </div>
@@ -195,25 +195,25 @@ const About: React.FC<Props> = () => {
             </section>
 
             {/* Visi & Misi Section */}
-            <section className="bg-green-deep text-white py-20 md:py-28 px-6 lg:px-12 border-y border-white/10">
+            <section className="bg-green-deep dark:bg-zinc-900 text-white py-20 md:py-28 px-6 lg:px-12 border-y border-white/10 dark:border-zinc-800">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
                         {/* Visi */}
                         <div className="lg:col-span-5">
-                            <h3 className="font-sans font-bold text-lg text-lime mb-6 tracking-tight">
+                            <h3 className="font-sans font-bold text-lg text-lime dark:text-emerald-400 mb-6 tracking-tight">
                                 Visi Perusahaan
                             </h3>
                             <blockquote className="font-serif italic text-2xl sm:text-3xl lg:text-4xl text-white font-normal leading-relaxed mb-6">
                                 &ldquo;Menjadi perusahaan pengelolaan limbah yang bertanggung jawab, inovatif, dan berkelanjutan dalam menciptakan lingkungan yang bersih serta bernilai bagi masyarakat.&rdquo;
                             </blockquote>
-                            <p className="font-sans text-sm text-paper/80 leading-relaxed">
+                            <p className="font-sans text-sm text-paper/80 dark:text-zinc-300 leading-relaxed">
                                 Menjadikan setiap ton sampah komersial terkelola sebagai katalis perubahan positif menuju ekonomi sirkular Jawa Timur.
                             </p>
                         </div>
 
                         {/* Misi */}
-                        <div className="lg:col-span-7 lg:border-l lg:border-white/10 lg:pl-16">
-                            <h3 className="font-sans font-bold text-lg text-lime mb-8 tracking-tight">
+                        <div className="lg:col-span-7 lg:border-l lg:border-white/10 dark:lg:border-zinc-800 lg:pl-16">
+                            <h3 className="font-sans font-bold text-lg text-lime dark:text-emerald-400 mb-8 tracking-tight">
                                 Misi Utama
                             </h3>
                             <div className="space-y-8">
@@ -235,14 +235,14 @@ const About: React.FC<Props> = () => {
                                     },
                                 ].map((m) => (
                                     <div key={m.step} className="flex gap-6 items-start">
-                                        <span className="font-mono text-sm text-lime border border-lime/30 px-2.5 py-1 rounded-sm shrink-0">
+                                        <span className="font-mono text-sm text-lime dark:text-emerald-400 border border-lime/30 dark:border-emerald-500/30 px-2.5 py-1 rounded-sm shrink-0">
                                             {m.step}
                                         </span>
                                         <div>
                                             <h3 className="font-sans font-semibold text-lg text-white mb-1.5">
                                                 {m.title}
                                             </h3>
-                                            <p className="font-sans text-sm text-paper/75 leading-relaxed">
+                                            <p className="font-sans text-sm text-paper/75 dark:text-zinc-300 leading-relaxed">
                                                 {m.body}
                                             </p>
                                         </div>
@@ -255,25 +255,25 @@ const About: React.FC<Props> = () => {
             </section>
 
             {/* Final CTA Section - Lime Background as per design.md */}
-            <section className="bg-lime text-green-deep py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden">
+            <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep tracking-tight leading-tight mb-6">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Mulai Transformasi Pengelolaan Limbah Bisnis Anda
                     </h2>
-                    <p className="font-sans text-base sm:text-lg text-green-deep/90 max-w-2xl mx-auto leading-relaxed mb-10">
+                    <p className="font-sans text-base sm:text-lg text-green-deep/90 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed mb-10">
                         Konsultasikan timbulan sampah fasilitas Anda bersama spesialis kami. Dapatkan asesmen volume, jadwal ritase teratur, dan kepatuhan ESG lengkap.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             href={route("login")}
-                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep text-white hover:bg-black font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Jadwalkan Konsultasi Gratis
                         </Link>
                         <Link
                             href={route("services")}
-                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 text-green-deep hover:border-green-deep font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 dark:border-zinc-700 text-green-deep dark:text-zinc-200 hover:border-green-deep dark:hover:border-zinc-500 dark:hover:bg-zinc-800/60 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Pelajari Skema Layanan
                         </Link>

@@ -22,20 +22,20 @@ const DayPicker = ({ maxDays, disabled }: { maxDays: number; disabled?: boolean 
 
     if (disabled) {
         return (
-            <div className="mt-4 pt-3 border-t border-black/10">
-                <p className="font-mono text-[11px] uppercase tracking-wider text-muted mb-1">Ritase Panggilan</p>
-                <p className="font-sans text-xs text-muted">Jadwal fleksibel disesuaikan panggilan fasilitas</p>
+            <div className="mt-4 pt-3 border-t border-black/10 dark:border-zinc-800">
+                <p className="font-mono text-[11px] uppercase tracking-wider text-muted dark:text-zinc-400 mb-1">Ritase Panggilan</p>
+                <p className="font-sans text-xs text-muted dark:text-zinc-400">Jadwal fleksibel disesuaikan panggilan fasilitas</p>
             </div>
         );
     }
 
     return (
-        <div className="mt-4 pt-3 border-t border-black/10">
+        <div className="mt-4 pt-3 border-t border-black/10 dark:border-zinc-800">
             <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-muted dark:text-zinc-400">
                     Simulasi Hari Ritase
                 </span>
-                <span className="font-mono text-[11px] text-green-forest">
+                <span className="font-mono text-[11px] text-green-forest dark:text-emerald-400 font-semibold">
                     {selected.length}/{maxDays} Hari
                 </span>
             </div>
@@ -51,10 +51,10 @@ const DayPicker = ({ maxDays, disabled }: { maxDays: number; disabled?: boolean 
                             disabled={isDisabled}
                             className={`h-7 px-2.5 rounded-sm font-mono text-[11px] font-medium transition-colors border ${
                                 isSelected
-                                    ? "bg-green-forest text-lime border-green-forest"
+                                    ? "bg-green-forest text-lime border-green-forest dark:bg-emerald-600 dark:text-white dark:border-emerald-600"
                                     : isDisabled
-                                    ? "bg-black/5 text-muted/40 border-transparent cursor-not-allowed"
-                                    : "bg-white text-ink border-black/15 hover:border-green-forest"
+                                    ? "bg-black/5 dark:bg-zinc-800/60 text-muted/40 dark:text-zinc-600 border-transparent cursor-not-allowed"
+                                    : "bg-white dark:bg-zinc-800 text-ink dark:text-zinc-200 border-black/15 dark:border-zinc-700 hover:border-green-forest dark:hover:border-emerald-500"
                             }`}
                         >
                             {day}
@@ -172,7 +172,7 @@ const Services = () => {
     });
 
     return (
-        <div className="bg-[#F8FAF8] min-h-screen font-sans text-ink selection:bg-lime selection:text-ink">
+        <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
             <SEO
                 title="Layanan & Paket Pengelolaan Sampah - WellTrash"
                 description="Pilihan skema jasa pengangkutan limbah komersial terjadwal, legalitas resmi, dan pelaporan ESG transparan untuk bisnis di Kabupaten Jember."
@@ -180,41 +180,41 @@ const Services = () => {
             <Navbar />
 
             {/* Hero Section: Green Deep Editorial Background per design.md */}
-            <section className="bg-green-deep text-white pt-36 md:pt-44 pb-20 md:pb-28 px-6 lg:px-12 border-b border-white/10 relative overflow-hidden">
+            <section className="bg-green-deep dark:bg-zinc-900 text-white pt-36 md:pt-44 pb-20 md:pb-28 px-6 lg:px-12 border-b border-white/10 dark:border-zinc-800 relative overflow-hidden">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end mb-12">
                         <div className="lg:col-span-8">
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-white tracking-tight leading-[1.05]">
                                 Pengelolaan sampah terjadwal &amp;{" "}
-                                <span className="font-serif italic font-normal text-lime">
+                                <span className="font-serif italic font-normal text-lime dark:text-emerald-400">
                                     legalitas lengkap.
                                 </span>
                             </h1>
                         </div>
                         <div className="lg:col-span-4">
-                            <p className="font-sans text-base sm:text-lg text-white/80 leading-relaxed">
+                            <p className="font-sans text-base sm:text-lg text-white/80 dark:text-zinc-300 leading-relaxed">
                                 Dirancang khusus untuk operasional bisnis, fasilitas kesehatan non-B3, hotel, dan restoran di Kabupaten Jember dengan jaminan SLA dan ketepatan ritase.
                             </p>
                         </div>
                     </div>
 
                     {/* Operational Highlights */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-10 border-t border-white/10">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-10 border-t border-white/10 dark:border-zinc-800">
                         <div>
-                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">99.2%</span>
-                            <span className="font-sans text-xs text-white/75 font-medium">Ketepatan SLA Ritase</span>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime dark:text-emerald-400 block mb-1 tabular-nums">99.2%</span>
+                            <span className="font-sans text-xs text-white/75 dark:text-zinc-400 font-medium">Ketepatan SLA Ritase</span>
                         </div>
                         <div>
-                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">100%</span>
-                            <span className="font-sans text-xs text-white/75 font-medium">Manifest Terverifikasi</span>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime dark:text-emerald-400 block mb-1 tabular-nums">100%</span>
+                            <span className="font-sans text-xs text-white/75 dark:text-zinc-400 font-medium">Manifest Terverifikasi</span>
                         </div>
                         <div>
-                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">5-7 Hari</span>
-                            <span className="font-sans text-xs text-white/75 font-medium">Fleksibilitas Penjemputan</span>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime dark:text-emerald-400 block mb-1 tabular-nums">5-7 Hari</span>
+                            <span className="font-sans text-xs text-white/75 dark:text-zinc-400 font-medium">Fleksibilitas Penjemputan</span>
                         </div>
                         <div>
-                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime block mb-1 tabular-nums">Audit ESG</span>
-                            <span className="font-sans text-xs text-white/75 font-medium">Laporan Tonase Bulanan</span>
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-lime dark:text-emerald-400 block mb-1 tabular-nums">Audit ESG</span>
+                            <span className="font-sans text-xs text-white/75 dark:text-zinc-400 font-medium">Laporan Tonase Bulanan</span>
                         </div>
                     </div>
                 </div>
@@ -224,23 +224,23 @@ const Services = () => {
             <section className="py-16 md:py-24 px-6 lg:px-12">
                 <div className="max-w-[1440px] mx-auto">
                     {/* Segmented Control Bar */}
-                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 pb-6 border-b border-black/10">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 pb-6 border-b border-black/10 dark:border-zinc-800">
                         <div>
-                            <h2 className="text-2xl sm:text-3xl font-sans font-bold text-ink tracking-tight mb-1">
+                            <h2 className="text-2xl sm:text-3xl font-sans font-bold text-ink dark:text-white tracking-tight mb-1">
                                 Skema Kemitraan Fasilitas
                             </h2>
-                            <p className="font-sans text-xs sm:text-sm text-muted">
+                            <p className="font-sans text-xs sm:text-sm text-muted dark:text-zinc-400">
                                 Sesuaikan jenis kontrak dengan frekuensi dan karakteristik timbulan limbah fasilitas Anda.
                             </p>
                         </div>
 
                         {/* Segmented Control Pill */}
-                        <div className="inline-flex p-1 bg-white border border-black/15 rounded-full self-start sm:self-auto shadow-sm">
+                        <div className="inline-flex p-1 bg-white dark:bg-zinc-900 border border-black/15 dark:border-zinc-800 rounded-full self-start sm:self-auto shadow-sm">
                             <button
                                 type="button"
                                 onClick={() => setActiveTab("all")}
                                 className={`px-4 py-1.5 rounded-full font-sans text-xs font-medium transition-colors ${
-                                    activeTab === "all" ? "bg-green-forest text-white" : "text-muted hover:text-ink"
+                                    activeTab === "all" ? "bg-green-forest dark:bg-emerald-600 text-white" : "text-muted dark:text-zinc-400 hover:text-ink dark:hover:text-white"
                                 }`}
                             >
                                 Semua Paket
@@ -249,7 +249,7 @@ const Services = () => {
                                 type="button"
                                 onClick={() => setActiveTab("commercial")}
                                 className={`px-4 py-1.5 rounded-full font-sans text-xs font-medium transition-colors ${
-                                    activeTab === "commercial" ? "bg-green-forest text-white" : "text-muted hover:text-ink"
+                                    activeTab === "commercial" ? "bg-green-forest dark:bg-emerald-600 text-white" : "text-muted dark:text-zinc-400 hover:text-ink dark:hover:text-white"
                                 }`}
                             >
                                 Rutin Komersial
@@ -258,7 +258,7 @@ const Services = () => {
                                 type="button"
                                 onClick={() => setActiveTab("ondemand")}
                                 className={`px-4 py-1.5 rounded-full font-sans text-xs font-medium transition-colors ${
-                                    activeTab === "ondemand" ? "bg-green-forest text-white" : "text-muted hover:text-ink"
+                                    activeTab === "ondemand" ? "bg-green-forest dark:bg-emerald-600 text-white" : "text-muted dark:text-zinc-400 hover:text-ink dark:hover:text-white"
                                 }`}
                             >
                                 On-Demand & Khusus
@@ -274,54 +274,54 @@ const Services = () => {
                             return (
                                 <div
                                     key={pkg.id}
-                                    className={`relative flex flex-col justify-between bg-white rounded-sm p-6 sm:p-8 transition-colors ${
+                                    className={`relative flex flex-col justify-between bg-white dark:bg-zinc-900 rounded-sm p-6 sm:p-8 transition-colors ${
                                         isFeatured
-                                            ? "border-2 border-green-forest shadow-md"
-                                            : "border border-black/10 hover:border-black/25"
+                                            ? "border-2 border-green-forest dark:border-emerald-500 shadow-md"
+                                            : "border border-black/10 dark:border-zinc-800 hover:border-black/25 dark:hover:border-zinc-700"
                                     }`}
                                 >
                                     {isFeatured && (
-                                        <div className="absolute -top-3.5 left-6 bg-green-forest text-lime font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-medium">
+                                        <div className="absolute -top-3.5 left-6 bg-green-forest dark:bg-emerald-600 text-lime dark:text-white font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-medium">
                                             ★ PILIHAN UTAMA MITRA
                                         </div>
                                     )}
 
                                     <div>
-                                        <span className="font-mono text-xs uppercase tracking-wider text-muted block mb-1">
+                                        <span className="font-mono text-xs uppercase tracking-wider text-muted dark:text-zinc-400 block mb-1">
                                             {pkg.target}
                                         </span>
-                                        <h3 className="font-sans font-semibold text-xl text-ink mb-2">
+                                        <h3 className="font-sans font-semibold text-xl text-ink dark:text-white mb-2">
                                             {pkg.name}
                                         </h3>
-                                        <p className="font-sans text-xs text-muted leading-relaxed mb-6">
+                                        <p className="font-sans text-xs text-muted dark:text-zinc-400 leading-relaxed mb-6">
                                             {pkg.description}
                                         </p>
 
                                         {/* Price block */}
-                                        <div className="pt-4 pb-4 border-t border-black/10">
-                                            <span className="font-mono text-[11px] uppercase tracking-wider text-muted block mb-1">
+                                        <div className="pt-4 pb-4 border-t border-black/10 dark:border-zinc-800">
+                                            <span className="font-mono text-[11px] uppercase tracking-wider text-muted dark:text-zinc-400 block mb-1">
                                                 {pkg.priceDetail}
                                             </span>
                                             <div className="flex items-baseline gap-1">
-                                                <span className="font-mono text-xs text-muted">Rp</span>
-                                                <span className="font-mono text-3xl sm:text-4xl font-medium text-green-forest tracking-tight">
+                                                <span className="font-mono text-xs text-muted dark:text-zinc-400">Rp</span>
+                                                <span className="font-mono text-3xl sm:text-4xl font-medium text-green-forest dark:text-emerald-400 tracking-tight">
                                                     {pkg.price}
                                                 </span>
                                             </div>
-                                            <p className="font-sans text-[11px] text-muted/75 italic mt-1 leading-snug">
+                                            <p className="font-sans text-[11px] text-muted/75 dark:text-zinc-500 italic mt-1 leading-snug">
                                                 *Nilai final disesuaikan dengan audit volume & ritase timbulan.
                                             </p>
                                         </div>
 
                                         {/* Capacity & Pickup Details */}
-                                        <div className="grid grid-cols-2 gap-2 py-3 border-y border-black/10 text-xs">
+                                        <div className="grid grid-cols-2 gap-2 py-3 border-y border-black/10 dark:border-zinc-800 text-xs">
                                             <div>
-                                                <span className="font-mono text-[10px] text-muted block uppercase">Kapasitas</span>
-                                                <span className="font-sans font-medium text-ink">{pkg.capacity}</span>
+                                                <span className="font-mono text-[10px] text-muted dark:text-zinc-500 block uppercase">Kapasitas</span>
+                                                <span className="font-sans font-medium text-ink dark:text-zinc-200">{pkg.capacity}</span>
                                             </div>
                                             <div>
-                                                <span className="font-mono text-[10px] text-muted block uppercase">Frekuensi</span>
-                                                <span className="font-sans font-medium text-ink">{pkg.pickup}</span>
+                                                <span className="font-mono text-[10px] text-muted dark:text-zinc-500 block uppercase">Frekuensi</span>
+                                                <span className="font-sans font-medium text-ink dark:text-zinc-200">{pkg.pickup}</span>
                                             </div>
                                         </div>
 
@@ -329,26 +329,26 @@ const Services = () => {
                                         <DayPicker maxDays={pkg.maxDays} disabled={pkg.dayPickerDisabled} />
 
                                         {/* Feature Checklist */}
-                                        <ul className="space-y-2.5 my-6 text-xs font-sans text-ink">
+                                        <ul className="space-y-2.5 my-6 text-xs font-sans text-ink dark:text-zinc-200">
                                             {pkg.features.map((feat, fIdx) => (
                                                 <li key={fIdx} className="flex items-start gap-2.5">
-                                                    <svg className="w-4 h-4 text-green-forest shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <svg className="w-4 h-4 text-green-forest dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                                     </svg>
-                                                    <span className="leading-tight text-ink/90">{feat}</span>
+                                                    <span className="leading-tight text-ink/90 dark:text-zinc-300">{feat}</span>
                                                 </li>
                                             ))}
                                         </ul>
                                     </div>
 
                                     {/* Action CTA */}
-                                    <div className="pt-4 border-t border-black/10">
+                                    <div className="pt-4 border-t border-black/10 dark:border-zinc-800">
                                         {pkg.id === "request" ? (
                                             <a
                                                 href="https://wa.me/62819848706?text=Halo%20WellTrash,%20saya%20ingin%20konsultasi%20Paket%20Request%20On-Demand%20untuk%20fasilitas%20kami"
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="w-full block py-3 rounded-sm font-sans text-xs font-semibold uppercase tracking-wider text-center transition-colors bg-white border border-green-forest text-green-forest hover:bg-green-forest hover:text-white"
+                                                className="w-full block py-3 rounded-sm font-sans text-xs font-semibold uppercase tracking-wider text-center transition-colors bg-white dark:bg-zinc-800 border border-green-forest dark:border-emerald-500 text-green-forest dark:text-emerald-400 hover:bg-green-forest dark:hover:bg-emerald-600 hover:text-white"
                                             >
                                                 Hubungi WhatsApp Bisnis
                                             </a>
@@ -357,8 +357,8 @@ const Services = () => {
                                                 href={route("register")}
                                                 className={`w-full block py-3 rounded-sm font-sans text-xs font-semibold uppercase tracking-wider text-center transition-colors ${
                                                     isFeatured
-                                                        ? "bg-green-forest text-lime hover:bg-black"
-                                                        : "bg-green-forest text-white hover:bg-black"
+                                                        ? "bg-green-forest dark:bg-emerald-600 text-lime dark:text-white hover:bg-black dark:hover:bg-emerald-500"
+                                                        : "bg-green-forest dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500"
                                                 }`}
                                             >
                                                 Pilih Paket Kemitraan
@@ -373,30 +373,30 @@ const Services = () => {
             </section>
 
             {/* Video & Komitmen Operasional */}
-            <section className="bg-white border-y py-20 md:py-28 px-6 lg:px-12">
+            <section className="bg-white dark:bg-zinc-900 border-t border-black/10 dark:border-zinc-800 py-20 md:py-28 px-6 lg:px-12">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                         <div className="lg:col-span-5">
-                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-ink tracking-tight leading-tight mb-6">
+                            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold text-ink dark:text-white tracking-tight leading-tight mb-6">
                                 Mengapa fasilitas bisnis mempercayakan limbah kepada{" "}
-                                <span className="font-serif italic font-normal text-green-forest">
+                                <span className="font-serif italic font-normal text-green-forest dark:text-emerald-400">
                                     WellTrash.
                                 </span>
                             </h2>
-                            <p className="font-sans text-base text-muted leading-relaxed mb-6">
+                            <p className="font-sans text-base text-muted dark:text-zinc-400 leading-relaxed mb-6">
                                 Pengelolaan limbah komersial dijalankan melalui tata kelola terukur. Setiap ritase dikelola dengan SOP kebersihan ketat, armada berizin resmi, dan pelaporan terstandarisasi untuk audit lingkungan korporat.
                             </p>
-                            <div className="space-y-4 pt-4 border-t border-black/10">
+                            <div className="space-y-4 pt-4 border-t border-black/10 dark:border-zinc-800">
                                 {[
                                     { title: "Manifest & Timbangan Digital", desc: "Data tonase real-time tercatat transparan untuk pemenuhan ESG." },
                                     { title: "Zero Spill Commitment", desc: "Armada tertutup dengan wadah terstandar mencegah ceceran bau & cairan." },
                                     { title: "Pemulihan Hilir Berkelanjutan", desc: "Material diarahkan ke biokonversi maggot BSF & daur ulang industri." },
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-3 items-start">
-                                        <span className="w-2 h-2 rounded-full bg-green-forest shrink-0 mt-1.5" />
+                                        <span className="w-2 h-2 rounded-full bg-green-forest dark:bg-emerald-400 shrink-0 mt-1.5" />
                                         <div>
-                                            <h4 className="font-sans font-semibold text-sm text-ink">{item.title}</h4>
-                                            <p className="font-sans text-xs text-muted leading-relaxed">{item.desc}</p>
+                                            <h4 className="font-sans font-semibold text-sm text-ink dark:text-white">{item.title}</h4>
+                                            <p className="font-sans text-xs text-muted dark:text-zinc-400 leading-relaxed">{item.desc}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -404,7 +404,7 @@ const Services = () => {
                         </div>
 
                         <div className="lg:col-span-7">
-                            <div className="relative rounded-sm overflow-hidden">
+                            <div className="relative rounded-sm overflow-hidden border border-black/10 dark:border-zinc-800">
                                 <video
                                     autoPlay
                                     muted
@@ -420,19 +420,19 @@ const Services = () => {
             </section>
 
             {/* Final CTA Section - Lime Background */}
-            <section className="bg-lime text-green-deep py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden">
+            <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep tracking-tight leading-tight mb-6">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Dapatkan Asesmen Volume & Penawaran Resmi
                     </h2>
-                    <p className="font-sans text-base sm:text-lg text-green-deep/90 max-w-2xl mx-auto leading-relaxed mb-10">
+                    <p className="font-sans text-base sm:text-lg text-green-deep/90 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed mb-10">
                         Tim spesialis kami siap mengunjungi fasilitas bisnis Anda di Jember untuk menghitung estimasi timbulan sampah dan merancang jadwal ritase paling efisien.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             href={route("register")}
-                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep text-white hover:bg-black font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Daftar Kemitraan Sekarang
                         </Link>
@@ -440,7 +440,7 @@ const Services = () => {
                             href="https://wa.me/62819848706?text=Halo%20WellTrash,%20kami%20ingin%20jadwalkan%20survei%20dan%20asesmen%20limbah%20fasilitas%20kami"
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 text-green-deep hover:border-green-deep font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 dark:border-zinc-700 text-green-deep dark:text-zinc-200 hover:border-green-deep dark:hover:border-zinc-500 dark:hover:bg-zinc-800/60 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Hubungi Tim Bisnis (WhatsApp)
                         </a>

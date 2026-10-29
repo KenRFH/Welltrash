@@ -65,7 +65,7 @@ export default function KatalogPage({ katalogs }: Props) {
     }, [selected]);
 
     return (
-        <div className="min-h-screen bg-[#F8FAF8] font-sans text-ink selection:bg-lime selection:text-ink">
+        <div className="min-h-screen bg-[#F8FAF8] dark:bg-zinc-950 font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
             <SEO
                 title="Katalog Produk Daur Ulang & Material Sirkular - WellTrash"
                 description="Katalog material daur ulang berkualitas industri, kompos organik, pakan protein BSF, dan cacahan plastik daur ulang dari WellTrash Farm Jember."
@@ -73,19 +73,19 @@ export default function KatalogPage({ katalogs }: Props) {
             <Navbar />
 
             {/* Editorial Page Header */}
-            <section className="pt-36 md:pt-44 pb-16 md:pb-24 px-6 lg:px-12 border-b border-black/10 bg-white">
+            <section className="pt-36 md:pt-44 pb-16 md:pb-24 px-6 lg:px-12 border-b border-black/10 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-end">
                         <div className="lg:col-span-8">
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-ink tracking-tight leading-[1.05]">
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-sans font-bold text-ink dark:text-white tracking-tight leading-[1.05]">
                                 Produk olahan &amp;{" "}
-                                <span className="font-serif italic font-normal text-green-forest">
+                                <span className="font-serif italic font-normal text-green-forest dark:text-emerald-400">
                                     ekonomi sirkular.
                                 </span>
                             </h1>
                         </div>
                         <div className="lg:col-span-4">
-                            <p className="font-sans text-base sm:text-lg text-muted leading-relaxed">
+                            <p className="font-sans text-base sm:text-lg text-muted dark:text-zinc-400 leading-relaxed">
                                 Output pemulihan material terstandarisasi untuk kebutuhan agribisnis, industri manufaktur, dan mitra sirkular di Jawa Timur.
                             </p>
                         </div>
@@ -95,9 +95,9 @@ export default function KatalogPage({ katalogs }: Props) {
 
             {/* Search & Material Counter */}
             <section className="max-w-[1440px] mx-auto px-6 lg:px-12 pt-10 pb-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/10 dark:border-zinc-800">
                     <div className="relative w-full sm:max-w-md">
-                        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <input
@@ -105,20 +105,20 @@ export default function KatalogPage({ katalogs }: Props) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Cari spesifikasi material atau nama produk..."
-                            className="w-full pl-10 pr-10 py-2.5 rounded-sm border border-black/15 bg-white text-xs sm:text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-green-forest transition-colors"
+                            className="w-full pl-10 pr-10 py-2.5 rounded-sm border border-black/15 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs sm:text-sm text-ink dark:text-white placeholder:text-muted/60 dark:placeholder:text-zinc-500 focus:outline-none focus:border-green-forest dark:focus:border-emerald-500 transition-colors"
                         />
                         {search && (
                             <button
                                 type="button"
                                 onClick={() => setSearch("")}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink text-xs font-mono"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted dark:text-zinc-400 hover:text-ink dark:hover:text-white text-xs font-mono"
                                 aria-label="Hapus pencarian"
                             >
                                 ✕
                             </button>
                         )}
                     </div>
-                    <p className="font-mono text-xs uppercase tracking-wider text-muted shrink-0">
+                    <p className="font-mono text-xs uppercase tracking-wider text-muted dark:text-zinc-400 shrink-0">
                         // Menampilkan {filtered.length} Jenis Material Sirkular
                     </p>
                 </div>
@@ -127,13 +127,13 @@ export default function KatalogPage({ katalogs }: Props) {
             {/* Product Grid Section */}
             <section className="max-w-[1440px] mx-auto px-6 lg:px-12 pb-24">
                 {filtered.length === 0 ? (
-                    <div className="py-24 text-center border border-black/10 rounded-sm bg-white p-8">
+                    <div className="py-24 text-center border border-black/10 dark:border-zinc-800 rounded-sm bg-white dark:bg-zinc-900 p-8">
                         <div className="max-w-md mx-auto">
                             <CatalogEmptyIllustration />
-                            <h3 className="font-sans font-semibold text-lg text-ink mt-6 mb-2">
+                            <h3 className="font-sans font-semibold text-lg text-ink dark:text-white mt-6 mb-2">
                                 {search ? "Material Tidak Ditemukan" : "Katalog Sedang Diperbarui"}
                             </h3>
-                            <p className="font-sans text-xs text-muted leading-relaxed">
+                            <p className="font-sans text-xs text-muted dark:text-zinc-400 leading-relaxed">
                                 {search
                                     ? `Tidak ada material recovery yang cocok dengan kata kunci "${search}". Silakan coba kata kunci lain atau hubungi tim bisnis kami.`
                                     : "Stok material sirkular sedang dalam proses kurasi berkala oleh tim operasional WellTrash Farm."}
@@ -148,7 +148,7 @@ export default function KatalogPage({ katalogs }: Props) {
                                 data-id={item.id}
                                 ref={(el) => { if (el) cardRefs.current.set(item.id, el); }}
                                 onClick={() => setSelected(item)}
-                                className="group cursor-pointer rounded-sm border border-black/10 bg-white hover:border-black/30 transition-all duration-200 overflow-hidden flex flex-col justify-between"
+                                className="group cursor-pointer rounded-sm border border-black/10 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-black/30 dark:hover:border-zinc-700 transition-all duration-200 overflow-hidden flex flex-col justify-between"
                                 style={{
                                     opacity: visibleCards.has(item.id) ? 1 : 0,
                                     transform: visibleCards.has(item.id) ? "translateY(0)" : "translateY(24px)",
@@ -156,7 +156,7 @@ export default function KatalogPage({ katalogs }: Props) {
                                 }}
                             >
                                 <div>
-                                    <div className="aspect-square bg-paper overflow-hidden relative border-b border-black/10">
+                                    <div className="aspect-square bg-paper dark:bg-zinc-800 overflow-hidden relative border-b border-black/10 dark:border-zinc-800">
                                         {item.image_path ? (
                                             <img
                                                 src={`/storage/${item.image_path}`}
@@ -166,38 +166,38 @@ export default function KatalogPage({ katalogs }: Props) {
                                                 className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform duration-500 ease-out"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center p-6 text-muted/30">
+                                            <div className="w-full h-full flex items-center justify-center p-6 text-muted/30 dark:text-zinc-600">
                                                 <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                                 </svg>
                                             </div>
                                         )}
                                         <div className="absolute top-3 left-3">
-                                            <span className="font-mono text-[10px] uppercase tracking-wider text-green-forest bg-white/90 border border-black/10 px-2 py-0.5 rounded-sm">
+                                            <span className="font-mono text-[10px] uppercase tracking-wider text-green-forest dark:text-emerald-300 bg-white/90 dark:bg-zinc-900/90 border border-black/10 dark:border-zinc-700 px-2 py-0.5 rounded-sm">
                                                 OUTPUT SIRKULAR
                                             </span>
                                         </div>
                                     </div>
                                     <div className="p-6">
-                                        <h3 className="font-sans font-semibold text-lg text-ink mb-2 group-hover:text-green-forest transition-colors leading-snug">
+                                        <h3 className="font-sans font-semibold text-lg text-ink dark:text-white mb-2 group-hover:text-green-forest dark:group-hover:text-emerald-400 transition-colors leading-snug">
                                             {item.name}
                                         </h3>
-                                        <p className="font-sans text-xs text-muted leading-relaxed line-clamp-2 mb-6">
+                                        <p className="font-sans text-xs text-muted dark:text-zinc-400 leading-relaxed line-clamp-2 mb-6">
                                             {item.description}
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 pt-3 border-t border-black/5 mt-auto flex items-baseline justify-between">
+                                <div className="p-6 pt-3 border-t border-black/5 dark:border-zinc-800 mt-auto flex items-baseline justify-between">
                                     <div>
-                                        <span className="font-mono text-[10px] uppercase text-muted block">Estimasi Nilai</span>
+                                        <span className="font-mono text-[10px] uppercase text-muted dark:text-zinc-500 block">Estimasi Nilai</span>
                                         {item.price ? (
-                                            <span className="font-mono text-base font-medium text-green-forest">{formatRupiah(item.price)}</span>
+                                            <span className="font-mono text-base font-medium text-green-forest dark:text-emerald-400">{formatRupiah(item.price)}</span>
                                         ) : (
-                                            <span className="font-mono text-xs text-muted">Penawaran MOQ</span>
+                                            <span className="font-mono text-xs text-muted dark:text-zinc-500">Penawaran MOQ</span>
                                         )}
                                     </div>
-                                    <span className="font-sans text-xs font-semibold text-green-forest group-hover:underline uppercase tracking-wider">
+                                    <span className="font-sans text-xs font-semibold text-green-forest dark:text-emerald-400 group-hover:underline uppercase tracking-wider">
                                         Detail RFQ →
                                     </span>
                                 </div>
@@ -208,13 +208,13 @@ export default function KatalogPage({ katalogs }: Props) {
             </section>
 
             {/* Final CTA Section - Lime Background */}
-            <section className="bg-lime text-green-deep py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden">
+            <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep tracking-tight leading-tight mb-6">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Pasokan Material Daur Ulang untuk Industri Anda
                     </h2>
-                    <p className="font-sans text-base sm:text-lg text-green-deep/90 max-w-2xl mx-auto leading-relaxed mb-10">
+                    <p className="font-sans text-base sm:text-lg text-green-deep/90 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed mb-10">
                         Kami melayani kontrak pasokan berkala untuk pupuk organik curah, pakan protein maggot BSF, dan cacahan plastik daur ulang dengan MOQ fleksibel.
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -222,13 +222,13 @@ export default function KatalogPage({ katalogs }: Props) {
                             href="https://wa.me/62819848706?text=Halo%20WellTrash,%20kami%20tertarik%20dengan%20pasokan%20material%20daur%20ulang%20industri"
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep text-white hover:bg-black font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-green-deep dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Konsultasikan Pasokan Industri (RFQ)
                         </a>
                         <Link
                             href={route("services")}
-                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 text-green-deep hover:border-green-deep font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
+                            className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-green-deep/30 dark:border-zinc-700 text-green-deep dark:text-zinc-200 hover:border-green-deep dark:hover:border-zinc-500 dark:hover:bg-zinc-800/60 font-sans font-semibold text-sm rounded-sm transition-colors duration-200 tracking-tight"
                         >
                             Lihat Layanan Penjemputan
                         </Link>
@@ -245,22 +245,22 @@ export default function KatalogPage({ katalogs }: Props) {
                     onClick={() => setSelected(null)}
                 >
                     <div
-                        className="absolute inset-0 bg-green-deep/75 backdrop-blur-sm transition-opacity"
+                        className="absolute inset-0 bg-green-deep/75 dark:bg-black/80 backdrop-blur-sm transition-opacity"
                     />
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="relative bg-white rounded-sm border border-black/15 shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto z-10"
+                        className="relative bg-white dark:bg-zinc-900 rounded-sm border border-black/15 dark:border-zinc-700 shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto z-10"
                     >
                         <button
                             type="button"
                             onClick={() => setSelected(null)}
-                            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-sm bg-white/90 border border-black/10 flex items-center justify-center text-muted hover:text-ink hover:bg-gray-50 transition-colors"
+                            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-sm bg-white/90 dark:bg-zinc-800 border border-black/10 dark:border-zinc-700 flex items-center justify-center text-muted dark:text-zinc-400 hover:text-ink dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
                             aria-label="Tutup"
                         >
                             ✕
                         </button>
 
-                        <div className="aspect-[16/10] bg-paper overflow-hidden border-b border-black/10 relative">
+                        <div className="aspect-[16/10] bg-paper dark:bg-zinc-800 overflow-hidden border-b border-black/10 dark:border-zinc-800 relative">
                             {selected.image_path ? (
                                 <img
                                     src={`/storage/${selected.image_path}`}
@@ -268,37 +268,37 @@ export default function KatalogPage({ katalogs }: Props) {
                                     className="w-full h-full object-contain p-6"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center p-6 text-muted/30">
+                                <div className="w-full h-full flex items-center justify-center p-6 text-muted/30 dark:text-zinc-600">
                                     <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                     </svg>
                                 </div>
                             )}
                             <div className="absolute top-3 left-3">
-                                <span className="font-mono text-[10px] uppercase tracking-wider text-green-forest bg-lime/30 px-2 py-0.5 rounded-sm">
+                                <span className="font-mono text-[10px] uppercase tracking-wider text-green-forest dark:text-emerald-400 bg-lime/30 dark:bg-emerald-950/60 px-2 py-0.5 rounded-sm">
                                     SPESIFIKASI PRODUK
                                 </span>
                             </div>
                         </div>
 
                         <div className="p-6 sm:p-8">
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4 pb-4 border-b border-black/10">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4 pb-4 border-b border-black/10 dark:border-zinc-800">
                                 <div>
-                                    <h2 className="text-xl sm:text-2xl font-sans font-medium text-ink leading-tight">
+                                    <h2 className="text-xl sm:text-2xl font-sans font-medium text-ink dark:text-white leading-tight">
                                         {selected.name}
                                     </h2>
                                 </div>
                                 <div className="sm:text-right shrink-0">
-                                    <span className="font-mono text-[10px] uppercase text-muted block">Estimasi Nilai</span>
+                                    <span className="font-mono text-[10px] uppercase text-muted dark:text-zinc-400 block">Estimasi Nilai</span>
                                     {selected.price ? (
-                                        <span className="font-mono text-xl font-medium text-green-forest">{formatRupiah(selected.price)}</span>
+                                        <span className="font-mono text-xl font-medium text-green-forest dark:text-emerald-400">{formatRupiah(selected.price)}</span>
                                     ) : (
-                                        <span className="font-mono text-xs text-muted">Sesuai MOQ</span>
+                                        <span className="font-mono text-xs text-muted dark:text-zinc-400">Sesuai MOQ</span>
                                     )}
                                 </div>
                             </div>
 
-                            <p className="font-sans text-xs sm:text-sm text-muted leading-relaxed mb-8">
+                            <p className="font-sans text-xs sm:text-sm text-muted dark:text-zinc-300 leading-relaxed mb-8">
                                 {selected.description}
                             </p>
 
@@ -309,14 +309,14 @@ export default function KatalogPage({ katalogs }: Props) {
                                     )}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-forest text-white hover:bg-black font-sans font-semibold text-xs uppercase tracking-wider rounded-sm transition-colors text-center"
+                                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-forest dark:bg-emerald-600 text-white hover:bg-black dark:hover:bg-emerald-500 font-sans font-semibold text-xs uppercase tracking-wider rounded-sm transition-colors text-center"
                                 >
                                     Minta Penawaran B2B (RFQ)
                                 </a>
                                 <button
                                     type="button"
                                     onClick={() => setSelected(null)}
-                                    className="px-6 py-3 border border-black/15 text-muted hover:text-ink font-sans font-semibold text-xs uppercase tracking-wider rounded-sm transition-colors"
+                                    className="px-6 py-3 border border-black/15 dark:border-zinc-700 text-muted dark:text-zinc-300 hover:text-ink dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 font-sans font-semibold text-xs uppercase tracking-wider rounded-sm transition-colors"
                                 >
                                     Tutup
                                 </button>

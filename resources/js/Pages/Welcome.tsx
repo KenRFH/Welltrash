@@ -16,7 +16,6 @@ import {
     Building2,
     Scale,
     MapPin,
-    Activity as ActivityIcon,
     CheckCircle2,
     Package,
     PackageSearch,
@@ -96,16 +95,6 @@ const Welcome: React.FC<Props> = ({
 
                 {/* Hero Content Container */}
                 <div className="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-12 w-full text-center">
-                    {/* Operational Status Pill */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 rounded-full font-mono text-xs text-zinc-700 dark:text-zinc-300 mb-8 shadow-2xs backdrop-blur-sm"
-                    >
-                        
-                    </motion.div>
-
                     {/* Headline & Description */}
                     <div className="max-w-4xl mx-auto">
                         <motion.h1
@@ -157,28 +146,6 @@ const Welcome: React.FC<Props> = ({
                         transition={{ duration: 0.7, delay: 0.35 }}
                         className="max-w-4xl mx-auto bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-xl shadow-zinc-900/5 dark:shadow-black/40 p-6 sm:p-8 relative text-left"
                     >
-                        {/* Status bar */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-zinc-100 dark:border-zinc-800 gap-3">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
-                                    <ActivityIcon className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <div className="text-xs font-semibold text-zinc-900 dark:text-white">
-                                        WellTrash Operational Telemetry
-                                    </div>
-                                    <div className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
-                                        Sistem Penjadwalan &amp; Logistik
-                                        Terintegrasi
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs font-mono text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-200/60 dark:border-emerald-800/60 self-start sm:self-auto">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
-                                <span>Armada &amp; MRF Aktif</span>
-                            </div>
-                        </div>
-
                         {/* Consolidated Stats Grid with Logo Harmony */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
                             {STATS.map((stat, i) => {
