@@ -7,6 +7,8 @@ export interface Vehicle {
     license_plate: string;
     type: string;
     capacity: string | null;
+    is_occupied?: boolean;
+    occupied_by?: string | null;
 }
 
 interface Props {
@@ -52,14 +54,19 @@ export default function CleanUPVehicleSelectorModal({
                     ) : (
                         activeVehicles.map((v) => {
                             const isSelected = currentVehicleId === v.id;
+                            const isOccupied = Boolean(v.is_occupied) && !isSelected;
                             return (
                                 <button
                                     key={v.id}
                                     type="button"
-                                    disabled={isSaving}
+                                    disabled={isSaving || isOccupied}
                                     onClick={() => onSelect(v.id)}
                                     className={`w-full p-3 rounded-xl border text-left transition flex items-center justify-between gap-2 ${
-                                        isSelected ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20' : 'bg-white hover:bg-slate-50 border-gray-200'
+                                        isSelected
+                                            ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20'
+                                            : isOccupied
+                                            ? 'bg-slate-100/70 border-slate-200 opacity-60 cursor-not-allowed'
+                                            : 'bg-white hover:bg-slate-50 border-gray-200'
                                     }`}
                                 >
                                     <div className="min-w-0">
@@ -74,6 +81,10 @@ export default function CleanUPVehicleSelectorModal({
                                     {isSelected ? (
                                         <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 shrink-0">
                                             <Check className="w-3.5 h-3.5" /> Terpilih
+                                        </span>
+                                    ) : isOccupied ? (
+                                        <span className="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full shrink-0">
+                                            Dipakai {v.occupied_by || 'driver lain'}
                                         </span>
                                     ) : (
                                         <span className="text-xs font-bold text-emerald-700 shrink-0">Pilih &rarr;</span>

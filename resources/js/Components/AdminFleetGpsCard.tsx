@@ -172,7 +172,7 @@ export default function AdminFleetGpsCard() {
         });
 
         filteredCompanies.forEach((c) => {
-            if (typeof c.latitude === 'number' && typeof c.longitude === 'number') {
+            if (typeof c.latitude === 'number' && typeof c.longitude === 'number' && c.latitude !== 0) {
                 list.push({
                     id: `company-${c.id}`,
                     lat: c.latitude,

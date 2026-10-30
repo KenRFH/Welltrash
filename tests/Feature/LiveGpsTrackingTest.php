@@ -380,4 +380,51 @@ class LiveGpsTrackingTest extends TestCase
         $this->assertEquals(-8.1788, round($createdCompany->latitude, 4));
         $this->assertEquals(113.7211, round($createdCompany->longitude, 4));
     }
+
+    public function test_company_with_address_auto_resolves_gps_coordinates_if_null(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $companyUser = User::factory()->create(['role' => 'company']);
+
+        $company = Company::create([
+            'user_id'             => $companyUser->id,
+            'company_name'        => 'Klinik Jember Indah',
+            'pic_name'            => 'dr. Maya',
+            'phone'               => '08123456789',
+            'address'             => 'Jl. PB Sudirman No. 10, Patrang, Jember',
+            'latitude'            => null,
+            'longitude'           => null,
+            'subscription_status' => 'active',
+        ]);
+
+        $response = $this->actingAs($admin)->getJson(route('admin.cleanups.liveLocations'));
+        $response->assertOk();
+
+        $company->refresh();
+        $this->assertNotNull($company->latitude);
+        $this->assertNotNull($company->longitude);
+        $this->assertNotEquals(0, $company->latitude);
+    }
+
+    public function test_companies_geocode_artisan_command(): void
+    {
+        $companyUser = User::factory()->create(['role' => 'company']);
+        $company = Company::create([
+            'user_id'             => $companyUser->id,
+            'company_name'        => 'Apotek Balung Raya',
+            'pic_name'            => 'Budi',
+            'phone'               => '08123456789',
+            'address'             => 'Jl. Rambipuji Balung, Jember',
+            'latitude'            => null,
+            'longitude'           => null,
+            'subscription_status' => 'active',
+        ]);
+
+        $this->artisan('companies:geocode')
+            ->assertExitCode(0);
+
+        $company->refresh();
+        $this->assertNotNull($company->latitude);
+        $this->assertNotNull($company->longitude);
+    }
 }

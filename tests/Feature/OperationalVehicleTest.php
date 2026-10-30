@@ -123,4 +123,62 @@ class OperationalVehicleTest extends TestCase
                 'vehicle' => ['license_plate' => 'P 8492 GA', 'name' => 'Truk Isuzu Elf 01'],
             ]);
     }
+
+    public function test_exclusive_vehicle_assignment_rejects_second_driver(): void
+    {
+        $vehicle = Vehicle::create([
+            'name' => 'Truk Isuzu 01', 'license_plate' => 'P 8492 GA', 'type' => 'Truk Boks', 'status' => 'active',
+        ]);
+
+        $driver1 = User::factory()->create(['name' => 'Driver Satu', 'role' => 'CleanUP', 'vehicle_id' => $vehicle->id]);
+        $driver2 = User::factory()->create(['name' => 'Driver Dua', 'role' => 'CleanUP']);
+
+        // Driver 2 tries via web
+        $res = $this->actingAs($driver2)->post(route('cleanup.selectVehicle'), [
+            'vehicle_id' => $vehicle->id,
+        ]);
+        $res->assertSessionHas('error');
+        $driver2->refresh();
+        $this->assertNull($driver2->vehicle_id);
+
+        // Driver 2 tries via API
+        $token2 = $driver2->createToken('token2')->plainTextToken;
+        $apiRes = $this->withHeader('Authorization', 'Bearer ' . $token2)
+            ->postJson(route('api.operator.vehicle.select'), ['vehicle_id' => $vehicle->id]);
+        $apiRes->assertStatus(422)
+            ->assertJsonPath('success', false);
+
+        // Check vehicles list shows is_occupied
+        $listRes = $this->withHeader('Authorization', 'Bearer ' . $token2)
+            ->getJson(route('api.operator.vehicles'));
+        $listRes->assertOk()
+            ->assertJsonPath('vehicles.0.is_occupied', true)
+            ->assertJsonPath('vehicles.0.occupied_by', 'Driver Satu');
+    }
+
+    public function test_clock_out_automatically_releases_vehicle(): void
+    {
+        $vehicle = Vehicle::create([
+            'name' => 'Truk Isuzu 01', 'license_plate' => 'P 8492 GA', 'type' => 'Truk Boks', 'status' => 'active',
+        ]);
+        $operator = User::factory()->create(['role' => 'CleanUP', 'vehicle_id' => $vehicle->id]);
+
+        \App\Models\Attendance::create([
+            'user_id'     => $operator->id,
+            'date'        => Carbon::today()->toDateString(),
+            'clock_in_at' => Carbon::now()->subHours(8),
+            'status'      => 'present',
+        ]);
+
+        // Clock out via mobile API
+        $token = $operator->createToken('token')->plainTextToken;
+        $res = $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson(route('api.operator.attendance.clockOut'), [
+                'lat' => -8.17, 'lng' => 113.70,
+            ]);
+        $res->assertOk();
+
+        $operator->refresh();
+        $this->assertNull($operator->vehicle_id);
+    }
 }

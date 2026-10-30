@@ -196,6 +196,9 @@ class AttendanceController extends Controller
             'status'          => 'present',
         ]);
 
+        // Auto-release armada operasional agar siap digunakan driver shift berikutnya
+        $user->update(['vehicle_id' => null]);
+
         return back()->with('success', 'Absen pulang berhasil dicatat! Durasi kerja: ' . number_format($workHours, 1) . ' jam.');
     }
 
@@ -326,6 +329,9 @@ class AttendanceController extends Controller
             'overtime_clock_out_lng'   => $request->lng,
             'overtime_hours'           => $overtimeHours,
         ]);
+
+        // Auto-release armada operasional
+        $user->update(['vehicle_id' => null]);
 
         $msg = $attendance->overtime_approved
             ? 'Absen pulang lembur dicatat! Durasi lembur: ' . number_format($overtimeHours, 1) . ' jam.'

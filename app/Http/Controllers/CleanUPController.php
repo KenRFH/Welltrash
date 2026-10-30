@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Pickup;
 use App\Models\CompanyActivity;
 use App\Models\Vehicle;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -52,13 +53,29 @@ class CleanUPController extends Controller
             ->whereDate('pickup_date', $targetDate)
             ->get();
 
-        $activeVehicles = Vehicle::where('status', 'active')
-            ->select('id', 'name', 'license_plate', 'type', 'capacity')
-            ->orderBy('name', 'asc')
-            ->get();
-
         $user = Auth::user();
         $user->load('vehicle:id,name,license_plate,type,capacity');
+
+        $activeVehicles = Vehicle::where('status', 'active')
+            ->with(['drivers' => function ($q) {
+                $q->select('id', 'name', 'vehicle_id');
+            }])
+            ->select('id', 'name', 'license_plate', 'type', 'capacity')
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(function ($v) use ($user) {
+                $activeDriver = $v->drivers->first();
+                $isOccupied = $activeDriver !== null && $activeDriver->id !== $user->id;
+                return [
+                    'id'            => $v->id,
+                    'name'          => $v->name,
+                    'license_plate' => $v->license_plate,
+                    'type'          => $v->type,
+                    'capacity'      => $v->capacity,
+                    'is_occupied'   => $isOccupied,
+                    'occupied_by'   => $isOccupied ? $activeDriver->name : null,
+                ];
+            });
 
         return Inertia::render('CleanUP/Dashboard', [
             'daysOfWeek'     => $daysOfWeek,
@@ -87,6 +104,13 @@ class CleanUPController extends Controller
             if (!$vehicle) {
                 return back()->with('error', 'Armada yang dipilih sedang dalam perbaikan atau tidak aktif.');
             }
+
+            // Validasi 1 truk 1 driver aktif
+            $occupiedBy = User::where('vehicle_id', $vehicle->id)->where('id', '!=', $user->id)->first();
+            if ($occupiedBy) {
+                return back()->with('error', "Armada {$vehicle->license_plate} sedang digunakan oleh driver {$occupiedBy->name}.");
+            }
+
             $user->update(['vehicle_id' => $vehicle->id]);
             $message = "Armada operasional berhasil dipilih: {$vehicle->name} ({$vehicle->license_plate}).";
         } else {

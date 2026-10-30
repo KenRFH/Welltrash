@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use App\Models\Company;
 use App\Models\User;
@@ -292,17 +293,26 @@ class AdminController extends Controller
                 ];
             });
 
-        // Mitra / Companies with GPS coordinates
-        $companies = Company::whereNotNull('latitude')
-            ->whereNotNull('longitude')
-            ->where('latitude', '!=', 0)
-            ->where('subscription_status', 'active')
+        // Mitra / Companies with GPS coordinates (auto-resolve coordinates if missing)
+        $companies = Company::whereNotNull('address')
+            ->where('address', '!=', '')
+            ->where('subscription_status', '!=', 'rejected')
             ->with(['pickups' => function ($q) use ($today) {
                 $q->whereDate('pickup_date', $today)
                   ->with(['cleanup.vehicle', 'vehicle']);
             }])
             ->get()
             ->map(function ($c) {
+                // Auto-resolve GPS coordinates from address if missing or zero
+                if ((is_null($c->latitude) || $c->latitude == 0) && !empty($c->address)) {
+                    [$lat, $lng] = self::resolveCompanyCoordinates($c->address, $c->id);
+                    if ($lat && $lng) {
+                        $c->update(['latitude' => $lat, 'longitude' => $lng]);
+                        $c->latitude = $lat;
+                        $c->longitude = $lng;
+                    }
+                }
+
                 $todayPickup = $c->pickups->firstWhere('status', 'completed')
                     ?? $c->pickups->firstWhere('status', 'on_the_way')
                     ?? $c->pickups->first();
@@ -317,8 +327,8 @@ class AdminController extends Controller
                     'pic_name'            => $c->pic_name,
                     'phone'               => $c->phone,
                     'address'             => $c->address,
-                    'latitude'            => (float) $c->latitude,
-                    'longitude'           => (float) $c->longitude,
+                    'latitude'            => $c->latitude !== null ? (float) $c->latitude : null,
+                    'longitude'           => $c->longitude !== null ? (float) $c->longitude : null,
                     'status'              => $status, // 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none'
                     'subscription_plan'   => $c->subscription_plan,
                     'business_category'   => $c->business_category,
@@ -343,5 +353,81 @@ class AdminController extends Controller
             'cleanups'  => $cleanups,
             'companies' => $companies,
         ]);
+    }
+
+    /**
+     * Resolve GPS coordinates from address with Nominatim, keyword mapping, and Jember fallbacks.
+     */
+    public static function resolveCompanyCoordinates(string $address, ?int $seed = null): array
+    {
+        $cleanAddress = trim($address);
+        if (empty($cleanAddress)) {
+            return [null, null];
+        }
+
+        $hasJember = str_contains(strtolower($cleanAddress), 'jember');
+        $queries = [$hasJember ? $cleanAddress : "{$cleanAddress}, Jember"];
+
+        $simplified = preg_replace('/(rt|rw|no|kel|kec)\.?\s*\d+/i', '', $cleanAddress);
+        $simplified = preg_replace('/[,\.\-]+/', ' ', $simplified);
+        $simplified = trim(preg_replace('/\s+/', ' ', $simplified));
+        if ($simplified !== $cleanAddress && !empty($simplified)) {
+            $queries[] = $hasJember ? $simplified : "{$simplified}, Jember";
+        }
+
+        foreach ($queries as $q) {
+            try {
+                $res = Http::withHeaders([
+                    'User-Agent' => 'WelltrashApp/1.0 (info@welltrash.com)',
+                    'Accept'     => 'application/json',
+                ])->timeout(3)->get('https://nominatim.openstreetmap.org/search', [
+                    'format' => 'json',
+                    'q'      => $q,
+                    'limit'  => 1,
+                ]);
+
+                if ($res->successful() && !empty($res->json())) {
+                    $first = $res->json()[0];
+                    return [(float) $first['lat'], (float) $first['lon']];
+                }
+            } catch (\Throwable) {
+            }
+        }
+
+        // Sub-district centroid keywords in Jember
+        $subdistricts = [
+            'patrang'    => [-8.1518, 113.7161],
+            'kaliwates'  => [-8.1764, 113.6890],
+            'sumbersari' => [-8.1720, 113.7180],
+            'mastrip'    => [-8.1650, 113.7120],
+            'gajah mada' => [-8.1764, 113.6890],
+            'baratan'    => [-8.1400, 113.7250],
+            'kampus'     => [-8.1660, 113.7150],
+            'mangli'     => [-8.1880, 113.6550],
+            'tanggul'    => [-8.1610, 113.4500],
+            'ambulu'     => [-8.3490, 113.6060],
+            'balung'     => [-8.2770, 113.5350],
+            'sukorambi'  => [-8.1400, 113.6600],
+            'puger'      => [-8.3750, 113.4800],
+            'kencong'    => [-8.2800, 113.3700],
+            'ajung'      => [-8.2100, 113.6700],
+            'rambipuji'  => [-8.2000, 113.6100],
+        ];
+
+        $lower = strtolower($cleanAddress);
+        foreach ($subdistricts as $key => $coords) {
+            if (str_contains($lower, $key)) {
+                $offset = $seed ? (sin($seed) * 0.003) : 0;
+                return [round($coords[0] + $offset, 6), round($coords[1] + $offset, 6)];
+            }
+        }
+
+        // Deterministic Jember center fallback so markers don't stack directly on top of each other
+        $baseLat = -8.1724;
+        $baseLng = 113.6995;
+        $offsetLat = $seed ? (sin($seed * 1.7) * 0.012) : 0;
+        $offsetLng = $seed ? (cos($seed * 2.3) * 0.012) : 0;
+
+        return [round($baseLat + $offsetLat, 6), round($baseLng + $offsetLng, 6)];
     }
 }

@@ -517,6 +517,15 @@ class CompanyController extends Controller
         $cleanup = $activePickup->cleanup;
         $assignedVehicle = $activePickup->vehicle ?? $cleanup->vehicle;
 
+        if ((is_null($company->latitude) || $company->latitude == 0) && !empty($company->address)) {
+            [$lat, $lng] = AdminController::resolveCompanyCoordinates($company->address, $company->id);
+            if ($lat && $lng) {
+                $company->update(['latitude' => $lat, 'longitude' => $lng]);
+                $company->latitude = $lat;
+                $company->longitude = $lng;
+            }
+        }
+
         return response()->json([
             'tracking_active' => true,
             'pickup' => [

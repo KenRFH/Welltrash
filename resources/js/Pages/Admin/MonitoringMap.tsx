@@ -185,7 +185,7 @@ export default function MonitoringMap() {
         });
 
         filteredCompanies.forEach((c) => {
-            if (typeof c.latitude === 'number' && typeof c.longitude === 'number') {
+            if (typeof c.latitude === 'number' && typeof c.longitude === 'number' && c.latitude !== 0) {
                 list.push({
                     id: `company-${c.id}`,
                     lat: c.latitude,
@@ -346,13 +346,17 @@ export default function MonitoringMap() {
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
-                                            <button
-                                                onClick={() => { setFocusCoordinate({ lat: c.latitude, lng: c.longitude }); window.scrollTo({ top: 140, behavior: 'smooth' }); }}
-                                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:text-emerald-700"
-                                            >
-                                                <Navigation className="w-3 h-3 text-emerald-600" />
-                                                <span>Fokus di Peta</span>
-                                            </button>
+                                            {typeof c.latitude === 'number' && typeof c.longitude === 'number' && c.latitude !== 0 ? (
+                                                <button
+                                                    onClick={() => { setFocusCoordinate({ lat: c.latitude!, lng: c.longitude! }); window.scrollTo({ top: 140, behavior: 'smooth' }); }}
+                                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 hover:text-emerald-700"
+                                                >
+                                                    <Navigation className="w-3 h-3 text-emerald-600" />
+                                                    <span>Fokus di Peta</span>
+                                                </button>
+                                            ) : (
+                                                <span className="text-[10px] text-amber-600 font-semibold italic">GPS Belum Terdeteksi</span>
+                                            )}
                                             <button
                                                 onClick={() => setSelectedCompany(c)}
                                                 className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-800"

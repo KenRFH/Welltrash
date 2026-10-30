@@ -105,12 +105,30 @@ class OperatorApiController extends Controller
     /**
      * List active operational vehicles for operator selection.
      */
-    public function vehicles(): JsonResponse
+    public function vehicles(Request $request): JsonResponse
     {
+        $currentUserId = $request->user()?->id;
+
         $vehicles = Vehicle::where('status', 'active')
+            ->with(['drivers' => function ($q) {
+                $q->select('id', 'name', 'vehicle_id');
+            }])
             ->select('id', 'name', 'license_plate', 'type', 'capacity')
             ->orderBy('name', 'asc')
-            ->get();
+            ->get()
+            ->map(function ($v) use ($currentUserId) {
+                $activeDriver = $v->drivers->first();
+                $isOccupied = $activeDriver !== null && $activeDriver->id !== $currentUserId;
+                return [
+                    'id'            => $v->id,
+                    'name'          => $v->name,
+                    'license_plate' => $v->license_plate,
+                    'type'          => $v->type,
+                    'capacity'      => $v->capacity,
+                    'is_occupied'   => $isOccupied,
+                    'occupied_by'   => $isOccupied ? $activeDriver->name : null,
+                ];
+            });
 
         return response()->json([
             'success'  => true,
@@ -137,6 +155,16 @@ class OperatorApiController extends Controller
                     'message' => 'Armada yang dipilih sedang dalam perbaikan atau tidak aktif.',
                 ], 422);
             }
+
+            // Validasi 1 truk 1 driver aktif
+            $occupiedBy = User::where('vehicle_id', $vehicle->id)->where('id', '!=', $user->id)->first();
+            if ($occupiedBy) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Armada {$vehicle->license_plate} sedang digunakan oleh driver {$occupiedBy->name}.",
+                ], 422);
+            }
+
             $user->update(['vehicle_id' => $vehicle->id]);
             $message = "Armada operasional berhasil dipilih: {$vehicle->name} ({$vehicle->license_plate}).";
         } else {
@@ -599,6 +627,9 @@ class OperatorApiController extends Controller
             'status'          => 'present',
         ]);
 
+        // Auto-release armada operasional agar siap digunakan driver shift berikutnya
+        $user->update(['vehicle_id' => null]);
+
         return response()->json([
             'success'    => true,
             'message'    => 'Absen pulang berhasil dicatat! Durasi kerja: ' . number_format($workHours, 1) . ' jam.',
@@ -754,6 +785,9 @@ class OperatorApiController extends Controller
             'overtime_clock_out_lng'   => $request->lng,
             'overtime_hours'           => $overtimeHours,
         ]);
+
+        // Auto-release armada operasional
+        $request->user()->update(['vehicle_id' => null]);
 
         return response()->json([
             'success'    => true,
