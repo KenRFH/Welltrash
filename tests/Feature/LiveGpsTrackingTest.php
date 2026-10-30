@@ -71,6 +71,28 @@ class LiveGpsTrackingTest extends TestCase
             'last_location_at' => Carbon::now(),
         ]);
 
+        $companyUser = User::factory()->create(['role' => 'company']);
+        $company = Company::create([
+            'user_id'              => $companyUser->id,
+            'company_name'         => 'PT Jember Sejahtera',
+            'pic_name'             => 'Hendra',
+            'address'              => 'Jl. Gajah Mada No. 10',
+            'latitude'             => -8.1710,
+            'longitude'            => 113.6980,
+            'phone'                => '081234567890',
+            'subscription_plan'    => 'Reguler',
+            'subscription_status'  => 'active',
+            'signed_mou_path'      => 'documents/mous/sample.pdf',
+        ]);
+
+        Pickup::create([
+            'company_id'  => $company->id,
+            'cleanup_id'  => $operator->id,
+            'pickup_date' => Carbon::today()->toDateString(),
+            'status'      => 'completed',
+            'organic_weight' => 15.5,
+        ]);
+
         $response = $this->actingAs($admin)
             ->getJson(route('admin.cleanups.liveLocations'));
 
@@ -86,11 +108,26 @@ class LiveGpsTrackingTest extends TestCase
                         'active_task',
                     ],
                 ],
+                'companies' => [
+                    '*' => [
+                        'id',
+                        'company_name',
+                        'latitude',
+                        'longitude',
+                        'status',
+                        'driver_name',
+                        'detail_url',
+                    ],
+                ],
             ]);
 
         $this->assertTrue(
             collect($response->json('cleanups'))->contains('id', $operator->id)
         );
+        $companyData = collect($response->json('companies'))->firstWhere('id', $company->id);
+        $this->assertNotNull($companyData);
+        $this->assertEquals('completed', $companyData['status']);
+        $this->assertEquals($operator->name, $companyData['driver_name']);
     }
 
     public function test_company_can_track_assigned_operator_when_on_the_way(): void
@@ -253,5 +290,15 @@ class LiveGpsTrackingTest extends TestCase
         $operator->refresh();
         $this->assertEquals(-8.1810, round($operator->current_lat, 4));
         $this->assertEquals(113.7150, round($operator->current_lng, 4));
+    }
+
+    public function test_admin_can_access_monitoring_map_screen(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.monitoring.map'));
+
+        $response->assertOk();
     }
 }

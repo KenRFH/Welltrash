@@ -159,6 +159,9 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
 
+        // Monitoring Peta Mitra & Armada
+        Route::get('/monitoring-map', [AdminController::class, 'monitoringMap'])->name('monitoring.map');
+
         Route::get('/cleanups', [AdminController::class, 'cleanups'])->name('cleanups');
         Route::get('/cleanups/live-locations', [AdminController::class, 'liveLocations'])->name('cleanups.liveLocations');
         Route::get('/cleanups/{user}', [AdminController::class, 'cleanupDetail'])->name('cleanups.show');

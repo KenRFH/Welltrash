@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
-import AdminSidebar from '@/Components/AdminSidebar';
+import AdminSidebar, { AdminActiveTab } from '@/Components/AdminSidebar';
 import PwaInstallButton from '@/Components/PwaInstallButton';
 import { Menu, ShieldCheck, Calendar, Sparkles } from 'lucide-react';
 
 interface Props {
     children: React.ReactNode;
     title: string;
-    activeTab: 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices';
+    activeTab: AdminActiveTab;
     subtitle?: string;
     headerAction?: React.ReactNode;
 }

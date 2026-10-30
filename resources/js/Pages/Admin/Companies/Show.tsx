@@ -2,6 +2,21 @@ import React from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link } from '@inertiajs/react';
 
+interface PickupItem {
+    id: number;
+    pickup_date: string;
+    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
+    organic_weight?: number;
+    anorganic_weight?: number;
+    residue_weight?: number;
+    trash_bag_count?: number;
+    evidence_pickup_path?: string | null;
+    cleanup?: {
+        id: number;
+        name: string;
+    } | null;
+}
+
 interface Company {
     id: number;
     company_name: string;
@@ -20,6 +35,7 @@ interface Company {
     };
     created_at: string;
     remaining_days: number | null;
+    pickups?: PickupItem[];
 }
 
 interface Props {
@@ -146,6 +162,71 @@ export default function Show({ company }: Props) {
                                 </div>
                             </div>
                         </div>
+                        {/* Pickups History Section */}
+                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
+                            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 pb-4 border-b border-gray-50 flex items-center justify-between">
+                                <span className="flex items-center gap-3">
+                                    <span className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">🚚</span>
+                                    Data & Riwayat Penjemputan
+                                </span>
+                                <span className="text-[10px] font-bold text-gray-400 normal-case">
+                                    {company.pickups?.length || 0} riwayat
+                                </span>
+                            </h3>
+
+                            {company.pickups && company.pickups.length > 0 ? (
+                                <div className="divide-y divide-gray-100">
+                                    {company.pickups.map((p) => {
+                                        const isCompleted = p.status === 'completed';
+                                        const isOtw = p.status === 'on_the_way';
+                                        const isFailed = p.status === 'failed';
+                                        const totalWeight = ((p.organic_weight || 0) + (p.anorganic_weight || 0) + (p.residue_weight || 0)).toFixed(1);
+
+                                        return (
+                                            <div key={p.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 first:pt-0 last:pb-0">
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-black text-gray-900">
+                                                            {new Date(p.pickup_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
+                                                        </span>
+                                                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                                                            isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                                            isOtw ? 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse' :
+                                                            isFailed ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                                                            'bg-blue-50 text-blue-700 border border-blue-200'
+                                                        }`}>
+                                                            {isCompleted ? 'Selesai' : isOtw ? 'OTW' : isFailed ? 'Gagal' : 'Terjadwal'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 mt-1 font-medium">
+                                                        Driver: <strong className="text-gray-800">{p.cleanup?.name || 'Belum ditugaskan'}</strong>
+                                                        {isCompleted && Number(totalWeight) > 0 && (
+                                                            <span className="ml-2 text-emerald-700 font-bold">&bull; {totalWeight} Kg limbah</span>
+                                                        )}
+                                                    </p>
+                                                </div>
+
+                                                {p.evidence_pickup_path && (
+                                                    <a
+                                                        href={`/storage/${p.evidence_pickup_path}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors self-start sm:self-auto"
+                                                    >
+                                                        <span>Foto Bukti</span>
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="p-6 bg-gray-50/60 rounded-2xl border border-dashed border-gray-200 text-center">
+                                    <p className="text-xs font-bold text-gray-400">Belum ada riwayat penjemputan tercatat</p>
+                                </div>
+                            )}
+                        </div>
+
                     </div>
 
                     {/* Documents Sidebar Section */}

@@ -25,13 +25,23 @@ class AdminController extends Controller
 
     public function showCompany(Company $company)
     {
-        $company->load('user');
+        $company->load([
+            'user',
+            'pickups' => function ($q) {
+                $q->with('cleanup:id,name')->orderByDesc('pickup_date')->take(20);
+            }
+        ]);
         
         $company->remaining_days = null;
 
         return Inertia::render('Admin/Companies/Show', [
             'company' => $company
         ]);
+    }
+
+    public function monitoringMap()
+    {
+        return Inertia::render('Admin/MonitoringMap');
     }
 
     public function pendingCompanies()
@@ -207,7 +217,7 @@ class AdminController extends Controller
     /**
      * Get real-time coordinates of all active operators.
      */
-    // ponytail: active fleet live coordinates endpoint; add geofencing alerts when scale exceeds 50 trucks.
+    // ponytail: active fleet & partner coordinates endpoint; add geofencing alerts when scale exceeds 50 trucks.
     public function liveLocations()
     {
         $today = Carbon::today()->toDateString();
@@ -253,6 +263,45 @@ class AdminController extends Controller
                 ];
             });
 
-        return response()->json(['cleanups' => $cleanups]);
+        // Mitra / Companies with GPS coordinates
+        $companies = Company::whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', 0)
+            ->where('subscription_status', 'active')
+            ->with(['pickups' => function ($q) use ($today) {
+                $q->whereDate('pickup_date', $today)
+                  ->with('cleanup:id,name');
+            }])
+            ->get()
+            ->map(function ($c) {
+                $todayPickup = $c->pickups->firstWhere('status', 'completed')
+                    ?? $c->pickups->firstWhere('status', 'on_the_way')
+                    ?? $c->pickups->first();
+
+                $status = $todayPickup ? $todayPickup->status : 'none';
+                $totalWeight = $todayPickup ? (float) (($todayPickup->organic_weight ?? 0) + ($todayPickup->anorganic_weight ?? 0) + ($todayPickup->residue_weight ?? 0)) : 0;
+
+                return [
+                    'id'              => $c->id,
+                    'company_name'    => $c->company_name,
+                    'pic_name'        => $c->pic_name,
+                    'phone'           => $c->phone,
+                    'address'         => $c->address,
+                    'latitude'        => (float) $c->latitude,
+                    'longitude'       => (float) $c->longitude,
+                    'status'          => $status, // 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none'
+                    'driver_name'     => $todayPickup?->cleanup?->name,
+                    'total_weight'    => $totalWeight,
+                    'trash_bag_count' => (int) ($todayPickup?->trash_bag_count ?? 0),
+                    'pickup_id'       => $todayPickup?->id,
+                    'pickup_time'     => $todayPickup?->updated_at?->format('H:i'),
+                    'detail_url'      => route('admin.companies.show', $c->id),
+                ];
+            });
+
+        return response()->json([
+            'cleanups'  => $cleanups,
+            'companies' => $companies,
+        ]);
     }
 }
