@@ -50,6 +50,10 @@ Route::prefix('operator')->group(function () {
         Route::get('/me', [OperatorApiController::class, 'me'])->name('api.operator.me');
         Route::post('/logout', [OperatorApiController::class, 'logout'])->name('api.operator.logout');
 
+        // Vehicles (Operational Fleet Selection)
+        Route::get('/vehicles', [OperatorApiController::class, 'vehicles'])->name('api.operator.vehicles');
+        Route::post('/vehicle/select', [OperatorApiController::class, 'selectVehicle'])->name('api.operator.vehicle.select');
+
         // Pickups
         Route::get('/pickups', [OperatorApiController::class, 'pickups'])->name('api.operator.pickups');
         Route::put('/pickups/{pickup}/status', [OperatorApiController::class, 'updatePickupStatus'])->name('api.operator.pickups.status');

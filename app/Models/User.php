@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'vehicle_id',
         'daily_salary',
         'current_lat',
         'current_lng',
@@ -68,6 +69,11 @@ class User extends Authenticatable
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 
     public function leaveRequests()

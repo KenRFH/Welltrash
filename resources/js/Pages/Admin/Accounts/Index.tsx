@@ -23,6 +23,8 @@ import {
     Layers,
     Sparkles,
     Briefcase,
+    Navigation,
+    MapPin,
 } from 'lucide-react';
 
 interface CompanyProfile {
@@ -31,6 +33,8 @@ interface CompanyProfile {
     company_name: string;
     pic_name: string;
     address: string;
+    latitude?: number | null;
+    longitude?: number | null;
     phone: string;
     business_category: string | null;
     subscription_plan: string | null;
@@ -66,6 +70,8 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
     const [isEditing, setIsEditing] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [isLocating, setIsLocating] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
 
     // Form logic
     const { data, setData, post, reset, errors, processing } = useForm({
@@ -77,12 +83,65 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
         company_name: '',
         pic_name: '',
         address: '',
+        latitude: '' as string | number,
+        longitude: '' as string | number,
         phone: '',
         business_category: '',
         subscription_plan: 'Reguler',
         pickup_schedule: [] as string[],
         signed_mou: null as File | null,
     });
+
+    const handleGetGeolocation = () => {
+        if (!navigator.geolocation) {
+            alert('Browser tidak mendukung deteksi lokasi.');
+            return;
+        }
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setData(prev => ({
+                    ...prev,
+                    latitude: Number(pos.coords.latitude.toFixed(6)),
+                    longitude: Number(pos.coords.longitude.toFixed(6)),
+                }));
+                setIsLocating(false);
+            },
+            (err) => {
+                setIsLocating(false);
+                alert('Gagal mengambil GPS: ' + err.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
+    const handleGeocodeAddress = async () => {
+        if (!data.address.trim()) {
+            alert('Ketik alamat terlebih dahulu.');
+            return;
+        }
+        setIsGeocoding(true);
+        try {
+            const query = data.address.toLowerCase().includes('jember')
+                ? data.address
+                : `${data.address}, Jember`;
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            const json = await res.json();
+            if (json && json.length > 0) {
+                setData(prev => ({
+                    ...prev,
+                    latitude: parseFloat(json[0].lat),
+                    longitude: parseFloat(json[0].lon),
+                }));
+            } else {
+                alert('Titik koordinat tidak ditemukan otomatis dari teks alamat ini.');
+            }
+        } catch {
+            alert('Gagal geocoding alamat.');
+        } finally {
+            setIsGeocoding(false);
+        }
+    };
 
     // Plan-based schedule limits
     const getScheduleLimit = (plan: string) => {
@@ -110,6 +169,8 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
         setData(prev => ({
             ...prev,
             role: activeSubTab,
+            latitude: '',
+            longitude: '',
             pickup_schedule: []
         }));
         setIsModalOpen(true);
@@ -128,6 +189,8 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
             company_name: user.company?.company_name || '',
             pic_name: user.company?.pic_name || '',
             address: user.company?.address || '',
+            latitude: user.company?.latitude ?? '',
+            longitude: user.company?.longitude ?? '',
             phone: user.company?.phone || '',
             business_category: user.company?.business_category || '',
             subscription_plan: user.company?.subscription_plan || 'Reguler',
@@ -497,8 +560,19 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                             {user.email}
                                                         </div>
                                                         {user.company && (
-                                                            <div className="text-[11px] text-teal-700 font-semibold mt-0.5">
-                                                                {user.company.company_name} {user.company.phone ? `(${user.company.phone})` : ''}
+                                                            <div className="flex flex-col gap-0.5 mt-0.5">
+                                                                <div className="text-[11px] text-teal-700 font-semibold">
+                                                                    {user.company.company_name} {user.company.phone ? `(${user.company.phone})` : ''}
+                                                                </div>
+                                                                {user.company.latitude && user.company.longitude ? (
+                                                                    <div className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                                                                        <MapPin className="w-2.5 h-2.5" /> GPS: {user.company.latitude.toFixed(4)}, {user.company.longitude.toFixed(4)}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-[10px] text-amber-600 font-medium">
+                                                                        📍 Belum ada koordinat GPS
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
                                                     </div>
@@ -746,6 +820,58 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                 placeholder="Alamat penjemputan limbah..."
                                                 className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                                             />
+                                        </div>
+
+                                        {/* Titik Koordinat GPS Mitra */}
+                                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                                                    Titik Koordinat GPS (Monitoring Map)
+                                                </label>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleGetGeolocation}
+                                                        disabled={isLocating}
+                                                        className="px-2 py-1 text-[11px] font-semibold rounded bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 disabled:opacity-50"
+                                                    >
+                                                        {isLocating ? 'GPS...' : '📍 GPS Saya'}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleGeocodeAddress}
+                                                        disabled={isGeocoding || !data.address.trim()}
+                                                        className="px-2 py-1 text-[11px] font-semibold rounded bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 disabled:opacity-50"
+                                                    >
+                                                        {isGeocoding ? 'Cari...' : '🔍 Dari Alamat'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">Latitude</label>
+                                                    <input
+                                                        type="number"
+                                                        step="any"
+                                                        value={data.latitude}
+                                                        onChange={(e) => setData('latitude', e.target.value)}
+                                                        placeholder="-8.1724"
+                                                        className="w-full px-2.5 py-1.5 rounded bg-white border border-slate-200 text-xs font-mono text-slate-800"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">Longitude</label>
+                                                    <input
+                                                        type="number"
+                                                        step="any"
+                                                        value={data.longitude}
+                                                        onChange={(e) => setData('longitude', e.target.value)}
+                                                        placeholder="113.6995"
+                                                        className="w-full px-2.5 py-1.5 rounded bg-white border border-slate-200 text-xs font-mono text-slate-800"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div>

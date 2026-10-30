@@ -3,6 +3,7 @@ import axios from 'axios';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link } from '@inertiajs/react';
 import LiveTrackingMap, { MapMarker } from '@/Components/LiveTrackingMap';
+import MonitoringCompanyDetailModal from './MonitoringCompanyDetailModal';
 import { MapPin, Truck, Building2, RefreshCw, Search, CheckCircle2, Clock, Navigation, ArrowUpRight } from 'lucide-react';
 
 interface Driver {
@@ -12,6 +13,13 @@ interface Driver {
     current_lng: number | null;
     last_location_at: string | null;
     is_online: boolean;
+    vehicle?: {
+        id: number;
+        name: string;
+        license_plate: string;
+        type: string;
+        capacity?: string | null;
+    } | null;
     active_task: {
         id: number;
         status: string;
@@ -20,7 +28,7 @@ interface Driver {
     } | null;
 }
 
-interface CompanyLocation {
+export interface CompanyLocation {
     id: number;
     company_name: string;
     pic_name?: string;
@@ -29,8 +37,15 @@ interface CompanyLocation {
     latitude: number;
     longitude: number;
     status: 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none';
+    subscription_plan?: string | null;
+    business_category?: string | null;
     driver_name?: string | null;
+    vehicle_name?: string | null;
+    vehicle_plate?: string | null;
     total_weight: number;
+    organic_weight?: number;
+    anorganic_weight?: number;
+    residue_weight?: number;
     trash_bag_count: number;
     pickup_id?: number | null;
     pickup_time?: string | null;
@@ -61,10 +76,12 @@ const buildPopupHtml = (c: CompanyLocation) => {
     }
 
     let detailRows = '';
+    const vehicleInfo = c.vehicle_plate ? ` • ${c.vehicle_name ? `${c.vehicle_name} ` : ''}(${c.vehicle_plate})` : '';
+
     if (c.status === 'completed') {
         detailRows = `
             <div style="background: #f8fafc; border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 11px; color: #334155; line-height: 1.4;">
-                <div><strong>Driver:</strong> ${c.driver_name || '-'}</div>
+                <div><strong>Driver:</strong> ${c.driver_name || '-'}${vehicleInfo}</div>
                 <div><strong>Total Sampah:</strong> ${c.total_weight} Kg ${c.trash_bag_count > 0 ? `(${c.trash_bag_count} kantong)` : ''}</div>
                 ${c.pickup_time ? `<div><strong>Selesai:</strong> ${c.pickup_time} WIB</div>` : ''}
             </div>
@@ -72,7 +89,7 @@ const buildPopupHtml = (c: CompanyLocation) => {
     } else if (c.status === 'on_the_way') {
         detailRows = `
             <div style="background: #fffbeb; border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 11px; color: #92400e; line-height: 1.4;">
-                <div><strong>Driver Bertugas:</strong> ${c.driver_name || 'Armada CleanUP'}</div>
+                <div><strong>Driver Bertugas:</strong> ${c.driver_name || 'Armada CleanUP'}${vehicleInfo}</div>
             </div>
         `;
     }
@@ -90,9 +107,9 @@ const buildPopupHtml = (c: CompanyLocation) => {
             </div>
             ${detailRows}
             <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
-                <a href="${c.detail_url}" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #059669; text-decoration: none;">
+                <button onclick="window.__openMonitoringCompanyDetail && window.__openMonitoringCompanyDetail(${c.id})" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #059669; background: none; border: none; padding: 0; cursor: pointer;">
                     Lihat Data Penjemputan &rarr;
-                </a>
+                </button>
             </div>
         </div>
     `;
@@ -105,6 +122,18 @@ export default function MonitoringMap() {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'today' | 'completed' | 'on_the_way' | 'scheduled' | 'none'>('all');
     const [focusCoordinate, setFocusCoordinate] = useState<{ lat: number; lng: number } | null>(null);
+    const [selectedCompany, setSelectedCompany] = useState<CompanyLocation | null>(null);
+
+    // Global listener for map popup clicks
+    useEffect(() => {
+        (window as any).__openMonitoringCompanyDetail = (id: number) => {
+            const target = companies.find((item) => item.id === id);
+            if (target) setSelectedCompany(target);
+        };
+        return () => {
+            delete (window as any).__openMonitoringCompanyDetail;
+        };
+    }, [companies]);
 
     const fetchData = () => {
         setLoading(true);
@@ -142,11 +171,12 @@ export default function MonitoringMap() {
         drivers.forEach((d) => {
             if (typeof d.current_lat === 'number' && typeof d.current_lng === 'number') {
                 const isOtw = d.active_task?.status === 'on_the_way';
+                const vPlate = d.vehicle ? ` [${d.vehicle.license_plate}] ${d.vehicle.name}` : '';
                 list.push({
                     id: `driver-${d.id}`,
                     lat: d.current_lat,
                     lng: d.current_lng,
-                    title: `Driver: ${d.name}`,
+                    title: `Driver: ${d.name}${vPlate}`,
                     subtitle: isOtw ? `🚚 OTW: ${d.active_task?.company_name}` : `Update: ${d.last_location_at || '-'}`,
                     type: 'truck',
                     isOnline: d.is_online,
@@ -323,10 +353,13 @@ export default function MonitoringMap() {
                                                 <Navigation className="w-3 h-3 text-emerald-600" />
                                                 <span>Fokus di Peta</span>
                                             </button>
-                                            <Link href={c.detail_url} className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-800">
+                                            <button
+                                                onClick={() => setSelectedCompany(c)}
+                                                className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 hover:text-emerald-800"
+                                            >
                                                 <span>Detail Data</span>
                                                 <ArrowUpRight className="w-3 h-3" />
-                                            </Link>
+                                            </button>
                                         </div>
                                     </div>
                                 ))
@@ -337,6 +370,16 @@ export default function MonitoringMap() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Detail Data Mitra & Penjemputan */}
+            <MonitoringCompanyDetailModal
+                company={selectedCompany}
+                onClose={() => setSelectedCompany(null)}
+                onFocusMap={(lat, lng) => {
+                    setFocusCoordinate({ lat, lng });
+                    window.scrollTo({ top: 140, behavior: 'smooth' });
+                }}
+            />
         </AdminLayout>
     );
 }

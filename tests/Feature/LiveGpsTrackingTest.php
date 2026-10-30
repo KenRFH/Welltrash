@@ -301,4 +301,83 @@ class LiveGpsTrackingTest extends TestCase
 
         $response->assertOk();
     }
+    public function test_admin_can_access_company_detail_screen(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $companyUser = User::factory()->create(['role' => 'company']);
+        $company = Company::create([
+            'user_id'             => $companyUser->id,
+            'company_name'        => 'Test Company',
+            'pic_name'            => 'Budi',
+            'phone'               => '08123456789',
+            'address'             => 'Jl. Test',
+            'latitude'            => -8.17,
+            'longitude'           => 113.70,
+            'subscription_status' => 'active',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.companies.show', $company->id));
+
+        $response->assertOk();
+    }
+
+
+    public function test_company_registration_persists_explicit_gps_coordinates(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $user = User::factory()->create(['role' => 'company']);
+
+        $response = $this->actingAs($user)->post(route('company.store'), [
+            'company_name'      => 'PT Cafe Jember Indah',
+            'pic_name'          => 'Bayu',
+            'address'           => 'Jl. Jawa No. 12, Jember',
+            'latitude'          => -8.1695,
+            'longitude'         => 113.7140,
+            'phone'             => '081234567899',
+            'business_category' => 'Cafe',
+            'subscription_plan' => 'Reguler',
+            'pickup_schedule'   => ['Senin', 'Rabu'],
+            'signed_mou'        => \Illuminate\Http\UploadedFile::fake()->create('mou.pdf', 100, 'application/pdf'),
+        ]);
+
+        $response->assertRedirect(route('company.dashboard'));
+
+        $company = Company::where('user_id', $user->id)->first();
+        $this->assertNotNull($company);
+        $this->assertEquals(-8.1695, round($company->latitude, 4));
+        $this->assertEquals(113.7140, round($company->longitude, 4));
+    }
+
+    public function test_admin_can_create_company_with_gps_coordinates(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->post(route('admin.accounts.store'), [
+            'name'              => 'Mitra Baru Jember',
+            'email'             => 'mitrabaru@jember.com',
+            'password'          => 'password123',
+            'role'              => 'company',
+            'company_name'      => 'PT Mitra Baru Jember',
+            'pic_name'          => 'Dodi',
+            'address'           => 'Jl. Danau Toba No. 5, Jember',
+            'latitude'          => -8.1788,
+            'longitude'         => 113.7211,
+            'phone'             => '08987654321',
+            'business_category' => 'Restoran',
+            'subscription_plan' => 'Prime',
+            'pickup_schedule'   => ['Senin', 'Selasa', 'Rabu'],
+            'signed_mou'        => \Illuminate\Http\UploadedFile::fake()->create('mou.pdf', 100, 'application/pdf'),
+        ]);
+
+        $response->assertSessionHas('success');
+
+        $createdCompany = Company::where('company_name', 'PT Mitra Baru Jember')->first();
+        $this->assertNotNull($createdCompany);
+        $this->assertEquals(-8.1788, round($createdCompany->latitude, 4));
+        $this->assertEquals(113.7211, round($createdCompany->longitude, 4));
+    }
 }

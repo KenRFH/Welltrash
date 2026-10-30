@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Company;
 use App\Models\Pickup;
 use App\Models\CompanyActivity;
+use App\Models\Vehicle;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -47,17 +48,53 @@ class CleanUPController extends Controller
         $isToday = ($diff === 0);
 
         // Fetch pre-generated pickups for that specific date
-        $pickups = Pickup::with(['company', 'cleanup'])
+        $pickups = Pickup::with(['company', 'cleanup', 'vehicle'])
             ->whereDate('pickup_date', $targetDate)
             ->get();
 
+        $activeVehicles = Vehicle::where('status', 'active')
+            ->select('id', 'name', 'license_plate', 'type', 'capacity')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $user = Auth::user();
+        $user->load('vehicle:id,name,license_plate,type,capacity');
+
         return Inertia::render('CleanUP/Dashboard', [
-            'daysOfWeek' => $daysOfWeek,
-            'selectedDay' => $selectedDay,
-            'targetDate' => $targetDate,
-            'isToday' => $isToday,
-            'pickups' => $pickups
+            'daysOfWeek'     => $daysOfWeek,
+            'selectedDay'    => $selectedDay,
+            'targetDate'     => $targetDate,
+            'isToday'        => $isToday,
+            'pickups'        => $pickups,
+            'activeVehicles' => $activeVehicles,
+            'currentVehicle' => $user->vehicle,
         ]);
+    }
+
+    /**
+     * Set operational vehicle for CleanUP operator.
+     */
+    public function selectVehicle(Request $request)
+    {
+        $request->validate([
+            'vehicle_id' => 'nullable|exists:vehicles,id',
+        ]);
+
+        $user = Auth::user();
+
+        if ($request->filled('vehicle_id')) {
+            $vehicle = Vehicle::where('id', $request->vehicle_id)->where('status', 'active')->first();
+            if (!$vehicle) {
+                return back()->with('error', 'Armada yang dipilih sedang dalam perbaikan atau tidak aktif.');
+            }
+            $user->update(['vehicle_id' => $vehicle->id]);
+            $message = "Armada operasional berhasil dipilih: {$vehicle->name} ({$vehicle->license_plate}).";
+        } else {
+            $user->update(['vehicle_id' => null]);
+            $message = 'Armada operasional berhasil dilepas.';
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -80,8 +117,9 @@ class CleanUPController extends Controller
         $cleanup = Auth::user();
 
         $pickup->update([
-            'cleanup_id' => $cleanup->id,
-            'status' => $request->status,
+            'cleanup_id'          => $cleanup->id,
+            'vehicle_id'          => $cleanup->vehicle_id,
+            'status'              => $request->status,
             'cancellation_reason' => $request->status === 'failed' ? $request->cancellation_reason : null,
         ]);
 
@@ -197,12 +235,13 @@ class CleanUPController extends Controller
         $evidencePickupPath = $request->file('evidence_pickup_path')->store('pickups/evidence', 'public');
 
         $pickup->update([
-            'cleanup_id' => $cleanup->id,
-            'status' => 'completed',
-            'organic_weight' => $organicWeight,
-            'anorganic_weight' => $anorganicWeight,
-            'residue_weight' => $residueWeight,
-            'trash_bag_count' => $trashBagCount,
+            'cleanup_id'           => $cleanup->id,
+            'vehicle_id'           => $pickup->vehicle_id ?? $cleanup->vehicle_id,
+            'status'               => 'completed',
+            'organic_weight'       => $organicWeight,
+            'anorganic_weight'     => $anorganicWeight,
+            'residue_weight'       => $residueWeight,
+            'trash_bag_count'      => $trashBagCount,
             'evidence_pickup_path' => $evidencePickupPath,
         ]);
 

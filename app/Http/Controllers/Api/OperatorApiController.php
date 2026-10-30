@@ -11,6 +11,7 @@ use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
 use App\Models\Pickup;
 use App\Models\User;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -51,6 +52,7 @@ class OperatorApiController extends Controller
         }
 
         $token = $user->createToken($request->device_name ?: 'android-operator')->plainTextToken;
+        $user->load('vehicle:id,name,license_plate,type,capacity');
 
         return response()->json([
             'success' => true,
@@ -62,6 +64,13 @@ class OperatorApiController extends Controller
                 'email'        => $user->email,
                 'role'         => $user->role,
                 'daily_salary' => $user->daily_salary,
+                'vehicle'      => $user->vehicle ? [
+                    'id'            => $user->vehicle->id,
+                    'name'          => $user->vehicle->name,
+                    'license_plate' => $user->vehicle->license_plate,
+                    'type'          => $user->vehicle->type,
+                    'capacity'      => $user->vehicle->capacity,
+                ] : null,
             ],
         ]);
     }
@@ -72,6 +81,7 @@ class OperatorApiController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
+        $user->load('vehicle:id,name,license_plate,type,capacity');
 
         return response()->json([
             'success' => true,
@@ -81,7 +91,71 @@ class OperatorApiController extends Controller
                 'email'        => $user->email,
                 'role'         => $user->role,
                 'daily_salary' => $user->daily_salary,
+                'vehicle'      => $user->vehicle ? [
+                    'id'            => $user->vehicle->id,
+                    'name'          => $user->vehicle->name,
+                    'license_plate' => $user->vehicle->license_plate,
+                    'type'          => $user->vehicle->type,
+                    'capacity'      => $user->vehicle->capacity,
+                ] : null,
             ],
+        ]);
+    }
+
+    /**
+     * List active operational vehicles for operator selection.
+     */
+    public function vehicles(): JsonResponse
+    {
+        $vehicles = Vehicle::where('status', 'active')
+            ->select('id', 'name', 'license_plate', 'type', 'capacity')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return response()->json([
+            'success'  => true,
+            'vehicles' => $vehicles,
+        ]);
+    }
+
+    /**
+     * Select/assign active operational vehicle for current operator.
+     */
+    public function selectVehicle(Request $request): JsonResponse
+    {
+        $request->validate([
+            'vehicle_id' => 'nullable|exists:vehicles,id',
+        ]);
+
+        $user = $request->user();
+
+        if ($request->filled('vehicle_id')) {
+            $vehicle = Vehicle::where('id', $request->vehicle_id)->where('status', 'active')->first();
+            if (! $vehicle) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Armada yang dipilih sedang dalam perbaikan atau tidak aktif.',
+                ], 422);
+            }
+            $user->update(['vehicle_id' => $vehicle->id]);
+            $message = "Armada operasional berhasil dipilih: {$vehicle->name} ({$vehicle->license_plate}).";
+        } else {
+            $user->update(['vehicle_id' => null]);
+            $message = 'Armada operasional berhasil dilepas.';
+        }
+
+        $user->load('vehicle:id,name,license_plate,type,capacity');
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'vehicle' => $user->vehicle ? [
+                'id'            => $user->vehicle->id,
+                'name'          => $user->vehicle->name,
+                'license_plate' => $user->vehicle->license_plate,
+                'type'          => $user->vehicle->type,
+                'capacity'      => $user->vehicle->capacity,
+            ] : null,
         ]);
     }
 
@@ -138,6 +212,7 @@ class OperatorApiController extends Controller
 
         $pickup->update([
             'cleanup_id'          => $request->user()->id,
+            'vehicle_id'          => $request->user()->vehicle_id,
             'status'              => $request->status,
             'cancellation_reason' => $request->status === 'failed' ? $request->cancellation_reason : null,
         ]);
@@ -232,6 +307,7 @@ class OperatorApiController extends Controller
 
         $pickup->update([
             'cleanup_id'           => $request->user()->id,
+            'vehicle_id'           => $pickup->vehicle_id ?? $request->user()->vehicle_id,
             'status'               => 'completed',
             'organic_weight'       => (float) $request->input('organic_weight', 0),
             'anorganic_weight'     => (float) $request->input('anorganic_weight', 0),

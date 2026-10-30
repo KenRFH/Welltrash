@@ -20,14 +20,15 @@ import {
 interface Company {
     id: number;
     company_name: string;
+    pic_name?: string;
     subscription_plan: string;
     subscription_status: string;
     remaining_days: number | null;
     phone: string;
-    user: {
+    user?: {
         name: string;
         email: string;
-    };
+    } | null;
 }
 
 interface Props {
@@ -82,8 +83,9 @@ export default function Index({ companies }: Props) {
         return companies.filter(c => {
             const matchesSearch =
                 c.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                c.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                c.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (c.user?.name && c.user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                (c.user?.email && c.user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                (c.pic_name && c.pic_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
                 (c.phone && c.phone.includes(searchQuery));
 
             const matchesStatus = statusFilter === 'all' || c.subscription_status === statusFilter;
@@ -515,7 +517,7 @@ export default function Index({ companies }: Props) {
                                                                 {company.company_name}
                                                             </div>
                                                             <div className="text-xs text-slate-400 font-medium mt-0.5">
-                                                                PIC: <span className="text-slate-600">{company.user.name}</span> &bull; {company.user.email}
+                                                                PIC: <span className="text-slate-600">{company.user?.name || company.pic_name || '-'}</span> &bull; {company.user?.email || '-'}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -611,7 +613,7 @@ export default function Index({ companies }: Props) {
                                                 <div>
                                                     <h3 className="font-bold text-slate-900 text-sm">{company.company_name}</h3>
                                                     <p className="text-xs text-slate-400 font-medium">
-                                                        PIC: {company.user.name}
+                                                        PIC: {company.user?.name || company.pic_name || '-'}
                                                     </p>
                                                 </div>
                                             </div>

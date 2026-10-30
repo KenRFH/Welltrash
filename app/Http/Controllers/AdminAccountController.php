@@ -8,6 +8,7 @@ use App\Models\Company;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
 class AdminAccountController extends Controller
@@ -49,6 +50,8 @@ class AdminAccountController extends Controller
                 'company_name' => 'required|string|max:255',
                 'pic_name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
                 'phone' => 'required|string|max:20',
                 'business_category' => 'nullable|string|max:255',
                 'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+',
@@ -87,11 +90,39 @@ class AdminAccountController extends Controller
                 $signedMouPath = $request->file('signed_mou')->store('documents/mous', 'public');
             }
 
+            $lat = $request->filled('latitude') ? (float) $request->latitude : null;
+            $lng = $request->filled('longitude') ? (float) $request->longitude : null;
+
+            // ponytail: fallback geocoding via OpenStreetMap Nominatim; upgrade to Google Geocoding API if rate limits exceeded.
+            if (is_null($lat) || is_null($lng)) {
+                $query = $validated['address'];
+                if (!str_contains(strtolower($query), 'jember')) {
+                    $query .= ', Jember';
+                }
+                try {
+                    $geoRes = Http::withHeaders(['User-Agent' => 'WelltrashApp/1.0'])
+                        ->timeout(3)
+                        ->get('https://nominatim.openstreetmap.org/search', [
+                            'format' => 'json',
+                            'q'      => $query,
+                            'limit'  => 1,
+                        ]);
+                    if ($geoRes->successful() && !empty($geoRes->json())) {
+                        $first = $geoRes->json()[0];
+                        $lat = (float) $first['lat'];
+                        $lng = (float) $first['lon'];
+                    }
+                } catch (\Throwable) {
+                }
+            }
+
             $company = Company::create([
                 'user_id' => $user->id,
                 'company_name' => $validated['company_name'],
                 'pic_name' => $validated['pic_name'],
                 'address' => $validated['address'],
+                'latitude' => $lat,
+                'longitude' => $lng,
                 'phone' => $validated['phone'],
                 'business_category' => $validated['business_category'] ?? null,
                 'subscription_plan' => $validated['subscription_plan'],
@@ -131,6 +162,8 @@ class AdminAccountController extends Controller
                 'company_name' => 'required|string|max:255',
                 'pic_name' => 'required|string|max:255',
                 'address' => 'required|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
                 'phone' => 'required|string|max:20',
                 'business_category' => 'nullable|string|max:255',
                 'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+',
@@ -170,10 +203,38 @@ class AdminAccountController extends Controller
         if ($user->role === 'company') {
             $company = $user->company;
 
+            $lat = $request->filled('latitude') ? (float) $request->latitude : null;
+            $lng = $request->filled('longitude') ? (float) $request->longitude : null;
+
+            // ponytail: fallback geocoding via OpenStreetMap Nominatim; upgrade to Google Geocoding API if rate limits exceeded.
+            if ((is_null($lat) || is_null($lng)) && (!$company || $company->address !== $validated['address'])) {
+                $query = $validated['address'];
+                if (!str_contains(strtolower($query), 'jember')) {
+                    $query .= ', Jember';
+                }
+                try {
+                    $geoRes = Http::withHeaders(['User-Agent' => 'WelltrashApp/1.0'])
+                        ->timeout(3)
+                        ->get('https://nominatim.openstreetmap.org/search', [
+                            'format' => 'json',
+                            'q'      => $query,
+                            'limit'  => 1,
+                        ]);
+                    if ($geoRes->successful() && !empty($geoRes->json())) {
+                        $first = $geoRes->json()[0];
+                        $lat = (float) $first['lat'];
+                        $lng = (float) $first['lon'];
+                    }
+                } catch (\Throwable) {
+                }
+            }
+
             $companyData = [
                 'company_name' => $validated['company_name'],
                 'pic_name' => $validated['pic_name'],
                 'address' => $validated['address'],
+                'latitude' => $lat ?? $company?->latitude,
+                'longitude' => $lng ?? $company?->longitude,
                 'phone' => $validated['phone'],
                 'business_category' => $validated['business_category'] ?? null,
                 'subscription_plan' => $validated['subscription_plan'],

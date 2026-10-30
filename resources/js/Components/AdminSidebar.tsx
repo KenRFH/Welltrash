@@ -15,9 +15,10 @@ import {
     X,
     Sparkles,
     MapPin,
+    CarFront,
 } from 'lucide-react';
 
-export type AdminActiveTab = 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices' | 'map';
+export type AdminActiveTab = 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices' | 'map' | 'vehicles';
 
 interface Props {
     active: AdminActiveTab;
@@ -120,6 +121,7 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                             <div className="space-y-1">
                                 {navItem('map', route('admin.monitoring.map'), 'Peta Monitor Mitra', MapPin)}
                                 {navItem('cleanups', route('admin.cleanups'), 'Monitor CleanUP', Truck)}
+                                {navItem('vehicles', route('admin.vehicles.index'), 'Inventaris Armada', CarFront)}
                                 {navItem('attendance', route('admin.attendance.index'), 'Absensi CleanUP', CalendarCheck2)}
                             </div>
                         </div>

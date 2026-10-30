@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use App\Models\Company;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -217,6 +218,8 @@ class CompanyController extends Controller
             'company_name' => 'required|string|max:255',
             'pic_name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'phone' => 'required|string|max:20',
             'business_category' => 'nullable|string|max:255',
             'subscription_plan' => 'required|string|in:Rumah Tangga (> 10km),Reguler,Prime,Premium+',
@@ -240,7 +243,31 @@ class CompanyController extends Controller
             'pickup_schedule.*' => 'string|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
         ]);
 
-        // Remove old separate restriction check (now handled in validation above)
+        $lat = $request->filled('latitude') ? (float) $request->latitude : null;
+        $lng = $request->filled('longitude') ? (float) $request->longitude : null;
+
+        // ponytail: fallback geocoding via OpenStreetMap Nominatim; upgrade to Google Geocoding API if rate limits exceeded.
+        if (is_null($lat) || is_null($lng)) {
+            $query = $request->address;
+            if (!str_contains(strtolower($query), 'jember')) {
+                $query .= ', Jember';
+            }
+            try {
+                $geoRes = Http::withHeaders(['User-Agent' => 'WelltrashApp/1.0'])
+                    ->timeout(3)
+                    ->get('https://nominatim.openstreetmap.org/search', [
+                        'format' => 'json',
+                        'q'      => $query,
+                        'limit'  => 1,
+                    ]);
+                if ($geoRes->successful() && !empty($geoRes->json())) {
+                    $first = $geoRes->json()[0];
+                    $lat = (float) $first['lat'];
+                    $lng = (float) $first['lon'];
+                }
+            } catch (\Throwable) {
+            }
+        }
 
         $user = Auth::user();
 
@@ -251,6 +278,8 @@ class CompanyController extends Controller
             'company_name' => $request->company_name,
             'pic_name' => $request->pic_name,
             'address' => $request->address,
+            'latitude' => $lat,
+            'longitude' => $lng,
             'phone' => $request->phone,
             'business_category' => $request->business_category,
             'subscription_plan' => $request->subscription_plan,
@@ -469,9 +498,13 @@ class CompanyController extends Controller
 
         $today = Carbon::today()->toDateString();
         $activePickup = $company->pickups()
-            ->with(['cleanup' => function ($q) {
-                $q->select('id', 'name', 'current_lat', 'current_lng', 'last_location_at');
-            }])
+            ->with([
+                'cleanup' => function ($q) {
+                    $q->select('id', 'name', 'vehicle_id', 'current_lat', 'current_lng', 'last_location_at')
+                      ->with('vehicle:id,name,license_plate,type,capacity');
+                },
+                'vehicle:id,name,license_plate,type,capacity',
+            ])
             ->whereDate('pickup_date', $today)
             ->where('status', 'on_the_way')
             ->latest()
@@ -482,6 +515,7 @@ class CompanyController extends Controller
         }
 
         $cleanup = $activePickup->cleanup;
+        $assignedVehicle = $activePickup->vehicle ?? $cleanup->vehicle;
 
         return response()->json([
             'tracking_active' => true,
@@ -497,6 +531,12 @@ class CompanyController extends Controller
                 'last_updated'     => $cleanup->last_location_at?->diffForHumans(),
                 'is_recent'        => $cleanup->last_location_at && $cleanup->last_location_at->gt(Carbon::now()->subMinutes(15)),
             ],
+            'vehicle' => $assignedVehicle ? [
+                'name'          => $assignedVehicle->name,
+                'license_plate' => $assignedVehicle->license_plate,
+                'type'          => $assignedVehicle->type,
+                'capacity'      => $assignedVehicle->capacity,
+            ] : null,
             'destination' => [
                 'company_name' => $company->company_name,
                 'address'      => $company->address,

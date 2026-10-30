@@ -126,6 +126,7 @@ Route::get('/katalog', function () {
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminAccountController;
+use App\Http\Controllers\AdminVehicleController;
 use App\Http\Controllers\InvoiceController;
 
 /*
@@ -165,6 +166,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/cleanups', [AdminController::class, 'cleanups'])->name('cleanups');
         Route::get('/cleanups/live-locations', [AdminController::class, 'liveLocations'])->name('cleanups.liveLocations');
         Route::get('/cleanups/{user}', [AdminController::class, 'cleanupDetail'])->name('cleanups.show');
+
+        // Inventaris Kendaraan Operasional
+        Route::resource('vehicles', AdminVehicleController::class)->except(['create', 'show', 'edit']);
+        Route::patch('/vehicles/{vehicle}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggleStatus');
 
         // Absensi
         Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');
@@ -276,6 +281,7 @@ Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function (
     Route::get('/kegiatan', [CleanUPController::class, 'activities'])->name('cleanup.kegiatan');
     Route::post('/kegiatan', [CleanUPController::class, 'storeActivity'])->name('cleanup.kegiatan.store');
     Route::post('/location', [CleanUPController::class, 'updateLocation'])->name('cleanup.location.update');
+    Route::post('/select-vehicle', [CleanUPController::class, 'selectVehicle'])->name('cleanup.selectVehicle');
 
     // Absensi
     Route::get('/attendance', [AttendanceController::class, 'myAttendance'])->name('cleanup.attendance');

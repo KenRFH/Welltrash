@@ -13,6 +13,12 @@ interface TrackingData {
         last_updated: string | null;
         is_recent: boolean;
     };
+    vehicle?: {
+        name: string;
+        license_plate: string;
+        type: string;
+        capacity?: string | null;
+    } | null;
     destination?: {
         company_name: string;
         address: string;
@@ -43,11 +49,13 @@ export default function CompanyTrackingCard() {
     const markers = useMemo<MapMarker[]>(() => {
         if (!data?.tracking_active || !data.driver?.lat || !data.driver?.lng) return [];
 
+        const vehicleLabel = data.vehicle ? ` • ${data.vehicle.name} (${data.vehicle.license_plate})` : '';
+
         const list: MapMarker[] = [{
             id: 'driver',
             lat: data.driver.lat,
             lng: data.driver.lng,
-            title: `Armada CleanUP: ${data.driver.name}`,
+            title: `Armada CleanUP: ${data.driver.name}${vehicleLabel}`,
             subtitle: `Update: ${data.driver.last_updated || 'baru saja'}`,
             type: 'truck',
             isOnline: data.driver.is_recent,
@@ -95,6 +103,16 @@ export default function CompanyTrackingCard() {
                         <h3 className="text-base font-extrabold text-slate-900 mt-0.5">
                             Driver <span className="text-emerald-700">{data.driver.name}</span> Sedang Menuju Lokasi Anda
                         </h3>
+                        {data.vehicle && (
+                            <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-900 text-white font-mono font-bold text-[11px] tracking-wider">
+                                    {data.vehicle.license_plate}
+                                </span>
+                                <span className="text-xs font-bold text-slate-700">
+                                    {data.vehicle.name} <span className="text-slate-400 font-normal">({data.vehicle.type})</span>
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

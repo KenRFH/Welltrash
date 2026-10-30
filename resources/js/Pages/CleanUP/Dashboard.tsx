@@ -5,6 +5,7 @@ import CleanUPSidebar from '@/Components/CleanUPSidebar';
 import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
 import PwaInstallButton from '@/Components/PwaInstallButton';
 import CleanUPOfflineSync from '@/Components/CleanUPOfflineSync';
+import CleanUPVehicleSelectorModal, { Vehicle } from '@/Components/CleanUPVehicleSelectorModal';
 import { compressImage } from '@/utils/compressImage';
 import { saveOfflinePickup, syncSinglePickup, getOfflinePickupIds } from '@/utils/offlinePickupQueue';
 
@@ -40,6 +41,8 @@ interface Props {
     targetDate: string;
     isToday: boolean;
     pickups: Pickup[];
+    activeVehicles?: Vehicle[];
+    currentVehicle?: Vehicle | null;
     auth: {
         user: { name: string; email: string };
     };
@@ -49,7 +52,7 @@ interface Props {
     };
 }
 
-export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday, pickups, auth, flash }: Props) {
+export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday, pickups, activeVehicles = [], currentVehicle = null, auth, flash }: Props) {
     const [activeModal, setActiveModal] = useState<number | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed'>('all');
@@ -59,6 +62,19 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [inputMode, setInputMode] = useState<'trashbag_only' | 'weight_and_trashbag'>('trashbag_only');
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(!currentVehicle && activeVehicles.length > 0);
+    const [isSavingVehicle, setIsSavingVehicle] = useState(false);
+
+    const handleSelectVehicle = (vehicleId: number | null) => {
+        setIsSavingVehicle(true);
+        router.post(route('cleanup.selectVehicle'), { vehicle_id: vehicleId }, {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsSavingVehicle(false);
+                setIsVehicleModalOpen(false);
+            },
+        });
+    };
 
     const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
     const galleryInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -393,6 +409,54 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                              </svg>
                              <span>{flash.success}</span>
+                         </div>
+                     )}
+
+                     {/* Operational Vehicle Selection Banner */}
+                     {currentVehicle ? (
+                         <div className="mb-6 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                             <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                                 </div>
+                                 <div>
+                                     <div className="flex items-center gap-2">
+                                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                             Armada Bertugas
+                                         </span>
+                                         <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-900 text-white">
+                                             {currentVehicle.license_plate}
+                                         </span>
+                                     </div>
+                                     <h4 className="text-sm font-extrabold text-slate-900 mt-1">
+                                         {currentVehicle.name} <span className="text-xs font-semibold text-slate-500">({currentVehicle.type} {currentVehicle.capacity ? `• ${currentVehicle.capacity}` : ''})</span>
+                                     </h4>
+                                 </div>
+                             </div>
+                             <button
+                                 onClick={() => setIsVehicleModalOpen(true)}
+                                 className="self-start sm:self-auto px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-2xs transition"
+                             >
+                                 Ganti Armada
+                             </button>
+                         </div>
+                     ) : (
+                         <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                             <div className="flex items-center gap-3">
+                                 <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm">
+                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                 </div>
+                                 <div>
+                                     <h4 className="text-sm font-bold text-amber-900">Armada Operasional Belum Dipilih</h4>
+                                     <p className="text-[11px] text-amber-700">Pilih kendaraan agar data plat dan armada muncul di monitor admin & mitra.</p>
+                                 </div>
+                             </div>
+                             <button
+                                 onClick={() => setIsVehicleModalOpen(true)}
+                                 className="self-start sm:self-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition"
+                             >
+                                 Pilih Armada Sekarang
+                             </button>
                          </div>
                      )}
 
@@ -809,6 +873,16 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                         </div>
                     </div>
                 )}
+
+                {/* Operational Vehicle Selector Modal */}
+                <CleanUPVehicleSelectorModal
+                    isOpen={isVehicleModalOpen}
+                    onClose={() => setIsVehicleModalOpen(false)}
+                    activeVehicles={activeVehicles}
+                    currentVehicleId={currentVehicle?.id}
+                    onSelect={handleSelectVehicle}
+                    isSaving={isSavingVehicle}
+                />
             </div>
             <AbsensiFloatingButton />
         </div>

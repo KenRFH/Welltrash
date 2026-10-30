@@ -162,7 +162,7 @@ class AdminController extends Controller
             }, 'pickups as failed_pickups' => function ($q) {
                 $q->where('status', 'failed');
             }])
-            ->with(['pickups' => function ($q) {
+            ->with(['vehicle', 'pickups' => function ($q) {
                 $q->latest('pickup_date')->take(1);
             }])
             ->get()
@@ -175,6 +175,12 @@ class AdminController extends Controller
                     'completed_pickups'=> $d->completed_pickups,
                     'failed_pickups'   => $d->failed_pickups,
                     'last_activity'    => $d->pickups->first()?->pickup_date,
+                    'vehicle'          => $d->vehicle ? [
+                        'id'            => $d->vehicle->id,
+                        'name'          => $d->vehicle->name,
+                        'license_plate' => $d->vehicle->license_plate,
+                        'type'          => $d->vehicle->type,
+                    ] : null,
                 ];
             });
 
@@ -185,8 +191,9 @@ class AdminController extends Controller
 
     public function cleanupDetail(User $user)
     {
+        $user->load('vehicle');
         $pickups = Pickup::where('cleanup_id', $user->id)
-            ->with('company')
+            ->with(['company', 'vehicle'])
             ->orderByDesc('pickup_date')
             ->get()
             ->map(function ($p) {
@@ -200,6 +207,10 @@ class AdminController extends Controller
                     'trash_bag_count'     => $p->trash_bag_count !== null ? (int) $p->trash_bag_count : null,
                     'evidence_pickup_path'=> $p->evidence_pickup_path,
                     'cancellation_reason' => $p->cancellation_reason,
+                    'vehicle'             => $p->vehicle ? [
+                        'name'          => $p->vehicle->name,
+                        'license_plate' => $p->vehicle->license_plate,
+                    ] : null,
                     'company'             => $p->company ? [
                         'id'           => $p->company->id,
                         'company_name' => $p->company->company_name,
@@ -209,7 +220,17 @@ class AdminController extends Controller
             });
 
         return Inertia::render('Admin/CleanUP/Show', [
-            'cleanup'  => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email],
+            'cleanup'  => [
+                'id'      => $user->id,
+                'name'    => $user->name,
+                'email'   => $user->email,
+                'vehicle' => $user->vehicle ? [
+                    'id'            => $user->vehicle->id,
+                    'name'          => $user->vehicle->name,
+                    'license_plate' => $user->vehicle->license_plate,
+                    'type'          => $user->vehicle->type,
+                ] : null,
+            ],
             'pickups' => $pickups,
         ]);
     }
@@ -222,8 +243,9 @@ class AdminController extends Controller
     {
         $today = Carbon::today()->toDateString();
         $cleanups = User::where('role', 'CleanUP')
-            ->select('id', 'name', 'email', 'current_lat', 'current_lng', 'last_location_at')
+            ->select('id', 'name', 'email', 'vehicle_id', 'current_lat', 'current_lng', 'last_location_at')
             ->with([
+                'vehicle:id,name,license_plate,type,capacity',
                 'attendances' => function ($q) use ($today) {
                     $q->whereDate('date', $today);
                 },
@@ -252,6 +274,13 @@ class AdminController extends Controller
                     'current_lng'      => $lng,
                     'last_location_at' => $cleanup->last_location_at?->diffForHumans() ?? ($todayAttendance ? 'Hadir hari ini' : 'Belum aktif'),
                     'is_online'        => (bool) $isOnline,
+                    'vehicle'          => $cleanup->vehicle ? [
+                        'id'            => $cleanup->vehicle->id,
+                        'name'          => $cleanup->vehicle->name,
+                        'license_plate' => $cleanup->vehicle->license_plate,
+                        'type'          => $cleanup->vehicle->type,
+                        'capacity'      => $cleanup->vehicle->capacity,
+                    ] : null,
                     'active_task'      => $activeTask ? [
                         'id'           => $activeTask->id,
                         'status'       => $activeTask->status,
@@ -270,7 +299,7 @@ class AdminController extends Controller
             ->where('subscription_status', 'active')
             ->with(['pickups' => function ($q) use ($today) {
                 $q->whereDate('pickup_date', $today)
-                  ->with('cleanup:id,name');
+                  ->with(['cleanup.vehicle', 'vehicle']);
             }])
             ->get()
             ->map(function ($c) {
@@ -280,22 +309,33 @@ class AdminController extends Controller
 
                 $status = $todayPickup ? $todayPickup->status : 'none';
                 $totalWeight = $todayPickup ? (float) (($todayPickup->organic_weight ?? 0) + ($todayPickup->anorganic_weight ?? 0) + ($todayPickup->residue_weight ?? 0)) : 0;
+                $assignedVehicle = $todayPickup?->vehicle ?? $todayPickup?->cleanup?->vehicle;
 
                 return [
-                    'id'              => $c->id,
-                    'company_name'    => $c->company_name,
-                    'pic_name'        => $c->pic_name,
-                    'phone'           => $c->phone,
-                    'address'         => $c->address,
-                    'latitude'        => (float) $c->latitude,
-                    'longitude'       => (float) $c->longitude,
-                    'status'          => $status, // 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none'
-                    'driver_name'     => $todayPickup?->cleanup?->name,
-                    'total_weight'    => $totalWeight,
-                    'trash_bag_count' => (int) ($todayPickup?->trash_bag_count ?? 0),
-                    'pickup_id'       => $todayPickup?->id,
-                    'pickup_time'     => $todayPickup?->updated_at?->format('H:i'),
-                    'detail_url'      => route('admin.companies.show', $c->id),
+                    'id'                  => $c->id,
+                    'company_name'        => $c->company_name,
+                    'pic_name'            => $c->pic_name,
+                    'phone'               => $c->phone,
+                    'address'             => $c->address,
+                    'latitude'            => (float) $c->latitude,
+                    'longitude'           => (float) $c->longitude,
+                    'status'              => $status, // 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none'
+                    'subscription_plan'   => $c->subscription_plan,
+                    'business_category'   => $c->business_category,
+                    'driver_name'         => $todayPickup?->cleanup?->name,
+                    'vehicle_name'        => $assignedVehicle?->name,
+                    'vehicle_plate'       => $assignedVehicle?->license_plate,
+                    'vehicle_type'        => $assignedVehicle?->type,
+                    'total_weight'        => $totalWeight,
+                    'organic_weight'      => (float) ($todayPickup?->organic_weight ?? 0),
+                    'anorganic_weight'    => (float) ($todayPickup?->anorganic_weight ?? 0),
+                    'residue_weight'      => (float) ($todayPickup?->residue_weight ?? 0),
+                    'trash_bag_count'     => (int) ($todayPickup?->trash_bag_count ?? 0),
+                    'evidence_url'        => $todayPickup?->evidence_pickup_path ? asset('storage/' . $todayPickup->evidence_pickup_path) : null,
+                    'cancellation_reason' => $todayPickup?->cancellation_reason,
+                    'pickup_id'           => $todayPickup?->id,
+                    'pickup_time'         => $todayPickup?->updated_at?->format('H:i'),
+                    'detail_url'          => route('admin.companies.show', $c->id),
                 ];
             });
 

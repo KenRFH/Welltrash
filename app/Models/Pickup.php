@@ -9,6 +9,7 @@ class Pickup extends Model
     protected $fillable = [
         'company_id',
         'cleanup_id',
+        'vehicle_id',
         'pickup_date',
         'status',
         'cancellation_reason',
@@ -34,6 +35,11 @@ class Pickup extends Model
     public function cleanup()
     {
         return $this->belongsTo(User::class, 'cleanup_id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 
     

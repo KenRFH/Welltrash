@@ -10,6 +10,13 @@ interface Driver {
     current_lng: number | null;
     last_location_at: string | null;
     is_online: boolean;
+    vehicle?: {
+        id: number;
+        name: string;
+        license_plate: string;
+        type: string;
+        capacity?: string | null;
+    } | null;
     active_task: {
         id: number;
         status: string;
@@ -30,6 +37,8 @@ interface CompanyLocation {
     longitude: number;
     status: 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none';
     driver_name?: string | null;
+    vehicle_name?: string | null;
+    vehicle_plate?: string | null;
     total_weight: number;
     trash_bag_count: number;
     pickup_id?: number | null;
@@ -66,10 +75,12 @@ const buildCompanyPopup = (c: CompanyLocation) => {
     }
 
     let detailRows = '';
+    const vehicleInfo = c.vehicle_plate ? ` • ${c.vehicle_name ? `${c.vehicle_name} ` : ''}(${c.vehicle_plate})` : '';
+
     if (c.status === 'completed') {
         detailRows = `
             <div style="background: #f8fafc; border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 11px; color: #334155; line-height: 1.4;">
-                <div><strong>Driver:</strong> ${c.driver_name || '-'}</div>
+                <div><strong>Driver:</strong> ${c.driver_name || '-'}${vehicleInfo}</div>
                 <div><strong>Total Sampah:</strong> ${c.total_weight} Kg ${c.trash_bag_count > 0 ? `(${c.trash_bag_count} kantong)` : ''}</div>
                 ${c.pickup_time ? `<div><strong>Selesai:</strong> ${c.pickup_time} WIB</div>` : ''}
             </div>
@@ -77,7 +88,7 @@ const buildCompanyPopup = (c: CompanyLocation) => {
     } else if (c.status === 'on_the_way') {
         detailRows = `
             <div style="background: #fffbeb; border-radius: 8px; padding: 6px 8px; margin-top: 6px; font-size: 11px; color: #92400e; line-height: 1.4;">
-                <div><strong>Driver Bertugas:</strong> ${c.driver_name || 'Armada CleanUP'}</div>
+                <div><strong>Driver Bertugas:</strong> ${c.driver_name || 'Armada CleanUP'}${vehicleInfo}</div>
                 <div>Armada sedang dalam perjalanan menuju lokasi mitra.</div>
             </div>
         `;
@@ -147,11 +158,12 @@ export default function AdminFleetGpsCard() {
         drivers.forEach((d) => {
             if (typeof d.current_lat === 'number' && typeof d.current_lng === 'number') {
                 const isOtw = d.active_task?.status === 'on_the_way';
+                const vPlate = d.vehicle ? ` [${d.vehicle.license_plate}] ${d.vehicle.name}` : '';
                 list.push({
                     id: `driver-${d.id}`,
                     lat: d.current_lat,
                     lng: d.current_lng,
-                    title: `Driver: ${d.name}`,
+                    title: `Driver: ${d.name}${vPlate}`,
                     subtitle: isOtw ? `🚚 OTW ke ${d.active_task?.company_name}` : `Update: ${d.last_location_at || '-'}`,
                     type: 'truck',
                     isOnline: d.is_online,
@@ -339,6 +351,16 @@ export default function AdminFleetGpsCard() {
                                             <div className="text-[11px] text-slate-500 truncate mt-0.5">
                                                 {isOtw ? <span className="text-emerald-700 font-semibold">OTW: {driver.active_task?.company_name}</span> : <span>Update: {driver.last_location_at || '-'}</span>}
                                             </div>
+                                            {driver.vehicle ? (
+                                                <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-700 font-semibold truncate">
+                                                    <span className="font-mono font-bold px-1.5 py-0.2 bg-slate-900 text-white rounded text-[10px]">
+                                                        {driver.vehicle.license_plate}
+                                                    </span>
+                                                    <span className="truncate">{driver.vehicle.name}</span>
+                                                </div>
+                                            ) : (
+                                                <div className="text-[10px] text-slate-400 italic mt-0.5">Tanpa armada terdaftar</div>
+                                            )}
                                         </div>
                                         <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0 ${
                                             isOtw ? 'bg-amber-100 text-amber-800' : driver.is_online ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'

@@ -1,13 +1,19 @@
 import { Head, useForm, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
+import { MapPin, Navigation, Search, CheckCircle2 } from 'lucide-react';
 import CompanySidebar from '@/Components/CompanySidebar';
 
 export default function Register({ auth }: any) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isLocating, setIsLocating] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
+
     const { data, setData, post, processing, errors } = useForm({
         company_name: '',
         pic_name: auth?.user?.name || '',
         address: '',
+        latitude: '' as string | number,
+        longitude: '' as string | number,
         phone: '',
         business_category: '', // NEW Field
         subscription_plan: 'Reguler',
@@ -91,6 +97,57 @@ export default function Register({ auth }: any) {
                 return;
             }
             setData('pickup_schedule', [...data.pickup_schedule, day]);
+        }
+    };
+
+    const handleGetGeolocation = () => {
+        if (!navigator.geolocation) {
+            alert('Browser Anda tidak mendukung deteksi lokasi.');
+            return;
+        }
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setData(prev => ({
+                    ...prev,
+                    latitude: Number(pos.coords.latitude.toFixed(6)),
+                    longitude: Number(pos.coords.longitude.toFixed(6)),
+                }));
+                setIsLocating(false);
+            },
+            (err) => {
+                setIsLocating(false);
+                alert('Gagal mendeteksi lokasi GPS: ' + err.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
+    const handleGeocodeAddress = async () => {
+        if (!data.address.trim()) {
+            alert('Silakan ketik alamat terlebih dahulu.');
+            return;
+        }
+        setIsGeocoding(true);
+        try {
+            const query = data.address.toLowerCase().includes('jember')
+                ? data.address
+                : `${data.address}, Jember`;
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+            const results = await res.json();
+            if (results && results.length > 0) {
+                setData(prev => ({
+                    ...prev,
+                    latitude: parseFloat(results[0].lat),
+                    longitude: parseFloat(results[0].lon),
+                }));
+            } else {
+                alert('Titik koordinat tidak ditemukan otomatis. Anda dapat mencoba tombol GPS atau mengisi alamat lebih detail.');
+            }
+        } catch {
+            alert('Gagal menghubungkan ke layanan peta OpenStreetMap. Koordinat akan diperkirakan saat disimpan.');
+        } finally {
+            setIsGeocoding(false);
         }
     };
 
@@ -194,16 +251,65 @@ export default function Register({ auth }: any) {
 
                             {/* Alamat Perusahaan */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Alamat Perusahaan</label>
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-sm font-bold text-gray-700">Alamat Perusahaan</label>
+                                    <span className="text-[11px] text-gray-400">Titik jemput armada CleanUP</span>
+                                </div>
                                 <input
                                     type="text"
                                     value={data.address}
                                     onChange={e => setData('address', e.target.value)}
-                                    placeholder="Alamat Perusahaan"
+                                    placeholder="Contoh: Jl. Gajah Mada No. 104, Kaliwates, Jember"
                                     className="w-full bg-gray-50 border-0 rounded-lg py-3 px-4 text-sm text-gray-700 focus:ring-2 focus:ring-teal-500 transition-colors"
                                     required
                                 />
                                 {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
+
+                                {/* Geolocation & Geocoding trigger buttons */}
+                                <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleGetGeolocation}
+                                        disabled={isLocating}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 transition-colors disabled:opacity-50"
+                                    >
+                                        <Navigation className="w-3.5 h-3.5" />
+                                        {isLocating ? 'Mendeteksi GPS...' : 'Gunakan Lokasi Saat Ini (GPS)'}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleGeocodeAddress}
+                                        disabled={isGeocoding || !data.address.trim()}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition-colors disabled:opacity-50"
+                                    >
+                                        <Search className="w-3.5 h-3.5" />
+                                        {isGeocoding ? 'Mencari Koordinat...' : 'Cari Titik dari Alamat'}
+                                    </button>
+                                </div>
+
+                                {/* Active Coordinate Indicator */}
+                                {data.latitude && data.longitude ? (
+                                    <div className="mt-2.5 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs text-emerald-800">
+                                        <div className="flex items-center gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                            <span>
+                                                <strong>Titik GPS Siap:</strong> {data.latitude}, {data.longitude}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setData(prev => ({ ...prev, latitude: '', longitude: '' }))}
+                                            className="text-xs text-slate-500 hover:text-rose-600 font-semibold underline ml-2"
+                                        >
+                                            Hapus
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="mt-1.5 text-[11px] text-gray-400">
+                                        *Jika tombol tidak ditekan, sistem otomatis memperkirakan koordinat dari alamat Anda di Jember.
+                                    </p>
+                                )}
                             </div>
 
                             {/* Nomer WA PIC */}

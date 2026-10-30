@@ -26,6 +26,12 @@ interface CleanUP {
     completed_pickups: number;
     failed_pickups: number;
     last_activity: string | null;
+    vehicle?: {
+        id: number;
+        name: string;
+        license_plate: string;
+        type: string;
+    } | null;
 }
 
 interface Props {
@@ -304,7 +310,7 @@ export default function Index({ cleanups }: Props) {
                                                 <tr key={cleanup.id} className="hover:bg-slate-50/70 transition-colors group">
                                                     <td className="px-5 py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-extrabold text-xs">
+                                                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center justify-center font-extrabold text-xs shrink-0">
                                                                 {cleanup.name.substring(0, 2).toUpperCase()}
                                                             </div>
                                                             <div>
@@ -314,6 +320,18 @@ export default function Index({ cleanups }: Props) {
                                                                 <div className="text-xs text-slate-400 font-medium mt-0.5">
                                                                     {cleanup.email}
                                                                 </div>
+                                                                {cleanup.vehicle ? (
+                                                                    <div className="flex items-center gap-1.5 mt-1">
+                                                                        <span className="font-mono font-bold px-1.5 py-0.2 bg-slate-900 text-white rounded text-[10px]">
+                                                                            {cleanup.vehicle.license_plate}
+                                                                        </span>
+                                                                        <span className="text-[11px] text-slate-600 font-medium truncate max-w-[150px]">
+                                                                            {cleanup.vehicle.name}
+                                                                        </span>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-[10px] text-slate-400 italic mt-0.5">Belum pilih armada</div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </td>
