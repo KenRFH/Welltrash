@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
-import { MapPin, Scale, Navigation, ArrowUpRight, X, CheckCircle2, Radio, Clock, MessageCircle } from 'lucide-react';
+import { MapPin, Scale, Navigation, ArrowUpRight, X, CheckCircle2, Radio, Clock, MessageCircle, Edit3 } from 'lucide-react';
 import { CompanyLocation } from './MonitoringMap';
+import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
 
 interface Props {
     company: CompanyLocation | null;
     onClose: () => void;
     onFocusMap: (lat: number, lng: number) => void;
+    onCoordinatesUpdated?: (id: number, lat: number, lng: number) => void;
 }
 
-export default function MonitoringCompanyDetailModal({ company, onClose, onFocusMap }: Props) {
+export default function MonitoringCompanyDetailModal({ company, onClose, onFocusMap, onCoordinatesUpdated }: Props) {
     if (!company) return null;
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
     const wa = company.phone?.startsWith('0') ? '62' + company.phone.slice(1) : company.phone;
 
     return (
@@ -59,9 +62,18 @@ export default function MonitoringCompanyDetailModal({ company, onClose, onFocus
                     )}
 
                     <div className="space-y-1 pt-1">
-                        <div className="flex items-start gap-1.5 text-slate-500">
-                            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                            <span>{company.address}</span>
+                        <div className="flex items-start justify-between gap-1.5 text-slate-500">
+                            <div className="flex items-start gap-1.5 min-w-0">
+                                <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                <span className="truncate">{company.address}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsPickerOpen(true)}
+                                className="shrink-0 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200 transition"
+                            >
+                                Atur Pin Peta
+                            </button>
                         </div>
                         <div className="flex items-center justify-between text-slate-500 pt-0.5">
                             <span>PIC: <strong>{company.pic_name || '-'}</strong></span>
@@ -83,6 +95,22 @@ export default function MonitoringCompanyDetailModal({ company, onClose, onFocus
                     </Link>
                 </div>
             </div>
+
+            {/* Modal Pinpoint Lokasi Mitra */}
+            <CompanyLocationPickerModal
+                isOpen={isPickerOpen}
+                onClose={() => setIsPickerOpen(false)}
+                companyId={company.id}
+                companyName={company.company_name}
+                initialLat={company.latitude}
+                initialLng={company.longitude}
+                onSaved={(nLat, nLng) => {
+                    company.latitude = nLat;
+                    company.longitude = nLng;
+                    onCoordinatesUpdated?.(company.id, nLat, nLng);
+                    onFocusMap(nLat, nLng);
+                }}
+            />
         </div>
     );
 }

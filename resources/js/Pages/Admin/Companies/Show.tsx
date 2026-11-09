@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
+import { MapPin } from 'lucide-react';
+import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
 
 interface PickupItem {
     id: number;
@@ -22,6 +24,8 @@ interface Company {
     company_name: string;
     pic_name: string;
     address: string;
+    latitude?: number | null;
+    longitude?: number | null;
     phone: string;
     business_category: string | null;
     subscription_plan: string;
@@ -43,6 +47,7 @@ interface Props {
 }
 
 export default function Show({ company }: Props) {
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'active':
@@ -133,6 +138,22 @@ export default function Show({ company }: Props) {
                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Alamat Perusahaan</p>
                                     <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-sm font-medium text-gray-600 leading-relaxed italic">
                                         "{company.address}"
+                                    </div>
+                                    <div className="flex items-center justify-between mt-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                                        <div className="flex items-center gap-1.5 font-mono text-slate-600">
+                                            <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                            <span>
+                                                GPS: {company.latitude && company.longitude ? `${company.latitude}, ${company.longitude}` : <span className="text-amber-600 font-sans italic">Belum diatur</span>}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsPickerOpen(true)}
+                                            className="px-3 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                                        >
+                                            <MapPin className="w-3 h-3" />
+                                            <span>Atur Titik Peta</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -276,6 +297,21 @@ export default function Show({ company }: Props) {
                     </div>
                 </div>
             </div>
+            {/* Modal Pinpoint Lokasi Mitra */}
+            <CompanyLocationPickerModal
+                isOpen={isPickerOpen}
+                onClose={() => setIsPickerOpen(false)}
+                companyId={company.id}
+                companyName={company.company_name}
+                initialLat={company.latitude}
+                initialLng={company.longitude}
+                onSaved={(nLat, nLng) => {
+                    company.latitude = nLat;
+                    company.longitude = nLng;
+                    router.reload({ only: ['company'] });
+                }}
+            />
+
         </AdminLayout>
     );
 }

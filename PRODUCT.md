@@ -4,7 +4,7 @@
 
 ## Platform
 
-web
+Web (Laravel 12 Monolith + Blade + Tailwind CSS. Fokus arsitektur server-side native PHP tanpa React/TypeScript).
 
 ## Users
 

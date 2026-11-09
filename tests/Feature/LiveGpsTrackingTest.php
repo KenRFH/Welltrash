@@ -427,4 +427,34 @@ class LiveGpsTrackingTest extends TestCase
         $this->assertNotNull($company->latitude);
         $this->assertNotNull($company->longitude);
     }
+
+    public function test_admin_can_update_company_coordinates_directly(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $companyUser = User::factory()->create(['role' => 'company']);
+        $company = Company::create([
+            'user_id'             => $companyUser->id,
+            'company_name'        => 'Kafe Senja Jember',
+            'pic_name'            => 'Budi',
+            'phone'               => '08123456789',
+            'address'             => 'Jl. Riau No. 12',
+            'latitude'            => -8.17,
+            'longitude'           => 113.70,
+            'subscription_status' => 'active',
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->patchJson(route('admin.companies.updateCoordinates', $company->id), [
+                'latitude'  => -8.1518,
+                'longitude' => 113.7161,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $company->refresh();
+        $this->assertEquals(-8.1518, round($company->latitude, 4));
+        $this->assertEquals(113.7161, round($company->longitude, 4));
+    }
+
 }

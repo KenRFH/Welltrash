@@ -26,6 +26,8 @@ import {
     Navigation,
     MapPin,
 } from 'lucide-react';
+import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
+import { parseCoordinatesOrGoogleMapsUrl } from '@/utils/gmapsParser';
 
 interface CompanyProfile {
     id: number;
@@ -72,6 +74,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
     const [showPassword, setShowPassword] = useState(false);
     const [isLocating, setIsLocating] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
+    const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
 
     // Form logic
     const { data, setData, post, reset, errors, processing } = useForm({
@@ -832,21 +835,33 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                 <div className="flex items-center gap-1">
                                                     <button
                                                         type="button"
+                                                        onClick={() => setIsMapPickerOpen(true)}
+                                                        className="px-2 py-1 text-[11px] font-bold rounded bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                                                    >
+                                                        🗺️ Pilih di Peta
+                                                    </button>
+                                                    <button
+                                                        type="button"
                                                         onClick={handleGetGeolocation}
                                                         disabled={isLocating}
                                                         className="px-2 py-1 text-[11px] font-semibold rounded bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 disabled:opacity-50"
                                                     >
                                                         {isLocating ? 'GPS...' : '📍 GPS Saya'}
                                                     </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleGeocodeAddress}
-                                                        disabled={isGeocoding || !data.address.trim()}
-                                                        className="px-2 py-1 text-[11px] font-semibold rounded bg-white text-slate-700 border border-slate-200 hover:bg-slate-100 disabled:opacity-50"
-                                                    >
-                                                        {isGeocoding ? 'Cari...' : '🔍 Dari Alamat'}
-                                                    </button>
                                                 </div>
+                                            </div>
+                                            <div className="mb-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Paste link Google Maps atau koordinat (contoh: -8.1518, 113.7161)..."
+                                                    onChange={(e) => {
+                                                        const parsed = parseCoordinatesOrGoogleMapsUrl(e.target.value);
+                                                        if (parsed) {
+                                                            setData(prev => ({ ...prev, latitude: parsed.lat, longitude: parsed.lng }));
+                                                        }
+                                                    }}
+                                                    className="w-full px-2.5 py-1.5 rounded bg-white border border-slate-200 text-xs font-mono text-slate-800 placeholder:text-slate-400 focus:outline-emerald-500"
+                                                />
                                             </div>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <div>
@@ -975,6 +990,18 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                 </div>,
                 document.body
             )}
+            {/* Interactive Leaflet Pinpoint Map Picker */}
+            <CompanyLocationPickerModal
+                isOpen={isMapPickerOpen}
+                onClose={() => setIsMapPickerOpen(false)}
+                companyName={data.company_name || 'Mitra'}
+                initialLat={data.latitude ? Number(data.latitude) : null}
+                initialLng={data.longitude ? Number(data.longitude) : null}
+                onSaved={(nLat, nLng) => {
+                    setData(prev => ({ ...prev, latitude: nLat, longitude: nLng }));
+                }}
+            />
+
         </AdminLayout>
     );
 }

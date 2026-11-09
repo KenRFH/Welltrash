@@ -159,6 +159,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::delete('/companies/{company}/cancellations/approve', [AdminController::class, 'approveCancellation'])->name('companies.cancellations.approve');
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
+        Route::patch('/companies/{company}/coordinates', [AdminController::class, 'updateCoordinates'])->name('companies.updateCoordinates');
 
         // Monitoring Peta Mitra & Armada
         Route::get('/monitoring-map', [AdminController::class, 'monitoringMap'])->name('monitoring.map');

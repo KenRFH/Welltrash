@@ -383,6 +383,12 @@ export default function MonitoringMap() {
                     setFocusCoordinate({ lat, lng });
                     window.scrollTo({ top: 140, behavior: 'smooth' });
                 }}
+                onCoordinatesUpdated={(id, nLat, nLng) => {
+                    setCompanies(prev => prev.map(c => c.id === id ? { ...c, latitude: nLat, longitude: nLng } : c));
+                    if (selectedCompany && selectedCompany.id === id) {
+                        setSelectedCompany(prev => prev ? { ...prev, latitude: nLat, longitude: nLng } : null);
+                    }
+                }}
             />
         </AdminLayout>
     );

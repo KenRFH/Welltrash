@@ -40,6 +40,31 @@ class AdminController extends Controller
         ]);
     }
 
+    public function updateCoordinates(Request $request, Company $company)
+    {
+        $validated = $request->validate([
+            'latitude'  => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+        ]);
+
+        $company->update([
+            'latitude'  => (float) $validated['latitude'],
+            'longitude' => (float) $validated['longitude'],
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success'   => true,
+                'message'   => "Titik koordinat untuk {$company->company_name} berhasil diperbarui.",
+                'latitude'  => (float) $validated['latitude'],
+                'longitude' => (float) $validated['longitude'],
+            ]);
+        }
+
+        return back()->with('success', "Titik koordinat untuk {$company->company_name} berhasil diperbarui.");
+    }
+
+
     public function monitoringMap()
     {
         return Inertia::render('Admin/MonitoringMap');
