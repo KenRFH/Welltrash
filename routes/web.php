@@ -23,7 +23,8 @@ Route::get('/generate-sitemap', function () {
         ->add(Url::create('/layanan'))
         ->add(Url::create('/activity'))
         ->add(Url::create('/news'))
-        ->add(Url::create('/katalog'));
+        ->add(Url::create('/katalog'))
+        ->add(Url::create('/downloads'));
 
     // Activity detail
     foreach (\App\Models\Activity::all() as $activity) {
@@ -123,6 +124,13 @@ Route::get('/katalog', function () {
         'canRegister' => Route::has('register'),
     ]);
 })->name('katalog');
+
+Route::get('/downloads', function () {
+    return Inertia::render('Downloads', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+})->name('downloads');
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminAccountController;

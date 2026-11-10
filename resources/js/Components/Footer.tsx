@@ -44,6 +44,7 @@ const Footer: React.FC<FooterProps> = () => {
                             <li><Link href={route("about")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Tentang Kami</Link></li>
                             <li><Link href={route("news")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Berita &amp; Wawasan</Link></li>
                             <li><Link href={route("katalog")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Katalog Daur Ulang</Link></li>
+                            <li><Link href={route("downloads")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Unduh Aplikasi &amp; Dokumen</Link></li>
                         </ul>
                     </div>
 

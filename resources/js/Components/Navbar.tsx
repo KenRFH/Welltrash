@@ -33,6 +33,7 @@ const Navbar: React.FC<NavbarProps> = ({ dark = false }) => {
         { label: "Aktivitas", route: "activity" },
         { label: "Berita", route: "news" },
         { label: "Katalog", route: "katalog" },
+        { label: "Unduh", route: "downloads" },
     ];
 
     const isRouteActive = (routeName: string) => {

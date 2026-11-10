@@ -29,6 +29,10 @@
     RewriteCond %{DOCUMENT_ROOT}/storage [!-d]
     RewriteRule ^storage/(.*)$ ../storage/app/public/$1 [L]
 
+    # Explicitly route /downloads and /downloads/ to front controller unless it is an existing file
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^downloads/?$ index.php [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
