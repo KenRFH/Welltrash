@@ -49,11 +49,6 @@ export default function NewsPage({ news }: Props) {
                                 </span>
                             </h1>
                         </div>
-                        <div className="lg:col-span-4">
-                            <p className="font-sans text-base sm:text-lg text-muted dark:text-zinc-400 leading-relaxed">
-                                Panduan regulasi KLHK, strategi kepatuhan ESG korporasi, serta inovasi rantai pasok ekonomi sirkular langsung dari praktisi lapangan WellTrash.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -61,7 +56,6 @@ export default function NewsPage({ news }: Props) {
             {news.length === 0 ? (
                 <div className="max-w-[1440px] mx-auto px-6 lg:px-12 py-32 text-center">
                     <div className="border border-black/10 dark:border-zinc-800 rounded-sm bg-white dark:bg-zinc-900 p-12">
-                        <p className="font-mono text-xs uppercase tracking-widest text-muted dark:text-zinc-500 mb-2">// ARSIP WARTA</p>
                         <p className="font-sans text-base text-muted dark:text-zinc-400">Belum ada warta atau publikasi yang dipublikasikan saat ini.</p>
                     </div>
                 </div>

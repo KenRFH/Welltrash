@@ -46,11 +46,6 @@ export default function ActivityPage({ activities }: Props) {
                                 </span>
                             </h1>
                         </div>
-                        <div className="lg:col-span-4">
-                            <p className="font-sans text-base sm:text-lg text-muted dark:text-zinc-400 leading-relaxed">
-                                Dokumentasi inisiatif operasional WellTrash bersama mitra industri, komunitas, dan institusi pendidikan dalam pengelolaan lingkungan di Kabupaten Jember.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -59,7 +54,6 @@ export default function ActivityPage({ activities }: Props) {
             <section className="max-w-[1440px] mx-auto px-6 lg:px-12 py-12 md:py-20">
                 {activities.length === 0 ? (
                     <div className="py-32 text-center border border-black/10 dark:border-zinc-800 rounded-sm bg-white dark:bg-zinc-900 p-8">
-                        <p className="font-mono text-xs uppercase tracking-widest text-muted dark:text-zinc-500 mb-2">// ARSIP AKTIVITAS</p>
                         <p className="font-sans text-base text-muted dark:text-zinc-400">Belum ada dokumentasi aktivitas yang dipublikasikan saat ini.</p>
                     </div>
                 ) : (
