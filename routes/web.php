@@ -132,6 +132,10 @@ Route::get('/downloads', function () {
     ]);
 })->name('downloads');
 
+Route::get('/download', function () {
+    return Inertia::render('Admin/Download');
+})->name('app.download');
+
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminAccountController;
 use App\Http\Controllers\AdminVehicleController;
