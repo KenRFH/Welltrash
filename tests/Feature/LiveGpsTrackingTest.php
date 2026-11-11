@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Pickup;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 
 class LiveGpsTrackingTest extends TestCase
 {
@@ -381,12 +382,11 @@ class LiveGpsTrackingTest extends TestCase
         $this->assertEquals(113.7211, round($createdCompany->longitude, 4));
     }
 
-    public function test_company_with_address_auto_resolves_gps_coordinates_if_null(): void
+    private function makeCompany(array $attrs = []): Company
     {
-        $admin = User::factory()->create(['role' => 'admin']);
         $companyUser = User::factory()->create(['role' => 'company']);
 
-        $company = Company::create([
+        return Company::create(array_merge([
             'user_id'             => $companyUser->id,
             'company_name'        => 'Klinik Jember Indah',
             'pic_name'            => 'dr. Maya',
@@ -395,37 +395,72 @@ class LiveGpsTrackingTest extends TestCase
             'latitude'            => null,
             'longitude'           => null,
             'subscription_status' => 'active',
-        ]);
+        ], $attrs));
+    }
+
+    public function test_live_locations_does_not_geocode_or_persist_guessed_coordinates(): void
+    {
+        Http::fake();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $company = $this->makeCompany();
 
         $response = $this->actingAs($admin)->getJson(route('admin.cleanups.liveLocations'));
         $response->assertOk();
 
+        Http::assertNothingSent();
         $company->refresh();
-        $this->assertNotNull($company->latitude);
-        $this->assertNotNull($company->longitude);
-        $this->assertNotEquals(0, $company->latitude);
+        $this->assertNull($company->latitude);
+        $this->assertNull($company->longitude);
+
+        $row = collect($response->json('companies'))->firstWhere('id', $company->id);
+        $this->assertNull($row['latitude']);
+        $this->assertNull($row['longitude']);
     }
 
     public function test_companies_geocode_artisan_command(): void
     {
-        $companyUser = User::factory()->create(['role' => 'company']);
-        $company = Company::create([
-            'user_id'             => $companyUser->id,
-            'company_name'        => 'Apotek Balung Raya',
-            'pic_name'            => 'Budi',
-            'phone'               => '08123456789',
-            'address'             => 'Jl. Rambipuji Balung, Jember',
-            'latitude'            => null,
-            'longitude'           => null,
-            'subscription_status' => 'active',
+        Http::fake([
+            'nominatim.openstreetmap.org/*' => Http::response([['lat' => '-8.2770', 'lon' => '113.5350']]),
         ]);
+        $company = $this->makeCompany(['address' => 'Jl. Rambipuji Balung, Jember']);
 
-        $this->artisan('companies:geocode')
-            ->assertExitCode(0);
+        $this->artisan('companies:geocode')->assertExitCode(0);
 
         $company->refresh();
-        $this->assertNotNull($company->latitude);
-        $this->assertNotNull($company->longitude);
+        $this->assertEquals(-8.2770, round($company->latitude, 4));
+        $this->assertEquals(113.5350, round($company->longitude, 4));
+        $this->assertEquals('geocoded', $company->coordinates_source);
+    }
+
+    public function test_geocode_command_leaves_company_null_when_address_not_found(): void
+    {
+        Http::fake(['nominatim.openstreetmap.org/*' => Http::response([])]);
+        $company = $this->makeCompany(['address' => 'Alamat Tidak Dikenal']);
+
+        $this->artisan('companies:geocode')->assertExitCode(0);
+
+        $company->refresh();
+        $this->assertNull($company->latitude);
+        $this->assertNull($company->longitude);
+    }
+
+    public function test_geocode_force_never_overwrites_manual_coordinates(): void
+    {
+        Http::fake([
+            'nominatim.openstreetmap.org/*' => Http::response([['lat' => '-8.0000', 'lon' => '113.0000']]),
+        ]);
+        $company = $this->makeCompany([
+            'latitude'           => -8.1518,
+            'longitude'          => 113.7161,
+            'coordinates_source' => 'manual',
+        ]);
+
+        $this->artisan('companies:geocode', ['--force' => true])->assertExitCode(0);
+
+        $company->refresh();
+        $this->assertEquals(-8.1518, round($company->latitude, 4));
+        $this->assertEquals(113.7161, round($company->longitude, 4));
+        Http::assertNothingSent();
     }
 
     public function test_admin_can_update_company_coordinates_directly(): void
@@ -455,6 +490,7 @@ class LiveGpsTrackingTest extends TestCase
         $company->refresh();
         $this->assertEquals(-8.1518, round($company->latitude, 4));
         $this->assertEquals(113.7161, round($company->longitude, 4));
+        $this->assertEquals('manual', $company->coordinates_source);
     }
 
 }

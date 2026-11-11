@@ -18,6 +18,7 @@ class Company extends Model
         'address',
         'latitude',
         'longitude',
+        'coordinates_source',
         'phone',
         'business_category',
         'subscription_plan',

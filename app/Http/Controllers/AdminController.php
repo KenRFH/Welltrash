@@ -48,8 +48,9 @@ class AdminController extends Controller
         ]);
 
         $company->update([
-            'latitude'  => (float) $validated['latitude'],
-            'longitude' => (float) $validated['longitude'],
+            'latitude'           => (float) $validated['latitude'],
+            'longitude'          => (float) $validated['longitude'],
+            'coordinates_source' => 'manual',
         ]);
 
         if ($request->wantsJson()) {
@@ -318,7 +319,7 @@ class AdminController extends Controller
                 ];
             });
 
-        // Mitra / Companies with GPS coordinates (auto-resolve coordinates if missing)
+        // Mitra / Companies (koordinat kosong dikirim null; isi via picker admin atau `php artisan companies:geocode`)
         $companies = Company::whereNotNull('address')
             ->where('address', '!=', '')
             ->where('subscription_status', '!=', 'rejected')
@@ -328,15 +329,7 @@ class AdminController extends Controller
             }])
             ->get()
             ->map(function ($c) {
-                // Auto-resolve GPS coordinates from address if missing or zero
-                if ((is_null($c->latitude) || $c->latitude == 0) && !empty($c->address)) {
-                    [$lat, $lng] = self::resolveCompanyCoordinates($c->address, $c->id);
-                    if ($lat && $lng) {
-                        $c->update(['latitude' => $lat, 'longitude' => $lng]);
-                        $c->latitude = $lat;
-                        $c->longitude = $lng;
-                    }
-                }
+                $hasCoords = $c->latitude !== null && $c->longitude !== null && (float) $c->latitude != 0.0;
 
                 $todayPickup = $c->pickups->firstWhere('status', 'completed')
                     ?? $c->pickups->firstWhere('status', 'on_the_way')
@@ -352,8 +345,8 @@ class AdminController extends Controller
                     'pic_name'            => $c->pic_name,
                     'phone'               => $c->phone,
                     'address'             => $c->address,
-                    'latitude'            => $c->latitude !== null ? (float) $c->latitude : null,
-                    'longitude'           => $c->longitude !== null ? (float) $c->longitude : null,
+                    'latitude'            => $hasCoords ? (float) $c->latitude : null,
+                    'longitude'           => $hasCoords ? (float) $c->longitude : null,
                     'status'              => $status, // 'completed' | 'on_the_way' | 'scheduled' | 'failed' | 'none'
                     'subscription_plan'   => $c->subscription_plan,
                     'business_category'   => $c->business_category,
@@ -381,12 +374,15 @@ class AdminController extends Controller
     }
 
     /**
-     * Resolve GPS coordinates from address with Nominatim, keyword mapping, and Jember fallbacks.
+     * Geocode alamat mitra via Nominatim (OpenStreetMap).
+     * Mengembalikan [null, null] bila tidak ditemukan — sengaja TIDAK memakai koordinat tebakan,
+     * agar titik yang tidak akurat tidak tersimpan permanen ke database.
+     * Catatan: kebijakan Nominatim maksimal 1 request/detik; jangan panggil dari dalam request web.
      */
-    public static function resolveCompanyCoordinates(string $address, ?int $seed = null): array
+    public static function resolveCompanyCoordinates(string $address): array
     {
         $cleanAddress = trim($address);
-        if (empty($cleanAddress)) {
+        if ($cleanAddress === '') {
             return [null, null];
         }
 
@@ -396,63 +392,33 @@ class AdminController extends Controller
         $simplified = preg_replace('/(rt|rw|no|kel|kec)\.?\s*\d+/i', '', $cleanAddress);
         $simplified = preg_replace('/[,\.\-]+/', ' ', $simplified);
         $simplified = trim(preg_replace('/\s+/', ' ', $simplified));
-        if ($simplified !== $cleanAddress && !empty($simplified)) {
+        if ($simplified !== $cleanAddress && $simplified !== '') {
             $queries[] = $hasJember ? $simplified : "{$simplified}, Jember";
         }
 
-        foreach ($queries as $q) {
+        foreach ($queries as $i => $q) {
+            if ($i > 0) {
+                sleep(1); // patuhi rate limit Nominatim
+            }
             try {
                 $res = Http::withHeaders([
                     'User-Agent' => 'WelltrashApp/1.0 (info@welltrash.com)',
                     'Accept'     => 'application/json',
-                ])->timeout(3)->get('https://nominatim.openstreetmap.org/search', [
-                    'format' => 'json',
-                    'q'      => $q,
-                    'limit'  => 1,
+                ])->timeout(5)->get('https://nominatim.openstreetmap.org/search', [
+                    'format'       => 'json',
+                    'q'            => $q,
+                    'limit'        => 1,
+                    'countrycodes' => 'id',
                 ]);
 
-                if ($res->successful() && !empty($res->json())) {
-                    $first = $res->json()[0];
+                $first = $res->successful() ? ($res->json()[0] ?? null) : null;
+                if ($first && isset($first['lat'], $first['lon'])) {
                     return [(float) $first['lat'], (float) $first['lon']];
                 }
             } catch (\Throwable) {
             }
         }
 
-        // Sub-district centroid keywords in Jember
-        $subdistricts = [
-            'patrang'    => [-8.1518, 113.7161],
-            'kaliwates'  => [-8.1764, 113.6890],
-            'sumbersari' => [-8.1720, 113.7180],
-            'mastrip'    => [-8.1650, 113.7120],
-            'gajah mada' => [-8.1764, 113.6890],
-            'baratan'    => [-8.1400, 113.7250],
-            'kampus'     => [-8.1660, 113.7150],
-            'mangli'     => [-8.1880, 113.6550],
-            'tanggul'    => [-8.1610, 113.4500],
-            'ambulu'     => [-8.3490, 113.6060],
-            'balung'     => [-8.2770, 113.5350],
-            'sukorambi'  => [-8.1400, 113.6600],
-            'puger'      => [-8.3750, 113.4800],
-            'kencong'    => [-8.2800, 113.3700],
-            'ajung'      => [-8.2100, 113.6700],
-            'rambipuji'  => [-8.2000, 113.6100],
-        ];
-
-        $lower = strtolower($cleanAddress);
-        foreach ($subdistricts as $key => $coords) {
-            if (str_contains($lower, $key)) {
-                $offset = $seed ? (sin($seed) * 0.003) : 0;
-                return [round($coords[0] + $offset, 6), round($coords[1] + $offset, 6)];
-            }
-        }
-
-        // Deterministic Jember center fallback so markers don't stack directly on top of each other
-        $baseLat = -8.1724;
-        $baseLng = 113.6995;
-        $offsetLat = $seed ? (sin($seed * 1.7) * 0.012) : 0;
-        $offsetLng = $seed ? (cos($seed * 2.3) * 0.012) : 0;
-
-        return [round($baseLat + $offsetLat, 6), round($baseLng + $offsetLng, 6)];
+        return [null, null];
     }
 }

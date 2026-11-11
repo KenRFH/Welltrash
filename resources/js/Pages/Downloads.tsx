@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "@inertiajs/react";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import SEO from "@/Components/SEO";
@@ -20,17 +19,7 @@ import {
 export default function Downloads() {
     const { install, showInstructionsModal, setShowInstructionsModal, isIos } = usePwa();
     const [selectedCategory, setSelectedCategory] = useState<"all" | "mobile" | "web" | "doc">("all");
-    const [copiedHash, setCopiedHash] = useState<string | null>(null);
-    const [showChangelog, setShowChangelog] = useState<boolean>(false);
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
-
-    const cleanupApkHash = "87e9f75d98b332f33bc27cd31427abf5ba6a24bff517a37414153a2cfc223dfe";
-
-    const handleCopy = (text: string, id: string) => {
-        navigator.clipboard.writeText(text);
-        setCopiedHash(id);
-        setTimeout(() => setCopiedHash(null), 2500);
-    };
 
     const handleDownloadTrigger = (id: string, url: string, filename: string) => {
         setDownloadingId(id);
@@ -46,93 +35,8 @@ export default function Downloads() {
         }, 1500);
     };
 
-    const documents = [
-        {
-            id: "mou-template",
-            title: "Template Perjanjian Kerja Sama (MOU)",
-            subtitle: "Kontrak resmi penjemputan limbah komersial B2B non-B3 berstandar KLHK & DLH Jember.",
-            file: "/downloads/mou_template.pdf",
-            fileName: "mou_template_welltrash.pdf",
-            size: "424 KB",
-            updated: "Maret 2026",
-            format: "PDF Resmi (Bilingual)",
-            pages: "6 Halaman",
-        },
-        {
-            id: "sop-pemilahan",
-            title: "SOP Pemilahan Sampah Terstandarisasi",
-            subtitle: "Panduan pemisahan 15 kategori fraksi anorganik, residu, dan biokonversi Maggot BSF.",
-            file: "/downloads/sop_pemilahan_sampah_welltrash.pdf",
-            fileName: "sop_pemilahan_sampah_welltrash.pdf",
-            size: "1.2 MB",
-            updated: "Januari 2026",
-            format: "Dokumen Teknis MRF",
-            pages: "12 Halaman",
-        },
-        {
-            id: "berita-acara",
-            title: "Formulir Berita Acara Rekonsiliasi Tonase",
-            subtitle: "Lembar verifikasi timbangan harian & manifest serah terima armada untuk audit ESG.",
-            file: "/downloads/berita_acara_rekonsiliasi_tonase.pdf",
-            fileName: "berita_acara_rekonsiliasi_tonase.pdf",
-            size: "310 KB",
-            updated: "Februari 2026",
-            format: "Formulir Audit Standar",
-            pages: "3 Halaman",
-        },
-    ];
-
-    const changelog = [
-        {
-            version: "v2.4.1 (Build 142)",
-            date: "15 Oktober 2026",
-            notes: [
-                "Optimalisasi kompresi foto nota timbangan client-side hingga 78% lebih hemat kuota data.",
-                "Peningkatan kestabilan sinkronisasi antrean penjemputan offline (IndexedDB) di basement.",
-                "Penambahan indikator akurasi GPS sebelum tombol clock-in presensi diaktifkan.",
-            ],
-        },
-        {
-            version: "v2.4.0 (Build 138)",
-            date: "28 September 2026",
-            notes: [
-                "Dukungan toleransi penundaan unggah bukti ritase hingga 48 jam (Store-and-Forward).",
-                "Fitur seleksi armada harian (Viar R3, Daihatsu GranMax, Suzuki Carry) dengan nomor polisi.",
-                "Mode input cepat berbasis jumlah kantong kresek untuk mitra tanpa timbangan lantai.",
-            ],
-        },
-        {
-            version: "v2.3.8 (Build 125)",
-            date: "10 September 2026",
-            notes: [
-                "Pembaruan koordinat geofence radius presensi RS Siloam Jember dan RSUD dr. Soebandi.",
-                "Peningkatan kompatibilitas untuk arsitektur 64-bit Android 14 (API level 34).",
-            ],
-        },
-    ];
-
-    const installSteps = [
-        {
-            step: "01",
-            title: "Unduh Berkas APK Resmi",
-            desc: "Klik tombol Unduh Berkas APK pada kartu WellTrash CleanUP. Berkas tersimpan di folder Unduhan ponsel Anda.",
-        },
-        {
-            step: "02",
-            title: "Izinkan Sumber Tak Dikenal",
-            desc: "Buka Pengaturan > Keamanan > Pasang aplikasi tidak dikenal (Install Unknown Apps) > Aktifkan izin untuk browser.",
-        },
-        {
-            step: "03",
-            title: "Buka & Pasang Paket APK",
-            desc: "Buka berkas welltrash-cleanup-operator.apk dari notifikasi atau pengelola berkas, lalu pilih Pasang (Install).",
-        },
-        {
-            step: "04",
-            title: "Beri Izin & Masuk Akun",
-            desc: "Buka aplikasi, izinkan Lokasi GPS dan Akses Kamera untuk foto timbangan, lalu login akun operator CleanUP.",
-        },
-    ];
+    const show = (category: "mobile" | "web" | "doc") =>
+        selectedCategory === "all" || selectedCategory === category;
 
     return (
         <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
@@ -264,7 +168,26 @@ export default function Downloads() {
                         </div>
                     </div>
 
-                    <div id="downloads-body"></div>
+                    {(show("mobile") || show("web")) && (
+                        <div className={`grid grid-cols-1 gap-8 ${selectedCategory === "all" ? "lg:grid-cols-2" : ""}`}>
+                            {show("mobile") && (
+                                <CleanUpCard
+                                    onDownload={handleDownloadTrigger}
+                                    downloadingId={downloadingId}
+                                    onInstallPwa={install}
+                                />
+                            )}
+                            {show("web") && <PartnerCard onInstallPwa={install} />}
+                        </div>
+                    )}
+
+                    {show("mobile") && <SideloadGuide />}
+
+                    {show("doc") && (
+                        <DocumentList onDownload={handleDownloadTrigger} downloadingId={downloadingId} />
+                    )}
+
+                    <SupportBanner />
                 </div>
             </main>
             <Footer />
