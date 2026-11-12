@@ -45,6 +45,8 @@ Route::get('/mitra', function (Request $request) {
 // Operator (CleanUP) Mobile REST API
 Route::prefix('operator')->group(function () {
     Route::post('/login', [OperatorApiController::class, 'login'])->name('api.operator.login');
+    // Update check for the Android app; same file the /download page reads.
+    Route::get('/app-version', fn () => response()->file(public_path('downloads/version.json')))->name('api.operator.app-version');
 
     Route::middleware(['auth:sanctum', 'role:CleanUP,operator,admin,Admin,Superadmin,superadmin,management'])->group(function () {
         Route::get('/me', [OperatorApiController::class, 'me'])->name('api.operator.me');

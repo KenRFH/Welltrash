@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ApkInfo } from '@/types';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
 import SEO from '@/Components/SEO';
@@ -17,41 +18,8 @@ import {
     BookOpen,
 } from 'lucide-react';
 
-const APK_VERSION = 'v2.4.1 (Build 142)';
-const APK_DATE = '15 Oktober 2026';
-const APK_SIZE = '24.3 MB';
-const APK_SHA256 = '87e9f75d98b332f33bc27cd31427abf5ba6a24bff517a37414153a2cfc223dfe';
 const APK_URL = '/downloads/welltrash-cleanup-operator.apk';
 const APK_FILENAME = 'welltrash-cleanup-operator.apk';
-
-const changelog = [
-    {
-        version: 'v2.4.1 (Build 142)',
-        date: '15 Oktober 2026',
-        notes: [
-            'Optimalisasi kompresi foto nota timbangan client-side hingga 78% lebih hemat kuota data.',
-            'Peningkatan kestabilan sinkronisasi antrean penjemputan offline (IndexedDB) di basement.',
-            'Penambahan indikator akurasi GPS sebelum tombol clock-in presensi diaktifkan.',
-        ],
-    },
-    {
-        version: 'v2.4.0 (Build 138)',
-        date: '28 September 2026',
-        notes: [
-            'Dukungan toleransi penundaan unggah bukti ritase hingga 48 jam (Store-and-Forward).',
-            'Fitur seleksi armada harian (Viar R3, Daihatsu GranMax, Suzuki Carry) dengan nomor polisi.',
-            'Mode input cepat berbasis jumlah kantong kresek untuk mitra tanpa timbangan lantai.',
-        ],
-    },
-    {
-        version: 'v2.3.8 (Build 125)',
-        date: '10 September 2026',
-        notes: [
-            'Pembaruan koordinat geofence radius presensi RS Siloam Jember dan RSUD dr. Soebandi.',
-            'Peningkatan kompatibilitas untuk arsitektur 64-bit Android 14 (API level 34).',
-        ],
-    },
-];
 
 const installSteps = [
     {
@@ -76,7 +44,15 @@ const installSteps = [
     },
 ];
 
-export default function AppDownload() {
+export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
+    const APK_VERSION = apk ? `v${apk.version_name} (Build ${apk.version_code})` : '-';
+    const APK_DATE = apk?.release_date
+        ? new Date(apk.release_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '-';
+    const APK_SIZE = apk?.size_bytes ? `${(apk.size_bytes / 1048576).toFixed(1)} MB` : '-';
+    const APK_SHA256 = apk?.sha256 ?? '-';
+    const notes = (apk?.changelog ?? '').split('\n').map((n) => n.replace(/^\s*[•\-*]\s*/, '')).filter(Boolean);
+
     const [downloading, setDownloading] = useState(false);
     const [copied, setCopied] = useState(false);
     const [showChangelog, setShowChangelog] = useState(false);
@@ -134,7 +110,7 @@ export default function AppDownload() {
                     {/* Stat strip */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {[
-                            { label: 'Versi Terkini', value: 'v2.4.1', icon: CheckCircle2, color: 'text-emerald-600' },
+                            { label: 'Versi Terkini', value: apk ? `v${apk.version_name}` : '-', icon: CheckCircle2, color: 'text-emerald-600' },
                             { label: 'Platform', value: 'Android', icon: Smartphone, color: 'text-blue-600' },
                             { label: 'Ukuran Berkas', value: APK_SIZE, icon: HardDrive, color: 'text-violet-600' },
                             { label: 'Keamanan', value: 'SHA-256', icon: ShieldCheck, color: 'text-amber-600' },
@@ -261,24 +237,22 @@ export default function AppDownload() {
 
                         {showChangelog && (
                             <div className="border-t border-slate-100 dark:border-zinc-800 px-6 py-4 space-y-5">
-                                {changelog.map(({ version, date, notes }) => (
-                                    <div key={version}>
-                                        <div className="flex items-baseline gap-3 mb-2">
-                                            <span className="text-xs font-black font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50 px-2 py-0.5 rounded">
-                                                {version}
-                                            </span>
-                                            <span className="text-xs text-slate-400">{date}</span>
-                                        </div>
-                                        <ul className="space-y-1">
-                                            {notes.map((note, i) => (
-                                                <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-zinc-400">
-                                                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                                                    {note}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                <div>
+                                    <div className="flex items-baseline gap-3 mb-2">
+                                        <span className="text-xs font-black font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/50 px-2 py-0.5 rounded">
+                                            {APK_VERSION}
+                                        </span>
+                                        <span className="text-xs text-slate-400">{APK_DATE}</span>
                                     </div>
-                                ))}
+                                    <ul className="space-y-1">
+                                        {notes.map((note, i) => (
+                                            <li key={i} className="flex items-start gap-2 text-xs text-slate-600 dark:text-zinc-400">
+                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                                                {note}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         )}
                     </div>

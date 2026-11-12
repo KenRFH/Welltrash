@@ -11,17 +11,22 @@ import {
     Check,
     CheckCircle2,
 } from "lucide-react";
+import { ApkInfo } from "@/types";
 
 interface Props {
     onDownload: (id: string, url: string, filename: string) => void;
     downloadingId: string | null;
     onInstallPwa: () => void;
+    apk: ApkInfo | null;
 }
 
-export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }: Props) {
+export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa, apk }: Props) {
     const [copiedHash, setCopiedHash] = useState(false);
     const [showChangelog, setShowChangelog] = useState(false);
-    const cleanupApkHash = "87e9f75d98b332f33bc27cd31427abf5ba6a24bff517a37414153a2cfc223dfe";
+    const cleanupApkHash = apk?.sha256 ?? "-";
+    const version = apk?.version_name ?? "-";
+    const build = apk ? `${apk.version_name} (Build ${apk.version_code})` : "-";
+    const size = apk?.size_bytes ? `${(apk.size_bytes / 1048576).toFixed(1)} MB` : "-";
 
     const handleCopy = () => {
         navigator.clipboard.writeText(cleanupApkHash);
@@ -43,7 +48,7 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }:
                                     WellTrash CleanUP Operator
                                 </h2>
                                 <span className="px-2 py-0.5 rounded-sm bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] uppercase font-bold tracking-wider">
-                                    APK v2.4.1
+                                    APK v{version}
                                 </span>
                             </div>
                             <p className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
@@ -82,14 +87,14 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }:
                                 onDownload(
                                     "cleanup-apk",
                                     "/downloads/welltrash-cleanup-operator.apk",
-                                    "welltrash-cleanup-operator-v2.4.1.apk"
+                                    `welltrash-cleanup-operator-v${version}.apk`
                                 )
                             }
                             disabled={downloadingId === "cleanup-apk"}
                             className="px-6 py-3 rounded-sm bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-sans font-semibold text-sm inline-flex items-center gap-2.5 transition-all shadow-xs active:scale-[0.98] disabled:opacity-75 cursor-pointer"
                         >
                             <ArrowDownToLine className={`w-4 h-4 ${downloadingId === "cleanup-apk" ? "animate-bounce" : ""}`} />
-                            <span>{downloadingId === "cleanup-apk" ? "Menyiapkan Berkas..." : "Unduh Berkas APK (18.4 MB)"}</span>
+                            <span>{downloadingId === "cleanup-apk" ? "Menyiapkan Berkas..." : `Unduh Berkas APK (${size})`}</span>
                         </button>
 
                         <button
@@ -118,7 +123,7 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }:
                             Spesifikasi Teknis
                         </span>
                         <span className="text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-sm">
-                            Production v2.4.1
+                            Production v{version}
                         </span>
                     </div>
 
@@ -129,7 +134,7 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }:
                         </div>
                         <div className="flex items-center justify-between py-1 border-b border-zinc-200/50 dark:border-zinc-800/50">
                             <span>Versi / Build:</span>
-                            <span className="text-zinc-800 dark:text-zinc-200 font-medium">2.4.1 (Build 142)</span>
+                            <span className="text-zinc-800 dark:text-zinc-200 font-medium">{build}</span>
                         </div>
                         <div className="flex items-center justify-between py-1 border-b border-zinc-200/50 dark:border-zinc-800/50">
                             <span>Arsitektur:</span>
@@ -141,7 +146,7 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }:
                         </div>
                         <div className="flex items-center justify-between py-1 border-b border-zinc-200/50 dark:border-zinc-800/50">
                             <span>Ukuran Unduhan:</span>
-                            <span className="text-zinc-800 dark:text-zinc-200 font-medium">18.4 MB (Paket Mandiri)</span>
+                            <span className="text-zinc-800 dark:text-zinc-200 font-medium">{size} (Paket Mandiri)</span>
                         </div>
                     </div>
 
@@ -186,21 +191,14 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa }:
                     <div className="space-y-3 font-sans text-xs">
                         <div className="border-l-2 border-emerald-800 dark:border-emerald-500 pl-3.5 space-y-1">
                             <div className="flex items-center gap-2 font-mono text-[11px]">
-                                <span className="font-bold text-ink dark:text-white">v2.4.1 (Build 142)</span>
-                                <span className="text-zinc-500">15 Oktober 2026</span>
+                                <span className="font-bold text-ink dark:text-white">v{build}</span>
+                                {apk?.release_date && (
+                                    <span className="text-zinc-500">
+                                        {new Date(apk.release_date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                                    </span>
+                                )}
                             </div>
-                            <p className="text-zinc-600 dark:text-zinc-400">
-                                Optimalisasi kompresi foto nota timbangan client-side hingga 78% lebih hemat kuota dan peningkatan toleransi offline 48 jam.
-                            </p>
-                        </div>
-                        <div className="border-l-2 border-zinc-300 dark:border-zinc-700 pl-3.5 space-y-1">
-                            <div className="flex items-center gap-2 font-mono text-[11px]">
-                                <span className="font-bold text-ink dark:text-white">v2.4.0 (Build 138)</span>
-                                <span className="text-zinc-500">28 September 2026</span>
-                            </div>
-                            <p className="text-zinc-600 dark:text-zinc-400">
-                                Seleksi armada harian (Viar R3, GranMax, Carry) dan mode input cepat berbasis jumlah kresek.
-                            </p>
+                            <p className="text-zinc-600 dark:text-zinc-400 whitespace-pre-line">{apk?.changelog}</p>
                         </div>
                     </div>
                 </div>

@@ -127,13 +127,16 @@ Route::get('/katalog', function () {
 
 Route::get('/downloads', function () {
     return Inertia::render('Downloads', [
+        'apk' => json_decode(@file_get_contents(public_path('downloads/version.json')), true),
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
     ]);
 })->name('downloads');
 
 Route::get('/download', function () {
-    return Inertia::render('Admin/Download');
+    return Inertia::render('Admin/Download', [
+        'apk' => json_decode(@file_get_contents(public_path('downloads/version.json')), true),
+    ]);
 })->name('app.download');
 
 use App\Http\Controllers\AdminController;

@@ -4,6 +4,7 @@ import Footer from "@/Components/Footer";
 import SEO from "@/Components/SEO";
 import { usePwa } from "@/utils/pwa";
 import PwaInstallModal from "@/Components/PwaInstallModal";
+import { ApkInfo } from "@/types";
 import CleanUpCard from "@/Components/Downloads/CleanUpCard";
 import PartnerCard from "@/Components/Downloads/PartnerCard";
 import DocumentList from "@/Components/Downloads/DocumentList";
@@ -16,7 +17,7 @@ import {
     Cpu,
 } from "lucide-react";
 
-export default function Downloads() {
+export default function Downloads({ apk }: { apk: ApkInfo | null }) {
     const { install, showInstructionsModal, setShowInstructionsModal, isIos } = usePwa();
     const [selectedCategory, setSelectedCategory] = useState<"all" | "mobile" | "web" | "doc">("all");
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -57,7 +58,7 @@ export default function Downloads() {
                             <span>DISTRIBUSI RESMI SISTEM OPERASIONAL</span>
                         </div>
                         <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400 hidden sm:inline">
-                            REPOSITORI VERIFIKASI v2.4.1 • KABUPATEN JEMBER
+                            REPOSITORI VERIFIKASI v{apk?.version_name ?? "-"} • KABUPATEN JEMBER
                         </span>
                     </div>
 
@@ -91,7 +92,7 @@ export default function Downloads() {
                             <span className="text-zinc-500 dark:text-zinc-500 uppercase tracking-wider block text-[11px]">Status Rilis</span>
                             <span className="font-bold text-zinc-900 dark:text-zinc-200 flex items-center gap-1.5">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                                Stable v2.4.1
+                                Stable v{apk?.version_name ?? "-"}
                             </span>
                         </div>
                         <div className="space-y-1">
@@ -175,6 +176,7 @@ export default function Downloads() {
                                     onDownload={handleDownloadTrigger}
                                     downloadingId={downloadingId}
                                     onInstallPwa={install}
+                                    apk={apk}
                                 />
                             )}
                             {show("web") && <PartnerCard onInstallPwa={install} />}
