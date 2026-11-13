@@ -23,11 +23,17 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
         'vehicle_id',
         'daily_salary',
         'current_lat',
         'current_lng',
         'last_location_at',
+    ];
+
+    // Mirror the DB default so freshly created (not yet refreshed) models count as active
+    protected $attributes = [
+        'is_active' => true,
     ];
 
     /**
@@ -50,6 +56,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password'          => 'hashed',
+            'is_active'         => 'boolean',
             'last_location_at'  => 'datetime',
             'current_lat'       => 'float',
             'current_lng'       => 'float',

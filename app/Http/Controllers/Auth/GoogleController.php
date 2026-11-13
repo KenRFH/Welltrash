@@ -26,6 +26,10 @@ class GoogleController extends Controller
                 return redirect()->route('login')->with('status', 'Access denied. Google login is only available for Company accounts.');
             }
 
+            if ($user && ! $user->is_active) {
+                return redirect()->route('login')->with('status', 'Akun Anda dinonaktifkan. Hubungi admin.');
+            }
+
             $user = User::updateOrCreate(
                 ['email' => $googleUser->getEmail()],
                 [

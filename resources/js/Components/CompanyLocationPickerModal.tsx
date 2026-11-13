@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -15,8 +16,14 @@ interface Props {
     onSaved?: (lat: number, lng: number) => void;
 }
 
-export default function CompanyLocationPickerModal({ isOpen, onClose, companyId, companyName, initialLat, initialLng, onSaved }: Props) {
-    if (!isOpen) return null;
+// Portal to <body> so the picker stacks above other portaled modals (e.g. the edit-account modal)
+// instead of being trapped under them inside the layout's stacking context.
+export default function CompanyLocationPickerModal(props: Props) {
+    if (!props.isOpen || typeof document === 'undefined') return null;
+    return createPortal(<PickerContent {...props} />, document.body);
+}
+
+function PickerContent({ onClose, companyId, companyName, initialLat, initialLng, onSaved }: Props) {
     const defaultLat = typeof initialLat === 'number' && initialLat !== 0 ? initialLat : -8.1724;
     const defaultLng = typeof initialLng === 'number' && initialLng !== 0 ? initialLng : 113.6995;
 

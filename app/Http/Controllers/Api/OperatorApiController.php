@@ -43,6 +43,13 @@ class OperatorApiController extends Controller
             ], 401);
         }
 
+        if (! $user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda dinonaktifkan. Hubungi admin.',
+            ], 403);
+        }
+
         $allowedRoles = ['CleanUP', 'operator', 'admin', 'Admin', 'Superadmin', 'superadmin', 'management'];
         if (! in_array($user->role, $allowedRoles)) {
             return response()->json([

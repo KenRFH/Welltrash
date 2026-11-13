@@ -13,6 +13,18 @@ class RoleMiddleware
             abort(403);
         }
 
+        // Kick out accounts deactivated by admin, including sessions opened before deactivation
+        if (! auth()->user()->is_active) {
+            if ($request->expectsJson()) {
+                abort(403, 'Akun Anda dinonaktifkan. Hubungi admin.');
+            }
+            auth('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('status', 'Akun Anda dinonaktifkan. Hubungi admin.');
+        }
+
         return $next($request);
     }
 }

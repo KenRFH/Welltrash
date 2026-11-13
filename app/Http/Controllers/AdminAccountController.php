@@ -296,6 +296,24 @@ class AdminAccountController extends Controller
     }
 
     /**
+     * Activate / deactivate login access for an account.
+     */
+    public function toggleActive(User $user)
+    {
+        if (auth()->id() === $user->id) {
+            return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
+        }
+
+        $user->update(['is_active' => ! $user->is_active]);
+
+        if (! $user->is_active) {
+            $user->tokens()->delete(); // log out the operator app immediately
+        }
+
+        return back()->with('success', $user->is_active ? 'Akun berhasil diaktifkan.' : 'Akun berhasil dinonaktifkan.');
+    }
+
+    /**
      * Remove the specified account from storage.
      */
     public function destroy(User $user)

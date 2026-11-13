@@ -161,6 +161,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/accounts', [AdminAccountController::class, 'index'])->name('accounts.index');
         Route::post('/accounts', [AdminAccountController::class, 'store'])->name('accounts.store');
         Route::post('/accounts/{user}', [AdminAccountController::class, 'update'])->name('accounts.update');
+        Route::patch('/accounts/{user}/toggle-active', [AdminAccountController::class, 'toggleActive'])->name('accounts.toggleActive');
         Route::delete('/accounts/{user}', [AdminAccountController::class, 'destroy'])->name('accounts.destroy');
 
         Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
