@@ -14,7 +14,8 @@ class RoleMiddleware
         }
 
         // Kick out accounts deactivated by admin, including sessions opened before deactivation
-        if (! auth()->user()->is_active) {
+        // "=== false" (not falsy): if the is_active column is missing (migration not run), nobody gets locked out
+        if (auth()->user()->is_active === false) {
             if ($request->expectsJson()) {
                 abort(403, 'Akun Anda dinonaktifkan. Hubungi admin.');
             }

@@ -43,7 +43,7 @@ class OperatorApiController extends Controller
             ], 401);
         }
 
-        if (! $user->is_active) {
+        if ($user->is_active === false) {
             return response()->json([
                 'success' => false,
                 'message' => 'Akun Anda dinonaktifkan. Hubungi admin.',

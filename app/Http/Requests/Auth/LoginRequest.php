@@ -61,7 +61,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if (! Auth::user()->is_active) {
+        if (Auth::user()->is_active === false) {
             Auth::logout();
 
             throw ValidationException::withMessages([

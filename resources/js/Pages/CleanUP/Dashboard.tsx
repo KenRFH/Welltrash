@@ -101,6 +101,16 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
 
     // ponytail: periodic GPS broadcast while on the way; stops automatically when finished.
     const hasActiveOnTheWay = pickups.some(p => p.status === 'on_the_way');
+
+    const [searchQuery, setSearchQuery] = useState('');
+    const q = searchQuery.trim().toLowerCase();
+    const visiblePickups = pickups.filter(pickup => {
+        if (statusFilter === 'pending' && (pickup.status === 'completed' || pickup.status === 'failed')) return false;
+        if (statusFilter === 'completed' && pickup.status !== 'completed' && pickup.status !== 'failed') return false;
+        if (!q) return true;
+        const c = pickup.company;
+        return [c.company_name, c.address, c.pic_name].some(v => v?.toLowerCase().includes(q));
+    });
     const [isGpsSharing, setIsGpsSharing] = useState(false);
 
     React.useEffect(() => {
@@ -510,6 +520,31 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                         </div>
                     </div>
 
+                    {/* Search Mitra */}
+                    {pickups.length > 0 && (
+                        <div className="relative mb-5">
+                            <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+                            <input
+                                type="search"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Cari mitra, alamat, atau PIC..."
+                                aria-label="Cari mitra"
+                                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchQuery('')}
+                                    aria-label="Hapus pencarian"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            )}
+                        </div>
+                    )}
+
                     {/* Live GPS Broadcast Indicator */}
                     {hasActiveOnTheWay && (
                         <div className="mb-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs font-semibold text-emerald-800 shadow-2xs">
@@ -537,15 +572,21 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                             <h3 className="text-xl font-bold text-gray-900 mb-2">Libur Dulu 🌴</h3>
                             <p className="text-gray-500 text-sm max-w-md mx-auto">Tampaknya jadwal Anda kosong untuk hari ini. Waktunya istirahat atau periksa hari lainnya.</p>
                         </div>
+                    ) : visiblePickups.length === 0 ? (
+                        <div className="bg-white rounded-3xl p-10 text-center border border-dashed border-gray-300">
+                            <h3 className="text-base font-bold text-gray-900 mb-1">Mitra tidak ditemukan</h3>
+                            <p className="text-gray-500 text-sm">
+                                {q ? <>Tidak ada mitra yang cocok dengan "<span className="font-semibold">{searchQuery}</span>" pada filter ini.</> : 'Tidak ada jadwal pada filter ini.'}
+                            </p>
+                            {q && (
+                                <button type="button" onClick={() => setSearchQuery('')} className="mt-4 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-900 text-white">
+                                    Hapus pencarian
+                                </button>
+                            )}
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            {pickups
-                                .filter(pickup => {
-                                    if (statusFilter === 'pending') return pickup.status !== 'completed' && pickup.status !== 'failed';
-                                    if (statusFilter === 'completed') return pickup.status === 'completed' || pickup.status === 'failed';
-                                    return true;
-                                })
-                                .map((pickup) => {
+                            {visiblePickups.map((pickup) => {
                                 const status = pickup.status;
                                 const isPendingOffline = pendingPickupIds.includes(pickup.id);
                                 
