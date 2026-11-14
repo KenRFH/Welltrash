@@ -92,6 +92,8 @@ class HrisService
             'name'          => $name,
             'email'         => $effectiveEmail,
             'employee_code' => $empCode,
+            'division'      => $emp['division'] ?? null,
+            'position'      => $emp['position'] ?? null,
             'role'          => $mappedRole,
             'is_active'     => $isActive,
         ];
@@ -166,6 +168,8 @@ class HrisService
                 'name'          => $name,
                 'email'         => $effectiveEmail,
                 'employee_code' => $empCode,
+                'division'      => $member['division'] ?? null,
+                'position'      => $member['position'] ?? null,
                 'is_active'     => $isActive,
             ];
 
@@ -189,6 +193,8 @@ class HrisService
             $syncedDetails[] = [
                 'id'            => $user->id,
                 'employee_code' => $user->employee_code,
+                'division'      => $user->division,
+                'position'      => $user->position,
                 'name'          => $user->name,
                 'email'         => $user->email,
                 'role'          => $user->role,

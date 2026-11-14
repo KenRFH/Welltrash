@@ -54,6 +54,8 @@ interface UserAccount {
     name: string;
     email: string;
     employee_code?: string | null;
+    division?: string | null;
+    position?: string | null;
     role: 'CleanUP' | 'web_admin' | 'company';
     is_active: boolean;
     created_at: string;
@@ -609,6 +611,11 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                         <div className="text-xs text-slate-400 font-medium">
                                                             {user.email}
                                                         </div>
+                                                        {(user.division || user.position) && (
+                                                            <div className="text-[11px] text-indigo-700 font-semibold mt-0.5" title="Divisi & Jabatan dari HRIS">
+                                                                {[user.division, user.position].filter(Boolean).join(' · ')}
+                                                            </div>
+                                                        )}
                                                         {user.company && (
                                                             <div className="flex flex-col gap-0.5 mt-0.5">
                                                                 <div className="text-[11px] text-teal-700 font-semibold">
