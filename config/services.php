@@ -50,5 +50,10 @@ return [
         'url'   => 'https://api.fonnte.com/send',
     ],
 
+    'hris' => [
+        'url'     => rtrim(env('HRIS_API_URL', 'http://127.0.0.1:8000'), '/'),
+        'api_key' => env('HRIS_API_KEY', ''),
+    ],
+
 ];
 

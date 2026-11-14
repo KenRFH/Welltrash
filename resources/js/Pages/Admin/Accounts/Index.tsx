@@ -27,6 +27,7 @@ import {
     MapPin,
     UserCheck,
     UserX,
+    RefreshCw,
 } from 'lucide-react';
 import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
 import { parseCoordinatesOrGoogleMapsUrl } from '@/utils/gmapsParser';
@@ -52,6 +53,7 @@ interface UserAccount {
     id: number;
     name: string;
     email: string;
+    employee_code?: string | null;
     role: 'CleanUP' | 'web_admin' | 'company';
     is_active: boolean;
     created_at: string;
@@ -78,6 +80,15 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
     const [isLocating, setIsLocating] = useState(false);
     const [isGeocoding, setIsGeocoding] = useState(false);
     const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
+    const [isSyncingHris, setIsSyncingHris] = useState(false);
+
+    const handleSyncHris = () => {
+        setIsSyncingHris(true);
+        router.post(route('admin.accounts.syncHris'), {}, {
+            onFinish: () => setIsSyncingHris(false),
+        });
+    };
+
 
     // Form logic
     const { data, setData, post, reset, errors, processing } = useForm({
@@ -293,13 +304,24 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
             subtitle="Manajemen otorisasi & kredensial akun CleanUP, Web Admin, dan Mitra Bisnis"
             activeTab="accounts"
             headerAction={
-                <button
-                    onClick={openAddModal}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
-                >
-                    <Plus className="w-4 h-4" />
-                    <span>Tambah Akun Baru</span>
-                </button>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleSyncHris}
+                        disabled={isSyncingHris}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-xs disabled:opacity-50"
+                        title="Sinkronisasi akun kru dan staf dari HRIS sebagai Single Source of Truth"
+                    >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isSyncingHris ? 'animate-spin' : ''}`} />
+                        <span>{isSyncingHris ? 'Menyinkronkan...' : 'Sinkronkan HRIS'}</span>
+                    </button>
+                    <button
+                        onClick={openAddModal}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                    >
+                        <Plus className="w-4 h-4" />
+                        <span>Tambah Akun Baru</span>
+                    </button>
+                </div>
             }
         >
             <div className="space-y-6">
@@ -571,10 +593,15 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                         {user.name.substring(0, 2).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors">
-                                                            {user.name}
+                                                        <div className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1.5 flex-wrap">
+                                                            <span>{user.name}</span>
+                                                            {user.employee_code && (
+                                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono" title="ID Karyawan HRIS (SSOT)">
+                                                                    {user.employee_code}
+                                                                </span>
+                                                            )}
                                                             {!user.is_active && (
-                                                                <span className="ml-1.5 align-middle px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
+                                                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
                                                                     Nonaktif
                                                                 </span>
                                                             )}

@@ -38,22 +38,50 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $loginValue = $this->input('email');
+        $loginValue = trim($this->input('email'));
+        $password = $this->input('password');
+
+        // 1. Try HRIS authentication first (Single Source of Truth)
+        $hrisService = app(\App\Services\HrisService::class);
+        if ($hrisService->isConfigured()) {
+            try {
+                $hrisData = $hrisService->verifyCredentials($loginValue, $password);
+                if ($hrisData && !empty($hrisData['verified'])) {
+                    $hrisUser = $hrisData['user'];
+
+                    if (!($hrisUser['is_active'] ?? true)) {
+                        throw ValidationException::withMessages([
+                            'email' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
+                        ]);
+                    }
+
+                    $user = $hrisService->syncUserFromHrisData($hrisUser, $password);
+                    Auth::login($user, $this->boolean('remember'));
+                    RateLimiter::clear($this->throttleKey());
+                    return;
+                }
+            } catch (ValidationException $ve) {
+                throw $ve;
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('HRIS web auth warning: ' . $e->getMessage());
+            }
+        }
+
+        // 2. Local authentication fallback (for companies and local accounts)
         $field = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
 
-        // ponytail: Auto-seed demo users in local development if demo account is missing
+        // Auto-seed demo users in local development if demo account is missing
         if (app()->environment('local') && !User::where('email', $loginValue)->exists()) {
             if (in_array($loginValue, ['admin@welltrash.com', 'cleanup@welltrash.com', 'cleanup2@welltrash.com', 'company@welltrash.com', 'webadmin@welltrash.com'])) {
                 (new UserSeeder())->run();
             }
         }
 
-        $credentials = [
-            $field => $loginValue,
-            'password' => $this->input('password'),
-        ];
+        $localUser = User::where($field, $loginValue)
+            ->orWhere('employee_code', strtoupper($loginValue))
+            ->first();
 
-        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+        if (!$localUser || !Auth::attempt(['email' => $localUser->email, 'password' => $password], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

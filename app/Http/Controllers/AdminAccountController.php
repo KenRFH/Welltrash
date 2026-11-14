@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Company;
+use App\Services\HrisService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Artisan;
@@ -31,6 +32,20 @@ class AdminAccountController extends Controller
             'companies' => $companies,
         ]);
     }
+    /**
+     * Synchronize CleanUP and employee accounts from HRIS (Single Source of Truth).
+     */
+    public function syncHrisCrew(HrisService $hrisService)
+    {
+        try {
+            $result = $hrisService->syncCrew();
+
+            return back()->with('success', "Sinkronisasi HRIS berhasil: {$result['synced']} akun kru diproses ({$result['created']} akun baru dibuat, {$result['updated']} diperbarui).");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal sinkronisasi dengan HRIS: ' . $e->getMessage());
+        }
+    }
+
 
     /**
      * Store a newly created account in storage.

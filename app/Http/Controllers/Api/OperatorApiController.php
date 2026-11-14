@@ -12,6 +12,7 @@ use App\Models\OvertimeRequest;
 use App\Models\Pickup;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\HrisService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,22 +26,55 @@ class OperatorApiController extends Controller
 {
     /**
      * Operator login via mobile app.
+     * Authenticates against HRIS as Single Source of Truth, with local fallback.
      */
-    public function login(Request $request): JsonResponse
+    public function login(Request $request, HrisService $hrisService): JsonResponse
     {
         $request->validate([
-            'email'       => 'required|email',
+            'email'       => 'required|string',
             'password'    => 'required|string',
             'device_name' => 'nullable|string|max:100',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $identifier = trim($request->input('email') ?? $request->input('username') ?? '');
+        $password = $request->input('password');
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Email atau password salah.',
-            ], 401);
+        $user = null;
+
+        // 1. Authenticate with HRIS (Single Source of Truth)
+        if ($hrisService->isConfigured()) {
+            try {
+                $hrisData = $hrisService->verifyCredentials($identifier, $password);
+
+                if ($hrisData && !empty($hrisData['verified'])) {
+                    $hrisUser = $hrisData['user'];
+
+                    if (!($hrisUser['is_active'] ?? true)) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
+                        ], 403);
+                    }
+
+                    $user = $hrisService->syncUserFromHrisData($hrisUser, $password);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('HRIS auth connection warning: ' . $e->getMessage());
+            }
+        }
+
+        // 2. Fallback to local authentication (if HRIS offline or local account)
+        if (!$user) {
+            $user = User::where('email', $identifier)
+                ->orWhere('employee_code', strtoupper($identifier))
+                ->first();
+
+            if (!$user || !Hash::check($password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email/kode karyawan atau password salah.',
+                ], 401);
+            }
         }
 
         if ($user->is_active === false) {
@@ -66,11 +100,12 @@ class OperatorApiController extends Controller
             'message' => 'Login berhasil.',
             'token'   => $token,
             'user'    => [
-                'id'           => $user->id,
-                'name'         => $user->name,
-                'email'        => $user->email,
-                'role'         => $user->role,
-                'daily_salary' => $user->daily_salary,
+                'id'            => $user->id,
+                'name'          => $user->name,
+                'email'         => $user->email,
+                'employee_code' => $user->employee_code,
+                'role'          => $user->role,
+                'daily_salary'  => $user->daily_salary,
                 'vehicle'      => $user->vehicle ? [
                     'id'            => $user->vehicle->id,
                     'name'          => $user->vehicle->name,
@@ -93,11 +128,12 @@ class OperatorApiController extends Controller
         return response()->json([
             'success' => true,
             'user'    => [
-                'id'           => $user->id,
-                'name'         => $user->name,
-                'email'        => $user->email,
-                'role'         => $user->role,
-                'daily_salary' => $user->daily_salary,
+                'id'            => $user->id,
+                'name'          => $user->name,
+                'email'         => $user->email,
+                'employee_code' => $user->employee_code,
+                'role'          => $user->role,
+                'daily_salary'  => $user->daily_salary,
                 'vehicle'      => $user->vehicle ? [
                     'id'            => $user->vehicle->id,
                     'name'          => $user->vehicle->name,
