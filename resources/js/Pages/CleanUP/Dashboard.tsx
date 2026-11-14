@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import CleanUPSidebar from '@/Components/CleanUPSidebar';
 import AbsensiFloatingButton from '@/Components/AbsensiFloatingButton';
-import PwaInstallButton from '@/Components/PwaInstallButton';
 import CleanUPOfflineSync from '@/Components/CleanUPOfflineSync';
 import CleanUPVehicleSelectorModal, { Vehicle } from '@/Components/CleanUPVehicleSelectorModal';
 import { compressImage } from '@/utils/compressImage';
@@ -368,9 +367,6 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                 </span>
                             )}
                         </Link>
-                        <div className="hidden sm:block">
-                            <PwaInstallButton variant="header" label="Unduh App" />
-                        </div>
                         <button
                             type="button"
                             onClick={() => setIsSidebarOpen(true)}

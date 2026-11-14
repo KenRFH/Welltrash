@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
     ArrowDownToLine,
-    Smartphone,
     Terminal,
     ChevronDown,
     ChevronUp,
@@ -16,11 +15,10 @@ import { ApkInfo } from "@/types";
 interface Props {
     onDownload: (id: string, url: string, filename: string) => void;
     downloadingId: string | null;
-    onInstallPwa: () => void;
     apk: ApkInfo | null;
 }
 
-export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa, apk }: Props) {
+export default function CleanUpCard({ onDownload, downloadingId, apk }: Props) {
     const [copiedHash, setCopiedHash] = useState(false);
     const [showChangelog, setShowChangelog] = useState(false);
     const cleanupApkHash = apk?.sha256 ?? "-";
@@ -95,15 +93,6 @@ export default function CleanUpCard({ onDownload, downloadingId, onInstallPwa, a
                         >
                             <ArrowDownToLine className={`w-4 h-4 ${downloadingId === "cleanup-apk" ? "animate-bounce" : ""}`} />
                             <span>{downloadingId === "cleanup-apk" ? "Menyiapkan Berkas..." : `Unduh Berkas APK (${size})`}</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={onInstallPwa}
-                            className="px-5 py-3 rounded-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 text-zinc-800 dark:text-zinc-200 font-sans font-medium text-sm inline-flex items-center gap-2 transition-colors cursor-pointer"
-                        >
-                            <Smartphone className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                            <span>Pasang Versi PWA Cepat</span>
                         </button>
 
                         <button

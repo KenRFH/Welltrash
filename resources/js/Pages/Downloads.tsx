@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import SEO from "@/Components/SEO";
-import { usePwa } from "@/utils/pwa";
-import PwaInstallModal from "@/Components/PwaInstallModal";
 import { ApkInfo } from "@/types";
 import CleanUpCard from "@/Components/Downloads/CleanUpCard";
 import PartnerCard from "@/Components/Downloads/PartnerCard";
@@ -18,7 +16,6 @@ import {
 } from "lucide-react";
 
 export default function Downloads({ apk }: { apk: ApkInfo | null }) {
-    const { install, showInstructionsModal, setShowInstructionsModal, isIos } = usePwa();
     const [selectedCategory, setSelectedCategory] = useState<"all" | "mobile" | "web" | "doc">("all");
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -43,7 +40,7 @@ export default function Downloads({ apk }: { apk: ApkInfo | null }) {
         <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
             <SEO
                 title="Pusat Unduhan Resmi Aplikasi & Dokumen Operasional | WellTrash"
-                description="Portal unduh berkas APK resmi WellTrash CleanUP Operator, instalasi PWA Partner Portal B2B, dan dokumen legalitas operasional pengelolaan limbah Kabupaten Jember."
+                description="Portal unduh berkas APK resmi WellTrash CleanUP Operator, akses Partner Portal B2B, dan dokumen legalitas operasional pengelolaan limbah Kabupaten Jember."
             />
             <Navbar />
             {/* Editorial Page Header */}
@@ -175,11 +172,10 @@ export default function Downloads({ apk }: { apk: ApkInfo | null }) {
                                 <CleanUpCard
                                     onDownload={handleDownloadTrigger}
                                     downloadingId={downloadingId}
-                                    onInstallPwa={install}
                                     apk={apk}
                                 />
                             )}
-                            {show("web") && <PartnerCard onInstallPwa={install} />}
+                            {show("web") && <PartnerCard />}
                         </div>
                     )}
 
@@ -193,11 +189,6 @@ export default function Downloads({ apk }: { apk: ApkInfo | null }) {
                 </div>
             </main>
             <Footer />
-            <PwaInstallModal
-                isOpen={showInstructionsModal}
-                onClose={() => setShowInstructionsModal(false)}
-                isIos={isIos}
-            />
         </div>
     );
 }

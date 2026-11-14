@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
-import PwaInstallButton from './PwaInstallButton';
 import { countOfflinePickups } from '../utils/offlinePickupQueue';
 
 const HistoryIcon = ({ className = "w-5 h-5 mr-3" }: { className?: string }) => (
@@ -125,7 +124,6 @@ export default function CleanUPSidebar({ active, isMobileOpen = false, onClose }
                     <div className="pt-2">
                         <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-gray-400 uppercase">Akses & Sesi</div>
                         <div className="space-y-1.5">
-                            <PwaInstallButton variant="sidebar" label="Unduh Aplikasi PWA" />
                             <Link
                                 href={route('logout')}
                                 method="post"

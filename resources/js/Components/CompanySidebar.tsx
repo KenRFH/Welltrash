@@ -1,7 +1,6 @@
 import { Link } from '@inertiajs/react';
 import React from 'react';
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
-import PwaInstallButton from './PwaInstallButton';
 import {
     LayoutDashboard,
     History,
@@ -139,7 +138,6 @@ export default function CompanySidebar({ active, isLocked = false, isMobileOpen 
                                 Akses & Sesi
                             </div>
                             <div className="space-y-1.5">
-                                <PwaInstallButton variant="sidebar" label="Unduh Aplikasi PWA" />
                                 <Link
                                     href={route('logout')}
                                     method="post"

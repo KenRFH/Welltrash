@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
 import WebAdminSidebar from '@/Components/WebAdminSidebar';
-import PwaInstallButton from '@/Components/PwaInstallButton';
 import { motion, type Variants } from 'motion/react';
 import {
     Menu,
@@ -120,9 +119,6 @@ export default function Dashboard({ auth, activitiesCount, katalogCount, newsCou
                     </div>
                     
                     <div className="flex items-center gap-3">
-                        <div className="hidden sm:block">
-                            <PwaInstallButton variant="header" label="Pasang App" />
-                        </div>
                         <div className="flex items-center gap-2.5 pl-3 border-l border-slate-200">
                             <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
                                 <ShieldCheck className="w-4 h-4" />

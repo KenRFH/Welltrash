@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import CompanySidebar, { CompanyActiveTab } from '@/Components/CompanySidebar';
-import PwaInstallButton from '@/Components/PwaInstallButton';
 import { Menu, Calendar, Building2 } from 'lucide-react';
 
 interface Props {
@@ -99,10 +98,6 @@ export default function CompanyLayout({
                         <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/80 border border-slate-200/60 text-xs font-semibold text-slate-600">
                             <Calendar className="w-3.5 h-3.5 text-slate-400" />
                             <span>{currentDateStr}</span>
-                        </div>
-
-                        <div className="hidden sm:block">
-                            <PwaInstallButton variant="header" label="Pasang App" />
                         </div>
 
                         {headerAction}

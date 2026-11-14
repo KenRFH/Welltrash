@@ -1,6 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
-import PwaInstallButton from '@/Components/PwaInstallButton';
 
 export default function Authenticated({
     header,
@@ -38,8 +37,6 @@ export default function Authenticated({
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center gap-3">
-                            <PwaInstallButton variant="header" label="Unduh App" />
-
                             <div className="relative ms-1">
                                 <button
                                     onClick={() => setShowingProfileDropdown(!showingProfileDropdown)}
@@ -148,9 +145,6 @@ export default function Authenticated({
                         >
                             Dashboard
                         </Link>
-                        <div className="px-3 pt-2">
-                            <PwaInstallButton variant="sidebar" label="Unduh Aplikasi" />
-                        </div>
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">

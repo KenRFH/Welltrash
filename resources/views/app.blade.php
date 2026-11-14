@@ -10,17 +10,7 @@
         <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
 
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <!-- PWA Manifest & Meta Tags -->
-        <link rel="manifest" href="/manifest.json">
         <meta name="theme-color" content="#0C3325">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="application-name" content="WellTrash">
-
-        <!-- Apple PWA Meta Tags -->
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="default">
-        <meta name="apple-mobile-web-app-title" content="WellTrash">
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
         <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">

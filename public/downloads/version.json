@@ -1,0 +1,11 @@
+{
+  "version_name": "1.2.5",
+  "version_code": 6,
+  "title": "Pembaruan Welltrash v1.2.5 Tersedia",
+  "changelog": "• Login dengan email atau kode karyawan (ID HRIS)\n• ID karyawan HRIS tampil di halaman profil\n• Tampilan baru lebih rapi: bar menu mengambang & kontras warna lebih jelas di bawah matahari\n• Cari mitra berdasarkan nama, alamat, atau PIC\n• Pemilih tanggal baru dengan kalender berbahasa Indonesia\n• Geser untuk menyelesaikan tugas (mencegah salah tekan)\n• Diagram progres penjemputan harian\n• Tombol lebih besar & mudah ditekan\n• Perbaikan crash dashboard admin dan tombol Mulai Pickup ganda\n• Cek pembaruan otomatis sejak halaman login & saat koneksi internet kembali\n• Versi aplikasi tampil di halaman login\n• Menu Aktivitas dihapus",
+  "apk_url": "https://welltrash.com/downloads/welltrash-cleanup-operator.apk",
+  "force_update": false,
+  "release_date": "2026-11-14",
+  "size_bytes": 57759205,
+  "sha256": "aab9e7c484292a332539a43568306a3efab9611857862a96dfdbc06d716236e3"
+}

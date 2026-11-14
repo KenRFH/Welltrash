@@ -6,7 +6,15 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import GlobalToast from "./Components/GlobalToast";
-import PwaGlobalManager from "./Components/PwaGlobalManager";
+
+// Unregister any active PWA service workers
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+            registration.unregister();
+        }
+    });
+}
 
 const appName = "Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash";
 
@@ -25,7 +33,6 @@ createInertiaApp({
         root.render(
             <HelmetProvider>
                 <GlobalToast initialFlash={initialFlash as any} />
-                <PwaGlobalManager initialAuth={initialAuth as any} />
                 <App {...props} />
             </HelmetProvider>
         );

@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
-import { CheckCircle2, ExternalLink, Monitor } from "lucide-react";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 
-export default function PartnerCard({ onInstallPwa }: { onInstallPwa: () => void }) {
+export default function PartnerCard() {
     return (
         <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200/90 dark:border-zinc-800 rounded-sm p-6 sm:p-8 shadow-xs">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -17,7 +17,7 @@ export default function PartnerCard({ onInstallPwa }: { onInstallPwa: () => void
                                     WellTrash Partner Portal
                                 </h2>
                                 <span className="px-2 py-0.5 rounded-sm bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-mono text-[10px] uppercase font-bold">
-                                    PWA Web
+                                    Portal Web
                                 </span>
                             </div>
                             <p className="font-mono text-xs text-zinc-500">Dasbor Kemitraan Bisnis, F&amp;B, &amp; Rumah Sakit</p>
@@ -43,7 +43,7 @@ export default function PartnerCard({ onInstallPwa }: { onInstallPwa: () => void
                         </div>
                         <div className="flex items-center gap-2">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span>Dapat Dipasang di Layar HP &amp; Desktop</span>
+                            <span>Akses Fleksibel via Web Browser</span>
                         </div>
                     </div>
 
@@ -55,14 +55,6 @@ export default function PartnerCard({ onInstallPwa }: { onInstallPwa: () => void
                             <ExternalLink className="w-3.5 h-3.5" />
                             <span>Buka Partner Portal</span>
                         </Link>
-                        <button
-                            type="button"
-                            onClick={onInstallPwa}
-                            className="px-4 py-2.5 rounded-sm bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-sans font-medium text-xs inline-flex items-center gap-2 transition-colors cursor-pointer"
-                        >
-                            <Monitor className="w-3.5 h-3.5 text-emerald-700" />
-                            <span>Pasang PWA di Perangkat</span>
-                        </button>
                     </div>
                 </div>
 
