@@ -160,10 +160,11 @@ Route::middleware(['auth', 'role:admin'])
         // Kelola Akun
         Route::get('/accounts', [AdminAccountController::class, 'index'])->name('accounts.index');
         Route::post('/accounts', [AdminAccountController::class, 'store'])->name('accounts.store');
+        // Must stay above /accounts/{user}, otherwise "sync-hris" is bound as a user id (404).
+        Route::post('/accounts/sync-hris', [AdminAccountController::class, 'syncHrisCrew'])->name('accounts.syncHris');
         Route::post('/accounts/{user}', [AdminAccountController::class, 'update'])->name('accounts.update');
         Route::patch('/accounts/{user}/toggle-active', [AdminAccountController::class, 'toggleActive'])->name('accounts.toggleActive');
         Route::delete('/accounts/{user}', [AdminAccountController::class, 'destroy'])->name('accounts.destroy');
-        Route::post('/accounts/sync-hris', [AdminAccountController::class, 'syncHrisCrew'])->name('accounts.syncHris');
 
 
         Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
