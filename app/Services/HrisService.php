@@ -299,6 +299,32 @@ class HrisService
     }
 
     /**
+     * One employee's monthly attendance recap and payroll slips from HRIS. Null when HRIS is unreachable.
+     */
+    public function fetchSelfService(string $employeeCode, string $month): ?array
+    {
+        if (!$this->isConfigured()) {
+            return null;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'X-HRIS-KEY' => $this->apiKey,
+                'Accept'     => 'application/json',
+            ])->timeout($this->timeout)->get("{$this->baseUrl}/api/v1/internal/employees/" . rawurlencode($employeeCode) . '/self-service', ['month' => $month]);
+
+            if (!$response->successful()) {
+                Log::warning("HrisService fetchSelfService {$employeeCode} gagal ({$response->status()}): " . $response->body());
+                return null;
+            }
+            return $response->json();
+        } catch (\Throwable $e) {
+            Log::warning("HrisService fetchSelfService {$employeeCode} connection error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Retrieve employee detail from HRIS by identifier (ID or employee code).
      */
     public function fetchEmployee(string $identifier): ?array

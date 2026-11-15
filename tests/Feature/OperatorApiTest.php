@@ -296,6 +296,33 @@ class OperatorApiTest extends TestCase
             && str_contains((string) $req['proof_url'], 'leave_requests/'));
     }
 
+    public function test_every_role_sees_only_own_hris_attendance_and_salary(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'test-key']);
+        \Illuminate\Support\Facades\Http::fake([
+            'hris.test/api/v1/internal/employees/WT-002/*' => \Illuminate\Support\Facades\Http::response(['success' => true, 'recap' => ['present' => 3], 'payroll' => [['net' => 1500000]]]),
+            'hris.test/*' => \Illuminate\Support\Facades\Http::response([], 500),
+        ]);
+
+        foreach (['CleanUP' => 'WT-001', 'admin' => 'WT-002'] as $role => $code) {
+            $user = $this->createOperator(['email' => "{$role}@welltrash.test", 'role' => $role, 'employee_code' => $code]);
+            $this->app['auth']->forgetGuards(); // test app keeps the previous request's user otherwise
+            $res = $this->withHeader('Authorization', 'Bearer ' . $user->createToken('t')->plainTextToken)
+                ->getJson('/api/operator/hr?month=2026-11');
+
+            // The caller's own code is what goes to HRIS; WT-001 is faked as HRIS failing.
+            $role === 'admin'
+                ? $res->assertOk()->assertJsonPath('payroll.0.net', 1500000)
+                : $res->assertStatus(503);
+        }
+        \Illuminate\Support\Facades\Http::assertSent(fn ($req) => str_contains($req->url(), '/employees/WT-002/self-service?month=2026-11'));
+
+        $noCode = $this->createOperator(['email' => 'nocode@welltrash.test']);
+        $this->app['auth']->forgetGuards();
+        $this->withHeader('Authorization', 'Bearer ' . $noCode->createToken('t')->plainTextToken)
+            ->getJson('/api/operator/hr')->assertStatus(422);
+    }
+
     public function test_operator_can_update_pickup_status_and_logout(): void
     {
         $operator = $this->createOperator();

@@ -418,7 +418,7 @@ class OperatorApiController extends Controller
     public function companies(): JsonResponse
     {
         $companies = Company::where('subscription_status', 'active')
-            ->select('id', 'company_name', 'address', 'pic_name')
+            ->select('id', 'company_name', 'address', 'pic_name', 'phone')
             ->orderBy('company_name')
             ->get();
 
@@ -566,6 +566,32 @@ class OperatorApiController extends Controller
                 'overtime_salary'      => $overtimeSalary,
             ],
         ]);
+    }
+
+    /**
+     * The caller's own HRIS attendance recap and salary slips (every role, own data only).
+     */
+    public function hrSelfService(Request $request, HrisService $hrisService): JsonResponse
+    {
+        $month = $request->validate(['month' => 'nullable|date_format:Y-m'])['month'] ?? Carbon::now()->format('Y-m');
+        $code = $request->user()->employee_code;
+
+        if (empty($code)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda belum terhubung ke data karyawan HRIS. Hubungi Direktur.',
+            ], 422);
+        }
+
+        $data = $hrisService->fetchSelfService($code, $month);
+        if (!$data) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data HRIS sedang tidak dapat diakses. Coba lagi nanti.',
+            ], 503);
+        }
+
+        return response()->json($data);
     }
 
     /**

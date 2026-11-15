@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Company;
 use App\Http\Controllers\Api\OperatorApiController;
+use App\Http\Controllers\Api\AdminApiController;
 
 Route::get('/mitra', function (Request $request) {
 
@@ -71,6 +72,7 @@ Route::prefix('operator')->group(function () {
         // Attendance & Salary
         Route::get('/attendance/status', [OperatorApiController::class, 'attendanceStatus'])->name('api.operator.attendance.status');
         Route::get('/attendance/summary', [OperatorApiController::class, 'attendanceSummary'])->name('api.operator.attendance.summary');
+        Route::get('/hr', [OperatorApiController::class, 'hrSelfService'])->name('api.operator.hr');
         Route::post('/attendance/clock-in', [OperatorApiController::class, 'clockIn'])->name('api.operator.attendance.clockIn');
         Route::post('/attendance/clock-out', [OperatorApiController::class, 'clockOut'])->name('api.operator.attendance.clockOut');
 
@@ -80,4 +82,14 @@ Route::prefix('operator')->group(function () {
         Route::post('/attendance/overtime/clock-out', [OperatorApiController::class, 'clockOutOvertime'])->name('api.operator.overtime.clockOut');
         Route::post('/leave-request', [OperatorApiController::class, 'storeLeaveRequest'])->name('api.operator.leave.store');
     });
+});
+
+// Admin screens of the operator mobile app (Direktur / Manager / Koordinator accounts)
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin,Admin,Superadmin,superadmin,management'])->group(function () {
+    Route::get('/dashboard', [AdminApiController::class, 'dashboard'])->name('api.admin.dashboard');
+    Route::get('/cleanups/live-locations', [AdminApiController::class, 'liveLocations'])->name('api.admin.live-locations');
+    Route::get('/approvals', [AdminApiController::class, 'approvals'])->name('api.admin.approvals');
+    Route::post('/attendance/overtime/{overtimeRequest}/review', [AdminApiController::class, 'reviewOvertime'])->name('api.admin.overtime.review');
+    Route::post('/attendance/leave/{leaveRequest}/review', [AdminApiController::class, 'reviewLeave'])->name('api.admin.leave.review');
+    Route::post('/companies/{company}/review', [AdminApiController::class, 'reviewCompany'])->name('api.admin.companies.review');
 });
