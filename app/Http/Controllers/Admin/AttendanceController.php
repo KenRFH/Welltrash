@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Attendance;
 use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
+use App\Services\HrisService;
 use Carbon\Carbon;
 
 defined('DAILY_RATE')     || define('DAILY_RATE', 67692);
@@ -118,7 +119,7 @@ class AttendanceController extends Controller
     /**
      * Approve or reject a leave request.
      */
-    public function reviewLeave(Request $request, LeaveRequest $leaveRequest)
+    public function reviewLeave(Request $request, LeaveRequest $leaveRequest, HrisService $hrisService)
     {
         $request->validate([
             'status'     => 'required|in:approved,rejected',
@@ -129,6 +130,8 @@ class AttendanceController extends Controller
             'status'     => $request->status,
             'admin_note' => $request->admin_note,
         ]);
+
+        \Illuminate\Support\defer(fn () => $hrisService->pushLeave($leaveRequest));
 
         $statusLabel = $request->status === 'approved' ? 'disetujui' : 'ditolak';
         return back()->with('success', "Pengajuan izin {$leaveRequest->user->name} berhasil {$statusLabel}.");

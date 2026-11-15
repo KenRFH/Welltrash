@@ -268,6 +268,34 @@ class OperatorApiTest extends TestCase
         ));
     }
 
+    public function test_leave_review_is_pushed_to_hris_with_proof(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'test-key']);
+        \Illuminate\Support\Facades\Http::fake(['hris.test/*' => \Illuminate\Support\Facades\Http::response(['success' => true])]);
+        Storage::fake('public');
+
+        $operator = $this->createOperator(['employee_code' => 'WT-001']);
+        $this->withHeader('Authorization', 'Bearer ' . $operator->createToken('t')->plainTextToken)
+            ->post('/api/operator/leave-request', [
+                'date' => Carbon::today()->toDateString(), 'type' => 'sakit', 'reason' => 'Demam',
+                'proof_image' => UploadedFile::fake()->image('surat.jpg'),
+            ], ['Accept' => 'application/json'])->assertCreated();
+
+        $leave = \App\Models\LeaveRequest::sole();
+        $this->assertNotNull($leave->proof_image, 'proof image must be saved');
+
+        $admin = $this->createOperator(['email' => 'admin@welltrash.test', 'role' => 'admin']);
+        $this->actingAs($admin)
+            ->patch(route('admin.attendance.leave.review', $leave), ['status' => 'approved'])
+            ->assertRedirect();
+
+        \Illuminate\Support\Facades\Http::assertSent(fn ($req) => $req->url() === 'https://hris.test/api/v1/internal/leave'
+            && $req['employee_code'] === 'WT-001'
+            && $req['type'] === 'sakit'
+            && $req['status'] === 'approved'
+            && str_contains((string) $req['proof_url'], 'leave_requests/'));
+    }
+
     public function test_operator_can_update_pickup_status_and_logout(): void
     {
         $operator = $this->createOperator();

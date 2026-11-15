@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Attendance;
+use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -251,6 +252,40 @@ class HrisService
             return $response->successful();
         } catch (\Throwable $e) {
             Log::warning("HrisService pushAttendance #{$attendance->id} connection error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Push a reviewed izin/sakit request to HRIS. Idempotent per employee + date.
+     */
+    public function pushLeave(LeaveRequest $leave): bool
+    {
+        $empCode = $leave->user?->employee_code;
+        if (!$this->isConfigured() || empty($empCode) || $leave->status === 'pending') {
+            return false;
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'X-HRIS-KEY' => $this->apiKey,
+                'Accept'     => 'application/json',
+            ])->timeout($this->timeout)->post("{$this->baseUrl}/api/v1/internal/leave", [
+                'employee_code' => $empCode,
+                'date'          => $leave->date->toDateString(),
+                'type'          => $leave->type,
+                'status'        => $leave->status,
+                'reason'        => $leave->reason,
+                'proof_url'     => $leave->proof_image ? Storage::disk('public')->url($leave->proof_image) : null,
+            ]);
+
+            // 409 = already clocked in that day; HRIS keeps the actual attendance, nothing to retry.
+            if (!$response->successful() && $response->status() !== 409) {
+                Log::warning("HrisService pushLeave #{$leave->id} gagal ({$response->status()}): " . $response->body());
+            }
+            return $response->successful() || $response->status() === 409;
+        } catch (\Throwable $e) {
+            Log::warning("HrisService pushLeave #{$leave->id} connection error: " . $e->getMessage());
             return false;
         }
     }

@@ -892,7 +892,7 @@ class OperatorApiController extends Controller
             'date'             => $date,
             'type'             => $request->type,
             'reason'           => $request->reason,
-            'proof_image_path' => $proofImagePath,
+            'proof_image'      => $proofImagePath,
             'status'           => 'pending',
         ]);
 

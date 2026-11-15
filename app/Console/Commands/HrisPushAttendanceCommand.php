@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Attendance;
+use App\Models\LeaveRequest;
 use App\Services\HrisService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -26,6 +27,10 @@ class HrisPushAttendanceCommand extends Command
         $ok = $rows->filter(fn ($a) => $hrisService->pushAttendance($a))->count();
         $this->info("Absensi {$date}: {$ok}/{$rows->count()} terkirim ke HRIS.");
 
-        return $ok === $rows->count() ? Command::SUCCESS : Command::FAILURE;
+        $leaves = LeaveRequest::with('user:id,employee_code')->whereDate('date', $date)->where('status', '!=', 'pending')->get();
+        $okLeave = $leaves->filter(fn ($l) => $hrisService->pushLeave($l))->count();
+        $this->info("Izin/sakit {$date}: {$okLeave}/{$leaves->count()} terkirim ke HRIS.");
+
+        return $ok === $rows->count() && $okLeave === $leaves->count() ? Command::SUCCESS : Command::FAILURE;
     }
 }
