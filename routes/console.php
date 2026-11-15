@@ -11,5 +11,8 @@ Artisan::command('inspire', function () {
 
 Schedule::command('pickups:generate')->daily();
 
+// Jaring pengaman: kirim ulang absensi hari ini ke HRIS bila push realtime sempat gagal
+Schedule::command('hris:push-attendance')->dailyAt('23:50');
+
 // Kirim WA invoice terjadwal — cek setiap menit
 Schedule::command('invoices:send-wa')->everyMinute()->withoutOverlapping();

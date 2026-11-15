@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Attendance;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class HrisService
 {
@@ -210,6 +212,55 @@ class HrisService
             'updated' => $updated,
             'crew'    => $syncedDetails,
         ];
+    }
+
+    /**
+     * Push one attendance row to HRIS. Idempotent on HRIS side (employee + date), so safe to resend.
+     */
+    public function pushAttendance(Attendance $attendance): bool
+    {
+        $empCode = $attendance->user?->employee_code;
+        if (!$this->isConfigured() || empty($empCode)) {
+            return false;
+        }
+
+        $photoUrl = fn (?string $path) => $path ? Storage::disk('public')->url($path) : null;
+
+        try {
+            $response = Http::withHeaders([
+                'X-HRIS-KEY' => $this->apiKey,
+                'Accept'     => 'application/json',
+            ])->timeout($this->timeout)->post("{$this->baseUrl}/api/v1/internal/attendance", [
+                'employee_code'   => $empCode,
+                'date'            => $attendance->date->toDateString(),
+                // Wall-clock Asia/Jakarta time, same convention as the date column.
+                'clock_in_at'     => $attendance->clock_in_at?->toDateTimeString(),
+                'clock_in_photo'  => $photoUrl($attendance->clock_in_photo),
+                'clock_in_lat'    => $attendance->clock_in_lat,
+                'clock_in_lng'    => $attendance->clock_in_lng,
+                'clock_out_at'    => $attendance->clock_out_at?->toDateTimeString(),
+                'clock_out_photo' => $photoUrl($attendance->clock_out_photo),
+                'clock_out_lat'   => $attendance->clock_out_lat,
+                'clock_out_lng'   => $attendance->clock_out_lng,
+                'overtime_hours'  => (float) $attendance->overtime_hours,
+            ]);
+
+            if (!$response->successful()) {
+                Log::warning("HrisService pushAttendance #{$attendance->id} gagal ({$response->status()}): " . $response->body());
+            }
+            return $response->successful();
+        } catch (\Throwable $e) {
+            Log::warning("HrisService pushAttendance #{$attendance->id} connection error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Push after the response is sent so a slow/down HRIS never blocks clock-in on the app.
+     */
+    public function pushAttendanceLater(Attendance $attendance): void
+    {
+        \Illuminate\Support\defer(fn () => $this->pushAttendance($attendance->fresh() ?? $attendance));
     }
 
     /**

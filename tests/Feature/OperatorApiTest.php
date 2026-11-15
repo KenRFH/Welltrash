@@ -234,6 +234,40 @@ class OperatorApiTest extends TestCase
             ]);
     }
 
+    public function test_clock_in_and_out_are_pushed_to_hris(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'test-key']);
+        \Illuminate\Support\Facades\Http::fake(['hris.test/*' => \Illuminate\Support\Facades\Http::response(['success' => true])]);
+
+        $operator = $this->createOperator(['employee_code' => 'WT-001']);
+        $token = $operator->createToken('test')->plainTextToken;
+
+        $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/operator/attendance/clock-in', ['lat' => -6.2, 'lng' => 106.8])
+            ->assertOk();
+        $this->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/operator/attendance/clock-out', ['lat' => -6.2, 'lng' => 106.8])
+            ->assertOk();
+
+        $sent = \Illuminate\Support\Facades\Http::recorded(
+            fn ($req) => $req->url() === 'https://hris.test/api/v1/internal/attendance'
+        );
+        $this->assertCount(2, $sent);
+        [$clockInReq] = $sent[0];
+        [$clockOutReq] = $sent[1];
+        $this->assertSame('test-key', $clockInReq->header('X-HRIS-KEY')[0]);
+        $this->assertSame('WT-001', $clockInReq['employee_code']);
+        $this->assertSame(Carbon::today()->toDateString(), $clockInReq['date']);
+        $this->assertNull($clockInReq['clock_out_at']);
+        $this->assertNotNull($clockOutReq['clock_out_at']);
+
+        // Operator without HRIS employee code is not pushed
+        \Illuminate\Support\Facades\Http::fake();
+        $this->assertFalse(app(\App\Services\HrisService::class)->pushAttendance(
+            \App\Models\Attendance::create(['user_id' => $this->createOperator(['email' => 'x@welltrash.test'])->id, 'date' => Carbon::today(), 'clock_in_at' => Carbon::now(), 'status' => 'incomplete'])
+        ));
+    }
+
     public function test_operator_can_update_pickup_status_and_logout(): void
     {
         $operator = $this->createOperator();

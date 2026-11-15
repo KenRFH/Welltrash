@@ -571,7 +571,7 @@ class OperatorApiController extends Controller
     /**
      * Clock in.
      */
-    public function clockIn(Request $request): JsonResponse
+    public function clockIn(Request $request, HrisService $hrisService): JsonResponse
     {
         $request->validate([
             'photo' => 'nullable|image|max:5120',
@@ -615,6 +615,8 @@ class OperatorApiController extends Controller
             ]);
         }
 
+        $hrisService->pushAttendanceLater($attendance);
+
         return response()->json([
             'success'    => true,
             'message'    => 'Absen masuk berhasil dicatat!',
@@ -625,7 +627,7 @@ class OperatorApiController extends Controller
     /**
      * Clock out.
      */
-    public function clockOut(Request $request): JsonResponse
+    public function clockOut(Request $request, HrisService $hrisService): JsonResponse
     {
         $request->validate([
             'photo' => 'nullable|image|max:5120',
@@ -672,6 +674,8 @@ class OperatorApiController extends Controller
 
         // Auto-release armada operasional agar siap digunakan driver shift berikutnya
         $user->update(['vehicle_id' => null]);
+
+        $hrisService->pushAttendanceLater($attendance);
 
         return response()->json([
             'success'    => true,
@@ -783,7 +787,7 @@ class OperatorApiController extends Controller
     /**
      * Overtime clock out.
      */
-    public function clockOutOvertime(Request $request): JsonResponse
+    public function clockOutOvertime(Request $request, HrisService $hrisService): JsonResponse
     {
         $request->validate([
             'photo' => 'nullable|image|max:5120',
@@ -831,6 +835,8 @@ class OperatorApiController extends Controller
 
         // Auto-release armada operasional
         $request->user()->update(['vehicle_id' => null]);
+
+        $hrisService->pushAttendanceLater($attendance);
 
         return response()->json([
             'success'    => true,
