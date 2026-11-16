@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\LeaveRequest;
 use App\Models\Pickup;
 use App\Models\User;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -88,5 +89,28 @@ class LeaveBlocksWorkTest extends TestCase
         LeaveRequest::whereDate('date', '2026-11-16')->update(['status' => 'approved']);
         $this->assertNotSame(423, $this->api()->postJson('/api/operator/attendance/clock-out')->status());
         $this->assertNotNull(Attendance::first()->fresh()->clock_out_at);
+    }
+
+    public function test_vehicle_can_be_released_but_not_taken_on_a_leave_day_and_others_see_who_holds_it(): void
+    {
+        $truck = Vehicle::create(['name' => 'Dyna', 'license_plate' => 'P 1 X', 'type' => 'Truk', 'capacity' => '8', 'status' => 'active']);
+        $this->crew->update(['vehicle_id' => $truck->id]);
+        $other = User::create(['name' => 'Sari', 'email' => 's@welltrash.test', 'password' => Hash::make('x'), 'role' => 'CleanUP']);
+        // Two phones in one test: forget the resolved user between requests so each token counts.
+        $as = function (User $u) {
+            $this->app['auth']->forgetGuards();
+            return $this->withToken($u->createToken('t')->plainTextToken);
+        };
+
+        $as($other)->getJson('/api/operator/vehicles')
+            ->assertJsonPath('vehicles.0.is_occupied', true)->assertJsonPath('vehicles.0.occupied_by', 'Budi');
+        $as($other)->postJson('/api/operator/vehicle/select', ['vehicle_id' => $truck->id])->assertStatus(422);
+
+        $this->leave('approved');
+        $as($this->crew)->postJson('/api/operator/vehicle/select', ['vehicle_id' => $truck->id])->assertStatus(423);
+        $as($this->crew)->postJson('/api/operator/vehicle/select', ['vehicle_id' => null])->assertOk();
+        $this->assertNull($this->crew->fresh()->vehicle_id);
+
+        $as($other)->postJson('/api/operator/vehicle/select', ['vehicle_id' => $truck->id])->assertOk();
     }
 }
