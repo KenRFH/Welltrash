@@ -18,6 +18,9 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
+    // Path to mysqldump for db:backup (e.g. MAMP: /Applications/MAMP/Library/bin/mysql80/bin/mysqldump).
+    'mysqldump' => env('DB_DUMP_BINARY', 'mysqldump'),
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections

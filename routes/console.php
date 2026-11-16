@@ -16,3 +16,6 @@ Schedule::command('hris:push-attendance')->dailyAt('23:50');
 
 // Kirim WA invoice terjadwal — cek setiap menit
 Schedule::command('invoices:send-wa')->everyMinute()->withoutOverlapping();
+
+// Daily database backup into storage/app/backups, keeping 7 days (see BackupDatabase).
+Schedule::command('db:backup')->dailyAt('02:30')->withoutOverlapping();
