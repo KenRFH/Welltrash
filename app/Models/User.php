@@ -23,6 +23,7 @@ class User extends Authenticatable
     public const COMMERCIAL_ROLES = ['superadmin', 'director', 'manager'];              // + mitra & invoice/piutang
     public const ACCOUNT_ROLES = ['superadmin', 'director'];                            // + kelola akun
     public const APP_ROLES = ['CleanUP', 'staff', ...self::OPS_ROLES];                // may sign in to the mobile app
+    public const INTERNAL_ROLES = [...self::OPS_ROLES, 'staff'];                       // managed in HRIS only (read-only here)
 
     /** HRIS access level → Welltrash role. company (mitra) is local only; superadmin is an HRIS root account. */
     public const HRIS_ROLE_MAP = [
@@ -61,6 +62,11 @@ class User extends Authenticatable
             $this->role === 'staff'         => route('app.download'),
             default                         => route('company.dashboard'),
         };
+    }
+
+    public function roleLabel(): string
+    {
+        return self::ROLE_LABELS[$this->role] ?? $this->role;
     }
 
     public function hasRole(array $roles): bool

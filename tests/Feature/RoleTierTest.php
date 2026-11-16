@@ -210,4 +210,30 @@ class RoleTierTest extends TestCase
             $this->assertSame($by->name, $fresh->reviewer->name);
         }
     }
+
+    public function test_accounts_page_lists_internal_staff_read_only_and_blocks_changes_to_them(): void
+    {
+        $director = $this->user('director');
+        $super = $this->user('superadmin');
+        $mgr = $this->user('manager');
+        $this->user('staff');
+        $crew = $this->user('CleanUP');
+
+        $this->actingAs($director)->get('/admin/accounts')->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Accounts/Index')
+                ->has('internals', 4)
+                ->where('internals.0.role', 'superadmin')
+                ->where('roleLabels.manager', 'Manager / GM'));
+
+        // A director cannot delete the superadmin or edit/deactivate a manager from Welltrash.
+        $this->actingAs($director)->delete(route('admin.accounts.destroy', $super))->assertSessionHas('error');
+        $this->actingAs($director)->patch(route('admin.accounts.toggleActive', $mgr))->assertSessionHas('error');
+        $this->actingAs($director)->post(route('admin.accounts.update', $mgr), ['name' => 'Ganti', 'password' => 'baru12345'])->assertSessionHas('error');
+        $this->assertNotNull($super->fresh());
+        $this->assertTrue($mgr->fresh()->is_active !== false);
+        $this->assertSame('manager', $mgr->fresh()->name);
+
+        // Local (non-HRIS) accounts stay manageable.
+        $this->actingAs($director)->patch(route('admin.accounts.toggleActive', $crew))->assertSessionHas('success');
+    }
 }
