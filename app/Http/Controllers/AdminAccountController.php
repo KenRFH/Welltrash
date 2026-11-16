@@ -40,7 +40,7 @@ class AdminAccountController extends Controller
         try {
             $result = $hrisService->syncCrew();
 
-            $msg = "Sinkronisasi HRIS berhasil: {$result['synced']} akun kru diproses ({$result['created']} akun baru dibuat, {$result['updated']} diperbarui).";
+            $msg = "Sinkronisasi HRIS berhasil: {$result['synced']} akun kru diproses ({$result['created']} akun baru dibuat, {$result['updated']} diperbarui, {$result['deactivated']} dinonaktifkan).";
             if ($result['skipped']) {
                 $list = collect($result['skipped'])->map(fn ($s) => "{$s['name']} ({$s['employee_code']}): {$s['reason']}")->implode('; ');
                 return back()->with('success', $msg)->with('error', count($result['skipped']) . " dilewati karena bentrok data, cek di HRIS: {$list}.");

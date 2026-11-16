@@ -156,4 +156,29 @@ class RoleTierTest extends TestCase
         $this->assertSame([$andik->id, 'andik@welltrash.test'], [$again->id, $again->email]);
         $this->assertSame('FERI', User::where('email', 'feri@welltrash.test')->value('name'));
     }
+
+    public function test_scheduled_sync_deactivates_former_employees_and_revokes_their_app_tokens(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'k']);
+        $left = User::create(['name' => 'KELUAR', 'email' => 'keluar@welltrash.test', 'password' => Hash::make('x'), 'role' => 'coordinator', 'employee_code' => 'WT-50']);
+        $left->createToken('app');
+        Http::fake(['hris.test/*' => Http::response(['data' => [
+            ['employee_code' => 'WT-50', 'name' => 'KELUAR', 'email' => 'keluar@welltrash.test', 'role' => 'coordinator', 'status' => 'resigned', 'is_user_active' => false],
+            ['employee_code' => 'WT-51', 'name' => 'LAMA', 'email' => 'lama@welltrash.test', 'role' => 'cleanup', 'status' => 'inactive'],
+        ]])]);
+
+        $this->artisan('hris:sync-crew')->expectsOutputToContain('1 dinonaktifkan')->assertSuccessful();
+
+        $this->assertFalse($left->fresh()->is_active);
+        $this->assertSame(0, $left->tokens()->count());
+        $this->assertSame(0, User::where('employee_code', 'WT-51')->count(), 'former employee without account is not created');
+        Http::assertSent(fn ($req) => str_contains($req->url(), 'include_inactive=1'));
+    }
+
+    public function test_scheduled_sync_reports_failure_without_changing_data(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'k']);
+        Http::fake(['hris.test/*' => Http::response('down', 503)]);
+        $this->artisan('hris:sync-crew')->assertFailed();
+    }
 }

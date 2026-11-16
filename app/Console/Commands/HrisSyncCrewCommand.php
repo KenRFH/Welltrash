@@ -4,61 +4,35 @@ namespace App\Console\Commands;
 
 use App\Services\HrisService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class HrisSyncCrewCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'hris:sync-crew {--dry-run : Only test HRIS connection without writing to DB}';
+    protected $signature = 'hris:sync-crew';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Synchronize active CleanUP crew and employee accounts from HRIS (Single Source of Truth)';
+    protected $description = 'Samakan akun, role dan status aktif karyawan dengan HRIS (aman diulang)';
 
-    /**
-     * Execute the console command.
-     */
     public function handle(HrisService $hrisService): int
     {
-        $this->info('Memulai sinkronisasi akun dari HRIS (Single Source of Truth)...');
-
         if (!$hrisService->isConfigured()) {
             $this->error('HRIS API URL atau HRIS API KEY belum diatur di .env');
             return Command::FAILURE;
         }
 
         try {
-            $result = $hrisService->syncCrew();
-
-            $this->info("Sinkronisasi selesai! Total: {$result['total']} | Dibuat: {$result['created']} | Diperbarui: {$result['updated']}");
-
-            $tableRows = array_map(function ($c) {
-                return [
-                    $c['id'],
-                    $c['employee_code'] ?? '-',
-                    $c['name'],
-                    $c['email'],
-                    $c['role'],
-                    $c['is_active'] ? 'Aktif' : 'Nonaktif',
-                    $c['action'],
-                ];
-            }, $result['crew'] ?? []);
-
-            $this->table(
-                ['ID', 'Kode Karyawan', 'Nama', 'Email', 'Role', 'Status', 'Aksi'],
-                $tableRows
-            );
-
-            return Command::SUCCESS;
+            $r = $hrisService->syncCrew();
         } catch (\Throwable $e) {
-            $this->error('Gagal sinkronisasi dengan HRIS: ' . $e->getMessage());
+            Log::warning('hris:sync-crew gagal: ' . $e->getMessage());
+            $this->error('Sinkronisasi gagal, tidak ada data yang diubah: ' . $e->getMessage());
             return Command::FAILURE;
         }
+
+        $this->info("HRIS: {$r['synced']} akun diproses ({$r['created']} baru, {$r['updated']} diperbarui, {$r['deactivated']} dinonaktifkan).");
+        foreach ($r['skipped'] as $s) {
+            $this->warn("Dilewati {$s['name']} ({$s['employee_code']}): {$s['reason']}");
+            Log::warning("hris:sync-crew dilewati {$s['name']} ({$s['employee_code']}): {$s['reason']}");
+        }
+
+        return Command::SUCCESS;
     }
 }

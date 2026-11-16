@@ -147,7 +147,7 @@ class HrisService
      * Fetch active crew list from HRIS and synchronize all accounts to Welltrash.
      * All-or-nothing: rows that would clash with another account are skipped and reported, never half-written.
      *
-     * @return array{total: int, synced: int, created: int, updated: int, skipped: array, crew: array}
+     * @return array{total: int, synced: int, created: int, updated: int, deactivated: int, skipped: array, crew: array}
      */
     public function syncCrew(): array
     {
@@ -157,10 +157,11 @@ class HrisService
 
         $url = "{$this->baseUrl}/api/v1/internal/crew";
 
+        // Older HRIS builds ignore include_inactive and only list active employees: then nobody is deactivated.
         $response = Http::withHeaders([
             'X-HRIS-KEY' => $this->apiKey,
             'Accept'     => 'application/json',
-        ])->timeout(10)->get($url);
+        ])->timeout(10)->get($url, ['include_inactive' => 1]);
 
         if (!$response->successful()) {
             throw new \RuntimeException("HRIS API mengembalikan status {$response->status()}: " . $response->body());
@@ -174,6 +175,7 @@ class HrisService
         return DB::transaction(function () use ($crewList) {
             $created = 0;
             $updated = 0;
+            $deactivated = 0;
             $syncedDetails = [];
             $skipped = [];
 
@@ -181,10 +183,14 @@ class HrisService
                 $empCode = !empty($member['employee_code']) ? trim($member['employee_code']) : null;
                 $email = !empty($member['email']) ? trim($member['email']) : null;
                 $name = $member['name'] ?? 'Petugas';
-                $isActive = (bool) ($member['is_user_active'] ?? true);
+                $employed = ($member['status'] ?? 'active') === 'active';
+                $isActive = $employed && (bool) ($member['is_user_active'] ?? true);
                 $role = User::roleFromHris($member['role'] ?? null);
 
                 $existing = $this->findLocalUser($empCode, $email, $name);
+                if (!$employed && !$existing) {
+                    continue; // former employee without a Welltrash account: nothing to create
+                }
                 $effectiveEmail = $email ?: ($existing?->email ?: (strtolower($empCode ?: 'crew') . '@welltrash.id'));
 
                 $clash = ($owner = $this->takenBy($existing, 'employee_code', $empCode))
@@ -217,10 +223,15 @@ class HrisService
                     if (isset($member['role'])) {
                         $attributes['role'] = $role;
                     }
+                    $wasActive = $existing->is_active !== false;
                     $existing->update($attributes);
                     $user = $existing;
                     $updated++;
                     $action = 'updated';
+                    if ($wasActive && !$isActive) {
+                        $user->tokens()->delete(); // app sessions end now; web sessions are stopped by RoleMiddleware
+                        $deactivated++;
+                    }
                 }
 
                 $syncedDetails[] = [
@@ -241,6 +252,7 @@ class HrisService
                 'synced'  => $created + $updated,
                 'created' => $created,
                 'updated' => $updated,
+                'deactivated' => $deactivated,
                 'skipped' => $skipped,
                 'crew'    => $syncedDetails,
             ];
