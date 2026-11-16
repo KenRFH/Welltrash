@@ -18,7 +18,7 @@ class AccountActivationTest extends TestCase
 
     public function test_admin_can_deactivate_and_reactivate_account(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
         $mitra = User::factory()->create(['role' => 'company']);
 
         $this->actingAs($admin)->patch(route('admin.accounts.toggleActive', $mitra))->assertRedirect();
@@ -30,7 +30,7 @@ class AccountActivationTest extends TestCase
 
     public function test_admin_cannot_deactivate_self(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
 
         $this->actingAs($admin)->patch(route('admin.accounts.toggleActive', $admin));
         $this->assertTrue($admin->fresh()->is_active);

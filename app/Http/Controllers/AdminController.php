@@ -81,7 +81,7 @@ class AdminController extends Controller
 
     public function approveCompany(Company $company)
     {
-        $company->update([
+        $company->review(auth()->user(), [
             'subscription_status' => 'approved',
         ]);
         
@@ -90,7 +90,7 @@ class AdminController extends Controller
 
     public function activateCompany(Company $company)
     {
-        $company->update([
+        $company->review(auth()->user(), [
             'subscription_status' => 'active',
             'subscription_end_date' => null
         ]);
@@ -105,10 +105,10 @@ class AdminController extends Controller
     public function toggleStatus(Company $company)
     {
         if ($company->subscription_status === 'active') {
-            $company->update(['subscription_status' => 'inactive']);
+            $company->review(auth()->user(), ['subscription_status' => 'inactive']);
             $msg = 'Akun mitra dinonaktifkan.';
         } elseif ($company->subscription_status === 'inactive') {
-            $company->update(['subscription_status' => 'active']);
+            $company->review(auth()->user(), ['subscription_status' => 'active']);
             $msg = 'Akun mitra diaktifkan.';
         } else {
             return back()->with('error', 'Hanya akun aktif/nonaktif yang dapat diubah statusnya.');
@@ -122,7 +122,7 @@ class AdminController extends Controller
             'rejection_reason' => 'required|string',
         ]);
 
-        $company->update([
+        $company->review($request->user(), [
             'subscription_status' => 'rejected',
             'rejection_reason' => $request->rejection_reason,
             'refund_evidence_path' => null,

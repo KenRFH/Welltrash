@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
 import { motion, AnimatePresence, type Variants } from 'motion/react';
 import {
     Building2,
@@ -18,6 +19,7 @@ import {
     Sparkles,
     ShieldCheck,
     Scale,
+    FileDown,
     Filter,
     Layers,
     ArrowUpDown,
@@ -151,6 +153,11 @@ export default function Dashboard({ trashStats, totals }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'pending'>('all');
     const [sortBy, setSortBy] = useState<'total' | 'organic' | 'anorganic' | 'pickups' | 'name'>('total');
+    // Board report (PDF) is for Superadmin, Direktur, Manager: it includes finance (server enforces it too).
+    const role = usePage<PageProps>().props.auth.user.role;
+    const canReport = ['superadmin', 'director', 'manager'].includes(role);
+    const thisMonth = new Date().toISOString().slice(0, 7);
+    const [reportMonth, setReportMonth] = useState(thisMonth);
 
     // Dynamic Greeting
     const hour = new Date().getHours();
@@ -224,6 +231,26 @@ export default function Dashboard({ trashStats, totals }: Props) {
             title="Dasbor Analitik"
             subtitle="Ringkasan platform pengolahan limbah & kemitraan industri"
             activeTab="dashboard"
+            headerAction={canReport ? (
+                <div className="flex items-center gap-2">
+                    <label htmlFor="report-month" className="sr-only">Bulan laporan</label>
+                    <input
+                        id="report-month"
+                        type="month"
+                        value={reportMonth}
+                        max={thisMonth}
+                        onChange={(e) => setReportMonth(e.target.value || thisMonth)}
+                        className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                    <a
+                        href={route('admin.reports.monthly', { month: reportMonth })}
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                    >
+                        <FileDown className="w-4 h-4" />
+                        <span>Laporan Bulanan (PDF)</span>
+                    </a>
+                </div>
+            ) : undefined}
         >
             <motion.div
                 variants={containerVariants}

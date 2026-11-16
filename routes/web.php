@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\User;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveRequestController;
@@ -150,14 +151,16 @@ use App\Http\Controllers\InvoiceController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:admin'])
+// Tiers follow HRIS levels (see User::OPS_ROLES / COMMERCIAL_ROLES / ACCOUNT_ROLES).
+Route::middleware(['auth', 'role:' . implode(',', User::OPS_ROLES)])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-        // Kelola Akun
+      // Kelola Akun: Superadmin & Direktur
+      Route::middleware('role:' . implode(',', User::ACCOUNT_ROLES))->group(function () {
         Route::get('/accounts', [AdminAccountController::class, 'index'])->name('accounts.index');
         Route::post('/accounts', [AdminAccountController::class, 'store'])->name('accounts.store');
         // Must stay above /accounts/{user}, otherwise "sync-hris" is bound as a user id (404).
@@ -165,6 +168,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/accounts/{user}', [AdminAccountController::class, 'update'])->name('accounts.update');
         Route::patch('/accounts/{user}/toggle-active', [AdminAccountController::class, 'toggleActive'])->name('accounts.toggleActive');
         Route::delete('/accounts/{user}', [AdminAccountController::class, 'destroy'])->name('accounts.destroy');
+      });
+
+      // Mitra, gaji & invoice: Superadmin, Direktur, Manager
+      Route::middleware('role:' . implode(',', User::COMMERCIAL_ROLES))->group(function () {
 
 
         Route::get('/companies', [AdminController::class, 'indexCompanies'])->name('companies.index');
@@ -179,6 +186,21 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
         Route::patch('/companies/{company}/coordinates', [AdminController::class, 'updateCoordinates'])->name('companies.updateCoordinates');
+        Route::patch('/attendance/salary/{user}', [AdminAttendanceController::class, 'updateSalary'])->name('attendance.updateSalary');
+        Route::get('/reports/monthly', \App\Http\Controllers\Admin\MonthlyReportController::class)->name('reports.monthly');
+
+        // Invoice
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('/invoices/{invoice}/show', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::patch('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.markPaid');
+        Route::post('/invoices/{invoice}/resend-wa', [InvoiceController::class, 'resendWa'])->name('invoices.resendWa');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
+        Route::get('/invoices/{invoice}/whatsapp', [InvoiceController::class, 'sendWhatsApp'])->name('invoices.whatsapp');
+      });
+
+      // Operasional: semua tingkat admin termasuk Koordinator
 
         // Monitoring Peta Mitra & Armada
         Route::get('/monitoring-map', [AdminController::class, 'monitoringMap'])->name('monitoring.map');
@@ -193,19 +215,8 @@ Route::middleware(['auth', 'role:admin'])
 
         // Absensi
         Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');
-        Route::patch('/attendance/salary/{user}', [AdminAttendanceController::class, 'updateSalary'])->name('attendance.updateSalary');
         Route::patch('/attendance/leave/{leaveRequest}/review', [AdminAttendanceController::class, 'reviewLeave'])->name('attendance.leave.review');
         Route::patch('/attendance/overtime/{overtimeRequest}/review', [AdminAttendanceController::class, 'reviewOvertime'])->name('attendance.overtime.review');
-
-        // Invoice
-        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-        Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
-        Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
-        Route::get('/invoices/{invoice}/show', [InvoiceController::class, 'show'])->name('invoices.show');
-        Route::patch('/invoices/{invoice}/mark-paid', [InvoiceController::class, 'markPaid'])->name('invoices.markPaid');
-        Route::post('/invoices/{invoice}/resend-wa', [InvoiceController::class, 'resendWa'])->name('invoices.resendWa');
-        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
-        Route::get('/invoices/{invoice}/whatsapp', [InvoiceController::class, 'sendWhatsApp'])->name('invoices.whatsapp');
 
     });
 
@@ -219,7 +230,7 @@ use App\Http\Controllers\WebAdmin\KatalogController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'role:web_admin'])
+Route::middleware(['auth', 'role:web_admin,superadmin'])
     ->prefix('webadmin')
     ->name('webadmin.')
     ->group(function () {
@@ -326,12 +337,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', function () {
         $user = Auth::user();
-        return match ($user->role) {
-            'admin'      => redirect()->route('admin.dashboard'),
-            'web_admin'  => redirect()->route('webadmin.dashboard'),
-            'CleanUP'     => redirect()->route('cleanup.dashboard'),
-            default      => redirect()->route('company.dashboard'),
-        };
+        return redirect($user->homeUrl());
     })->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])

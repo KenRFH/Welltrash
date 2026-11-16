@@ -14,13 +14,14 @@ export interface QuickAccount {
 // ponytail: Hardcoded seeded demo credentials; upgrade to dynamic seeder-driven config if auth schema changes.
 const DEMO_ACCOUNTS: Record<'staff' | 'mitra' | 'local', QuickAccount[]> = {
     local: [
-        { role: 'admin', label: 'Admin', actorTitle: 'Admin Sistem', email: 'admin@welltrash.com', password: 'admin123', dotColor: 'bg-violet-500' },
+        { role: 'director', label: 'Direktur', actorTitle: 'Admin Sistem', email: 'admin@welltrash.com', password: 'admin123', dotColor: 'bg-violet-500' },
         { role: 'CleanUP', label: 'Operator', actorTitle: 'Armada CleanUP', email: 'cleanup@welltrash.com', password: 'cleanup123', dotColor: 'bg-teal-500' },
         { role: 'company', label: 'Mitra', actorTitle: 'PT WellTrash (B2B)', email: 'company@welltrash.com', password: 'company123', dotColor: 'bg-emerald-500' },
     ],
     staff: [
-        { role: 'admin', label: 'Admin', actorTitle: 'Hak Akses & Sistem', email: 'admin@welltrash.com', password: 'admin123', dotColor: 'bg-violet-500' },
-        { role: 'web_admin', label: 'Web Admin', actorTitle: 'Kelola Tampilan', email: 'webadmin@welltrash.com', password: 'webadmin123', dotColor: 'bg-sky-500' },
+        { role: 'superadmin', label: 'Superadmin', actorTitle: 'Semua Panel', email: 'superadmin@welltrash.com', password: 'superadmin123', dotColor: 'bg-rose-500' },
+        { role: 'director', label: 'Direktur', actorTitle: 'Hak Akses & Sistem', email: 'admin@welltrash.com', password: 'admin123', dotColor: 'bg-violet-500' },
+        { role: 'web_admin', label: 'Public Relation', actorTitle: 'Kelola Website', email: 'webadmin@welltrash.com', password: 'webadmin123', dotColor: 'bg-sky-500' },
         { role: 'CleanUP', label: 'Operator', actorTitle: 'Armada CleanUP', email: 'cleanup@welltrash.com', password: 'cleanup123', dotColor: 'bg-emerald-500' },
     ],
     mitra: [

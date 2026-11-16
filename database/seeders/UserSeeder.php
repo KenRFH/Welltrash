@@ -13,13 +13,24 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin
+        // Superadmin: full access to every panel (also an HRIS root account in production)
+        User::updateOrCreate(
+            ['email' => 'superadmin@welltrash.com'],
+            [
+                'name' => 'Superadmin WellTrash',
+                'password' => 'superadmin123',
+                'role' => 'superadmin',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // Direktur
         User::updateOrCreate(
             ['email' => 'admin@welltrash.com'],
             [
                 'name' => 'Mashudi',
                 'password' => 'admin123',
-                'role' => 'admin',
+                'role' => 'director',
                 'email_verified_at' => now(),
             ]
         );

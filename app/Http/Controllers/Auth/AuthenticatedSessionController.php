@@ -48,21 +48,16 @@ class AuthenticatedSessionController extends Controller
 
         // Portal admin (/admin/login) khusus untuk staf internal
         if ($request->is('admin/*')) {
-            if (!in_array($user->role, ['admin', 'web_admin', 'CleanUP'])) {
+            if (!$user->hasRole([...\App\Models\User::OPS_ROLES, 'web_admin', 'CleanUP', 'staff'])) {
                 Auth::logout();
 
                 return back()->withErrors([
-                    'email' => 'Halaman ini khusus untuk staf internal (Admin, Web Admin, CleanUP). Akun Mitra silakan masuk melalui portal mitra.',
+                    'email' => 'Halaman ini khusus untuk staf internal Welltrash. Akun Mitra silakan masuk melalui portal mitra.',
                 ]);
             }
         }
 
-        return match ($user->role) {
-            'admin'     => redirect()->route('admin.dashboard'),
-            'web_admin' => redirect()->route('webadmin.dashboard'),
-            'CleanUP'   => redirect()->route('cleanup.dashboard'),
-            default     => redirect()->route('company.dashboard'),
-        };
+        return redirect($user->homeUrl());
     }
 
     /**

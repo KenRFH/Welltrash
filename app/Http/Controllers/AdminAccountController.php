@@ -25,11 +25,16 @@ class AdminAccountController extends Controller
             ->with('company')
             ->orderBy('created_at', 'desc')
             ->get();
+        // Read-only: Superadmin, Direktur, Manager, Koordinator, Staf, highest level first.
+        $internals = User::whereIn('role', User::INTERNAL_ROLES)->orderBy('name')->get()
+            ->sortBy(fn (User $u) => array_search($u->role, User::INTERNAL_ROLES, true))->values();
 
         return Inertia::render('Admin/Accounts/Index', [
             'cleanups' => $cleanups,
             'webAdmins' => $webAdmins,
             'companies' => $companies,
+            'internals' => $internals,
+            'roleLabels' => User::ROLE_LABELS,
         ]);
     }
     /**
@@ -40,7 +45,13 @@ class AdminAccountController extends Controller
         try {
             $result = $hrisService->syncCrew();
 
-            return back()->with('success', "Sinkronisasi HRIS berhasil: {$result['synced']} akun kru diproses ({$result['created']} akun baru dibuat, {$result['updated']} diperbarui).");
+            $msg = "Sinkronisasi HRIS berhasil: {$result['synced']} akun kru diproses ({$result['created']} akun baru dibuat, {$result['updated']} diperbarui, {$result['deactivated']} dinonaktifkan).";
+            if ($result['skipped']) {
+                $list = collect($result['skipped'])->map(fn ($s) => "{$s['name']} ({$s['employee_code']}): {$s['reason']}")->implode('; ');
+                return back()->with('success', $msg)->with('error', count($result['skipped']) . " dilewati karena bentrok data, cek di HRIS: {$list}.");
+            }
+
+            return back()->with('success', $msg);
         } catch (\Throwable $e) {
             return back()->with('error', 'Gagal sinkronisasi dengan HRIS: ' . $e->getMessage());
         }
@@ -163,8 +174,20 @@ class AdminAccountController extends Controller
     /**
      * Update the specified account in storage.
      */
+    /** Internal accounts follow HRIS (role, status, password): changing them here would be overwritten or bypass it. */
+    private function hrisManaged(User $user)
+    {
+        return $user->hasRole(User::INTERNAL_ROLES)
+            ? back()->with('error', "Akun {$user->name} ({$user->roleLabel()}) dikelola di HRIS. Ubah jabatan atau status di HRIS, lalu sinkronkan.")
+            : null;
+    }
+
     public function update(Request $request, User $user)
     {
+        if ($blocked = $this->hrisManaged($user)) {
+            return $blocked;
+        }
+
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
@@ -315,6 +338,10 @@ class AdminAccountController extends Controller
      */
     public function toggleActive(User $user)
     {
+        if ($blocked = $this->hrisManaged($user)) {
+            return $blocked;
+        }
+
         if (auth()->id() === $user->id) {
             return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
         }
@@ -333,6 +360,10 @@ class AdminAccountController extends Controller
      */
     public function destroy(User $user)
     {
+        if ($blocked = $this->hrisManaged($user)) {
+            return $blocked;
+        }
+
         // Prevent deleting current logged in admin
         if (auth()->id() === $user->id) {
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');

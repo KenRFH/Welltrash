@@ -1,4 +1,5 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
 import React from 'react';
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
 import {
@@ -11,6 +12,7 @@ import {
     LogOut,
     X,
     Sparkles,
+    ShieldCheck,
 } from 'lucide-react';
 
 interface Props {
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export default function WebAdminSidebar({ active, isMobileOpen = false, onClose }: Props) {
+    const isSuperadmin = usePage<PageProps>().props.auth.user.role === 'superadmin';
     const navItem = (tab: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams' | 'solutions', href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
         const isActive = active === tab;
         return (
@@ -82,6 +85,16 @@ export default function WebAdminSidebar({ active, isMobileOpen = false, onClose 
                                 {navItem('teams', route('webadmin.teams.index'), 'Tim & Profil', Users)}
                             </div>
                         </div>
+
+                        {isSuperadmin && (
+                            <Link
+                                href={route('admin.dashboard')}
+                                className="group flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                            >
+                                <ShieldCheck className="w-4 h-4 mr-3 shrink-0 text-slate-400 group-hover:text-emerald-600" />
+                                <span className="truncate">Kembali ke Admin Console</span>
+                            </Link>
+                        )}
 
                         {/* Akses & Sesi Sistem */}
                         <div className="pt-2">

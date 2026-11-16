@@ -56,7 +56,7 @@ interface UserAccount {
     employee_code?: string | null;
     division?: string | null;
     position?: string | null;
-    role: 'CleanUP' | 'web_admin' | 'company';
+    role: string;
     is_active: boolean;
     created_at: string;
     company?: CompanyProfile | null;
@@ -66,14 +66,19 @@ interface Props {
     cleanups: UserAccount[];
     webAdmins: UserAccount[];
     companies: UserAccount[];
+    internals: UserAccount[];
+    roleLabels: Record<string, string>;
     flash?: {
         success: string | null;
         error: string | null;
     };
 }
 
-export default function Index({ cleanups, webAdmins, companies, flash }: Props) {
-    const [activeSubTab, setActiveSubTab] = useState<'CleanUP' | 'web_admin' | 'company'>('CleanUP');
+// Internal staff (Superadmin … Staf) come from HRIS: shown read-only, changed in HRIS.
+const isInternal = (u: UserAccount) => !['CleanUP', 'web_admin', 'company'].includes(u.role);
+
+export default function Index({ cleanups, webAdmins, companies, internals, roleLabels, flash }: Props) {
+    const [activeSubTab, setActiveSubTab] = useState<'CleanUP' | 'web_admin' | 'company' | 'internal'>('CleanUP');
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -187,7 +192,8 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
         setShowPassword(false);
         setData(prev => ({
             ...prev,
-            role: activeSubTab,
+            // Internal staff are created in HRIS; from that tab a new local account defaults to CleanUP.
+            role: activeSubTab === 'internal' ? 'CleanUP' : activeSubTab,
             latitude: '',
             longitude: '',
             pickup_schedule: []
@@ -286,11 +292,12 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
     const totalCleanups = cleanups.length;
     const totalWebAdmins = webAdmins.length;
     const totalCompanies = companies.length;
-    const totalAccounts = totalCleanups + totalWebAdmins + totalCompanies;
+    const totalInternals = internals.length;
+    const totalAccounts = totalCleanups + totalWebAdmins + totalCompanies + totalInternals;
 
     // Filtered lists
     const activeList = useMemo(() => {
-        const list = activeSubTab === 'CleanUP' ? cleanups : activeSubTab === 'web_admin' ? webAdmins : companies;
+        const list = { CleanUP: cleanups, web_admin: webAdmins, company: companies, internal: internals }[activeSubTab];
         if (!searchQuery) return list;
         const q = searchQuery.toLowerCase();
         return list.filter(u =>
@@ -298,12 +305,12 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
             u.email.toLowerCase().includes(q) ||
             (u.company?.company_name && u.company.company_name.toLowerCase().includes(q))
         );
-    }, [activeSubTab, cleanups, webAdmins, companies, searchQuery]);
+    }, [activeSubTab, cleanups, webAdmins, companies, internals, searchQuery]);
 
     return (
         <AdminLayout
             title="Kelola Akun Pengguna"
-            subtitle="Manajemen otorisasi & kredensial akun CleanUP, Web Admin, dan Mitra Bisnis"
+            subtitle="Manajemen otorisasi & kredensial akun CleanUP, Public Relation, dan Mitra Bisnis"
             activeTab="accounts"
             headerAction={
                 <div className="flex items-center gap-2">
@@ -367,7 +374,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
 
                     <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
                         <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Web Admin</span>
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Public Relation</span>
                             <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                                 <Shield className="w-4.5 h-4.5" />
                             </div>
@@ -424,12 +431,17 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                     <div
                                         style={{ width: `${(totalWebAdmins / totalAccounts) * 100}%` }}
                                         className="bg-blue-500 transition-all duration-500"
-                                        title={`Web Admin: ${totalWebAdmins}`}
+                                        title={`Public Relation: ${totalWebAdmins}`}
                                     />
                                     <div
                                         style={{ width: `${(totalCompanies / totalAccounts) * 100}%` }}
                                         className="bg-teal-500 transition-all duration-500"
                                         title={`Mitra Perusahaan: ${totalCompanies}`}
+                                    />
+                                    <div
+                                        style={{ width: `${(totalInternals / totalAccounts) * 100}%` }}
+                                        className="bg-indigo-500 transition-all duration-500"
+                                        title={`Staf Internal: ${totalInternals}`}
                                     />
                                 </>
                             ) : null}
@@ -442,11 +454,15 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-xs bg-blue-500" />
-                                <span>Web Admin ({totalWebAdmins})</span>
+                                <span>Public Relation ({totalWebAdmins})</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-xs bg-teal-500" />
                                 <span>Mitra Perusahaan ({totalCompanies})</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2.5 h-2.5 rounded-xs bg-indigo-500" />
+                                <span>Staf Internal ({totalInternals})</span>
                             </div>
                         </div>
                     </div>
@@ -481,7 +497,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                             }`}
                         >
                             <Shield className="w-3.5 h-3.5" />
-                            <span>Web Admin</span>
+                            <span>Public Relation</span>
                             <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                                 activeSubTab === 'web_admin' ? 'bg-blue-50 text-blue-700' : 'bg-slate-200 text-slate-600'
                             }`}>
@@ -503,6 +519,23 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                 activeSubTab === 'company' ? 'bg-teal-50 text-teal-700' : 'bg-slate-200 text-slate-600'
                             }`}>
                                 {totalCompanies}
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={() => setActiveSubTab('internal')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                                activeSubTab === 'internal'
+                                    ? 'bg-white text-indigo-700 shadow-2xs'
+                                    : 'text-slate-600 hover:text-slate-900'
+                            }`}
+                        >
+                            <Briefcase className="w-3.5 h-3.5" />
+                            <span>Staf Internal</span>
+                            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                                activeSubTab === 'internal' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-200 text-slate-600'
+                            }`}>
+                                {totalInternals}
                             </span>
                         </button>
                     </div>
@@ -532,10 +565,11 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-bold text-slate-900">
-                                {activeSubTab === 'CleanUP' ? 'Daftar Personel CleanUP' : activeSubTab === 'web_admin' ? 'Daftar Web Administrator' : 'Daftar Akun Mitra Bisnis'}
+                                {{ CleanUP: 'Daftar Personel CleanUP', web_admin: 'Daftar Akun Public Relation', company: 'Daftar Akun Mitra Bisnis', internal: 'Daftar Staf Internal' }[activeSubTab]}
                             </h2>
                             <p className="text-xs text-slate-400 font-medium mt-0.5">
                                 Menampilkan {activeList.length} akun pengguna
+                                {activeSubTab === 'internal' && ' · hanya-baca, jabatan & status mengikuti HRIS'}
                             </p>
                         </div>
                     </div>
@@ -586,7 +620,9 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-extrabold text-xs border ${
-                                                        user.role === 'CleanUP'
+                                                        isInternal(user)
+                                                            ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                                                            : user.role === 'CleanUP'
                                                             ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
                                                             : user.role === 'web_admin'
                                                             ? 'bg-blue-50 text-blue-700 border-blue-100'
@@ -637,16 +673,18 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                             </td>
                                             <td className="px-5 py-4">
                                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${
-                                                    user.role === 'CleanUP'
+                                                    isInternal(user)
+                                                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/70'
+                                                        : user.role === 'CleanUP'
                                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/70'
                                                         : user.role === 'web_admin'
                                                         ? 'bg-blue-50 text-blue-700 border border-blue-200/70'
                                                         : 'bg-teal-50 text-teal-700 border border-teal-200/70'
                                                 }`}>
                                                     <span className={`w-1.5 h-1.5 rounded-full ${
-                                                        user.role === 'CleanUP' ? 'bg-emerald-500' : user.role === 'web_admin' ? 'bg-blue-500' : 'bg-teal-500'
+                                                        isInternal(user) ? 'bg-indigo-500' : user.role === 'CleanUP' ? 'bg-emerald-500' : user.role === 'web_admin' ? 'bg-blue-500' : 'bg-teal-500'
                                                     }`} />
-                                                    {user.role === 'CleanUP' ? 'Driver / Armada' : user.role === 'web_admin' ? 'Web Admin' : 'Mitra Industri'}
+                                                    {isInternal(user) ? (roleLabels[user.role] ?? user.role) : user.role === 'CleanUP' ? 'Driver / Armada' : user.role === 'web_admin' ? 'Public Relation' : 'Mitra Industri'}
                                                 </span>
                                             </td>
 
@@ -677,6 +715,11 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                 {new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                             </td>
                                             <td className="px-5 py-4 text-right">
+                                                {isInternal(user) ? (
+                                                    <span className="text-[11px] font-semibold text-slate-400" title="Ubah jabatan atau status di HRIS, lalu sinkronkan">
+                                                        Dikelola di HRIS
+                                                    </span>
+                                                ) : (
                                                 <div className="inline-flex items-center gap-1.5">
                                                     <button
                                                         onClick={() => openEditModal(user)}
@@ -705,6 +748,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                         <Trash2 className="w-3.5 h-3.5" />
                                                     </button>
                                                 </div>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -761,7 +805,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                                                 }`}
                                             >
-                                                {r === 'CleanUP' ? 'CleanUP' : r === 'web_admin' ? 'Web Admin' : 'Mitra Bisnis'}
+                                                {r === 'CleanUP' ? 'CleanUP' : r === 'web_admin' ? 'Public Relation' : 'Mitra Bisnis'}
                                             </button>
                                         ))}
                                     </div>

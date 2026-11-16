@@ -50,6 +50,11 @@ return [
         'url'   => 'https://api.fonnte.com/send',
     ],
 
+    // Firebase Cloud Messaging (push). The service account key is a secret: keep it out of git and public/.
+    'fcm' => [
+        'credentials' => env('FIREBASE_CREDENTIALS', storage_path('app/private/firebase-service-account.json')),
+    ],
+
     'hris' => [
         'url'     => rtrim(env('HRIS_API_URL', 'http://127.0.0.1:8000'), '/'),
         'api_key' => env('HRIS_API_KEY', ''),

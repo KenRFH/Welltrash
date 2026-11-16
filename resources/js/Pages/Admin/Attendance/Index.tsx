@@ -68,6 +68,8 @@ interface LeaveRequest {
     status: 'pending' | 'approved' | 'rejected';
     admin_note: string | null;
     proof_image: string | null;
+    reviewer: { id: number; name: string } | null;
+    reviewed_at: string | null;
     user: {
         id: number;
         name: string;
@@ -81,10 +83,24 @@ interface OvertimeRequest {
     reason: string;
     status: 'pending' | 'approved' | 'rejected';
     admin_note: string | null;
+    reviewer: { id: number; name: string } | null;
+    reviewed_at: string | null;
     user: {
         id: number;
         name: string;
     };
+}
+
+/** "Disetujui oleh Nama · 16 Nov 2026 10.05": who decided, now that several admin tiers can approve. */
+function ReviewedBy({ item }: { item: { status: string; reviewer: { name: string } | null; reviewed_at: string | null } }) {
+    if (item.status === 'pending' || !item.reviewer) return null;
+    const when = item.reviewed_at ? new Date(item.reviewed_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : null;
+    return (
+        <p className="text-[11px] text-slate-500">
+            {item.status === 'approved' ? 'Disetujui' : 'Ditolak'} oleh <span className="font-semibold text-slate-700">{item.reviewer.name}</span>
+            {when && <> &middot; {when}</>}
+        </p>
+    );
 }
 
 interface PaginatedData<T> {
@@ -752,6 +768,7 @@ export default function AttendanceIndex({
                                                     {leave.admin_note && (
                                                         <p className="text-[11px] text-slate-400 italic">Catatan Admin: {leave.admin_note}</p>
                                                     )}
+                                                    <ReviewedBy item={leave} />
                                                     {leave.proof_image && (
                                                         <div className="pt-1">
                                                             <a href={`/storage/${leave.proof_image}`} target="_blank" rel="noreferrer"
@@ -878,6 +895,7 @@ export default function AttendanceIndex({
                                                     {ot.admin_note && (
                                                         <p className="text-[11px] text-slate-400 italic">Catatan Admin: {ot.admin_note}</p>
                                                     )}
+                                                    <ReviewedBy item={ot} />
                                                 </div>
                                             </div>
 
