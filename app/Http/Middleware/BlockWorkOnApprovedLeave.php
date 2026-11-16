@@ -15,7 +15,8 @@ class BlockWorkOnApprovedLeave
     public function handle(Request $request, Closure $next): Response
     {
         $leave = $request->user()?->approvedLeaveOn();
-        if (!$leave) {
+        // Handing a vehicle back (vehicle select with no vehicle_id) is not work: someone else may need it.
+        if (!$leave || ($request->has('vehicle_id') && !$request->filled('vehicle_id'))) {
             return $next($request);
         }
 
