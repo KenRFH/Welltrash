@@ -92,5 +92,6 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:' . implode(',', User:
     Route::get('/approvals', [AdminApiController::class, 'approvals'])->name('api.admin.approvals');
     Route::post('/attendance/overtime/{overtimeRequest}/review', [AdminApiController::class, 'reviewOvertime'])->name('api.admin.overtime.review');
     Route::post('/attendance/leave/{leaveRequest}/review', [AdminApiController::class, 'reviewLeave'])->name('api.admin.leave.review');
+    Route::post('/target', [AdminApiController::class, 'setMonthlyTarget'])->middleware('role:' . implode(',', User::ACCOUNT_ROLES))->name('api.admin.target');
     Route::post('/companies/{company}/review', [AdminApiController::class, 'reviewCompany'])->middleware('role:' . implode(',', User::COMMERCIAL_ROLES))->name('api.admin.companies.review');
 });

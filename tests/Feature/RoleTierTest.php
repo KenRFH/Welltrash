@@ -236,4 +236,25 @@ class RoleTierTest extends TestCase
         // Local (non-HRIS) accounts stay manageable.
         $this->actingAs($director)->patch(route('admin.accounts.toggleActive', $crew))->assertSessionHas('success');
     }
+
+    public function test_monthly_target_is_set_by_director_level_and_shown_to_every_admin_tier(): void
+    {
+        \Carbon\Carbon::setTestNow('2026-11-16 09:00:00');
+        $dir = $this->user('director');
+        $mgr = $this->user('manager');
+
+        $this->api($mgr)->getJson('/api/admin/dashboard')->assertOk()
+            ->assertJsonPath('target.kg', null)->assertJsonPath('target.can_set', false)->assertJsonPath('target.ends_on', '2026-11-30');
+        $this->api($mgr)->postJson('/api/admin/target', ['kg' => 5000])->assertForbidden();
+
+        $this->api($dir)->postJson('/api/admin/target', ['kg' => 0])->assertUnprocessable();
+        $this->api($dir)->postJson('/api/admin/target', ['kg' => 5000, 'pickups' => 200])->assertOk()->assertJsonPath('target.kg', 5000);
+        $this->api($mgr)->getJson('/api/admin/dashboard')->assertJsonPath('target.kg', 5000)->assertJsonPath('target.pickups', 200);
+
+        // Clearing one goal keeps the other; next month starts empty.
+        $this->api($dir)->postJson('/api/admin/target', ['kg' => 5000])->assertOk()->assertJsonPath('target.pickups', null);
+        \Carbon\Carbon::setTestNow('2026-12-01 09:00:00');
+        $this->api($dir)->getJson('/api/admin/dashboard')->assertJsonPath('target.kg', null)->assertJsonPath('target.can_set', true);
+        \Carbon\Carbon::setTestNow();
+    }
 }

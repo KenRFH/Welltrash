@@ -9,6 +9,7 @@ use App\Models\Invoice;
 use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
 use App\Models\Pickup;
+use App\Models\SiteSetting;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\HrisService;
@@ -42,7 +43,38 @@ class AdminApiController extends Controller
                 + LeaveRequest::where('status', 'pending')->count()
                 + ($commercial ? Company::where('subscription_status', 'pending')->count() : 0),
             'executive'         => $this->executiveSummary($commercial),
+            'target'            => $this->monthlyTarget() + ['can_set' => $request->user()->hasRole(User::ACCOUNT_ROLES)],
         ]);
+    }
+
+    /** Current month's goal (null = not set). Stored per month in site_settings, e.g. target_kg:2026-11. */
+    private function monthlyTarget(): array
+    {
+        $month = Carbon::today()->format('Y-m');
+        $num = fn ($v) => $v === null ? null : (float) $v;
+
+        return [
+            'month'   => $month,
+            'ends_on' => Carbon::today()->endOfMonth()->toDateString(),
+            'kg'      => $num(SiteSetting::get("target_kg:{$month}")),
+            'pickups' => $num(SiteSetting::get("target_pickups:{$month}")),
+        ];
+    }
+
+    public function setMonthlyTarget(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'kg'      => 'nullable|numeric|min:1|max:10000000',
+            'pickups' => 'nullable|integer|min:1|max:1000000',
+        ]);
+        $month = Carbon::today()->format('Y-m');
+        foreach (['kg', 'pickups'] as $k) {
+            isset($data[$k])
+                ? SiteSetting::set("target_{$k}:{$month}", $data[$k])
+                : SiteSetting::where('key', "target_{$k}:{$month}")->delete();
+        }
+
+        return response()->json(['success' => true, 'target' => $this->monthlyTarget()]);
     }
 
     /** Director/GM view: month-to-date vs the same days last month, 7-day trend, people and receivables. */

@@ -21,7 +21,7 @@ class User extends Authenticatable
     // Access tiers for the admin panel and admin app (Bertingkat). Internal roles follow the HRIS position level.
     public const OPS_ROLES = ['superadmin', 'director', 'manager', 'coordinator'];      // monitoring, armada, absensi, lembur/izin
     public const COMMERCIAL_ROLES = ['superadmin', 'director', 'manager'];              // + mitra & invoice/piutang
-    public const ACCOUNT_ROLES = ['superadmin', 'director'];                            // + kelola akun
+    public const ACCOUNT_ROLES = ['superadmin', 'director'];                            // + kelola akun, target bulanan
     public const APP_ROLES = ['CleanUP', 'staff', ...self::OPS_ROLES];                // may sign in to the mobile app
     public const INTERNAL_ROLES = [...self::OPS_ROLES, 'staff'];                       // managed in HRIS only (read-only here)
 
