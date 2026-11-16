@@ -144,4 +144,51 @@ class PushNotificationTest extends TestCase
         $this->artisan('push:reminders fleet')->expectsOutputToContain('belum dikonfigurasi')->assertSuccessful();
         Http::assertNothingSent();
     }
+
+    public function test_bell_keeps_every_notice_even_without_a_phone_and_marks_read_per_owner(): void
+    {
+        config(['services.fcm.credentials' => '/tidak/ada.json']); // no Firebase at all: bell still works
+        $crew = $this->user('CleanUP');
+        $coord = $this->user('coordinator');
+        $other = $this->user('coordinator');
+
+        LeaveRequest::create(['user_id' => $crew->id, 'date' => '2026-11-20', 'type' => 'izin', 'reason' => 'Acara keluarga']);
+        app(\Illuminate\Support\Defer\DeferredCallbackCollection::class)->invoke();
+
+        $tok = $coord->createToken('t')->plainTextToken;
+        $res = $this->withToken($tok)->getJson('/api/operator/notifications')->assertOk()
+            ->assertJsonPath('unread_count', 1)
+            ->assertJsonPath('data.0.title', 'Pengajuan izin baru')
+            ->assertJsonPath('data.0.type', 'approval')
+            ->assertJsonPath('data.0.read', false);
+        $id = $res->json('data.0.id');
+
+        // Someone else cannot mark my notification as read.
+        $this->app['auth']->forgetGuards();
+        $this->withToken($other->createToken('t')->plainTextToken)->postJson('/api/operator/notifications/read', ['id' => $id])->assertOk();
+        $this->assertNull($coord->notifications()->first()->read_at);
+
+        $this->app['auth']->forgetGuards();
+        $this->withToken($tok)->postJson('/api/operator/notifications/read', ['id' => $id])->assertOk()->assertJsonPath('unread_count', 0);
+        Http::assertNothingSent();
+    }
+
+    public function test_crew_is_told_when_their_leave_or_overtime_is_decided(): void
+    {
+        $crew = $this->user('CleanUP');
+        $dir = $this->user('director');
+        $this->device($crew, 'crew-phone');
+        $leave = LeaveRequest::create(['user_id' => $crew->id, 'date' => '2026-11-20', 'type' => 'sakit', 'reason' => 'Demam']);
+        $ot = \App\Models\OvertimeRequest::create(['user_id' => $crew->id, 'date' => '2026-11-20', 'reason' => 'Event']);
+
+        $leave->review($dir, ['status' => 'rejected', 'admin_note' => 'Lampirkan surat dokter']);
+        $ot->review($dir, ['status' => 'approved']);
+        $leave->update(['reason' => 'edit lain']); // not a decision: no notice
+        app(\Illuminate\Support\Defer\DeferredCallbackCollection::class)->invoke();
+
+        $titles = $crew->notifications()->get()->pluck('data.title')->sort()->values()->all();
+        $this->assertSame(['Lembur Anda disetujui', 'Sakit Anda ditolak'], $titles);
+        $this->assertStringContainsString('Lampirkan surat dokter', $crew->notifications()->get()->firstWhere('data.title', 'Sakit Anda ditolak')->data['body']);
+        $this->assertSame(['crew-phone', 'crew-phone'], array_merge($this->sentTo('Sakit Anda ditolak'), $this->sentTo('Lembur Anda disetujui')));
+    }
 }

@@ -69,6 +69,13 @@ class User extends Authenticatable
         return self::ROLE_LABELS[$this->role] ?? $this->role;
     }
 
+    /** Approved izin/sakit covering $date (default today): that day the person neither clocks in nor works. */
+    public function approvedLeaveOn($date = null): ?LeaveRequest
+    {
+        return LeaveRequest::where('user_id', $this->id)->where('status', 'approved')
+            ->whereDate('date', \Carbon\Carbon::parse($date ?? 'today')->toDateString())->first();
+    }
+
     public function hasRole(array $roles): bool
     {
         return in_array($this->role, $roles, true);

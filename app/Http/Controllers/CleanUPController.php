@@ -131,8 +131,13 @@ class CleanUPController extends Controller
             return back()->with('error', 'Akses ditolak. Anda hanya dapat memperbarui status untuk jadwal HARI INI.');
         }
 
+        if ($refusal = $pickup->refusalFor(Auth::user())) {
+            return back()->with('error', $refusal);
+        }
+
+        // Completion only through submitPickup (weights + photo), never as a bare status.
         $request->validate([
-            'status' => 'required|in:on_the_way,completed,failed',
+            'status' => 'required|in:on_the_way,failed',
             'cancellation_reason' => 'required_if:status,failed|string|max:1000',
             'lat' => 'nullable|numeric|between:-90,90',
             'lng' => 'nullable|numeric|between:-180,180',
@@ -224,6 +229,13 @@ class CleanUPController extends Controller
                 ], 422);
             }
             return back()->with('error', $errorMessage);
+        }
+
+        if ($refusal = $pickup->refusalFor(Auth::user())) {
+            if ($request->expectsJson() || $request->header('X-Background-Sync') === 'true') {
+                return response()->json(['success' => false, 'message' => $refusal], 422);
+            }
+            return back()->with('error', $refusal);
         }
 
         $request->validate([

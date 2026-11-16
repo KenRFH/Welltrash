@@ -306,22 +306,22 @@ Route::prefix('cleanup')->middleware(['auth', 'role:CleanUP'])->group(function (
     Route::get('/dashboard', [CleanUPController::class, 'dashboard'])->name('cleanup.dashboard');
     Route::get('/sync', [CleanUPController::class, 'sync'])->name('cleanup.sync');
     Route::get('/sync-status', [CleanUPController::class, 'syncStatus'])->name('cleanup.syncStatus');
-    Route::put('/update-status/{pickup}', [CleanUPController::class, 'updateStatus'])->name('cleanup.updateStatus');
-    Route::post('/submit-pickup/{pickup}', [CleanUPController::class, 'submitPickup'])->name('cleanup.submitPickup');
+    Route::put('/update-status/{pickup}', [CleanUPController::class, 'updateStatus'])->middleware('not-on-leave')->name('cleanup.updateStatus');
+    Route::post('/submit-pickup/{pickup}', [CleanUPController::class, 'submitPickup'])->middleware('not-on-leave')->name('cleanup.submitPickup');
     Route::get('/history', [CleanUPController::class, 'history'])->name('cleanup.history');
     Route::get('/kegiatan', [CleanUPController::class, 'activities'])->name('cleanup.kegiatan');
     Route::post('/kegiatan', [CleanUPController::class, 'storeActivity'])->name('cleanup.kegiatan.store');
     Route::post('/location', [CleanUPController::class, 'updateLocation'])->name('cleanup.location.update');
-    Route::post('/select-vehicle', [CleanUPController::class, 'selectVehicle'])->name('cleanup.selectVehicle');
+    Route::post('/select-vehicle', [CleanUPController::class, 'selectVehicle'])->middleware('not-on-leave')->name('cleanup.selectVehicle');
 
     // Absensi
     Route::get('/attendance', [AttendanceController::class, 'myAttendance'])->name('cleanup.attendance');
     Route::get('/attendance/status', [AttendanceController::class, 'status'])->name('cleanup.attendance.status');
-    Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('cleanup.attendance.clockIn');
+    Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->middleware('not-on-leave')->name('cleanup.attendance.clockIn');
     Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('cleanup.attendance.clockOut');
-    Route::post('/attendance/overtime/clock-in', [AttendanceController::class, 'clockInOvertime'])->name('cleanup.attendance.clockInOvertime');
+    Route::post('/attendance/overtime/clock-in', [AttendanceController::class, 'clockInOvertime'])->middleware('not-on-leave')->name('cleanup.attendance.clockInOvertime');
     Route::post('/attendance/overtime/clock-out', [AttendanceController::class, 'clockOutOvertime'])->name('cleanup.attendance.clockOutOvertime');
-    Route::post('/attendance/overtime/request', [AttendanceController::class, 'requestOvertime'])->name('cleanup.attendance.requestOvertime');
+    Route::post('/attendance/overtime/request', [AttendanceController::class, 'requestOvertime'])->middleware('not-on-leave')->name('cleanup.attendance.requestOvertime');
 
     // Pengajuan Izin/Sakit
     Route::post('/leave-request', [LeaveRequestController::class, 'store'])->name('cleanup.leave.store');
