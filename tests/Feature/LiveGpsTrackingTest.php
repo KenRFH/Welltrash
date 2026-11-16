@@ -63,7 +63,7 @@ class LiveGpsTrackingTest extends TestCase
 
     public function test_admin_can_retrieve_live_fleet_locations(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
 
         $operator = User::factory()->create([
             'role'             => 'CleanUP',
@@ -204,7 +204,7 @@ class LiveGpsTrackingTest extends TestCase
 
     public function test_admin_can_see_cleanup_even_without_gps_coordinates(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
         $operatorWithoutGps = User::factory()->create([
             'role'             => 'CleanUP',
             'current_lat'      => null,
@@ -295,7 +295,7 @@ class LiveGpsTrackingTest extends TestCase
 
     public function test_admin_can_access_monitoring_map_screen(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
 
         $response = $this->actingAs($admin)
             ->get(route('admin.monitoring.map'));
@@ -304,7 +304,7 @@ class LiveGpsTrackingTest extends TestCase
     }
     public function test_admin_can_access_company_detail_screen(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
         $companyUser = User::factory()->create(['role' => 'company']);
         $company = Company::create([
             'user_id'             => $companyUser->id,
@@ -355,7 +355,7 @@ class LiveGpsTrackingTest extends TestCase
     {
         \Illuminate\Support\Facades\Storage::fake('public');
 
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
 
         $response = $this->actingAs($admin)->post(route('admin.accounts.store'), [
             'name'              => 'Mitra Baru Jember',
@@ -401,7 +401,7 @@ class LiveGpsTrackingTest extends TestCase
     public function test_live_locations_does_not_geocode_or_persist_guessed_coordinates(): void
     {
         Http::fake();
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
         $company = $this->makeCompany();
 
         $response = $this->actingAs($admin)->getJson(route('admin.cleanups.liveLocations'));
@@ -465,7 +465,7 @@ class LiveGpsTrackingTest extends TestCase
 
     public function test_admin_can_update_company_coordinates_directly(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
         $companyUser = User::factory()->create(['role' => 'company']);
         $company = Company::create([
             'user_id'             => $companyUser->id,

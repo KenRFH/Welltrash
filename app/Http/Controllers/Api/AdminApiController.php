@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
 use App\Models\Company;
+use App\Models\Invoice;
 use App\Models\LeaveRequest;
 use App\Models\OvertimeRequest;
 use App\Models\Pickup;
@@ -20,8 +22,9 @@ use Illuminate\Support\Facades\Storage;
  */
 class AdminApiController extends Controller
 {
-    public function dashboard(): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
+        $commercial = $request->user()->hasRole(User::COMMERCIAL_ROLES);
         $today = Carbon::today()->toDateString();
         $pickups = Pickup::whereDate('pickup_date', $today)->get();
         $done = $pickups->where('status', 'completed');
@@ -37,8 +40,53 @@ class AdminApiController extends Controller
             'kg_residu'         => round((float) $done->sum('residue_weight'), 2),
             'pending_approvals' => OvertimeRequest::where('status', 'pending')->count()
                 + LeaveRequest::where('status', 'pending')->count()
-                + Company::where('subscription_status', 'pending')->count(),
+                + ($commercial ? Company::where('subscription_status', 'pending')->count() : 0),
+            'executive'         => $this->executiveSummary($commercial),
         ]);
+    }
+
+    /** Director/GM view: month-to-date vs the same days last month, 7-day trend, people and receivables. */
+    private function executiveSummary(bool $commercial): array
+    {
+        $today = Carbon::today();
+        $kgSql = 'COALESCE(organic_weight,0)+COALESCE(anorganic_weight,0)+COALESCE(residue_weight,0)';
+        $range = function (Carbon $from, Carbon $to) use ($kgSql) {
+            $row = Pickup::where('status', 'completed')
+                ->whereDate('pickup_date', '>=', $from->toDateString())
+                ->whereDate('pickup_date', '<=', $to->toDateString())
+                ->selectRaw("COUNT(*) c, SUM($kgSql) kg")->first();
+            return ['pickups' => (int) $row->c, 'kg' => round((float) $row->kg, 2)];
+        };
+
+        $prevStart = $today->copy()->startOfMonth()->subMonthNoOverflow();
+        $prevEnd = $prevStart->copy()->addDays($today->day - 1)->min($prevStart->copy()->endOfMonth());
+
+        $daily = Pickup::where('status', 'completed')
+            ->whereDate('pickup_date', '>=', $today->copy()->subDays(6)->toDateString())
+            ->selectRaw("DATE(pickup_date) d, COUNT(*) c, SUM($kgSql) kg")
+            ->groupBy('d')->get()->keyBy('d');
+
+        $crew = fn ($q) => $q->where('role', 'CleanUP');
+        $unpaid = Invoice::where('status', 'unpaid');
+
+        // Koordinator: operasional saja, tanpa angka piutang mitra.
+        $receivables = !$commercial ? [] : [
+            'unpaid_count'   => (clone $unpaid)->count(),
+            'unpaid_amount'  => round((float) (clone $unpaid)->sum('amount'), 2),
+            'overdue_count'  => (clone $unpaid)->whereDate('due_date', '<', $today)->count(),
+        ];
+
+        return $receivables + [
+            'month'          => $range($today->copy()->startOfMonth(), $today),
+            'prev_month'     => $range($prevStart, $prevEnd),
+            'trend'          => collect(range(6, 0))->map(function ($ago) use ($today, $daily) {
+                $d = $today->copy()->subDays($ago)->toDateString();
+                return ['date' => $d, 'pickups' => (int) ($daily[$d]->c ?? 0), 'kg' => round((float) ($daily[$d]->kg ?? 0), 2)];
+            })->values(),
+            'crew_total'     => User::where('role', 'CleanUP')->count(),
+            'crew_present'   => Attendance::whereHas('user', $crew)->whereDate('date', $today)->whereNotNull('clock_in_at')->distinct()->count('user_id'),
+            'crew_on_leave'  => LeaveRequest::whereHas('user', $crew)->where('status', 'approved')->whereDate('date', $today)->distinct()->count('user_id'),
+        ];
     }
 
     public function liveLocations(): JsonResponse
@@ -76,7 +124,7 @@ class AdminApiController extends Controller
         return response()->json(['data' => $drivers]);
     }
 
-    public function approvals(): JsonResponse
+    public function approvals(Request $request): JsonResponse
     {
         $overtime = OvertimeRequest::with('user:id,name')->where('status', 'pending')->orderBy('date')->get()
             ->map(fn ($o) => [
@@ -102,7 +150,7 @@ class AdminApiController extends Controller
                 'status'         => $l->status,
             ]);
 
-        $companies = Company::where('subscription_status', 'pending')->orderBy('created_at')->get()
+        $companies = !$request->user()->hasRole(User::COMMERCIAL_ROLES) ? collect() : Company::where('subscription_status', 'pending')->orderBy('created_at')->get()
             ->map(fn ($c) => [
                 'id'             => $c->id,
                 'type'           => 'company',

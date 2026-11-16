@@ -1,0 +1,159 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Company;
+use App\Models\User;
+use App\Services\HrisService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Tests\TestCase;
+
+class RoleTierTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function user(string $role): User
+    {
+        return User::create(['name' => $role, 'email' => "{$role}@welltrash.test", 'password' => Hash::make('x'), 'role' => $role]);
+    }
+
+    private function api(User $u): static
+    {
+        $this->app['auth']->forgetGuards();
+        return $this->withHeader('Authorization', 'Bearer ' . $u->createToken('t')->plainTextToken);
+    }
+
+    public function test_admin_panel_tiers_follow_hris_levels(): void
+    {
+        // [accounts, invoices, attendance, webadmin] expected status per role
+        $matrix = [
+            'superadmin'  => [200, 200, 200, 200],
+            'director'    => [200, 200, 200, 403],
+            'manager'     => [403, 200, 200, 403],
+            'coordinator' => [403, 403, 200, 403],
+            'web_admin'   => [403, 403, 403, 200],
+            'staff'       => [403, 403, 403, 403],
+            'CleanUP'     => [403, 403, 403, 403],
+        ];
+        $urls = ['/admin/accounts', '/admin/invoices', '/admin/attendance', '/webadmin/dashboard'];
+
+        foreach ($matrix as $role => $expected) {
+            $u = $this->user($role);
+            foreach ($urls as $i => $url) {
+                $status = $this->actingAs($u)->get($url)->getStatusCode();
+                $this->assertSame($expected[$i], $status, "{$role} → {$url}");
+            }
+        }
+    }
+
+    public function test_login_redirects_each_role_to_its_home(): void
+    {
+        foreach (['superadmin' => 'admin.dashboard', 'manager' => 'admin.dashboard', 'coordinator' => 'admin.dashboard', 'web_admin' => 'webadmin.dashboard', 'staff' => 'app.download'] as $role => $route) {
+            $this->actingAs($this->user($role))->get('/dashboard')->assertRedirect(route($route));
+        }
+    }
+
+    public function test_coordinator_app_dashboard_hides_receivables_and_mitra_approvals(): void
+    {
+        $owner = $this->user('company');
+        $company = Company::create(['user_id' => $owner->id, 'company_name' => 'PT Mitra', 'pic_name' => 'Budi', 'address' => 'Jl. A', 'phone' => '0812', 'business_category' => 'resto', 'subscription_plan' => 'basic', 'subscription_status' => 'pending']);
+
+        $coord = $this->user('coordinator');
+        $this->api($coord)->getJson('/api/admin/dashboard')->assertOk()
+            ->assertJsonMissingPath('executive.unpaid_amount')
+            ->assertJsonPath('pending_approvals', 0);
+        $this->api($coord)->getJson('/api/admin/approvals')->assertOk()->assertJsonCount(0, 'data');
+        $this->api($coord)->postJson("/api/admin/companies/{$company->id}/review", ['status' => 'approved'])->assertForbidden();
+
+        $mgr = $this->user('manager');
+        $this->api($mgr)->getJson('/api/admin/dashboard')->assertOk()->assertJsonPath('executive.unpaid_amount', 0)->assertJsonPath('pending_approvals', 1);
+        $this->api($mgr)->postJson("/api/admin/companies/{$company->id}/review", ['status' => 'approved'])->assertOk();
+    }
+
+    public function test_staff_can_use_app_but_not_admin_api(): void
+    {
+        $staff = $this->user('staff');
+        $this->api($staff)->getJson('/api/operator/me')->assertOk();
+        $this->api($staff)->getJson('/api/admin/dashboard')->assertForbidden();
+    }
+
+    public function test_hris_levels_map_to_welltrash_roles(): void
+    {
+        $svc = app(HrisService::class);
+        $cases = [
+            [['role' => 'director', 'access' => ['level' => 'superadmin']], 'superadmin'],
+            [['role' => 'manager', 'access' => ['level' => 'manager']], 'manager'],
+            [['role' => 'coordinator'], 'coordinator'],
+            [['role' => 'public_relation'], 'web_admin'],
+            [['role' => 'staff'], 'staff'],
+            [['role' => 'CleanUP'], 'CleanUP'],
+            [[], 'CleanUP'],
+        ];
+        foreach ($cases as $i => [$payload, $expected]) {
+            $u = $svc->syncUserFromHrisData($payload + ['email' => "h{$i}@welltrash.test", 'employee' => ['employee_code' => "WT-H{$i}", 'full_name' => "H{$i}"]]);
+            $this->assertSame($expected, $u->role, json_encode($payload));
+        }
+
+        // A demoted position in HRIS demotes the Welltrash account too (HRIS is the source of truth).
+        $u = $svc->syncUserFromHrisData(['role' => 'staff', 'email' => 'h1@welltrash.test', 'employee' => ['employee_code' => 'WT-H1']]);
+        $this->assertSame('staff', $u->role);
+    }
+
+    public function test_crew_sync_uses_hris_role_and_keeps_role_when_hris_sends_none(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'k']);
+        $existing = User::create(['name' => 'Lama', 'email' => 'lama@welltrash.test', 'password' => Hash::make('x'), 'role' => 'director', 'employee_code' => 'WT-9']);
+        Http::fake(['hris.test/*' => Http::response(['data' => [
+            ['employee_code' => 'WT-1', 'name' => 'GM', 'email' => 'gm@welltrash.test', 'role' => 'manager'],
+            ['employee_code' => 'WT-2', 'name' => 'PR', 'email' => 'pr@welltrash.test', 'role' => 'public_relation'],
+            ['employee_code' => 'WT-9', 'name' => 'Lama', 'email' => 'lama@welltrash.test'], // older HRIS: no role key
+        ]])]);
+
+        app(HrisService::class)->syncCrew();
+
+        $this->assertSame('manager', User::where('employee_code', 'WT-1')->value('role'));
+        $this->assertSame('web_admin', User::where('employee_code', 'WT-2')->value('role'));
+        $this->assertSame('director', $existing->fresh()->role);
+    }
+
+    public function test_crew_sync_never_overwrites_another_person_and_rolls_back_nothing_half_written(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'k']);
+        // Local numbering: WT-005 is FERI. The HRIS being called (another environment) says WT-005 is ANDIK.
+        $feri = User::create(['name' => 'FERI', 'email' => 'feri@welltrash.test', 'password' => Hash::make('x'), 'role' => 'CleanUP', 'employee_code' => 'WT-005']);
+        $harry = User::create(['name' => 'HARRY', 'email' => 'harry@welltrash.test', 'password' => Hash::make('x'), 'role' => 'director', 'employee_code' => 'WT-013']);
+        Http::fake(['hris.test/*' => Http::response(['data' => [
+            ['employee_code' => 'WT-005', 'name' => 'ANDIK', 'email' => 'andik@prod.test', 'role' => 'cleanup', 'is_user_active' => false],
+            ['employee_code' => 'WT-003', 'name' => 'HARRY', 'email' => 'harry@welltrash.test', 'role' => 'public_relation'], // same person, new code
+            ['employee_code' => 'WT-777', 'name' => 'BARU', 'email' => 'feri@welltrash.test', 'role' => 'staff'],           // email owned by FERI
+        ]])]);
+
+        $result = app(HrisService::class)->syncCrew();
+
+        $this->assertSame(['FERI', 'feri@welltrash.test', 'WT-005', true], [$feri->fresh()->name, $feri->fresh()->email, $feri->fresh()->employee_code, $feri->fresh()->is_active]);
+        $this->assertSame(['web_admin', 'WT-003'], [$harry->fresh()->role, $harry->fresh()->employee_code]);
+        $this->assertSame(1, $result['updated']);
+        $this->assertSame(['WT-005', 'WT-777'], array_column($result['skipped'], 'employee_code'));
+        $this->assertSame(0, User::where('email', 'andik@prod.test')->count(), 'clashing row is reported, not created');
+        $this->assertSame(0, User::where('employee_code', 'WT-777')->count());
+    }
+
+    public function test_hris_login_with_clashing_email_or_code_still_signs_in_without_error(): void
+    {
+        User::create(['name' => 'FERI', 'email' => 'feri@welltrash.test', 'password' => Hash::make('x'), 'role' => 'CleanUP', 'employee_code' => 'WT-005']);
+        $svc = app(HrisService::class);
+
+        // HRIS says this ANDIK has code WT-005 (held locally by FERI): ANDIK gets an account, FERI is untouched.
+        $andik = $svc->syncUserFromHrisData(['email' => 'andik@welltrash.test', 'role' => 'manager', 'employee' => ['employee_code' => 'WT-005', 'full_name' => 'ANDIK']], 'secret123');
+        $this->assertSame(['ANDIK', 'manager', null], [$andik->name, $andik->role, $andik->employee_code]);
+        $this->assertSame('FERI', User::where('employee_code', 'WT-005')->value('name'));
+
+        // Same person (code + name) whose HRIS email is now another account's: keep the local email instead of a 500.
+        $andik->update(['employee_code' => 'WT-001']);
+        $again = $svc->syncUserFromHrisData(['email' => 'feri@welltrash.test', 'role' => 'manager', 'employee' => ['employee_code' => 'WT-001', 'full_name' => 'ANDIK']]);
+        $this->assertSame([$andik->id, 'andik@welltrash.test'], [$again->id, $again->email]);
+        $this->assertSame('FERI', User::where('email', 'feri@welltrash.test')->value('name'));
+    }
+}

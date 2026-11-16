@@ -1,4 +1,5 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
 import React from 'react';
 import Welltrash_logo from "../assets/img/logowelltrash.webp";
 import {
@@ -15,9 +16,10 @@ import {
     Sparkles,
     MapPin,
     CarFront,
+    Globe,
 } from 'lucide-react';
 
-export type AdminActiveTab = 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices' | 'map' | 'vehicles';
+export type AdminActiveTab = 'dashboard' | 'companies' | 'pending' | 'cancellations' | 'cleanups' | 'accounts' | 'attendance' | 'invoices' | 'map' | 'vehicles' | 'website';
 
 interface Props {
     active: AdminActiveTab;
@@ -25,7 +27,13 @@ interface Props {
     onClose?: () => void;
 }
 
+// Mirrors User::COMMERCIAL_ROLES / ACCOUNT_ROLES on the server, which is what actually enforces access.
+const COMMERCIAL_ROLES = ['superadmin', 'director', 'manager'];
+const ACCOUNT_ROLES = ['superadmin', 'director'];
+
 export default function AdminSidebar({ active, isMobileOpen = false, onClose }: Props) {
+    const role = usePage<PageProps>().props.auth.user.role;
+    const commercial = COMMERCIAL_ROLES.includes(role);
     const navItem = (tab: AdminActiveTab, href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
         const isActive = active === tab;
         return (
@@ -98,20 +106,22 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                             </div>
                             <div className="space-y-1">
                                 {navItem('dashboard', route('admin.dashboard'), 'Dasbor Analitik', LayoutDashboard)}
-                                {navItem('companies', route('admin.companies.index'), 'Semua Perusahaan', Building2)}
+                                {commercial && navItem('companies', route('admin.companies.index'), 'Semua Perusahaan', Building2)}
                             </div>
                         </div>
 
+                        {commercial && (
                         <div>
                             <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                                 Manajemen
                             </div>
                             <div className="space-y-1">
-                                {navItem('accounts', route('admin.accounts.index'), 'Kelola Akun', Users)}
+                                {ACCOUNT_ROLES.includes(role) && navItem('accounts', route('admin.accounts.index'), 'Kelola Akun', Users)}
                                 {navItem('pending', route('admin.companies.pending'), 'Persetujuan Mitra', Clock)}
                                 {navItem('cancellations', route('admin.companies.cancellations'), 'Permintaan Batal', Ban)}
                             </div>
                         </div>
+                        )}
 
                         <div>
                             <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
@@ -125,6 +135,7 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                             </div>
                         </div>
 
+                        {commercial && (
                         <div>
                             <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                                 Keuangan
@@ -133,6 +144,18 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                                 {navItem('invoices', route('admin.invoices.index'), 'Invoice Mitra', Receipt)}
                             </div>
                         </div>
+                        )}
+
+                        {role === 'superadmin' && (
+                        <div>
+                            <div className="px-3 mb-1.5 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                                Superadmin
+                            </div>
+                            <div className="space-y-1">
+                                {navItem('website', route('webadmin.dashboard'), 'Panel Website (PR)', Globe)}
+                            </div>
+                        </div>
+                        )}
 
                         {/* Akses & Sesi Sistem */}
                         <div className="pt-2">

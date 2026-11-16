@@ -5,10 +5,12 @@ namespace App\Services;
 use App\Models\Attendance;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class HrisService
 {
@@ -57,34 +59,60 @@ class HrisService
     }
 
     /**
-     * Synchronize or create a local Welltrash User from HRIS user payload.
+     * Local account for an HRIS identity. One matching key is not enough: codes get reassigned and HRIS_API_URL
+     * can point at another environment with its own numbering, so a match must not contradict the other keys.
+     */
+    private function findLocalUser(?string $code, ?string $email, ?string $name): ?User
+    {
+        $sameName = fn (User $u) => $name && strcasecmp(trim($u->name), trim($name)) === 0;
+
+        // Same code: also same email or same name.
+        $byCode = $code ? User::where('employee_code', $code)->first() : null;
+        if ($byCode && (($email && strcasecmp($byCode->email, $email) === 0) || $sameName($byCode))) {
+            return $byCode;
+        }
+
+        // Same email: no other employee code on the local account, or same name.
+        $byEmail = $email ? User::where('email', $email)->first() : null;
+        if ($byEmail && (!$byEmail->employee_code || $byEmail->employee_code === $code || $sameName($byEmail))) {
+            return $byEmail;
+        }
+
+        return null;
+    }
+
+    /** Unique columns this write would take from another account (emails and employee codes are unique). */
+    private function takenBy(?User $self, string $column, ?string $value): ?User
+    {
+        return $value ? User::where($column, $value)->when($self, fn ($q) => $q->whereKeyNot($self->id))->first() : null;
+    }
+
+    /**
+     * Synchronize or create a local Welltrash User from HRIS user payload (on login).
+     * Never fails on a clash: the HRIS credentials were already verified, so the person still gets in.
      */
     public function syncUserFromHrisData(array $hrisUser, ?string $plainPassword = null): User
     {
         $emp = $hrisUser['employee'] ?? null;
         $empCode = !empty($emp['employee_code']) ? trim($emp['employee_code']) : null;
         $email = !empty($hrisUser['email']) ? trim($hrisUser['email']) : null;
-
-        $user = null;
-        if (!empty($empCode)) {
-            $user = User::where('employee_code', $empCode)->first();
-        }
-        if (!$user && !empty($email)) {
-            $user = User::where('email', $email)->first();
-        }
-
-        $hrisRole = strtolower($hrisUser['role'] ?? 'cleanup');
-        $mappedRole = match ($hrisRole) {
-            'director', 'coordinator' => 'admin',
-            default                   => 'CleanUP',
-        };
-
-        if ($user && in_array($user->role, ['admin', 'superadmin', 'web_admin']) && $mappedRole === 'CleanUP') {
-            $mappedRole = $user->role;
-        }
-
-        $effectiveEmail = $email ?: ($user?->email ?: (strtolower($empCode ?: 'user') . '@welltrash.id'));
         $name = !empty($emp['full_name']) ? $emp['full_name'] : ($hrisUser['name'] ?? 'Petugas CleanUP');
+
+        $user = $this->findLocalUser($empCode, $email, $name);
+
+        // HRIS is the source of truth: access.level carries "superadmin" for root accounts, role the position level.
+        $mappedRole = User::roleFromHris($hrisUser['access']['level'] ?? $hrisUser['role'] ?? null);
+
+        if ($owner = $this->takenBy($user, 'email', $email)) {
+            Log::warning("HRIS sync: email {$email} sudah dipakai akun #{$owner->id}, email lokal dipertahankan.");
+            $email = null;
+        }
+        if ($owner = $this->takenBy($user, 'employee_code', $empCode)) {
+            Log::warning("HRIS sync: kode {$empCode} sudah dipakai akun #{$owner->id} ({$owner->name}), kode tidak dipasang.");
+            $empCode = $user?->employee_code;
+        }
+
+        $effectiveEmail = $email ?: ($user?->email ?: (strtolower($empCode ?: 'user' . Str::random(6)) . '@welltrash.id'));
 
         $isActive = isset($hrisUser['is_active']) ? (bool) $hrisUser['is_active'] : true;
         if ($emp && isset($emp['status']) && $emp['status'] !== 'active') {
@@ -117,8 +145,9 @@ class HrisService
 
     /**
      * Fetch active crew list from HRIS and synchronize all accounts to Welltrash.
+     * All-or-nothing: rows that would clash with another account are skipped and reported, never half-written.
      *
-     * @return array{total: int, synced: int, created: int, updated: int, crew: array}
+     * @return array{total: int, synced: int, created: int, updated: int, skipped: array, crew: array}
      */
     public function syncCrew(): array
     {
@@ -137,82 +166,85 @@ class HrisService
             throw new \RuntimeException("HRIS API mengembalikan status {$response->status()}: " . $response->body());
         }
 
-        $crewList = $response->json('data') ?? [];
-        $created = 0;
-        $updated = 0;
-        $synced = 0;
-        $syncedDetails = [];
-
-        foreach ($crewList as $member) {
-            $empCode = !empty($member['employee_code']) ? trim($member['employee_code']) : null;
-            $email = !empty($member['email']) ? trim($member['email']) : null;
-            $name = $member['name'] ?? 'Petugas';
-            $isActive = (bool) ($member['is_user_active'] ?? true);
-
-            $pos = strtolower($member['position'] ?? '');
-            $div = strtolower($member['division'] ?? '');
-
-            $role = 'CleanUP';
-            if (str_contains($pos, 'direktur') || str_contains($div, 'manajemen') || str_contains($pos, 'koordinator')) {
-                $role = 'admin';
-            }
-
-            $existing = null;
-            if ($empCode) {
-                $existing = User::where('employee_code', $empCode)->first();
-            }
-            if (!$existing && $email) {
-                $existing = User::where('email', $email)->first();
-            }
-
-            $effectiveEmail = $email ?: ($existing?->email ?: (strtolower($empCode ?: 'crew') . '@welltrash.id'));
-
-            $attributes = [
-                'name'          => $name,
-                'email'         => $effectiveEmail,
-                'employee_code' => $empCode,
-                'division'      => $member['division'] ?? null,
-                'position'      => $member['position'] ?? null,
-                'is_active'     => $isActive,
-            ];
-
-            if (!$existing) {
-                $attributes['role'] = $role;
-                $attributes['password'] = Hash::make('12345678');
-                $user = User::create($attributes);
-                $created++;
-                $action = 'created';
-            } else {
-                if ($role === 'admin' && $existing->role !== 'admin') {
-                    $attributes['role'] = 'admin';
-                }
-                $existing->update($attributes);
-                $user = $existing;
-                $updated++;
-                $action = 'updated';
-            }
-
-            $synced++;
-            $syncedDetails[] = [
-                'id'            => $user->id,
-                'employee_code' => $user->employee_code,
-                'division'      => $user->division,
-                'position'      => $user->position,
-                'name'          => $user->name,
-                'email'         => $user->email,
-                'role'          => $user->role,
-                'is_active'     => $user->is_active,
-                'action'        => $action,
-            ];
+        $crewList = $response->json('data');
+        if (!is_array($crewList)) {
+            throw new \RuntimeException('Respons HRIS tidak berisi daftar kru.');
         }
 
-        return [
-            'total'   => count($crewList),
-            'synced'  => $synced,
-            'created' => $created,
-            'updated' => $updated,
-            'crew'    => $syncedDetails,
-        ];
+        return DB::transaction(function () use ($crewList) {
+            $created = 0;
+            $updated = 0;
+            $syncedDetails = [];
+            $skipped = [];
+
+            foreach ($crewList as $member) {
+                $empCode = !empty($member['employee_code']) ? trim($member['employee_code']) : null;
+                $email = !empty($member['email']) ? trim($member['email']) : null;
+                $name = $member['name'] ?? 'Petugas';
+                $isActive = (bool) ($member['is_user_active'] ?? true);
+                $role = User::roleFromHris($member['role'] ?? null);
+
+                $existing = $this->findLocalUser($empCode, $email, $name);
+                $effectiveEmail = $email ?: ($existing?->email ?: (strtolower($empCode ?: 'crew') . '@welltrash.id'));
+
+                $clash = ($owner = $this->takenBy($existing, 'employee_code', $empCode))
+                    ? "kode {$empCode} sudah dipakai akun lain ({$owner->name}, {$owner->email})"
+                    : (($owner = $this->takenBy($existing, 'email', $effectiveEmail))
+                        ? "email {$effectiveEmail} sudah dipakai akun lain ({$owner->name})"
+                        : null);
+                if ($clash) {
+                    $skipped[] = ['employee_code' => $empCode, 'name' => $name, 'reason' => $clash];
+                    continue;
+                }
+
+                $attributes = [
+                    'name'          => $name,
+                    'email'         => $effectiveEmail,
+                    'employee_code' => $empCode,
+                    'division'      => $member['division'] ?? null,
+                    'position'      => $member['position'] ?? null,
+                    'is_active'     => $isActive,
+                ];
+
+                if (!$existing) {
+                    $attributes['role'] = $role;
+                    $attributes['password'] = Hash::make('12345678');
+                    $user = User::create($attributes);
+                    $created++;
+                    $action = 'created';
+                } else {
+                    // Older HRIS builds do not send "role": never downgrade an existing account on a missing value.
+                    if (isset($member['role'])) {
+                        $attributes['role'] = $role;
+                    }
+                    $existing->update($attributes);
+                    $user = $existing;
+                    $updated++;
+                    $action = 'updated';
+                }
+
+                $syncedDetails[] = [
+                    'id'            => $user->id,
+                    'employee_code' => $user->employee_code,
+                    'division'      => $user->division,
+                    'position'      => $user->position,
+                    'name'          => $user->name,
+                    'email'         => $user->email,
+                    'role'          => $user->role,
+                    'is_active'     => $user->is_active,
+                    'action'        => $action,
+                ];
+            }
+
+            return [
+                'total'   => count($crewList),
+                'synced'  => $created + $updated,
+                'created' => $created,
+                'updated' => $updated,
+                'skipped' => $skipped,
+                'crew'    => $syncedDetails,
+            ];
+        });
     }
 
     /**

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Company;
 use App\Http\Controllers\Api\OperatorApiController;
 use App\Http\Controllers\Api\AdminApiController;
+use App\Models\User;
 
 Route::get('/mitra', function (Request $request) {
 
@@ -49,7 +50,7 @@ Route::prefix('operator')->group(function () {
     // Update check for the Android app; same file the /download page reads.
     Route::get('/app-version', fn () => response()->file(public_path('downloads/version.json')))->name('api.operator.app-version');
 
-    Route::middleware(['auth:sanctum', 'role:CleanUP,operator,admin,Admin,Superadmin,superadmin,management'])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:' . implode(',', User::APP_ROLES)])->group(function () {
         Route::get('/me', [OperatorApiController::class, 'me'])->name('api.operator.me');
         Route::post('/logout', [OperatorApiController::class, 'logout'])->name('api.operator.logout');
 
@@ -85,11 +86,11 @@ Route::prefix('operator')->group(function () {
 });
 
 // Admin screens of the operator mobile app (Direktur / Manager / Koordinator accounts)
-Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin,Admin,Superadmin,superadmin,management'])->group(function () {
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:' . implode(',', User::OPS_ROLES)])->group(function () {
     Route::get('/dashboard', [AdminApiController::class, 'dashboard'])->name('api.admin.dashboard');
     Route::get('/cleanups/live-locations', [AdminApiController::class, 'liveLocations'])->name('api.admin.live-locations');
     Route::get('/approvals', [AdminApiController::class, 'approvals'])->name('api.admin.approvals');
     Route::post('/attendance/overtime/{overtimeRequest}/review', [AdminApiController::class, 'reviewOvertime'])->name('api.admin.overtime.review');
     Route::post('/attendance/leave/{leaveRequest}/review', [AdminApiController::class, 'reviewLeave'])->name('api.admin.leave.review');
-    Route::post('/companies/{company}/review', [AdminApiController::class, 'reviewCompany'])->name('api.admin.companies.review');
+    Route::post('/companies/{company}/review', [AdminApiController::class, 'reviewCompany'])->middleware('role:' . implode(',', User::COMMERCIAL_ROLES))->name('api.admin.companies.review');
 });

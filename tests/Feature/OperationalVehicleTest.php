@@ -22,7 +22,7 @@ class OperationalVehicleTest extends TestCase
 
     public function test_admin_can_manage_vehicle_inventory(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
 
         $vehicle = Vehicle::create([
             'name'          => 'Truk Isuzu Elf 01',
@@ -109,7 +109,7 @@ class OperationalVehicleTest extends TestCase
         ]);
 
         // Admin monitor
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'director']);
         $this->actingAs($admin)->getJson(route('admin.cleanups.liveLocations'))
             ->assertOk()
             ->assertJsonPath('cleanups.0.vehicle.license_plate', 'P 8492 GA')

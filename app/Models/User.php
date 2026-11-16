@@ -18,6 +18,56 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    // Access tiers for the admin panel and admin app (Bertingkat). Internal roles follow the HRIS position level.
+    public const OPS_ROLES = ['superadmin', 'director', 'manager', 'coordinator'];      // monitoring, armada, absensi, lembur/izin
+    public const COMMERCIAL_ROLES = ['superadmin', 'director', 'manager'];              // + mitra & invoice/piutang
+    public const ACCOUNT_ROLES = ['superadmin', 'director'];                            // + kelola akun
+    public const APP_ROLES = ['CleanUP', 'staff', ...self::OPS_ROLES];                // may sign in to the mobile app
+
+    /** HRIS access level → Welltrash role. company (mitra) is local only; superadmin is an HRIS root account. */
+    public const HRIS_ROLE_MAP = [
+        'superadmin'      => 'superadmin',
+        'director'        => 'director',
+        'manager'         => 'manager',
+        'coordinator'     => 'coordinator',
+        'public_relation' => 'web_admin',
+        'staff'           => 'staff',
+        'cleanup'         => 'CleanUP',
+    ];
+
+    public const ROLE_LABELS = [
+        'superadmin'  => 'Superadmin',
+        'director'    => 'Direktur',
+        'manager'     => 'Manager / GM',
+        'coordinator' => 'Koordinator',
+        'web_admin'   => 'Public Relation',
+        'staff'       => 'Staf',
+        'CleanUP'     => 'Kru CleanUP',
+        'company'     => 'Mitra',
+    ];
+
+    public static function roleFromHris(?string $level): string
+    {
+        return self::HRIS_ROLE_MAP[strtolower((string) $level)] ?? 'CleanUP';
+    }
+
+    /** Landing page after login. Staf has no web panel: they use the mobile app. */
+    public function homeUrl(): string
+    {
+        return match (true) {
+            $this->hasRole(self::OPS_ROLES) => route('admin.dashboard'),
+            $this->role === 'web_admin'     => route('webadmin.dashboard'),
+            $this->role === 'CleanUP'       => route('cleanup.dashboard'),
+            $this->role === 'staff'         => route('app.download'),
+            default                         => route('company.dashboard'),
+        };
+    }
+
+    public function hasRole(array $roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
+
     protected $fillable = [
         'name',
         'email',

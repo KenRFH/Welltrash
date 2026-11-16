@@ -91,7 +91,7 @@ class OperatorApiTest extends TestCase
             'name'     => 'Admin Operasional',
             'email'    => 'admin.ops@welltrash.test',
             'password' => Hash::make('admin123'),
-            'role'     => 'admin',
+            'role'     => 'director',
         ]);
 
         $loginResponse = $this->postJson('/api/operator/login', [
@@ -105,7 +105,7 @@ class OperatorApiTest extends TestCase
                 'user'    => [
                     'id'    => $admin->id,
                     'email' => 'admin.ops@welltrash.test',
-                    'role'  => 'admin',
+                    'role'  => 'director',
                 ],
             ]);
 
@@ -119,7 +119,7 @@ class OperatorApiTest extends TestCase
                 'success' => true,
                 'user'    => [
                     'id'    => $admin->id,
-                    'role'  => 'admin',
+                    'role'  => 'director',
                 ],
             ]);
     }
@@ -284,7 +284,7 @@ class OperatorApiTest extends TestCase
         $leave = \App\Models\LeaveRequest::sole();
         $this->assertNotNull($leave->proof_image, 'proof image must be saved');
 
-        $admin = $this->createOperator(['email' => 'admin@welltrash.test', 'role' => 'admin']);
+        $admin = $this->createOperator(['email' => 'admin@welltrash.test', 'role' => 'director']);
         $this->actingAs($admin)
             ->patch(route('admin.attendance.leave.review', $leave), ['status' => 'approved'])
             ->assertRedirect();
@@ -304,14 +304,14 @@ class OperatorApiTest extends TestCase
             'hris.test/*' => \Illuminate\Support\Facades\Http::response([], 500),
         ]);
 
-        foreach (['CleanUP' => 'WT-001', 'admin' => 'WT-002'] as $role => $code) {
+        foreach (['CleanUP' => 'WT-001', 'director' => 'WT-002'] as $role => $code) {
             $user = $this->createOperator(['email' => "{$role}@welltrash.test", 'role' => $role, 'employee_code' => $code]);
             $this->app['auth']->forgetGuards(); // test app keeps the previous request's user otherwise
             $res = $this->withHeader('Authorization', 'Bearer ' . $user->createToken('t')->plainTextToken)
                 ->getJson('/api/operator/hr?month=2026-11');
 
             // The caller's own code is what goes to HRIS; WT-001 is faked as HRIS failing.
-            $role === 'admin'
+            $role === 'director'
                 ? $res->assertOk()->assertJsonPath('payroll.0.net', 1500000)
                 : $res->assertStatus(503);
         }

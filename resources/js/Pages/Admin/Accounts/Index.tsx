@@ -303,7 +303,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
     return (
         <AdminLayout
             title="Kelola Akun Pengguna"
-            subtitle="Manajemen otorisasi & kredensial akun CleanUP, Web Admin, dan Mitra Bisnis"
+            subtitle="Manajemen otorisasi & kredensial akun CleanUP, Public Relation, dan Mitra Bisnis"
             activeTab="accounts"
             headerAction={
                 <div className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
 
                     <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
                         <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Web Admin</span>
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Public Relation</span>
                             <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                                 <Shield className="w-4.5 h-4.5" />
                             </div>
@@ -424,7 +424,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                     <div
                                         style={{ width: `${(totalWebAdmins / totalAccounts) * 100}%` }}
                                         className="bg-blue-500 transition-all duration-500"
-                                        title={`Web Admin: ${totalWebAdmins}`}
+                                        title={`Public Relation: ${totalWebAdmins}`}
                                     />
                                     <div
                                         style={{ width: `${(totalCompanies / totalAccounts) * 100}%` }}
@@ -442,7 +442,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-xs bg-blue-500" />
-                                <span>Web Admin ({totalWebAdmins})</span>
+                                <span>Public Relation ({totalWebAdmins})</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-xs bg-teal-500" />
@@ -481,7 +481,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                             }`}
                         >
                             <Shield className="w-3.5 h-3.5" />
-                            <span>Web Admin</span>
+                            <span>Public Relation</span>
                             <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                                 activeSubTab === 'web_admin' ? 'bg-blue-50 text-blue-700' : 'bg-slate-200 text-slate-600'
                             }`}>
@@ -532,7 +532,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-bold text-slate-900">
-                                {activeSubTab === 'CleanUP' ? 'Daftar Personel CleanUP' : activeSubTab === 'web_admin' ? 'Daftar Web Administrator' : 'Daftar Akun Mitra Bisnis'}
+                                {activeSubTab === 'CleanUP' ? 'Daftar Personel CleanUP' : activeSubTab === 'web_admin' ? 'Daftar Public Relationistrator' : 'Daftar Akun Mitra Bisnis'}
                             </h2>
                             <p className="text-xs text-slate-400 font-medium mt-0.5">
                                 Menampilkan {activeList.length} akun pengguna
@@ -646,7 +646,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                     <span className={`w-1.5 h-1.5 rounded-full ${
                                                         user.role === 'CleanUP' ? 'bg-emerald-500' : user.role === 'web_admin' ? 'bg-blue-500' : 'bg-teal-500'
                                                     }`} />
-                                                    {user.role === 'CleanUP' ? 'Driver / Armada' : user.role === 'web_admin' ? 'Web Admin' : 'Mitra Industri'}
+                                                    {user.role === 'CleanUP' ? 'Driver / Armada' : user.role === 'web_admin' ? 'Public Relation' : 'Mitra Industri'}
                                                 </span>
                                             </td>
 
@@ -761,7 +761,7 @@ export default function Index({ cleanups, webAdmins, companies, flash }: Props) 
                                                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                                                 }`}
                                             >
-                                                {r === 'CleanUP' ? 'CleanUP' : r === 'web_admin' ? 'Web Admin' : 'Mitra Bisnis'}
+                                                {r === 'CleanUP' ? 'CleanUP' : r === 'web_admin' ? 'Public Relation' : 'Mitra Bisnis'}
                                             </button>
                                         ))}
                                     </div>

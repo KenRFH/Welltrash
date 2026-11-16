@@ -84,8 +84,7 @@ class OperatorApiController extends Controller
             ], 403);
         }
 
-        $allowedRoles = ['CleanUP', 'operator', 'admin', 'Admin', 'Superadmin', 'superadmin', 'management'];
-        if (! in_array($user->role, $allowedRoles)) {
+        if (! $user->hasRole(User::APP_ROLES)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Akses ditolak. Akun ini tidak memiliki akses aplikasi operasional.',
