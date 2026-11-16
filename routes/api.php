@@ -53,6 +53,7 @@ Route::prefix('operator')->group(function () {
     Route::middleware(['auth:sanctum', 'role:' . implode(',', User::APP_ROLES)])->group(function () {
         Route::get('/me', [OperatorApiController::class, 'me'])->name('api.operator.me');
         Route::post('/logout', [OperatorApiController::class, 'logout'])->name('api.operator.logout');
+        Route::post('/push-device', [OperatorApiController::class, 'registerPushDevice'])->middleware('throttle:30,1')->name('api.operator.push-device');
 
         // Vehicles (Operational Fleet Selection)
         Route::get('/vehicles', [OperatorApiController::class, 'vehicles'])->name('api.operator.vehicles');

@@ -232,8 +232,27 @@ class OperatorApiController extends Controller
     /**
      * Operator logout and revoke token.
      */
+    /**
+     * Register this phone for push. A phone that switches account moves to the new owner (one row per installation).
+     */
+    public function registerPushDevice(Request $request): JsonResponse
+    {
+        $data = $request->validate(['fid' => 'required|string|max:255']);
+
+        \App\Models\PushDevice::updateOrCreate(
+            ['fid' => $data['fid']],
+            ['user_id' => $request->user()->id, 'last_seen_at' => now()],
+        );
+
+        return response()->json(['success' => true]);
+    }
+
     public function logout(Request $request): JsonResponse
     {
+        // Stop pushes to this phone for this account (the app sends its Firebase Installation ID).
+        if ($request->filled('fid')) {
+            \App\Models\PushDevice::where('fid', (string) $request->input('fid'))->where('user_id', $request->user()->id)->delete();
+        }
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
