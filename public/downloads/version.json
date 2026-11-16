@@ -1,11 +1,11 @@
 {
-  "version_name": "1.3.0",
-  "version_code": 7,
-  "title": "Pembaruan Welltrash v1.3.0 Tersedia",
-  "changelog": "• Tombol Absen Masuk / Absen Pulang melayang di pojok kanan bawah untuk semua akun\n• Presensi & gaji kini tersedia untuk semua jabatan, termasuk Direktur, Manager, dan staf\n• Ajukan izin atau sakit langsung dari aplikasi, lengkap dengan foto bukti\n• Rekap kehadiran bulanan dari HRIS: Hadir, Izin, Sakit, Alpha, Libur, dan status lembur\n• Slip gaji per periode dengan rincian pendapatan dan potongan\n• Kerja di hari Minggu/libur nasional dihitung sebagai lembur per jam\n• Dashboard admin kini menampilkan data asli dari welltrash.com (bukan data contoh)\n• Persetujuan lembur, izin, dan mitra baru tersimpan langsung ke server",
+  "version_name": "1.4.0",
+  "version_code": 8,
+  "title": "Pembaruan Welltrash v1.4.0 Tersedia",
+  "changelog": "• Lonceng notifikasi: semua pemberitahuan tersimpan dan bisa dibaca ulang\n• Notifikasi langsung ke HP: pengajuan baru untuk admin, keputusan izin/lembur untuk kru\n• Ringkasan admin baru: penjemputan hari ini, target bulan ini, tren 7 hari, dan piutang mitra\n• Izin/sakit yang sudah disetujui: presensi dan tugas hari itu tidak perlu dilakukan\n• Presensi masuk wajib dilakukan sebelum menjalankan tugas penjemputan\n• Penjemputan yang sedang dikerjakan rekan atau sudah selesai tidak bisa diubah lagi\n• Izin yang ditolak kini bisa diajukan ulang\n• Perbaikan: aplikasi tidak lagi error setelah mengirim izin/sakit\n• Penolakan dari server kini ditampilkan jelas, tidak lagi tersimpan sebagai antrean offline",
   "apk_url": "https://welltrash.com/downloads/welltrash-cleanup-operator.apk",
-  "force_update": false,
-  "release_date": "2026-11-15",
-  "size_bytes": 58218725,
-  "sha256": "a7e4cde5333f0efdd6191d952987a3833a97b91d14530c2fc1f370cef8e28f80"
+  "force_update": true,
+  "release_date": "2026-11-16",
+  "size_bytes": 59217102,
+  "sha256": "53260c96233986eee15299d02b81402185d225f08e7a2781d1fdd20644a8e638"
 }

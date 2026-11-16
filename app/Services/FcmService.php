@@ -4,13 +4,16 @@ namespace App\Services;
 
 use App\Models\PushDevice;
 use App\Models\User;
+use App\Notifications\AppNotice;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Push via FCM HTTP v1 to Firebase Installation IDs ("fid" target). Best effort by design:
- * a failed push is logged and never breaks the action that triggered it.
+ * Notifies users: an entry in the app's bell (always), plus a phone push via FCM HTTP v1 to Firebase
+ * Installation IDs ("fid" target). The push is best effort: a failure is logged and never breaks the
+ * action that triggered it.
  */
 class FcmService
 {
@@ -31,7 +34,14 @@ class FcmService
 
     public function toUsers(array $userIds, string $title, string $body, array $data = []): int
     {
-        if (!$userIds || !$this->isConfigured()) {
+        if (!$userIds) {
+            return 0;
+        }
+
+        // Bell first: kept even without Firebase, a registered phone, or network.
+        Notification::send(User::whereIn('id', $userIds)->get(), new AppNotice($title, $body, $data));
+
+        if (!$this->isConfigured()) {
             return 0;
         }
 

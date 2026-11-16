@@ -224,6 +224,7 @@ class LiveGpsTrackingTest extends TestCase
     public function test_cleanup_update_status_records_gps_coordinates(): void
     {
         $operator = User::factory()->create(['role' => 'CleanUP']);
+        $this->clockIn($operator);
         $companyUser = User::factory()->create(['role' => 'company']);
         $company = Company::create([
             'user_id'              => $companyUser->id,
@@ -258,6 +259,7 @@ class LiveGpsTrackingTest extends TestCase
     public function test_operator_api_update_pickup_status_records_gps_coordinates(): void
     {
         $operator = User::factory()->create(['role' => 'CleanUP']);
+        $this->clockIn($operator);
         $token = $operator->createToken('test-token')->plainTextToken;
 
         $companyUser = User::factory()->create(['role' => 'company']);

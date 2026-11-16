@@ -26,6 +26,8 @@ class CleanUPOfflinePickupTest extends TestCase
         $this->cleanupUser = User::factory()->create([
             'role' => 'CleanUP',
         ]);
+        $this->clockIn($this->cleanupUser);
+        $this->clockIn($this->cleanupUser, 'yesterday'); // offline submissions of yesterday's jobs
 
         $companyOwner = User::factory()->create([
             'role' => 'Company',

@@ -247,6 +247,37 @@ class OperatorApiController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /** The bell: latest 50 notifications of the signed-in user, newest first, plus the unread count. */
+    public function notifications(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'unread_count' => $user->unreadNotifications()->count(),
+            'data'         => $user->notifications()->latest()->limit(50)->get()->map(fn ($n) => [
+                'id'         => $n->id,
+                'title'      => $n->data['title'] ?? 'Welltrash',
+                'body'       => $n->data['body'] ?? '',
+                'type'       => $n->data['type'] ?? null,
+                'read'       => $n->read_at !== null,
+                'created_at' => $n->created_at?->toIso8601String(),
+            ]),
+        ]);
+    }
+
+    /** Mark one notification (id) or all of them as read. Only the owner's own notifications are touched. */
+    public function readNotifications(Request $request): JsonResponse
+    {
+        $data = $request->validate(['id' => 'nullable|string|max:64']);
+        $query = $request->user()->unreadNotifications();
+        if (!empty($data['id'])) {
+            $query->where('id', $data['id']);
+        }
+        $query->update(['read_at' => now()]);
+
+        return response()->json(['success' => true, 'unread_count' => $request->user()->unreadNotifications()->count()]);
+    }
+
     public function logout(Request $request): JsonResponse
     {
         // Stop pushes to this phone for this account (the app sends its Firebase Installation ID).
@@ -292,8 +323,13 @@ class OperatorApiController extends Controller
             ], 422);
         }
 
+        if ($refusal = $pickup->refusalFor($request->user())) {
+            return response()->json(['success' => false, 'message' => $refusal], 422);
+        }
+
+        // Completion only through submitPickup (weights + photo), never as a bare status.
         $request->validate([
-            'status'              => 'required|in:on_the_way,completed,failed',
+            'status'              => 'required|in:on_the_way,failed',
             'cancellation_reason' => 'required_if:status,failed|nullable|string|max:1000',
             'lat'                 => 'nullable|numeric|between:-90,90',
             'lng'                 => 'nullable|numeric|between:-180,180',
@@ -370,6 +406,10 @@ class OperatorApiController extends Controller
                 'success' => false,
                 'message' => 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI atau antrean offline dalam batas toleransi.',
             ], 422);
+        }
+
+        if ($refusal = $pickup->refusalFor($request->user())) {
+            return response()->json(['success' => false, 'message' => $refusal], 422);
         }
 
         $request->validate([
@@ -528,6 +568,8 @@ class OperatorApiController extends Controller
             'date'                  => $today,
             'attendance'            => $attendance,
             'todayApprovedOvertime' => $todayApprovedOvertime,
+            // Approved izin/sakit today: the app hides clock-in/tasks (the server refuses them anyway).
+            'leaveToday'            => ($leave = $user->approvedLeaveOn()) ? ['type' => $leave->type, 'reason' => $leave->reason] : null,
         ]);
     }
 
@@ -915,8 +957,10 @@ class OperatorApiController extends Controller
             ], 422);
         }
 
+        // A rejected request does not block a new one (e.g. resubmitted with a doctor's note).
         $existing = LeaveRequest::where('user_id', $user->id)
             ->whereDate('date', $date)
+            ->where('status', '!=', 'rejected')
             ->first();
 
         if ($existing) {
@@ -931,13 +975,10 @@ class OperatorApiController extends Controller
             $proofImagePath = $request->file('proof_image')->store('leave_requests', 'public');
         }
 
-        $leave = LeaveRequest::create([
-            'user_id'          => $user->id,
-            'date'             => $date,
-            'type'             => $request->type,
-            'reason'           => $request->reason,
-            'proof_image'      => $proofImagePath,
-            'status'           => 'pending',
+        $leave = LeaveRequest::submit($user->id, $date, [
+            'type'        => $request->type,
+            'reason'      => $request->reason,
+            'proof_image' => $proofImagePath,
         ]);
 
         return response()->json([

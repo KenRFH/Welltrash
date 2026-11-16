@@ -35,8 +35,10 @@ class LeaveRequestController extends Controller
         }
 
         // Check if already submitted leave for that day
+        // A rejected request does not block a new one (e.g. resubmitted with a doctor's note).
         $existing = LeaveRequest::where('user_id', $user->id)
             ->whereDate('date', $date)
+            ->where('status', '!=', 'rejected')
             ->first();
 
         if ($existing) {
@@ -48,12 +50,9 @@ class LeaveRequestController extends Controller
             $proofImagePath = $request->file('proof_image')->store('leave_requests', 'public');
         }
 
-        LeaveRequest::create([
-            'user_id'     => $user->id,
-            'date'        => $date,
+        LeaveRequest::submit($user->id, $date, [
             'type'        => $request->type,
             'reason'      => $request->reason,
-            'status'      => 'pending',
             'proof_image' => $proofImagePath,
         ]);
 

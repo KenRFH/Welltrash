@@ -129,6 +129,7 @@ class OperatorApiTest extends TestCase
     {
         Storage::fake('public');
         $operator = $this->createOperator();
+        $this->clockIn($operator);
         $token = $operator->createToken('test')->plainTextToken;
 
         $clientUser = User::create([
@@ -326,6 +327,7 @@ class OperatorApiTest extends TestCase
     public function test_operator_can_update_pickup_status_and_logout(): void
     {
         $operator = $this->createOperator();
+        $this->clockIn($operator);
         $token = $operator->createToken('test')->plainTextToken;
 
         $clientUser = User::create([

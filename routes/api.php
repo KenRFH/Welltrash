@@ -54,15 +54,17 @@ Route::prefix('operator')->group(function () {
         Route::get('/me', [OperatorApiController::class, 'me'])->name('api.operator.me');
         Route::post('/logout', [OperatorApiController::class, 'logout'])->name('api.operator.logout');
         Route::post('/push-device', [OperatorApiController::class, 'registerPushDevice'])->middleware('throttle:30,1')->name('api.operator.push-device');
+        Route::get('/notifications', [OperatorApiController::class, 'notifications'])->name('api.operator.notifications');
+        Route::post('/notifications/read', [OperatorApiController::class, 'readNotifications'])->name('api.operator.notifications.read');
 
         // Vehicles (Operational Fleet Selection)
         Route::get('/vehicles', [OperatorApiController::class, 'vehicles'])->name('api.operator.vehicles');
-        Route::post('/vehicle/select', [OperatorApiController::class, 'selectVehicle'])->name('api.operator.vehicle.select');
+        Route::post('/vehicle/select', [OperatorApiController::class, 'selectVehicle'])->middleware('not-on-leave')->name('api.operator.vehicle.select');
 
         // Pickups
         Route::get('/pickups', [OperatorApiController::class, 'pickups'])->name('api.operator.pickups');
-        Route::put('/pickups/{pickup}/status', [OperatorApiController::class, 'updatePickupStatus'])->name('api.operator.pickups.status');
-        Route::post('/pickups/{pickup}/submit', [OperatorApiController::class, 'submitPickup'])->name('api.operator.pickups.submit');
+        Route::put('/pickups/{pickup}/status', [OperatorApiController::class, 'updatePickupStatus'])->middleware('not-on-leave')->name('api.operator.pickups.status');
+        Route::post('/pickups/{pickup}/submit', [OperatorApiController::class, 'submitPickup'])->middleware('not-on-leave')->name('api.operator.pickups.submit');
         Route::post('/location', [OperatorApiController::class, 'updateLocation'])->name('api.operator.location');
         Route::get('/pickups/history', [OperatorApiController::class, 'history'])->name('api.operator.pickups.history');
 
@@ -75,12 +77,12 @@ Route::prefix('operator')->group(function () {
         Route::get('/attendance/status', [OperatorApiController::class, 'attendanceStatus'])->name('api.operator.attendance.status');
         Route::get('/attendance/summary', [OperatorApiController::class, 'attendanceSummary'])->name('api.operator.attendance.summary');
         Route::get('/hr', [OperatorApiController::class, 'hrSelfService'])->name('api.operator.hr');
-        Route::post('/attendance/clock-in', [OperatorApiController::class, 'clockIn'])->name('api.operator.attendance.clockIn');
+        Route::post('/attendance/clock-in', [OperatorApiController::class, 'clockIn'])->middleware('not-on-leave')->name('api.operator.attendance.clockIn');
         Route::post('/attendance/clock-out', [OperatorApiController::class, 'clockOut'])->name('api.operator.attendance.clockOut');
 
         // Overtime & Leave Requests
-        Route::post('/attendance/overtime/request', [OperatorApiController::class, 'requestOvertime'])->name('api.operator.overtime.request');
-        Route::post('/attendance/overtime/clock-in', [OperatorApiController::class, 'clockInOvertime'])->name('api.operator.overtime.clockIn');
+        Route::post('/attendance/overtime/request', [OperatorApiController::class, 'requestOvertime'])->middleware('not-on-leave')->name('api.operator.overtime.request');
+        Route::post('/attendance/overtime/clock-in', [OperatorApiController::class, 'clockInOvertime'])->middleware('not-on-leave')->name('api.operator.overtime.clockIn');
         Route::post('/attendance/overtime/clock-out', [OperatorApiController::class, 'clockOutOvertime'])->name('api.operator.overtime.clockOut');
         Route::post('/leave-request', [OperatorApiController::class, 'storeLeaveRequest'])->name('api.operator.leave.store');
     });
