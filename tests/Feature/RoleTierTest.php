@@ -181,4 +181,33 @@ class RoleTierTest extends TestCase
         Http::fake(['hris.test/*' => Http::response('down', 503)]);
         $this->artisan('hris:sync-crew')->assertFailed();
     }
+
+    public function test_every_approval_path_records_who_decided_and_when(): void
+    {
+        Http::fake();
+        $crew = $this->user('CleanUP');
+        $coord = $this->user('coordinator');
+        $mgr = $this->user('manager');
+        $owner = $this->user('company');
+        $mk = fn () => Company::create(['user_id' => $owner->id, 'company_name' => 'PT ' . uniqid(), 'pic_name' => 'Budi', 'address' => 'Jl. A', 'phone' => '0812', 'business_category' => 'resto', 'subscription_plan' => 'basic', 'subscription_status' => 'pending']);
+        $ot = \App\Models\OvertimeRequest::create(['user_id' => $crew->id, 'date' => today(), 'reason' => 'x', 'status' => 'pending']);
+        $leave = \App\Models\LeaveRequest::create(['user_id' => $crew->id, 'date' => today(), 'type' => 'izin', 'reason' => 'x', 'status' => 'pending']);
+        $leave2 = \App\Models\LeaveRequest::create(['user_id' => $crew->id, 'date' => today()->addDay(), 'type' => 'izin', 'reason' => 'x', 'status' => 'pending']);
+        [$c1, $c2, $c3] = [$mk(), $mk(), $mk()];
+
+        $this->api($coord)->postJson("/api/admin/attendance/overtime/{$ot->id}/review", ['status' => 'approved'])->assertOk();
+        $this->api($coord)->postJson("/api/admin/attendance/leave/{$leave->id}/review", ['status' => 'rejected'])->assertOk();
+        $this->api($mgr)->postJson("/api/admin/companies/{$c1->id}/review", ['status' => 'approved'])->assertOk();
+        $this->app['auth']->forgetGuards();
+        $this->actingAs($coord)->patch(route('admin.attendance.leave.review', $leave2), ['status' => 'approved'])->assertRedirect();
+        $this->actingAs($mgr)->patch(route('admin.companies.approve', $c2))->assertRedirect();
+        $this->actingAs($mgr)->post(route('admin.companies.reject', $c3), ['rejection_reason' => 'x'])->assertRedirect();
+
+        foreach ([[$ot, $coord], [$leave, $coord], [$leave2, $coord], [$c1, $mgr], [$c2, $mgr], [$c3, $mgr]] as [$model, $by]) {
+            $fresh = $model->fresh();
+            $this->assertSame($by->id, $fresh->reviewed_by, class_basename($model) . " #{$model->id}");
+            $this->assertNotNull($fresh->reviewed_at);
+            $this->assertSame($by->name, $fresh->reviewer->name);
+        }
+    }
 }

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasReviewer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
 class Company extends Model
 {
+    use HasReviewer;
     /** @use HasFactory<\Database\Factories\CompanyFactory> */
     use HasFactory;
 

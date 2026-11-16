@@ -168,7 +168,7 @@ class AdminApiController extends Controller
     public function reviewOvertime(Request $request, OvertimeRequest $overtimeRequest): JsonResponse
     {
         $data = $request->validate(['status' => 'required|in:approved,rejected', 'admin_note' => 'nullable|string|max:500']);
-        $overtimeRequest->update(['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null]);
+        $overtimeRequest->review($request->user(), ['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null]);
 
         return response()->json(['success' => true]);
     }
@@ -176,7 +176,7 @@ class AdminApiController extends Controller
     public function reviewLeave(Request $request, LeaveRequest $leaveRequest, HrisService $hrisService): JsonResponse
     {
         $data = $request->validate(['status' => 'required|in:approved,rejected', 'admin_note' => 'nullable|string|max:500']);
-        $leaveRequest->update(['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null]);
+        $leaveRequest->review($request->user(), ['status' => $data['status'], 'admin_note' => $data['admin_note'] ?? null]);
 
         // Same as the web review: the decision is reflected in HRIS attendance.
         \Illuminate\Support\defer(fn () => $hrisService->pushLeave($leaveRequest));
@@ -188,7 +188,7 @@ class AdminApiController extends Controller
     {
         $data = $request->validate(['status' => 'required|in:approved,rejected', 'reason' => 'nullable|string|max:500']);
 
-        $company->update($data['status'] === 'approved'
+        $company->review($request->user(), $data['status'] === 'approved'
             ? ['subscription_status' => 'approved']
             : ['subscription_status' => 'rejected', 'rejection_reason' => $data['reason'] ?: 'Ditolak melalui aplikasi admin', 'refund_evidence_path' => null]);
 

@@ -54,7 +54,7 @@ class AttendanceController extends Controller
         // Leave requests
         $selectedMonth = Carbon::parse($selectedDate)->format('Y-m');
 
-        $leaveQuery = LeaveRequest::with('user:id,name')
+        $leaveQuery = LeaveRequest::with(['user:id,name', 'reviewer:id,name'])
             ->where(function ($q) use ($selectedMonth) {
                 $q->where('status', 'pending')
                   ->orWhere(function ($q2) use ($selectedMonth) {
@@ -72,7 +72,7 @@ class AttendanceController extends Controller
 
         // ── OVERTIME REQUESTS ──────────────────────────────────────────
         // Tampilkan: semua yang masih pending (global) + bulan yg dipilih
-        $overtimeRequestQuery = OvertimeRequest::with('user:id,name')
+        $overtimeRequestQuery = OvertimeRequest::with(['user:id,name', 'reviewer:id,name'])
             ->where(function ($q) use ($selectedMonth) {
                 $q->where('status', 'pending')
                   ->orWhere(function ($q2) use ($selectedMonth) {
@@ -126,7 +126,7 @@ class AttendanceController extends Controller
             'admin_note' => 'nullable|string|max:500',
         ]);
 
-        $leaveRequest->update([
+        $leaveRequest->review($request->user(), [
             'status'     => $request->status,
             'admin_note' => $request->admin_note,
         ]);
@@ -147,7 +147,7 @@ class AttendanceController extends Controller
             'admin_note' => 'nullable|string|max:500',
         ]);
 
-        $overtimeRequest->update([
+        $overtimeRequest->review($request->user(), [
             'status'     => $request->status,
             'admin_note' => $request->admin_note,
         ]);
