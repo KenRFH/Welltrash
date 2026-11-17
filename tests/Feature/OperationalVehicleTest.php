@@ -65,6 +65,24 @@ class OperationalVehicleTest extends TestCase
         $this->assertDatabaseMissing('vehicles', ['id' => $vehicle->id]);
     }
 
+    public function test_admin_can_release_the_driver_so_the_vehicle_is_free_again(): void
+    {
+        $admin = User::factory()->create(['role' => 'director']);
+        $vehicle = Vehicle::create(['name' => 'L-300', 'license_plate' => 'P 1 WT', 'type' => 'Pick Up', 'status' => 'active']);
+        $driver = User::factory()->create(['role' => 'CleanUP', 'vehicle_id' => $vehicle->id]);
+        $other = User::factory()->create(['role' => 'CleanUP']);
+
+        $this->actingAs($admin)->patch(route('admin.vehicles.releaseDriver', $vehicle))->assertRedirect()->assertSessionHas('success');
+        $this->assertNull($driver->fresh()->vehicle_id);
+        $this->assertSame('active', $vehicle->fresh()->status);
+
+        // Another driver can now take it.
+        $this->actingAs($other)->post(route('cleanup.selectVehicle'), ['vehicle_id' => $vehicle->id]);
+        $this->assertSame($vehicle->id, $other->fresh()->vehicle_id);
+
+        $this->actingAs($driver)->patch(route('admin.vehicles.releaseDriver', $vehicle))->assertForbidden();
+    }
+
     public function test_operator_can_select_active_vehicle(): void
     {
         $operator = User::factory()->create(['role' => 'CleanUP']);

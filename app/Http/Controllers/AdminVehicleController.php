@@ -120,6 +120,18 @@ class AdminVehicleController extends Controller
     }
 
     /**
+     * Free the vehicle for another driver (e.g. the driver forgot to release it or did not clock out).
+     */
+    public function releaseDriver(Vehicle $vehicle)
+    {
+        $released = User::where('vehicle_id', $vehicle->id)->update(['vehicle_id' => null]);
+
+        return back()->with('success', $released
+            ? "Driver dilepas dari {$vehicle->name}. Armada siap dipakai driver lain."
+            : 'Armada ini sudah tidak dipakai driver.');
+    }
+
+    /**
      * Remove the specified operational vehicle from storage.
      */
     public function destroy(Vehicle $vehicle)
