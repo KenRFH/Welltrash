@@ -71,21 +71,21 @@ export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
         >
             {/* Stats Overview */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-amber-200 transition-colors">
+                <div className="bg-white rounded-md p-6 border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-amber-200 transition-colors">
                     <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🍞</div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Total Organik</p>
                         <p className="text-2xl font-black text-gray-900 leading-tight">{totalOrg.toFixed(1)} <span className="text-xs font-bold text-amber-400">Kg</span></p>
                     </div>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-teal-200 transition-colors">
+                <div className="bg-white rounded-md p-6 border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-teal-200 transition-colors">
                     <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🛍️</div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Total Anorganik</p>
                         <p className="text-2xl font-black text-gray-900 leading-tight">{totalAnorg.toFixed(1)} <span className="text-xs font-bold text-teal-400">Kg</span></p>
                     </div>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-gray-300 transition-colors">
+                <div className="bg-white rounded-md p-6 border border-gray-100 shadow-sm flex items-center gap-4 group hover:border-gray-300 transition-colors">
                     <div className="w-12 h-12 bg-gray-50 text-gray-500 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🗑️</div>
                     <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Total Residu</p>
@@ -118,7 +118,7 @@ export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
 
             {/* Activity List */}
             {filtered.length === 0 ? (
-                <div className="bg-white rounded-3xl p-20 text-center border border-dashed border-gray-200">
+                <div className="bg-white rounded-md p-20 text-center border border-dashed border-gray-200">
                     <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Tidak ada data untuk filter ini</p>
                 </div>
             ) : (
@@ -133,7 +133,7 @@ export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
                         return (
                             <div
                                 key={pickup.id}
-                                className={`bg-white rounded-3xl border shadow-sm hover:shadow-md transition-all overflow-hidden ${sc.border}`}
+                                className={`bg-white rounded-md border shadow-sm hover:shadow-md transition-all overflow-hidden ${sc.border}`}
                             >
                                 <div className="flex flex-col lg:flex-row lg:items-center p-6 gap-6">
                                     <div className="flex-1 min-w-0">
@@ -157,15 +157,15 @@ export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
                                             )}
                                             {(Number(pickup.organic_weight || 0) > 0 || Number(pickup.anorganic_weight || 0) > 0 || Number(pickup.residue_weight || 0) > 0) ? (
                                                 <div className="grid grid-cols-3 gap-2 w-64">
-                                                    <div className="bg-amber-50 rounded-xl px-2.5 py-2 text-center border border-amber-100">
+                                                    <div className="bg-amber-50 rounded-md px-2.5 py-2 text-center border border-amber-100">
                                                         <p className="text-[9px] font-black text-amber-600 mb-0.5 uppercase">Org</p>
                                                         <p className="text-sm font-black text-gray-900">{Number(pickup.organic_weight || 0)}<span className="text-[9px] ml-0.5 opacity-40">kg</span></p>
                                                     </div>
-                                                    <div className="bg-teal-50 rounded-xl px-2.5 py-2 text-center border border-teal-100">
+                                                    <div className="bg-teal-50 rounded-md px-2.5 py-2 text-center border border-teal-100">
                                                         <p className="text-[9px] font-black text-teal-600 mb-0.5 uppercase">Anorg</p>
                                                         <p className="text-sm font-black text-gray-900">{Number(pickup.anorganic_weight || 0)}<span className="text-[9px] ml-0.5 opacity-40">kg</span></p>
                                                     </div>
-                                                    <div className="bg-gray-50 rounded-xl px-2.5 py-2 text-center border border-gray-100">
+                                                    <div className="bg-gray-50 rounded-md px-2.5 py-2 text-center border border-gray-100">
                                                         <p className="text-[9px] font-black text-gray-400 mb-0.5 uppercase">Res</p>
                                                         <p className="text-sm font-black text-gray-900">{Number(pickup.residue_weight || 0)}<span className="text-[9px] ml-0.5 opacity-40">kg</span></p>
                                                     </div>
@@ -185,12 +185,12 @@ export default function CleanUPShow({ cleanup, pickups = [] }: Props) {
                                             )}
                                         </div>
                                     ) : pickup.status === 'failed' && pickup.cancellation_reason ? (
-                                        <div className="bg-red-50 rounded-2xl px-5 py-4 border border-red-100 lg:w-72">
+                                        <div className="bg-red-50 rounded-md px-5 py-4 border border-red-100 lg:w-72">
                                             <p className="text-[10px] font-black text-red-500 mb-1 uppercase tracking-widest">Alasan Gagal</p>
                                             <p className="text-xs text-red-800 font-bold italic">"{pickup.cancellation_reason}"</p>
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-50/50 rounded-2xl px-5 py-4 border border-gray-100 lg:w-72 flex items-center justify-center">
+                                        <div className="bg-gray-50/50 rounded-md px-5 py-4 border border-gray-100 lg:w-72 flex items-center justify-center">
                                             <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest italic">Belum Ada Data</p>
                                         </div>
                                     )}

@@ -182,3 +182,18 @@ Operator lapangan bekerja dalam kondisi dinamis: di atas bak armada, basement ge
 4. **Haptic Feedback (Tahap Lanjutan):** Menambahkan getaran perangkat pendek (`navigator.vibrate([30])`) saat tombol scan kamera selesai atau upload sukses.
 5. **Geo-Fencing Radius Check (Tahap Lanjutan):** Peringatan jarak radius bila operator melakukan check-in di luar area koordinat mitra yang ditentukan.
 
+
+---
+
+## Panel Admin (desktop, mode Operate)
+
+Panel admin memakai identitas merek dari PRODUCT.md, bukan emerald generik: **Deep Green `#0C3325`** untuk aksi utama dan status aktif, **Lime `#B7E35C`** sebagai aksen kecil di atas Deep Green. Semua halaman memakai `AdminLayout` (termasuk Persetujuan Mitra dan Permintaan Batal).
+
+- **Sudut kartu:** semua kartu, panel, modal dan hero maksimal `rounded-md` (6px); kontrol (tombol, input, pill) tidak termasuk.
+- **Kartu statistik:** satu komponen `Components/Admin/StatCard.tsx`. Label sentence case 13px, angka 28px tabular, ikon dalam petak berwarna sesuai makna (`ok` hijau, `warn` amber, `bad` merah, `info` biru langit, `neutral` abu). Kartu pertama tiap halaman adalah angka utama (`tone="brand"`: latar Deep Green, ikon Lime). Di Dasbor, hero Deep Green sudah menjadi momen merek, jadi kartunya netral.
+- **Tombol:** `.adm-btn` + `.adm-btn-primary` (Deep Green) / `.adm-btn-outline`; `.adm-btn-sm` untuk aksi baris. Tidak ada tombol indigo atau hitam.
+- **Filter status/tab:** satu kontrol bersegmen `.adm-seg` / `.adm-seg-item[aria-pressed]` dengan penghitung `.adm-seg-count`.
+- **Tabel:** kepala tabel seragam lewat `.adm-main thead th` (12px, sentence case, abu terbaca).
+- **Navigasi:** item aktif berlatar Deep Green dengan ikon Lime; Keluar Sistem berupa item merah tanpa bingkai.
+- **Gerak:** kartu statistik muncul berurutan (60ms per kartu), tombol menekan ke .97; `prefers-reduced-motion` mematikan keduanya.
+- **Larangan:** kelas Tailwind yang tidak ada di v3 (`p-4.5`, `w-4.5`, `h-18`) diam-diam tidak berlaku; emoji tidak dipakai sebagai ikon; nama kelas jangan dirakit dinamis (`tone-${x}`) karena dibuang oleh pemindai Tailwind.

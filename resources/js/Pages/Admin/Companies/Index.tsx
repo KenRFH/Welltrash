@@ -1,4 +1,9 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
+import { MeterList, CHART } from '@/Components/Admin/Charts';
+
+// Plans in their natural order (smallest service level first), not alphabetical.
+const PLAN_ORDER = ['Reguler', 'Prime', 'Premium+'];
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link } from '@inertiajs/react';
 import {
@@ -180,7 +185,7 @@ export default function Index({ companies }: Props) {
             headerAction={
                 <Link
                     href={route('admin.invoices.create')}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                    className="adm-btn adm-btn-primary"
                 >
                     <PlusCircle className="w-4 h-4" />
                     <span>Buat Invoice Baru</span>
@@ -190,193 +195,61 @@ export default function Index({ companies }: Props) {
             <div className="space-y-6">
                 {/* 1. Infographic Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Mitra</span>
-                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-                                <Building2 className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">
-                            {totalCompanies}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Entitas</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="text-emerald-600 font-bold">{activeRate}%</span>
-                            <span>berlangganan aktif</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mitra Aktif</span>
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <CheckCircle2 className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
-                            {activeCompanies}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Mitra</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>Jadwal rutin terintegrasi</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Perlu Tindakan</span>
-                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                                <Clock className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
-                            {pendingActivation}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Mitra</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            {pendingActivation > 0 ? (
-                                <span className="text-amber-700 font-semibold inline-flex items-center gap-1">
-                                    Verifikasi & aktivasi segera
-                                </span>
-                            ) : (
-                                <span>Semua mitra terverifikasi</span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nonaktif / Ditolak</span>
-                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
-                                <AlertCircle className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-slate-700 tracking-tight tabular-nums">
-                            {inactiveCompanies}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Entitas</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span>Bisa diaktifkan kembali sewaktu-waktu</span>
-                        </div>
-                    </div>
+                    <StatCard index={0} tone="brand" icon={Building2} label="Total mitra" value={totalCompanies} unit="entitas"
+                        note={<><span className="font-semibold text-lime">{activeRate}%</span><span>berlangganan aktif</span></>} />
+                    <StatCard index={1} tone="ok" icon={CheckCircle2} label="Mitra aktif" value={activeCompanies} unit="mitra"
+                        note={<span>Jadwal rutin terintegrasi</span>} />
+                    <StatCard index={2} tone="warn" icon={Clock} label="Perlu tindakan" value={pendingActivation} unit="mitra"
+                        note={pendingActivation > 0 ? <span className="font-semibold text-amber-700">Verifikasi & aktivasi segera</span> : <span>Semua mitra terverifikasi</span>} />
+                    <StatCard index={3} tone="neutral" icon={AlertCircle} label="Nonaktif / ditolak" value={inactiveCompanies} unit="entitas"
+                        note={<span>Bisa diaktifkan kembali sewaktu-waktu</span>} />
                 </div>
 
-                {/* 2. Visual Distribution & Plan Infographics */}
-                <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                {/* 2. Partners by status and by plan: two meter lists against the same whole */}
+                <div className="bg-white rounded-md p-5 sm:p-6 border border-slate-200/80">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4">
+                    <div>
+                        <h3 className="text-base font-semibold text-ink tracking-tight">Sebaran mitra</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Jumlah mitra per status dan per paket; klik paket untuk menyaring daftar di bawah.</p>
+                    </div>
+                    <span className="text-sm text-slate-500">Dari <span className="font-semibold text-ink tabular-nums">{totalCompanies}</span> mitra</span>
+                </div>
+                    <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
                         <div>
-                            <div className="flex items-center gap-2">
-                                <Layers className="w-4 h-4 text-emerald-600" />
-                                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                                    Distribusi Status & Portofolio Paket Mitra
-                                </h3>
-                            </div>
-                            <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                Proporsi mitra bisnis berdasarkan status operasional dan pilihan paket layanan
-                            </p>
+                            <h4 className="mb-3 text-sm font-semibold text-slate-700">Status</h4>
+                            <MeterList
+                                label="Mitra per status"
+                                unit="mitra"
+                                total={totalCompanies}
+                                rows={[
+                                    { label: 'Aktif', value: activeCompanies, color: CHART.green },
+                                    { label: 'Verifikasi pembayaran', value: statusCounts.payment_uploaded, color: CHART.blue },
+                                    { label: 'Menunggu', value: statusCounts.pending, color: CHART.amber },
+                                    { label: 'Nonaktif / ditolak', value: inactiveCompanies, color: CHART.gray },
+                                ]}
+                            />
                         </div>
-                        <span className="text-xs font-semibold text-slate-500">
-                            Basis {totalCompanies} Total Perusahaan
-                        </span>
-                    </div>
-
-                    {/* Segmented Distribution Bar */}
-                    <div className="space-y-2">
-                        <div className="h-3 w-full bg-slate-100 rounded-md overflow-hidden flex">
-                            {totalCompanies > 0 ? (
-                                <>
-                                    <div
-                                        style={{ width: `${(activeCompanies / totalCompanies) * 100}%` }}
-                                        className="bg-emerald-500 transition-all duration-500"
-                                        title={`Aktif: ${activeCompanies} (${activeRate}%)`}
-                                    />
-                                    <div
-                                        style={{ width: `${(statusCounts.payment_uploaded / totalCompanies) * 100}%` }}
-                                        className="bg-teal-400 transition-all duration-500"
-                                        title={`Verifikasi Pembayaran: ${statusCounts.payment_uploaded}`}
-                                    />
-                                    <div
-                                        style={{ width: `${(statusCounts.pending / totalCompanies) * 100}%` }}
-                                        className="bg-amber-400 transition-all duration-500"
-                                        title={`Menunggu: ${statusCounts.pending}`}
-                                    />
-                                    <div
-                                        style={{ width: `${(inactiveCompanies / totalCompanies) * 100}%` }}
-                                        className="bg-slate-300 transition-all duration-500"
-                                        title={`Nonaktif: ${inactiveCompanies}`}
-                                    />
-                                </>
-                            ) : (
-                                <div className="w-full bg-slate-200" />
-                            )}
-                        </div>
-
-                        {/* Legend */}
-                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 pt-1">
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
-                                <span>Aktif ({activeCompanies})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-teal-400" />
-                                <span>Verifikasi ({statusCounts.payment_uploaded})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-amber-400" />
-                                <span>Menunggu ({statusCounts.pending})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-slate-300" />
-                                <span>Nonaktif / Ditolak ({inactiveCompanies})</span>
-                            </div>
+                        <div>
+                            <h4 className="mb-3 text-sm font-semibold text-slate-700">Paket langganan</h4>
+                            <MeterList
+                                label="Mitra per paket langganan"
+                                unit="mitra"
+                                total={totalCompanies}
+                                rows={[...uniquePlans]
+                                    .sort((a, b) => (PLAN_ORDER.indexOf(a) + 1 || 99) - (PLAN_ORDER.indexOf(b) + 1 || 99))
+                                    .map((plan) => ({
+                                        label: plan,
+                                        value: planCounts[plan],
+                                        onClick: () => setPlanFilter(planFilter === plan ? 'all' : plan),
+                                        active: planFilter === plan,
+                                    }))}
+                            />
                         </div>
                     </div>
-
-                    {/* Plan Distribution Badges */}
-                    {uniquePlans.length > 0 && (
-                        <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">
-                                Paket Langganan:
-                            </span>
-                            {uniquePlans.map(plan => {
-                                const count = planCounts[plan];
-                                const pct = totalCompanies > 0 ? Math.round((count / totalCompanies) * 100) : 0;
-                                return (
-                                    <button
-                                        key={plan}
-                                        onClick={() => setPlanFilter(planFilter === plan ? 'all' : plan)}
-                                        className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                                            planFilter === plan
-                                                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                                                : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'
-                                        }`}
-                                    >
-                                        <span>{plan}</span>
-                                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                            planFilter === plan ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-600'
-                                        }`}>
-                                            {count} ({pct}%)
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                            {planFilter !== 'all' && (
-                                <button
-                                    onClick={() => setPlanFilter('all')}
-                                    className="text-xs font-semibold text-rose-600 hover:text-rose-700 ml-1 inline-flex items-center gap-1"
-                                >
-                                    <X className="w-3.5 h-3.5" />
-                                    Reset
-                                </button>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 {/* 3. Search & Filter Bar */}
-                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div className="relative flex-1 max-w-md">
                         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
@@ -398,54 +271,23 @@ export default function Index({ companies }: Props) {
 
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Status Filter */}
-                        <div className="flex items-center gap-1.5 bg-slate-100/70 p-1 rounded-lg border border-slate-200/60 text-xs">
-                            <span className="text-[11px] font-bold text-slate-400 px-2 uppercase">Status:</span>
-                            <button
-                                onClick={() => setStatusFilter('all')}
-                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                                    statusFilter === 'all'
-                                        ? 'bg-white text-slate-900 shadow-2xs'
-                                        : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                            >
-                                Semua ({totalCompanies})
-                            </button>
-                            <button
-                                onClick={() => setStatusFilter('active')}
-                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                                    statusFilter === 'active'
-                                        ? 'bg-white text-emerald-700 shadow-2xs'
-                                        : 'text-slate-600 hover:text-emerald-700'
-                                }`}
-                            >
-                                Aktif ({activeCompanies})
-                            </button>
-                            <button
-                                onClick={() => setStatusFilter('payment_uploaded')}
-                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                                    statusFilter === 'payment_uploaded'
-                                        ? 'bg-white text-teal-700 shadow-2xs'
-                                        : 'text-slate-600 hover:text-teal-700'
-                                }`}
-                            >
-                                Verifikasi ({statusCounts.payment_uploaded})
-                            </button>
-                            <button
-                                onClick={() => setStatusFilter('inactive')}
-                                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                                    statusFilter === 'inactive'
-                                        ? 'bg-white text-slate-800 shadow-2xs'
-                                        : 'text-slate-600 hover:text-slate-900'
-                                }`}
-                            >
-                                Nonaktif ({inactiveCompanies})
-                            </button>
+                        <div className="adm-seg" role="group" aria-label="Filter status mitra">
+                            {([
+                                ['all', 'Semua', totalCompanies],
+                                ['active', 'Aktif', activeCompanies],
+                                ['payment_uploaded', 'Verifikasi', statusCounts.payment_uploaded],
+                                ['inactive', 'Nonaktif', inactiveCompanies],
+                            ] as const).map(([key, label, count]) => (
+                                <button key={key} type="button" onClick={() => setStatusFilter(key)} aria-pressed={statusFilter === key} className="adm-seg-item">
+                                    {label} <span className="adm-seg-count">{count}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
 
                 {/* 4. Companies Table Container */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-bold text-slate-900">
@@ -553,7 +395,7 @@ export default function Index({ companies }: Props) {
                                                                 method="patch"
                                                                 as="button"
                                                                 preserveScroll
-                                                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white border border-teal-200 transition-colors"
+                                                                className="px-2.5 py-1.5 rounded-md text-xs font-semibold bg-teal-50 text-teal-700 hover:bg-teal-600 hover:text-white border border-teal-200 transition-colors"
                                                             >
                                                                 Verifikasi & Aktifkan
                                                             </Link>
@@ -565,7 +407,7 @@ export default function Index({ companies }: Props) {
                                                                 method="patch"
                                                                 as="button"
                                                                 preserveScroll
-                                                                className={`p-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                                                className={`p-1.5 rounded-md text-xs font-semibold border transition-colors ${
                                                                     company.subscription_status === 'active'
                                                                         ? 'text-rose-600 hover:bg-rose-50 border-rose-200/80'
                                                                         : 'text-emerald-600 hover:bg-emerald-50 border-emerald-200/80'
@@ -579,7 +421,7 @@ export default function Index({ companies }: Props) {
                                                         {company.subscription_status === 'active' && (
                                                             <Link
                                                                 href={route('admin.invoices.create') + '?company_id=' + company.id}
-                                                                className="p-1.5 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80 transition-colors"
+                                                                className="p-1.5 rounded-md text-xs font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80 transition-colors"
                                                                 title="Buat Tagihan Invoice"
                                                             >
                                                                 <FileText className="w-3.5 h-3.5" />
@@ -588,7 +430,7 @@ export default function Index({ companies }: Props) {
 
                                                         <Link
                                                             href={route('admin.companies.show', company.id)}
-                                                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
+                                                            className="adm-btn adm-btn-outline adm-btn-sm"
                                                         >
                                                             <span>Detail</span>
                                                             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -620,7 +462,7 @@ export default function Index({ companies }: Props) {
                                             {getStatusBadge(company.subscription_status)}
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-2 text-xs py-2.5 px-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                                        <div className="grid grid-cols-2 gap-2 text-xs py-2.5 px-3 rounded-md bg-slate-50 border border-slate-100 mb-3">
                                             <div>
                                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Paket</span>
                                                 <span className="font-semibold text-slate-700 mt-0.5 inline-block">{company.subscription_plan || 'Reguler'}</span>
@@ -644,7 +486,7 @@ export default function Index({ companies }: Props) {
                                                     href={`https://wa.me/${company.phone.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-2 rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                                    className="p-2 rounded-md text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
                                                     title="Hubungi WhatsApp"
                                                 >
                                                     <PhoneCall className="w-4 h-4" />
@@ -654,7 +496,7 @@ export default function Index({ companies }: Props) {
                                             {company.subscription_status === 'active' && (
                                                 <Link
                                                     href={route('admin.invoices.create') + '?company_id=' + company.id}
-                                                    className="p-2 rounded-lg text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                                                    className="p-2 rounded-md text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors"
                                                     title="Buat Tagihan Invoice"
                                                 >
                                                     <FileText className="w-4 h-4" />

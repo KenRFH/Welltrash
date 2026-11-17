@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
+import { SegmentedBar, CHART, fmtShare } from '@/Components/Admin/Charts';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
@@ -16,7 +18,6 @@ import {
     ArrowUpRight,
     Ban,
     Receipt,
-    Sparkles,
     ShieldCheck,
     Scale,
     FileDown,
@@ -81,40 +82,11 @@ interface KpiCardProps {
     href?: string;
 }
 
-const KpiCard: React.FC<KpiCardProps> = ({ icon: Icon, label, value, unit, badge, subtext, color, href }) => {
-    const colorStyles = {
-        emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
-        amber: 'bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white',
-        teal: 'bg-teal-50 text-teal-600 group-hover:bg-teal-600 group-hover:text-white',
-        slate: 'bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white',
-    };
-
-    const content = (
-        <motion.div
-            variants={itemVariants}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className={`bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:shadow-md transition-all group ${
-                color === 'amber' && typeof value === 'number' && value > 0 ? 'bg-amber-50/30 border-amber-200' : ''
-            }`}
-        >
-            <div className="flex items-center justify-between mb-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${colorStyles[color]}`}>
-                    <Icon className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                    {badge}
-                </span>
-            </div>
-            <div className="text-2xl font-black text-slate-900 tracking-tight">
-                {value}
-                {unit && <span className="text-xs font-medium text-slate-400 ml-1 font-sans">{unit}</span>}
-            </div>
-            <div className="mt-2 text-xs text-slate-500 font-medium">{subtext}</div>
-        </motion.div>
-    );
-
-    return href ? <Link href={href} className="block">{content}</Link> : content;
-};
+// Delegates to the shared admin StatCard; badge text is kept for screen readers only (the label already says it).
+const KPI_TONE = { slate: 'neutral', emerald: 'ok', amber: 'warn', teal: 'info' } as const;
+const KpiCard: React.FC<KpiCardProps & { index?: number }> = ({ icon, label, value, unit, subtext, color, href, index }) => (
+    <StatCard icon={icon as any} label={label} value={value} unit={unit?.toLowerCase()} note={subtext} tone={KPI_TONE[color]} href={href} index={index} />
+);
 
 interface WasteCardProps {
     icon: React.ComponentType<{ className?: string }>;
@@ -129,7 +101,7 @@ interface WasteCardProps {
 }
 
 const WasteCard: React.FC<WasteCardProps> = ({ icon: Icon, title, weight, pct, desc, bg, border, iconBg, textColor }) => (
-    <div className={`p-4 rounded-xl ${bg} ${border} border transition-colors`}>
+    <div className={`p-4 rounded-md ${bg} ${border} border transition-colors`}>
         <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
                 <div className={`w-8 h-8 rounded-lg ${iconBg} text-white flex items-center justify-center`}>
@@ -244,7 +216,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                     />
                     <a
                         href={route('admin.reports.monthly', { month: reportMonth })}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                        className="adm-btn adm-btn-primary"
                     >
                         <FileDown className="w-4 h-4" />
                         <span>Laporan Bulanan (PDF)</span>
@@ -261,40 +233,31 @@ export default function Dashboard({ trashStats, totals }: Props) {
                 {/* 1. Greeting & Intelligence Summary Bar */}
                 <motion.div
                     variants={itemVariants}
-                    className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-xs border border-slate-800"
+                    className="relative overflow-hidden bg-green-deep text-white rounded-md p-5 sm:p-6"
                 >
-                    <div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-emerald-500/10 via-teal-500/5 to-transparent pointer-events-none" />
                     <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-2 mb-1.5">
-                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                    <Sparkles className="w-3 h-3 text-emerald-400" />
-                                    WellTrash Enterprise
-                                </span>
-                                <span className="text-xs text-slate-400 font-medium hidden sm:inline">&bull;</span>
-                                <span className="text-xs text-slate-400 font-medium hidden sm:inline">Pusat Kendali Operasional</span>
-                            </div>
-                            <h2 className="text-lg sm:text-2xl font-black tracking-tight text-white">
+                            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
                                 {greeting}, Administrator
                             </h2>
-                            <p className="text-xs text-slate-300/90 mt-1 max-w-2xl leading-relaxed">
-                                Memonitor <span className="font-bold text-white">{totals.total_companies} mitra industri</span> di Jember dengan akumulasi <span className="font-bold text-emerald-400">{totalWasteKg.toLocaleString('id-ID')} Kg</span> limbah terkelola secara sirkular.
+                            <p className="text-sm text-white/75 mt-1 max-w-2xl leading-relaxed">
+                                Memonitor <span className="font-bold text-white">{totals.total_companies} mitra industri</span> di Jember dengan akumulasi <span className="font-bold text-lime">{totalWasteKg.toLocaleString('id-ID')} Kg</span> limbah terkelola secara sirkular.
                             </p>
                         </div>
 
                         {/* Quick Intelligence Badges */}
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                            <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center gap-2.5">
-                                <Leaf className="w-4 h-4 text-emerald-400" />
+                            <div className="px-3.5 py-2 rounded-md bg-white/[.06] border border-white/10 flex items-center gap-2.5">
+                                <Leaf className="w-4 h-4 text-lime" />
                                 <div>
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tingkat Daur Ulang</div>
+                                    <div className="text-[11px] text-white/60 font-medium">Tingkat daur ulang</div>
                                     <div className="text-xs font-black text-white">{diversionRate}% Teralihkan</div>
                                 </div>
                             </div>
-                            <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center gap-2.5">
-                                <Scale className="w-4 h-4 text-teal-400" />
+                            <div className="px-3.5 py-2 rounded-md bg-white/[.06] border border-white/10 flex items-center gap-2.5">
+                                <Scale className="w-4 h-4 text-lime" />
                                 <div>
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Reduksi Karbon</div>
+                                    <div className="text-[11px] text-white/60 font-medium">Reduksi karbon</div>
                                     <div className="text-xs font-black text-white">{co2eAvoided} Kg CO₂e</div>
                                 </div>
                             </div>
@@ -304,6 +267,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                 {/* 2. Primary KPI Metrics Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <KpiCard
+                        index={0}
                         icon={Building2}
                         label="Total Perusahaan"
                         value={totals.total_companies}
@@ -319,6 +283,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                     />
 
                     <KpiCard
+                        index={1}
                         icon={CheckCircle2}
                         label="Mitra Aktif"
                         value={totals.active_companies}
@@ -334,6 +299,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                     />
 
                     <KpiCard
+                        index={2}
                         icon={Clock}
                         label="Persetujuan"
                         value={totals.pending_companies}
@@ -353,6 +319,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                     />
 
                     <KpiCard
+                        index={3}
                         icon={Truck}
                         label="Total Penjemputan"
                         value={totals.total_pickups}
@@ -371,7 +338,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                 {/* 3. Waste Composition & Alur Sirkularitas */}
                 <motion.div
                     variants={itemVariants}
-                    className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/80 shadow-xs"
+                    className="bg-white rounded-md p-5 sm:p-6 border border-slate-200/80 shadow-xs"
                 >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                         <div>
@@ -385,44 +352,26 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                 Akumulasi penimbangan dari penjemputan armada CleanUP yang telah selesai
                             </p>
                         </div>
-                        <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 text-xs font-bold text-slate-700 self-start sm:self-auto">
+                        <div className="px-3 py-1.5 rounded-md bg-slate-50 border border-slate-200/60 text-xs font-bold text-slate-700 self-start sm:self-auto">
                             Total: <span className="text-emerald-700 font-extrabold">{totalWasteKg.toLocaleString('id-ID')} Kg</span>
                         </div>
                     </div>
 
-                    {/* Segmented Progress Bar */}
-                    <div className="space-y-2 mb-6">
-                        <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex shadow-inner">
-                            <div
-                                style={{ width: `${Math.max(Number(organicPct), totalOrganic > 0 ? 3 : 0)}%` }}
-                                className="bg-emerald-500 transition-all duration-700"
-                                title={`Organik: ${totalOrganic} Kg (${organicPct}%)`}
-                            />
-                            <div
-                                style={{ width: `${Math.max(Number(anorganicPct), totalAnorganic > 0 ? 3 : 0)}%` }}
-                                className="bg-teal-500 transition-all duration-700"
-                                title={`Anorganik: ${totalAnorganic} Kg (${anorganicPct}%)`}
-                            />
-                            <div
-                                style={{ width: `${Math.max(Number(residuePct), totalResidue > 0 ? 3 : 0)}%` }}
-                                className="bg-slate-400 transition-all duration-700"
-                                title={`Residu: ${totalResidue} Kg (${residuePct}%)`}
-                            />
-                        </div>
-                        <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 font-medium pt-1">
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                                <span>Organik ({organicPct}%)</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
-                                <span>Anorganik ({anorganicPct}%)</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
-                                <span>Residu ({residuePct}%)</span>
-                            </div>
-                        </div>
+                    {/* Composition, with what is diverted from landfill (TPA) bracketed against what still goes there */}
+                    <div className="mb-6">
+                        <SegmentedBar
+                            label="Komposisi sampah terkelola menurut kategori"
+                            emptyText="Belum ada penimbangan dari penjemputan yang selesai."
+                            brackets={[
+                                { from: 0, to: 1, text: `Teralihkan dari TPA · ${fmtShare(((totalOrganic + totalAnorganic) / (totalWasteKg || 1)) * 100)}` },
+                                { from: 2, to: 2, text: 'Ke TPA' },
+                            ]}
+                            parts={[
+                                { label: 'Organik', value: totalOrganic, display: `${totalOrganic.toLocaleString('id-ID')} kg`, color: CHART.green },
+                                { label: 'Anorganik', value: totalAnorganic, display: `${totalAnorganic.toLocaleString('id-ID')} kg`, color: CHART.blue },
+                                { label: 'Residu', value: totalResidue, display: `${totalResidue.toLocaleString('id-ID')} kg`, color: CHART.brown },
+                            ]}
+                        />
                     </div>
 
                     {/* 3 Waste Stream Cards */}
@@ -435,7 +384,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             desc="Dikompos & dibiokonversi larva Maggot BSF untuk pakan ternak tinggi protein."
                             bg="bg-emerald-50/50"
                             border="border-emerald-100"
-                            iconBg="bg-emerald-600"
+                            iconBg="bg-[#1f7a4d]"
                             textColor="text-emerald-950"
                         />
 
@@ -445,9 +394,9 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             weight={totalAnorganic}
                             pct={anorganicPct}
                             desc="Pilah bernilai ekonomis (plastik PET/HDPE, kardus, kaleng) untuk rantai pasok daur ulang."
-                            bg="bg-teal-50/50"
-                            border="border-teal-100"
-                            iconBg="bg-teal-600"
+                            bg="bg-blue-50/50"
+                            border="border-blue-100"
+                            iconBg="bg-[#2a78d6]"
                             textColor="text-teal-950"
                         />
 
@@ -457,9 +406,9 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             weight={totalResidue}
                             pct={residuePct}
                             desc="Material sisa non-daur ulang diangkut secara terkontrol menuju TPA Pakusari."
-                            bg="bg-slate-50"
-                            border="border-slate-200/80"
-                            iconBg="bg-slate-700"
+                            bg="bg-orange-50/40"
+                            border="border-orange-100"
+                            iconBg="bg-[#b8652a]"
                             textColor="text-slate-800"
                         />
                     </div>
@@ -468,7 +417,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                 {/* 4. Per-Company Trash Ledger Table with Live Filters */}
                 <motion.div
                     variants={itemVariants}
-                    className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden"
+                    className="bg-white rounded-md border border-slate-200/80 shadow-xs overflow-hidden"
                 >
                     <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
@@ -498,7 +447,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             </div>
 
                             {/* Status Filters */}
-                            <div className="inline-flex p-0.5 rounded-xl bg-slate-100 border border-slate-200/70 text-xs font-semibold">
+                            <div className="inline-flex p-0.5 rounded-md bg-slate-100 border border-slate-200/70 text-xs font-semibold">
                                 <button
                                     onClick={() => setStatusFilter('all')}
                                     className={`px-2.5 py-1 rounded-lg transition-all ${
@@ -672,7 +621,7 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             <Link
                                 key={i}
                                 href={action.href}
-                                className={`group bg-white rounded-2xl p-4 border ${action.border} hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-3.5`}
+                                className={`group bg-white rounded-md p-4 border ${action.border} hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-3.5`}
                             >
                                 <div className={`w-11 h-11 ${action.bg} ${action.color} rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
                                     <ActionIcon className="w-5 h-5" />

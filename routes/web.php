@@ -212,6 +212,7 @@ Route::middleware(['auth', 'role:' . implode(',', User::OPS_ROLES)])
         // Inventaris Kendaraan Operasional
         Route::resource('vehicles', AdminVehicleController::class)->except(['create', 'show', 'edit']);
         Route::patch('/vehicles/{vehicle}/toggle-status', [AdminVehicleController::class, 'toggleStatus'])->name('vehicles.toggleStatus');
+        Route::patch('/vehicles/{vehicle}/release-driver', [AdminVehicleController::class, 'releaseDriver'])->name('vehicles.releaseDriver');
 
         // Absensi
         Route::get('/attendance', [AdminAttendanceController::class, 'index'])->name('attendance.index');

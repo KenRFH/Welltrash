@@ -1,6 +1,6 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { useForm, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
-import AdminSidebar from '@/Components/AdminSidebar';
+import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Company {
     id: number;
@@ -20,7 +20,6 @@ interface Props {
 
 export default function Cancellations({ companies }: Props) {
     const { delete: destroy, processing } = useForm();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleApproveCancellation = (e: React.FormEvent, id: number) => {
         e.preventDefault();
@@ -30,28 +29,13 @@ export default function Cancellations({ companies }: Props) {
     };
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Permintaan Pembatalan | WellTrash Admin" />
-            <AdminSidebar active="cancellations" isMobileOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-20 flex items-center justify-between px-6 sm:px-10 bg-white/70 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 hover:text-orange-600 md:hidden focus:outline-none">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                        </button>
-                        <div>
-                            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Permintaan Pembatalan</h1>
-                            <p className="text-xs text-gray-400 font-medium">Tinjau perusahaan yang ingin berhenti berlangganan</p>
-                        </div>
-                    </div>
-                    <div className="bg-red-50 text-red-700 px-4 py-2 rounded-xl font-bold text-sm border border-red-100">
-                        {companies.length} Permintaan
-                    </div>
-                </header>
-
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-8">
-                    <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+        <AdminLayout
+            title="Permintaan Pembatalan"
+            subtitle="Tinjau perusahaan yang ingin berhenti berlangganan"
+            activeTab="cancellations"
+            headerAction={<span className="inline-flex h-8 items-center rounded-lg bg-rose-50 px-3 text-xs font-semibold text-rose-700">{companies.length} permintaan</span>}
+        >
+                    <div className="bg-white rounded-md shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
                         {companies.length === 0 ? (
                             <div className="p-16 flex flex-col items-center justify-center text-center">
                                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
@@ -78,7 +62,7 @@ export default function Cancellations({ companies }: Props) {
                                                 </div>
                                             </div>
                                             <div className="flex-shrink-0 flex items-center gap-3 lg:border-l lg:border-gray-100 lg:pl-6">
-                                                <Link href={route('admin.companies.show', company.id)} className="px-4 py-2.5 text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-100 rounded-xl font-bold text-sm flex items-center justify-center transition-colors">
+                                                <Link href={route('admin.companies.show', company.id)} className="px-4 py-2.5 text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-100 rounded-md font-bold text-sm flex items-center justify-center transition-colors">
                                                     Detail
                                                 </Link>
                                                 <form onSubmit={(e) => handleApproveCancellation(e, company.id)}>
@@ -94,8 +78,6 @@ export default function Cancellations({ companies }: Props) {
                             </ul>
                         )}
                     </div>
-                </main>
-            </div>
-        </div>
+        </AdminLayout>
     );
 }

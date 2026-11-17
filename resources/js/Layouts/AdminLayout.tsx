@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
+import type { PageProps } from '@/types';
 import AdminSidebar, { AdminActiveTab } from '@/Components/AdminSidebar';
 import { Menu, ShieldCheck, Calendar, Sparkles } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface Props {
 
 export default function AdminLayout({ children, title, activeTab, subtitle, headerAction }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const me = usePage<PageProps>().props.auth.user;
     const [isScrolled, setIsScrolled] = useState(false);
 
     useEffect(() => {
@@ -43,8 +45,7 @@ export default function AdminLayout({ children, title, activeTab, subtitle, head
 
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Subtle Clean Ambient Gradient */}
-                <div className="fixed top-0 right-0 w-[500px] h-[300px] bg-gradient-to-b from-emerald-500/5 to-transparent rounded-full blur-3xl pointer-events-none z-0" />
-
+                
                 {/* Header */}
                 <header className={`h-18 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30 transition-all duration-200 ${
                     isScrolled
@@ -54,25 +55,25 @@ export default function AdminLayout({ children, title, activeTab, subtitle, head
                     <div className="flex items-center gap-3 sm:gap-4">
                         <button 
                             onClick={() => setIsSidebarOpen(true)} 
-                            className="p-2 -ml-2 text-slate-600 hover:text-emerald-700 hover:bg-slate-100 rounded-xl md:hidden transition-all active:scale-95"
+                            className="p-2 -ml-2 text-slate-600 hover:text-green-deep hover:bg-paper rounded-xl md:hidden transition-all active:scale-95"
                             aria-label="Buka Menu"
                         >
                             <Menu className="w-5 h-5" />
                         </button>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">{title}</h1>
+                                <h1 className="text-lg sm:text-xl font-bold text-ink tracking-tight">{title}</h1>
                                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                     Online
                                 </span>
                             </div>
-                            {subtitle && <p className="hidden sm:block text-[11px] font-medium text-slate-400 mt-0.5">{subtitle}</p>}
+                            {subtitle && <p className="hidden sm:block text-xs text-slate-500 mt-0.5">{subtitle}</p>}
                         </div>
                     </div>
                     
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/80 border border-slate-200/60 text-xs font-semibold text-slate-600">
+                        <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-100/80 border border-slate-200/60 text-xs font-semibold text-slate-600 whitespace-nowrap">
                             <Calendar className="w-3.5 h-3.5 text-slate-400" />
                             <span>{currentDateStr}</span>
                         </div>
@@ -80,19 +81,19 @@ export default function AdminLayout({ children, title, activeTab, subtitle, head
                         {headerAction}
 
                         <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-slate-200">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                            <div className="w-8 h-8 rounded-lg bg-green-deep text-lime font-bold text-xs flex items-center justify-center">
                                 <ShieldCheck className="w-4 h-4" />
                             </div>
                             <div className="hidden sm:flex flex-col text-left">
-                                <span className="text-xs font-bold text-slate-900 leading-tight">Administrator</span>
-                                <span className="text-[10px] font-medium text-emerald-600 leading-tight">Super Admin</span>
+                                <span className="max-w-[180px] truncate text-xs font-bold text-slate-900 leading-tight" title={me?.name}>{me?.name}</span>
+                                <span className="max-w-[180px] truncate text-[11px] font-medium text-slate-500 leading-tight">{me?.division || me?.role_label}</span>
                             </div>
                         </div>
                     </div>
                 </header>
 
                 {/* Main Content */}
-                <main className="flex-1 relative z-10 p-4 sm:p-8 pt-4 sm:pt-6">
+                <main className="adm-main flex-1 relative z-10 p-4 sm:p-8 pt-4 sm:pt-6">
                     {children}
                 </main>
                 

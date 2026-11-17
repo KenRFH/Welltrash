@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
+import { SegmentedBar, CHART } from '@/Components/Admin/Charts';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Link, router } from '@inertiajs/react';
 import {
@@ -158,6 +160,9 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
             .reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0);
     }, [invoices.data]);
 
+    const proofSum = useMemo(() => invoices.data
+        .filter(inv => inv.status === 'unpaid' && inv.payment_proof_path)
+        .reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0), [invoices.data]);
     const paidCount = useMemo(() => invoices.data.filter(inv => inv.status === 'paid').length, [invoices.data]);
     const unpaidCount = useMemo(() => invoices.data.filter(inv => inv.status === 'unpaid').length, [invoices.data]);
     const proofCount = useMemo(() => invoices.data.filter(inv => inv.status === 'unpaid' && inv.payment_proof_path).length, [invoices.data]);
@@ -172,7 +177,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
             headerAction={
                 <Link
                     href={route('admin.invoices.create')}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                    className="adm-btn adm-btn-primary"
                 >
                     <PlusCircle className="w-4 h-4" />
                     <span>Buat Invoice Baru</span>
@@ -182,131 +187,38 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
             <div className="space-y-6">
                 {/* 1. Infographic Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tagihan</span>
-                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-                                <Receipt className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-xl font-extrabold text-slate-900 tracking-tight tabular-nums">
-                            {formatRupiah(totalRevenueSum)}
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="w-2 h-2 rounded-full bg-slate-400" />
-                            <span>Dari {invoices.total} total invoice</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tagihan Lunas</span>
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <CheckCircle2 className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
-                            {formatRupiah(paidSum)}
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="font-bold text-emerald-600">{settlementRate}%</span>
-                            <span>({paidCount} invoice lunas)</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Belum Lunas</span>
-                            <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                                <AlertCircle className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-xl font-extrabold text-rose-700 tracking-tight tabular-nums">
-                            {formatRupiah(unpaidSum)}
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="text-rose-600 font-bold">{unpaidCount} invoice</span>
-                            <span>tertunggak</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Verifikasi Bukti</span>
-                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                                <Clock className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
-                            {proofCount}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Dokumen</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            {proofCount > 0 ? (
-                                <span className="text-amber-700 font-semibold">Perlu dicek & verifikasi</span>
-                            ) : (
-                                <span>Semua bukti telah ditinjau</span>
-                            )}
-                        </div>
-                    </div>
+                    <StatCard index={0} tone="brand" icon={Receipt} label="Total tagihan" value={formatRupiah(totalRevenueSum)}
+                        note={<span>Dari {invoices.total} total invoice</span>} />
+                    <StatCard index={1} tone="ok" icon={CheckCircle2} label="Tagihan lunas" value={formatRupiah(paidSum)}
+                        note={<><span className="font-semibold text-emerald-700">{settlementRate}%</span><span>({paidCount} invoice lunas)</span></>} />
+                    <StatCard index={2} tone="bad" icon={AlertCircle} label="Belum lunas" value={formatRupiah(unpaidSum)}
+                        note={<><span className="font-semibold text-rose-600">{unpaidCount} invoice</span><span>tertunggak</span></>} />
+                    <StatCard index={3} tone="warn" icon={Clock} label="Verifikasi bukti" value={proofCount} unit="dokumen"
+                        note={proofCount > 0 ? <span className="font-semibold text-amber-700">Perlu dicek & verifikasi</span> : <span>Semua bukti telah ditinjau</span>} />
                 </div>
 
-                {/* 2. Visual Settlement & WA Status Meter */}
-                <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-emerald-600" />
-                            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                                Progres Pelunasan & Penagihan Retribusi
-                            </h3>
-                        </div>
-                        <span className="text-xs font-semibold text-slate-500">
-                            Rasio Lunas: <span className="font-extrabold text-emerald-700">{settlementRate}%</span>
-                        </span>
+                {/* 2. Where the billed money stands: paid / proof awaiting check / unpaid, by amount */}
+                <div className="bg-white rounded-md p-5 sm:p-6 border border-slate-200/80">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4">
+                    <div>
+                        <h3 className="text-base font-semibold text-ink tracking-tight">Posisi tagihan</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Nilai tagihan pada halaman ini menurut status pembayaran.</p>
                     </div>
-
-                    <div className="space-y-2">
-                        <div className="h-2.5 w-full bg-slate-100 rounded-md overflow-hidden flex">
-                            {invoices.data.length > 0 ? (
-                                <>
-                                    <div
-                                        style={{ width: `${(paidCount / invoices.data.length) * 100}%` }}
-                                        className="bg-emerald-500 transition-all duration-500"
-                                        title={`Lunas: ${paidCount}`}
-                                    />
-                                    <div
-                                        style={{ width: `${(proofCount / invoices.data.length) * 100}%` }}
-                                        className="bg-amber-400 transition-all duration-500"
-                                        title={`Bukti Diunggah: ${proofCount}`}
-                                    />
-                                    <div
-                                        style={{ width: `${((unpaidCount - proofCount) / invoices.data.length) * 100}%` }}
-                                        className="bg-rose-400 transition-all duration-500"
-                                        title={`Belum Lunas: ${unpaidCount - proofCount}`}
-                                    />
-                                </>
-                            ) : null}
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 pt-1">
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
-                                <span>Lunas ({paidCount})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-amber-400" />
-                                <span>Verifikasi Bukti ({proofCount})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-rose-400" />
-                                <span>Belum Lunas ({unpaidCount - proofCount})</span>
-                            </div>
-                        </div>
-                    </div>
+                    <span className="text-sm text-slate-500">Terbayar <span className="font-semibold text-ink tabular-nums">{settlementRate}%</span> dari jumlah invoice</span>
+                </div>
+                    <SegmentedBar
+                        label="Nilai tagihan menurut status pembayaran"
+                        emptyText="Belum ada tagihan untuk ditampilkan."
+                        parts={[
+                            { label: 'Lunas', value: paidSum, display: formatRupiah(paidSum), color: CHART.green },
+                            { label: 'Bukti menunggu verifikasi', value: proofSum, display: formatRupiah(proofSum), color: CHART.amber, ink: 'dark' },
+                            { label: 'Belum dibayar', value: unpaidSum - proofSum, display: formatRupiah(unpaidSum - proofSum), color: CHART.red },
+                        ]}
+                    />
                 </div>
 
                 {/* 3. Minimalist Filter Bar */}
-                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-wrap gap-3 items-center justify-between">
+                <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs flex flex-wrap gap-3 items-center justify-between">
                     <div className="flex flex-wrap items-center gap-2.5">
                         <select
                             value={companyFilter}
@@ -344,7 +256,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={applyFilters}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
+                            className="adm-btn adm-btn-primary adm-btn-sm"
                         >
                             Terapkan Filter
                         </button>
@@ -360,7 +272,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                 </div>
 
                 {/* 4. Invoices Table Container */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-bold text-slate-900">
@@ -383,7 +295,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                             </p>
                             <Link
                                 href={route('admin.invoices.create')}
-                                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-2xs"
+                                className="mt-3 adm-btn adm-btn-primary adm-btn-sm"
                             >
                                 <PlusCircle className="w-3.5 h-3.5" />
                                 <span>Buat Invoice Baru</span>
@@ -483,7 +395,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                                                             <a
                                                                 href={route('admin.invoices.show', invoice.id)}
                                                                 target="_blank"
-                                                                className="p-1.5 rounded-lg text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 transition-colors"
+                                                                className="p-1.5 rounded-md text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 transition-colors"
                                                                 title="Preview PDF Invoice"
                                                             >
                                                                 <FileText className="w-3.5 h-3.5" />
@@ -493,7 +405,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                                                             <a
                                                                 href={route('admin.invoices.whatsapp', invoice.id)}
                                                                 target="_blank"
-                                                                className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-colors"
+                                                                className="p-1.5 rounded-md text-emerald-700 hover:bg-emerald-50 border border-slate-200 transition-colors"
                                                                 title="Kirim ke WhatsApp PIC"
                                                             >
                                                                 <MessageSquare className="w-3.5 h-3.5" />
@@ -573,7 +485,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                                                 </div>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-2 text-xs py-2 px-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                                            <div className="grid grid-cols-2 gap-2 text-xs py-2 px-3 rounded-md bg-slate-50 border border-slate-100 mb-3">
                                                 <div>
                                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Jatuh Tempo</span>
                                                     <span className={`font-semibold mt-0.5 inline-block ${isOverdue ? 'text-rose-600 font-bold' : 'text-slate-700'}`}>
@@ -597,7 +509,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                                                 <a
                                                     href={route('admin.invoices.whatsapp', invoice.id)}
                                                     target="_blank"
-                                                    className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-center transition-colors"
+                                                    className="flex-1 py-1.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-center transition-colors"
                                                 >
                                                     Kirim WA
                                                 </a>
@@ -657,7 +569,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
             {/* Payment Proof Modal */}
             {viewingProofInvoice && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-                    <div className="bg-white rounded-xl p-6 max-w-xl w-full border border-slate-200 shadow-xl relative animate-in fade-in zoom-in-95">
+                    <div className="bg-white rounded-md p-6 max-w-xl w-full border border-slate-200 shadow-xl relative animate-in fade-in zoom-in-95">
                         <button
                             onClick={() => setViewingProofInvoice(null)}
                             className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -677,12 +589,12 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                             </div>
                         </div>
 
-                        <div className="my-4 p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                        <div className="my-4 p-3 rounded-md bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
                             <span className="text-slate-500">Nominal Tagihan:</span>
                             <span className="font-extrabold text-slate-900 text-sm">{formatRupiah(viewingProofInvoice.amount)}</span>
                         </div>
 
-                        <div className="bg-slate-100 rounded-lg p-3 flex justify-center items-center min-h-[260px] max-h-[400px] border border-slate-200 overflow-hidden mb-5">
+                        <div className="bg-slate-100 rounded-md p-3 flex justify-center items-center min-h-[260px] max-h-[400px] border border-slate-200 overflow-hidden mb-5">
                             {viewingProofInvoice.payment_proof_path ? (
                                 viewingProofInvoice.payment_proof_path.endsWith('.pdf') ? (
                                     <div className="text-center space-y-3">
@@ -694,7 +606,7 @@ export default function InvoicesIndex({ invoices, companies, filters }: Props) {
                                             href={`/storage/${viewingProofInvoice.payment_proof_path}`}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
                                         >
                                             <ExternalLink className="w-3.5 h-3.5" />
                                             <span>Buka PDF di Tab Baru</span>

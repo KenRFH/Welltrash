@@ -43,7 +43,8 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user,
+                // role_label: shown when an account has no HRIS division (local/demo accounts).
+                'user' => $user ? $user->toArray() + ['role_label' => $user->roleLabel()] : null,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),

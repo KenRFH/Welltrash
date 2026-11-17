@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useForm, router } from '@inertiajs/react';
 import VehicleModal from './VehicleModal';
@@ -116,6 +117,13 @@ export default function Index({ vehicles, stats, filters }: Props) {
         }
     };
 
+    const handleReleaseDriver = (vehicle: Vehicle) => {
+        const names = vehicle.drivers?.map((d) => d.name).join(', ');
+        if (confirm(`Lepas ${names} dari "${vehicle.name}"? Armada akan tersedia untuk driver lain.`)) {
+            router.patch(route('admin.vehicles.releaseDriver', vehicle.id), {}, { preserveScroll: true });
+        }
+    };
+
     const handleToggleStatus = (vehicle: Vehicle, newStatus: 'active' | 'maintenance' | 'inactive') => {
         router.patch(route('admin.vehicles.toggleStatus', vehicle.id), { status: newStatus });
     };
@@ -139,7 +147,7 @@ export default function Index({ vehicles, stats, filters }: Props) {
             headerAction={
                 <button
                     onClick={openCreateModal}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                    className="adm-btn adm-btn-primary"
                 >
                     <Plus className="w-4 h-4" />
                     <span>Tambah Armada</span>
@@ -148,103 +156,26 @@ export default function Index({ vehicles, stats, filters }: Props) {
         >
             <div className="space-y-6">
                 {/* 1. Stat Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-4.5 shadow-2xs">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Armada</span>
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-                                <CarFront className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-black text-slate-900 tracking-tight tabular-nums">
-                            {stats.total}
-                            <span className="text-xs font-medium text-slate-400 ml-1">unit</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-4.5 shadow-2xs">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Siap Jalan</span>
-                            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <CheckCircle2 className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-black text-emerald-700 tracking-tight tabular-nums">
-                            {stats.active}
-                            <span className="text-xs font-medium text-slate-400 ml-1">aktif</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-4.5 shadow-2xs">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Perawatan</span>
-                            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                                <AlertTriangle className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-black text-amber-700 tracking-tight tabular-nums">
-                            {stats.maintenance}
-                            <span className="text-xs font-medium text-slate-400 ml-1">unit</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-slate-200/80 p-4.5 shadow-2xs">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-bold text-rose-600 uppercase tracking-wider">Nonaktif</span>
-                            <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-                                <XCircle className="w-4 h-4" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-black text-rose-700 tracking-tight tabular-nums">
-                            {stats.inactive}
-                            <span className="text-xs font-medium text-slate-400 ml-1">unit</span>
-                        </div>
-                    </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard index={0} tone="brand" icon={CarFront} label="Total armada" value={stats.total} unit="unit" />
+                    <StatCard index={1} tone="ok" icon={CheckCircle2} label="Siap jalan" value={stats.active} unit="aktif" />
+                    <StatCard index={2} tone="warn" icon={AlertTriangle} label="Perawatan" value={stats.maintenance} unit="unit" />
+                    <StatCard index={3} tone="bad" icon={XCircle} label="Nonaktif" value={stats.inactive} unit="unit" />
                 </div>
 
                 {/* 2. Filter & Search Controls */}
-                <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-                        <button
-                            onClick={() => setStatusFilter('all')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                statusFilter === 'all'
-                                    ? 'bg-slate-900 text-white'
-                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                        >
-                            Semua ({stats.total})
-                        </button>
-                        <button
-                            onClick={() => setStatusFilter('active')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                statusFilter === 'active'
-                                    ? 'bg-emerald-600 text-white'
-                                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                            }`}
-                        >
-                            Siap Jalan ({stats.active})
-                        </button>
-                        <button
-                            onClick={() => setStatusFilter('maintenance')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                statusFilter === 'maintenance'
-                                    ? 'bg-amber-600 text-white'
-                                    : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                            }`}
-                        >
-                            Perawatan ({stats.maintenance})
-                        </button>
-                        <button
-                            onClick={() => setStatusFilter('inactive')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                statusFilter === 'inactive'
-                                    ? 'bg-rose-600 text-white'
-                                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                            }`}
-                        >
-                            Nonaktif ({stats.inactive})
-                        </button>
+                <div className="bg-white rounded-md border border-slate-200/80 p-4 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="adm-seg" role="group" aria-label="Filter status armada">
+                        {([
+                            ['all', 'Semua', stats.total],
+                            ['active', 'Siap jalan', stats.active],
+                            ['maintenance', 'Perawatan', stats.maintenance],
+                            ['inactive', 'Nonaktif', stats.inactive],
+                        ] as const).map(([key, label, count]) => (
+                            <button key={key} type="button" onClick={() => setStatusFilter(key)} aria-pressed={statusFilter === key} className="adm-seg-item">
+                                {label} <span className="adm-seg-count">{count}</span>
+                            </button>
+                        ))}
                     </div>
 
                     <div className="relative min-w-[240px]">
@@ -259,7 +190,7 @@ export default function Index({ vehicles, stats, filters }: Props) {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -287,13 +218,29 @@ export default function Index({ vehicles, stats, filters }: Props) {
                                             <td className="py-3.5 px-4 font-mono font-bold">{v.license_plate}</td>
                                             <td className="py-3.5 px-4">{v.capacity || '-'}</td>
                                             <td className="py-3.5 px-4 text-emerald-800 font-bold text-[11px]">
-                                                {v.drivers?.map((d) => d.name).join(', ') || <span className="text-slate-400 font-normal italic">Standby</span>}
+                                                {v.drivers?.length ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <span>{v.drivers.map((d) => d.name).join(', ')}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleReleaseDriver(v)}
+                                                            title="Lepas driver agar armada tersedia kembali"
+                                                            aria-label={`Lepas driver dari ${v.name}`}
+                                                            className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[10px] font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors"
+                                                        >
+                                                            <X className="w-3 h-3" /> Lepas
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-slate-400 font-normal italic">Standby</span>
+                                                )}
                                             </td>
                                             <td className="py-3.5 px-4">
                                                 <select
                                                     value={v.status}
                                                     onChange={(e) => handleToggleStatus(v, e.target.value as any)}
-                                                    className="text-xs font-bold rounded px-2 py-1 border bg-slate-50"
+                                                    className="text-xs font-semibold rounded-lg border-slate-200 bg-white pl-2.5 pr-8 py-1.5 focus:border-green-deep focus:ring-lime"
+                                                    aria-label={`Status ${v.name}`}
                                                 >
                                                     <option value="active">Siap Jalan</option>
                                                     <option value="maintenance">Perawatan</option>

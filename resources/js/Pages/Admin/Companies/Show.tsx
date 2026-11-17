@@ -74,7 +74,7 @@ export default function Show({ company }: Props) {
         >
             <div className="max-w-5xl mx-auto space-y-6">
                 {/* Header Information Card */}
-                <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden relative group">
+                <div className="bg-white rounded-md shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden relative group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-orange-100 transition-colors" />
                     <div className="p-8 relative z-10">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -104,7 +104,7 @@ export default function Show({ company }: Props) {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Details Section */}
                     <div className="lg:col-span-2 space-y-6">
-                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
+                        <div className="bg-white rounded-md p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
                             <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 pb-4 border-b border-gray-50 flex items-center gap-3">
                                 <span className="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center text-xs">ℹ️</span>
                                 Informasi Utama
@@ -119,7 +119,7 @@ export default function Show({ company }: Props) {
                                                 href={`https://wa.me/${company.phone?.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 hover:border-emerald-600 uppercase tracking-widest"
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100 hover:border-emerald-600 uppercase tracking-widest"
                                                 title="Hubungi PIC via WhatsApp"
                                             >
                                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -136,10 +136,10 @@ export default function Show({ company }: Props) {
                                 </div>
                                 <div className="md:col-span-2">
                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Alamat Perusahaan</p>
-                                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-sm font-medium text-gray-600 leading-relaxed italic">
+                                    <div className="bg-gray-50 p-4 rounded-md border border-gray-100 text-sm font-medium text-gray-600 leading-relaxed italic">
                                         "{company.address}"
                                     </div>
-                                    <div className="flex items-center justify-between mt-3 p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                                    <div className="flex items-center justify-between mt-3 p-3 rounded-md bg-slate-50 border border-slate-100 text-xs">
                                         <div className="flex items-center gap-1.5 font-mono text-slate-600">
                                             <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                             <span>
@@ -159,7 +159,7 @@ export default function Show({ company }: Props) {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
+                        <div className="bg-white rounded-md p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
                             <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 pb-4 border-b border-gray-50 flex items-center gap-3">
                                 <span className="w-8 h-8 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center text-xs">📅</span>
                                 Jadwal & Layanan
@@ -184,7 +184,7 @@ export default function Show({ company }: Props) {
                             </div>
                         </div>
                         {/* Pickups History Section */}
-                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
+                        <div className="bg-white rounded-md p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100">
                             <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 pb-4 border-b border-gray-50 flex items-center justify-between">
                                 <span className="flex items-center gap-3">
                                     <span className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xs">🚚</span>
@@ -242,7 +242,7 @@ export default function Show({ company }: Props) {
                                     })}
                                 </div>
                             ) : (
-                                <div className="p-6 bg-gray-50/60 rounded-2xl border border-dashed border-gray-200 text-center">
+                                <div className="p-6 bg-gray-50/60 rounded-md border border-dashed border-gray-200 text-center">
                                     <p className="text-xs font-bold text-gray-400">Belum ada riwayat penjemputan tercatat</p>
                                 </div>
                             )}
@@ -252,13 +252,13 @@ export default function Show({ company }: Props) {
 
                     {/* Documents Sidebar Section */}
                     <div className="space-y-6">
-                        <div className="bg-white rounded-3xl p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28">
+                        <div className="bg-white rounded-md p-8 shadow-[0_4px_24px_rgb(0,0,0,0.04)] border border-gray-100 sticky top-28">
                             <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6 pb-4 border-b border-gray-50">Dokumen</h3>
                             <div className="space-y-4">
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Legalitas & Pembayaran</p>
                                 
                                 {company.payment_evidence_path ? (
-                                    <a href={`/storage/${company.payment_evidence_path}`} target="_blank" className="group block p-4 bg-gray-50 hover:bg-orange-50 rounded-2xl border border-gray-100 hover:border-orange-100 transition-all">
+                                    <a href={`/storage/${company.payment_evidence_path}`} target="_blank" className="group block p-4 bg-gray-50 hover:bg-orange-50 rounded-md border border-gray-100 hover:border-orange-100 transition-all">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 bg-white text-orange-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -270,13 +270,13 @@ export default function Show({ company }: Props) {
                                         </div>
                                     </a>
                                 ) : (
-                                    <div className="p-4 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 text-center">
+                                    <div className="p-4 bg-gray-50/50 rounded-md border border-dashed border-gray-200 text-center">
                                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest italic">Belum Ada Pembayaran</p>
                                     </div>
                                 )}
 
                                 {company.signed_mou_path ? (
-                                    <a href={`/storage/${company.signed_mou_path}`} target="_blank" className="group block p-4 bg-gray-50 hover:bg-blue-50 rounded-2xl border border-gray-100 hover:border-blue-100 transition-all">
+                                    <a href={`/storage/${company.signed_mou_path}`} target="_blank" className="group block p-4 bg-gray-50 hover:bg-blue-50 rounded-md border border-gray-100 hover:border-blue-100 transition-all">
                                         <div className="flex items-center gap-4">
                                             <div className="w-10 h-10 bg-white text-blue-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -288,7 +288,7 @@ export default function Show({ company }: Props) {
                                         </div>
                                     </a>
                                 ) : (
-                                    <div className="p-4 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 text-center">
+                                    <div className="p-4 bg-gray-50/50 rounded-md border border-dashed border-gray-200 text-center">
                                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest italic">Belum Ada MOU</p>
                                     </div>
                                 )}

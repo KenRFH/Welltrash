@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
+import { MeterList } from '@/Components/Admin/Charts';
 import { createPortal } from 'react-dom';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { useForm, Link, router } from '@inertiajs/react';
@@ -317,7 +319,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                     <button
                         onClick={handleSyncHris}
                         disabled={isSyncingHris}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-xs disabled:opacity-50"
+                        className="adm-btn adm-btn-outline"
                         title="Sinkronisasi akun kru dan staf dari HRIS sebagai Single Source of Truth"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${isSyncingHris ? 'animate-spin' : ''}`} />
@@ -325,7 +327,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                     </button>
                     <button
                         onClick={openAddModal}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
+                        className="adm-btn adm-btn-primary"
                     >
                         <Plus className="w-4 h-4" />
                         <span>Tambah Akun Baru</span>
@@ -336,208 +338,51 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
             <div className="space-y-6">
                 {/* 1. Infographic Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Akun</span>
-                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-                                <Users className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">
-                            {totalAccounts}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Pengguna</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>Terdaftar pada sistem terpusat</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">CleanUP Driver</span>
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <Truck className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
-                            {totalCleanups}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Personel</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="font-bold text-emerald-600">
-                                {totalAccounts > 0 ? Math.round((totalCleanups / totalAccounts) * 100) : 0}%
-                            </span>
-                            <span>dari total akun</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Public Relation</span>
-                            <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                                <Shield className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-blue-700 tracking-tight tabular-nums">
-                            {totalWebAdmins}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Pengelola</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span>Portal berita & katalog</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Akun Mitra</span>
-                            <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                                <Building2 className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-teal-700 tracking-tight tabular-nums">
-                            {totalCompanies}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Entitas</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span>Perusahaan industri & komersial</span>
-                        </div>
-                    </div>
+                    <StatCard index={0} tone="brand" icon={Users} label="Total akun" value={totalAccounts} unit="pengguna"
+                        note={<span>Terdaftar pada sistem terpusat</span>} />
+                    <StatCard index={1} tone="ok" icon={Truck} label="CleanUP driver" value={totalCleanups} unit="personel"
+                        note={<><span className="font-semibold text-emerald-700">{totalAccounts > 0 ? Math.round((totalCleanups / totalAccounts) * 100) : 0}%</span><span>dari total akun</span></>} />
+                    <StatCard index={2} tone="info" icon={Shield} label="Public relation" value={totalWebAdmins} unit="pengelola"
+                        note={<span>Portal berita & katalog</span>} />
+                    <StatCard index={3} tone="neutral" icon={Building2} label="Akun mitra" value={totalCompanies} unit="entitas"
+                        note={<span>Perusahaan industri & komersial</span>} />
                 </div>
 
-                {/* 2. Visual Role Proportion Meter */}
-                <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-2">
-                            <Layers className="w-4 h-4 text-emerald-600" />
-                            <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                                Komposisi Hak Akses Pengguna Sistem
-                            </h3>
-                        </div>
-                        <span className="text-xs font-semibold text-slate-500">
-                            Total {totalAccounts} Akun Aktif
-                        </span>
+                {/* 2. Accounts per role: ranked bars on one baseline */}
+                <div className="bg-white rounded-md p-5 sm:p-6 border border-slate-200/80">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4">
+                    <div>
+                        <h3 className="text-base font-semibold text-ink tracking-tight">Akun per peran</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Peran dengan akun terbanyak di atas; batang dibandingkan terhadap total akun.</p>
                     </div>
-
-                    <div className="space-y-2">
-                        <div className="h-2.5 w-full bg-slate-100 rounded-md overflow-hidden flex">
-                            {totalAccounts > 0 ? (
-                                <>
-                                    <div
-                                        style={{ width: `${(totalCleanups / totalAccounts) * 100}%` }}
-                                        className="bg-emerald-500 transition-all duration-500"
-                                        title={`CleanUP: ${totalCleanups}`}
-                                    />
-                                    <div
-                                        style={{ width: `${(totalWebAdmins / totalAccounts) * 100}%` }}
-                                        className="bg-blue-500 transition-all duration-500"
-                                        title={`Public Relation: ${totalWebAdmins}`}
-                                    />
-                                    <div
-                                        style={{ width: `${(totalCompanies / totalAccounts) * 100}%` }}
-                                        className="bg-teal-500 transition-all duration-500"
-                                        title={`Mitra Perusahaan: ${totalCompanies}`}
-                                    />
-                                    <div
-                                        style={{ width: `${(totalInternals / totalAccounts) * 100}%` }}
-                                        className="bg-indigo-500 transition-all duration-500"
-                                        title={`Staf Internal: ${totalInternals}`}
-                                    />
-                                </>
-                            ) : null}
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 pt-1">
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500" />
-                                <span>CleanUP ({totalCleanups})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-blue-500" />
-                                <span>Public Relation ({totalWebAdmins})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-teal-500" />
-                                <span>Mitra Perusahaan ({totalCompanies})</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <span className="w-2.5 h-2.5 rounded-xs bg-indigo-500" />
-                                <span>Staf Internal ({totalInternals})</span>
-                            </div>
-                        </div>
-                    </div>
+                    <span className="text-sm text-slate-500">Total <span className="font-semibold text-ink tabular-nums">{totalAccounts}</span> akun</span>
+                </div>
+                    <MeterList
+                        label="Jumlah akun per peran"
+                        unit="akun"
+                        total={totalAccounts}
+                        rows={[
+                            { label: 'CleanUP (driver & kru)', value: totalCleanups },
+                            { label: 'Mitra bisnis', value: totalCompanies },
+                            { label: 'Staf internal', value: totalInternals },
+                            { label: 'Public relation', value: totalWebAdmins },
+                        ].sort((a, b) => b.value - a.value)}
+                    />
                 </div>
 
                 {/* 3. Segmented Role Tabs & Search Bar */}
-                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5 bg-slate-100/70 p-1 rounded-lg border border-slate-200/60 text-xs">
-                        <button
-                            onClick={() => setActiveSubTab('CleanUP')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                                activeSubTab === 'CleanUP'
-                                    ? 'bg-white text-emerald-700 shadow-2xs'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                            <Truck className="w-3.5 h-3.5" />
-                            <span>CleanUP</span>
-                            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                activeSubTab === 'CleanUP' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-200 text-slate-600'
-                            }`}>
-                                {totalCleanups}
-                            </span>
-                        </button>
-
-                        <button
-                            onClick={() => setActiveSubTab('web_admin')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                                activeSubTab === 'web_admin'
-                                    ? 'bg-white text-blue-700 shadow-2xs'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                            <Shield className="w-3.5 h-3.5" />
-                            <span>Public Relation</span>
-                            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                activeSubTab === 'web_admin' ? 'bg-blue-50 text-blue-700' : 'bg-slate-200 text-slate-600'
-                            }`}>
-                                {totalWebAdmins}
-                            </span>
-                        </button>
-
-                        <button
-                            onClick={() => setActiveSubTab('company')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                                activeSubTab === 'company'
-                                    ? 'bg-white text-teal-700 shadow-2xs'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                            <Building2 className="w-3.5 h-3.5" />
-                            <span>Mitra Bisnis</span>
-                            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                activeSubTab === 'company' ? 'bg-teal-50 text-teal-700' : 'bg-slate-200 text-slate-600'
-                            }`}>
-                                {totalCompanies}
-                            </span>
-                        </button>
-
-                        <button
-                            onClick={() => setActiveSubTab('internal')}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                                activeSubTab === 'internal'
-                                    ? 'bg-white text-indigo-700 shadow-2xs'
-                                    : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                            <Briefcase className="w-3.5 h-3.5" />
-                            <span>Staf Internal</span>
-                            <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                                activeSubTab === 'internal' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-200 text-slate-600'
-                            }`}>
-                                {totalInternals}
-                            </span>
-                        </button>
+                <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="adm-seg" role="group" aria-label="Jenis akun">
+                        {([
+                            ['CleanUP', 'CleanUP', Truck, totalCleanups],
+                            ['web_admin', 'Public Relation', Shield, totalWebAdmins],
+                            ['company', 'Mitra Bisnis', Building2, totalCompanies],
+                            ['internal', 'Staf Internal', Briefcase, totalInternals],
+                        ] as const).map(([key, label, Icon, count]) => (
+                            <button key={key} type="button" onClick={() => setActiveSubTab(key)} aria-pressed={activeSubTab === key} className="adm-seg-item">
+                                <Icon className="w-3.5 h-3.5" aria-hidden="true" /> {label} <span className="adm-seg-count">{count}</span>
+                            </button>
+                        ))}
                     </div>
 
                     <div className="relative w-full md:w-72">
@@ -561,7 +406,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                 </div>
 
                 {/* 4. Accounts Table */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-bold text-slate-900">
@@ -764,7 +609,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex items-center justify-center min-h-screen p-4">
                         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity" onClick={closeModal} />
-                        <div className="relative bg-white rounded-xl max-w-xl w-full border border-slate-200 shadow-xl overflow-hidden my-8 z-10">
+                        <div className="relative bg-white rounded-md max-w-xl w-full border border-slate-200 shadow-xl overflow-hidden my-8 z-10">
                             {/* Modal Header */}
                             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                                 <div className="flex items-center gap-2.5">
@@ -936,7 +781,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                                         </div>
 
                                         {/* Titik Koordinat GPS Mitra */}
-                                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                        <div className="bg-slate-50 p-3 rounded-md border border-slate-200">
                                             <div className="flex items-center justify-between mb-2">
                                                 <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                                     <MapPin className="w-3.5 h-3.5 text-emerald-600" />
@@ -1071,7 +916,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex items-center justify-center min-h-screen p-4">
                         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity" onClick={() => setDeleteConfirmId(null)} />
-                        <div className="relative bg-white rounded-xl max-w-sm w-full p-6 border border-slate-200 shadow-xl overflow-hidden my-8 z-10">
+                        <div className="relative bg-white rounded-md max-w-sm w-full p-6 border border-slate-200 shadow-xl overflow-hidden my-8 z-10">
                             <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
                                 <AlertTriangle className="w-5 h-5" />
                             </div>
@@ -1105,7 +950,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                 <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="toggle-active-title">
                     <div className="flex items-center justify-center min-h-screen p-4">
                         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity" onClick={() => !toggling && setToggleTarget(null)} />
-                        <div className="relative bg-white rounded-xl max-w-sm w-full p-6 border border-slate-200 shadow-xl overflow-hidden my-8 z-10">
+                        <div className="relative bg-white rounded-md max-w-sm w-full p-6 border border-slate-200 shadow-xl overflow-hidden my-8 z-10">
                             <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-4 ${
                                 toggleTarget.is_active ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
                             }`}>
@@ -1115,7 +960,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                                 {toggleTarget.is_active ? 'Nonaktifkan Akun?' : 'Aktifkan Kembali Akun?'}
                             </h3>
 
-                            <div className="mt-3 flex items-center gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div className="mt-3 flex items-center gap-3 p-3 rounded-md bg-slate-50 border border-slate-200">
                                 <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center font-extrabold text-[11px] text-slate-700">
                                     {toggleTarget.name.substring(0, 2).toUpperCase()}
                                 </div>
