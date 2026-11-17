@@ -97,4 +97,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:' . implode(',', User:
     Route::post('/attendance/leave/{leaveRequest}/review', [AdminApiController::class, 'reviewLeave'])->name('api.admin.leave.review');
     Route::post('/target', [AdminApiController::class, 'setMonthlyTarget'])->middleware('role:' . implode(',', User::ACCOUNT_ROLES))->name('api.admin.target');
     Route::post('/companies/{company}/review', [AdminApiController::class, 'reviewCompany'])->middleware('role:' . implode(',', User::COMMERCIAL_ROLES))->name('api.admin.companies.review');
+
+    // Agenda / event + push reminder (Manager, Direktur, Superadmin)
+    Route::middleware('role:' . implode(',', User::COMMERCIAL_ROLES))->group(function () {
+        Route::get('/agendas', [AdminApiController::class, 'agendas'])->name('api.admin.agendas');
+        Route::post('/agendas', [AdminApiController::class, 'storeAgenda'])->name('api.admin.agendas.store');
+        Route::put('/agendas/{agenda}', [AdminApiController::class, 'updateAgenda'])->name('api.admin.agendas.update');
+        Route::delete('/agendas/{agenda}', [AdminApiController::class, 'destroyAgenda'])->name('api.admin.agendas.destroy');
+    });
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Agenda;
 use App\Models\Attendance;
 use App\Models\Company;
 use App\Models\Invoice;
@@ -44,6 +45,9 @@ class AdminApiController extends Controller
                 + ($commercial ? Company::where('subscription_status', 'pending')->count() : 0),
             'executive'         => $this->executiveSummary($commercial),
             'target'            => $this->monthlyTarget() + ['can_set' => $request->user()->hasRole(User::ACCOUNT_ROLES)],
+            // Next agenda items for the overview card; null = this role has no agenda.
+            'agendas'           => $commercial ? Agenda::with('creator:id,name')->where('starts_at', '>=', now())->orderBy('starts_at')->limit(3)->get()
+                ->map(fn (Agenda $a) => $a->toApi($request->user())) : null,
         ]);
     }
 
@@ -225,5 +229,66 @@ class AdminApiController extends Controller
             : ['subscription_status' => 'rejected', 'rejection_reason' => $data['reason'] ?: 'Ditolak melalui aplikasi admin', 'refund_evidence_path' => null]);
 
         return response()->json(['success' => true]);
+    }
+
+    /** Shared agenda (Manager / Direktur / Superadmin) for one calendar month, ?month=YYYY-MM (default: this month). */
+    public function agendas(Request $request): JsonResponse
+    {
+        $request->validate(['month' => 'nullable|date_format:Y-m']);
+        $from = $request->filled('month') ? Carbon::createFromFormat('!Y-m', $request->month) : Carbon::today()->startOfMonth();
+
+        return response()->json(['data' => Agenda::with('creator:id,name')
+            ->whereBetween('starts_at', [$from, $from->copy()->endOfMonth()])
+            ->orderBy('starts_at')->get()
+            ->map(fn (Agenda $a) => $a->toApi($request->user()))]);
+    }
+
+    public function storeAgenda(Request $request): JsonResponse
+    {
+        $agenda = Agenda::create($this->agendaData($request) + ['created_by' => $request->user()->id]);
+
+        return response()->json(['success' => true, 'data' => $agenda->load('creator:id,name')->toApi($request->user())], 201);
+    }
+
+    public function updateAgenda(Request $request, Agenda $agenda): JsonResponse
+    {
+        $this->authorizeAgenda($request, $agenda);
+        $agenda->fill($this->agendaData($request));
+        // A new time or reminder means the reminder must fire again.
+        if ($agenda->isDirty(['starts_at', 'remind_minutes'])) {
+            $agenda->reminded_at = null;
+        }
+        $agenda->save();
+
+        return response()->json(['success' => true, 'data' => $agenda->load('creator:id,name')->toApi($request->user())]);
+    }
+
+    public function destroyAgenda(Request $request, Agenda $agenda): JsonResponse
+    {
+        $this->authorizeAgenda($request, $agenda);
+        $agenda->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    private function agendaData(Request $request): array
+    {
+        $data = $request->validate([
+            'title'          => 'required|string|max:150',
+            'location'       => 'nullable|string|max:255',
+            'notes'          => 'nullable|string|max:2000',
+            'starts_at'      => 'required|date',
+            'remind_minutes' => 'nullable|integer|in:' . implode(',', Agenda::REMIND_OPTIONS),
+        ]);
+        // The app sends UTC; store wall time in the app timezone like every other datetime here.
+        $data['starts_at'] = Carbon::parse($data['starts_at'])->setTimezone(config('app.timezone'));
+
+        return $data;
+    }
+
+    /** Only the creator, or Direktur / Superadmin, may change or remove an agenda item. */
+    private function authorizeAgenda(Request $request, Agenda $agenda): void
+    {
+        abort_unless($agenda->created_by === $request->user()->id || $request->user()->hasRole(User::ACCOUNT_ROLES), 403, 'Hanya pembuat agenda atau Direktur yang dapat mengubahnya.');
     }
 }
