@@ -1,11 +1,11 @@
 {
-  "version_name": "1.5.0",
-  "version_code": 10,
-  "title": "Pembaruan Welltrash v1.5.0 Tersedia",
-  "changelog": "• Agenda baru untuk Manager & Direktur: catat rapat, kunjungan mitra, atau acara lain\n• Kalender bulanan: tanggal yang ada agendanya ditandai titik, ketuk tanggal untuk melihat agendanya\n• Pengingat otomatis lewat notifikasi sebelum acara dimulai (15 menit hingga 1 hari sebelumnya)\n• Kartu \"Agenda terdekat\" di Ringkasan",
+  "version_name": "1.5.1",
+  "version_code": 11,
+  "title": "Pembaruan Welltrash v1.5.1 Tersedia",
+  "changelog": "• Tampilan Agenda baru: tanggal ditampilkan jelas di setiap agenda\n• Kalender lebih ringkas, hari Minggu berwarna merah, dan tombol \"Hari ini\"\n• Form agenda lebih rapi: kolom tanggal dan jam berlabel, tombol Hapus dipisah dari Simpan\n• Tombol \"Coba lagi\" bila agenda gagal dimuat",
   "apk_url": "https://welltrash.com/downloads/welltrash-cleanup-operator.apk",
   "force_update": false,
   "release_date": "2026-11-17",
-  "size_bytes": 60724794,
-  "sha256": "db083c9e2f621b54661feb676bb34a64adb12df56c18b259b89bde0ef5b2286e"
+  "size_bytes": 60741090,
+  "sha256": "5fcff774af8245b1ffb6c0dfa381433793a0538747b3a79dca549d50cf880f30"
 }
