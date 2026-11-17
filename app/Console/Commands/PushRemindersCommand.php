@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Agenda;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Services\FcmService;
@@ -9,15 +10,20 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
-/** Scheduled push reminders for the admin app: invoices due (daily) and crew gone silent (every 15 min). */
+/** Scheduled push reminders for the admin app: invoices due (daily), crew gone silent (every 15 min), agenda (every minute). */
 class PushRemindersCommand extends Command
 {
-    protected $signature = 'push:reminders {type : invoices|fleet} {--offline-minutes=30}';
+    protected $signature = 'push:reminders {type : invoices|fleet|agendas} {--offline-minutes=30}';
 
     protected $description = 'Kirim notifikasi pengingat (invoice jatuh tempo / armada offline) ke admin';
 
     public function handle(FcmService $fcm): int
     {
+        // Agenda reminders also live in the bell, so they run even without Firebase.
+        if ($this->argument('type') === 'agendas') {
+            return $this->agendas($fcm);
+        }
+
         if (!$fcm->isConfigured()) {
             $this->warn('FCM belum dikonfigurasi (services.fcm.credentials): tidak ada notifikasi dikirim.');
             return Command::SUCCESS;
@@ -74,9 +80,30 @@ class PushRemindersCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function agendas(FcmService $fcm): int
+    {
+        $max = max(Agenda::REMIND_OPTIONS);
+        $due = Agenda::whereNull('reminded_at')->whereNotNull('remind_minutes')
+            // Not already over (also skips a backlog after scheduler downtime), and within the longest reminder window.
+            ->whereBetween('starts_at', [now()->subMinutes(30), now()->addMinutes($max)])
+            ->get()
+            ->filter(fn (Agenda $a) => $a->starts_at->copy()->subMinutes($a->remind_minutes)->lte(now()));
+
+        foreach ($due as $a) {
+            // Mark first: a failed push must not repeat the reminder every minute.
+            $a->update(['reminded_at' => now()]);
+            $when = $a->starts_at->locale('id')->translatedFormat('l, d M Y') . ' pukul ' . $a->starts_at->format('H.i');
+            $body = $when . ($a->location ? " · {$a->location}" : '') . '.';
+            $n = $fcm->toRoles(User::COMMERCIAL_ROLES, "Agenda: {$a->title}", $body, ['type' => 'agenda', 'agenda_id' => $a->id]);
+            $this->info("Agenda #{$a->id} {$a->title}: terkirim ke {$n} perangkat.");
+        }
+
+        return Command::SUCCESS;
+    }
+
     private function invalid(): int
     {
-        $this->error('Jenis harus invoices atau fleet.');
+        $this->error('Jenis harus invoices, fleet, atau agendas.');
         return Command::INVALID;
     }
 }
