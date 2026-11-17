@@ -184,7 +184,9 @@ class HrisService
                 $email = !empty($member['email']) ? trim($member['email']) : null;
                 $name = $member['name'] ?? 'Petugas';
                 $employed = ($member['status'] ?? 'active') === 'active';
-                $isActive = $employed && (bool) ($member['is_user_active'] ?? true);
+                // HRIS sends is_user_active=false for employees with no HRIS login; that is "no account there", not "blocked".
+                $blockedInHris = ($member['has_user_account'] ?? true) && !($member['is_user_active'] ?? true);
+                $isActive = $employed && !$blockedInHris;
                 $role = User::roleFromHris($member['role'] ?? null);
 
                 $existing = $this->findLocalUser($empCode, $email, $name);
