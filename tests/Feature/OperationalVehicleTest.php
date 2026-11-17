@@ -199,4 +199,18 @@ class OperationalVehicleTest extends TestCase
         $operator->refresh();
         $this->assertNull($operator->vehicle_id);
     }
+
+    public function test_logging_out_releases_the_vehicle_in_the_app_and_on_the_web(): void
+    {
+        $vehicle = Vehicle::create(['name' => 'L-300', 'license_plate' => 'P 2 WT', 'type' => 'Pick Up', 'status' => 'active']);
+        $appDriver = User::factory()->create(['role' => 'CleanUP', 'vehicle_id' => $vehicle->id]);
+        $token = $appDriver->createToken('app')->plainTextToken;
+
+        $this->withHeader('Authorization', 'Bearer ' . $token)->postJson('/api/operator/logout')->assertOk();
+        $this->assertNull($appDriver->fresh()->vehicle_id);
+
+        $webDriver = User::factory()->create(['role' => 'CleanUP', 'vehicle_id' => $vehicle->id]);
+        $this->actingAs($webDriver)->post(route('logout'));
+        $this->assertNull($webDriver->fresh()->vehicle_id);
+    }
 }

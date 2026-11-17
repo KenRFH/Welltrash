@@ -65,6 +65,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $request->user()?->update(['vehicle_id' => null]); // same as the app: logging out frees the vehicle
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

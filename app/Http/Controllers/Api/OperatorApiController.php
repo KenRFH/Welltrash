@@ -285,6 +285,7 @@ class OperatorApiController extends Controller
             \App\Models\PushDevice::where('fid', (string) $request->input('fid'))->where('user_id', $request->user()->id)->delete();
         }
         $request->user()->currentAccessToken()->delete();
+        $request->user()->update(['vehicle_id' => null]); // logging out frees the vehicle for the next driver
 
         return response()->json([
             'success' => true,
