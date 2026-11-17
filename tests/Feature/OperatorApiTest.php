@@ -474,4 +474,36 @@ class OperatorApiTest extends TestCase
             'status'  => 'pending',
         ]);
     }
+
+    public function test_completing_a_pickup_emails_the_partner_a_pdf_report_once(): void
+    {
+        Storage::fake('public');
+        \Illuminate\Support\Facades\Mail::fake();
+        $operator = $this->createOperator();
+        $this->clockIn($operator);
+        $token = $operator->createToken('test')->plainTextToken;
+        $client = User::create(['name' => 'PT Mitra', 'email' => 'mitra@welltrash.test', 'password' => Hash::make('password123'), 'role' => 'company']);
+        $company = Company::create(['user_id' => $client->id, 'company_name' => 'PT Mitra Jember', 'pic_name' => 'Budi', 'phone' => '0812', 'address' => 'Jl. A',
+            'business_category' => 'F&B', 'subscription_plan' => 'Prime', 'subscription_status' => 'active']);
+        $pickup = Pickup::create(['company_id' => $company->id, 'cleanup_id' => $operator->id, 'pickup_date' => Carbon::today()->toDateString(), 'status' => 'scheduled']);
+        $submit = fn () => $this->withHeader('Authorization', 'Bearer ' . $token)->postJson("/api/operator/pickups/{$pickup->id}/submit", [
+            'organic_weight' => 12.5, 'anorganic_weight' => 8, 'residue_weight' => 3.2,
+            'evidence_pickup_path' => UploadedFile::fake()->image('bukti.jpg', 2400, 1800),
+        ]);
+
+        $submit()->assertOk();
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\PickupReportMail::class, 1);
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\PickupReportMail::class, fn ($m) => $m->hasTo('mitra@welltrash.test'));
+        // Retried offline sync / double tap is refused, so no second report. (No mail count after it: the test app
+        // re-runs earlier after-response callbacks on every request, which a real server's fresh process never does.)
+        $submit()->assertStatus(422);
+
+        // The attachment really builds: photo shrunk to <= 900px, PDF renders.
+        $photo = \App\Mail\PickupReportMail::compressedPhoto($pickup->fresh()->evidence_pickup_path);
+        $this->assertNotNull($photo);
+        [$w, $h] = getimagesizefromstring(base64_decode(substr($photo, strlen('data:image/jpeg;base64,'))));
+        $this->assertSame([900, 675], [$w, $h]);
+        $mail = new \App\Mail\PickupReportMail($pickup->fresh());
+        $this->assertStringStartsWith('%PDF', ($mail->attachments()[0])->attachWith(fn ($path) => null, fn ($data) => $data()));
+    }
 }
