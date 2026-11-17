@@ -64,12 +64,12 @@ const buildPopupHtml = (c: CompanyLocation) => {
         badgeColor = '#047857';
         badgeBorder = '#a7f3d0';
     } else if (c.status === 'on_the_way') {
-        badgeText = '🚚 Sedang Dijemput (OTW)';
+        badgeText = 'Sedang Dijemput (OTW)';
         badgeBg = '#fffbeb';
         badgeColor = '#b45309';
         badgeBorder = '#fde68a';
     } else if (c.status === 'scheduled') {
-        badgeText = '⏳ Belum Diambil (Jadwal Hari Ini)';
+        badgeText = 'Belum Diambil (Jadwal Hari Ini)';
         badgeBg = '#eff6ff';
         badgeColor = '#1d4ed8';
         badgeBorder = '#bfdbfe';
@@ -177,7 +177,7 @@ export default function MonitoringMap() {
                     lat: d.current_lat,
                     lng: d.current_lng,
                     title: `Driver: ${d.name}${vPlate}`,
-                    subtitle: isOtw ? `🚚 OTW: ${d.active_task?.company_name}` : `Update: ${d.last_location_at || '-'}`,
+                    subtitle: isOtw ? `OTW: ${d.active_task?.company_name}` : `Update: ${d.last_location_at || '-'}`,
                     type: 'truck',
                     isOnline: d.is_online,
                 });
@@ -226,35 +226,35 @@ export default function MonitoringMap() {
             <div className="space-y-6">
                 {/* 1. Metric Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs">
                         <div className="text-[10px] font-bold text-slate-400 uppercase">Total Mitra</div>
                         <div className="text-xl font-extrabold text-slate-900 mt-1">{companies.length}</div>
                         <div className="text-[11px] text-slate-400">Titik lokasi</div>
                     </div>
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
-                        <div className="text-[10px] font-bold text-emerald-600 uppercase">🟢 Selesai</div>
+                    <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs">
+                        <div className="text-[10px] font-bold text-emerald-600 uppercase">Selesai</div>
                         <div className="text-xl font-extrabold text-emerald-700 mt-1">{completedCount}</div>
                         <div className="text-[11px] text-emerald-600">Sudah diambil</div>
                     </div>
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs">
                         <div className="text-[10px] font-bold text-amber-600 uppercase">🟡 OTW</div>
                         <div className="text-xl font-extrabold text-amber-700 mt-1">{otwCount}</div>
                         <div className="text-[11px] text-amber-600">Menuju lokasi</div>
                     </div>
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs">
                         <div className="text-[10px] font-bold text-blue-600 uppercase">🔵 Terjadwal</div>
                         <div className="text-xl font-extrabold text-blue-700 mt-1">{scheduledCount}</div>
                         <div className="text-[11px] text-blue-600">Hari ini</div>
                     </div>
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs col-span-2 sm:col-span-1">
-                        <div className="text-[10px] font-bold text-slate-500 uppercase">🚚 Armada Online</div>
+                    <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs col-span-2 sm:col-span-1">
+                        <div className="text-[10px] font-bold text-slate-500 uppercase">Armada Online</div>
                         <div className="text-xl font-extrabold text-slate-900 mt-1">{activeDrivers} Driver</div>
                         <div className="text-[11px] text-slate-400">GPS terhubung</div>
                     </div>
                 </div>
 
                 {/* 2. Filter & Search Bar */}
-                <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div className="relative flex-1 max-w-md">
                         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
@@ -282,7 +282,7 @@ export default function MonitoringMap() {
                             onClick={() => setStatusFilter('completed')}
                             className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${statusFilter === 'completed' ? 'bg-emerald-700 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'}`}
                         >
-                            🟢 Selesai ({completedCount})
+                            Selesai ({completedCount})
                         </button>
                         <button
                             onClick={() => setStatusFilter('on_the_way')}
@@ -307,7 +307,7 @@ export default function MonitoringMap() {
 
                 {/* 3. Map & Partner List Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    <div className="lg:col-span-8 bg-white rounded-3xl p-4 border border-slate-200/80 shadow-2xs space-y-3">
+                    <div className="lg:col-span-8 bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs space-y-3">
                         <div className="flex items-center justify-between px-1">
                             <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                 <MapPin className="w-4 h-4 text-emerald-600" />
@@ -315,12 +315,12 @@ export default function MonitoringMap() {
                             </span>
                             <span className="text-[11px] text-slate-400">Klik titik untuk detail penjemputan</span>
                         </div>
-                        <div className="rounded-2xl overflow-hidden border border-slate-200">
+                        <div className="rounded-md overflow-hidden border border-slate-200">
                             <LiveTrackingMap markers={markers} height="540px" focusCoordinate={focusCoordinate} />
                         </div>
                     </div>
 
-                    <div className="lg:col-span-4 bg-white rounded-3xl p-5 border border-slate-200/80 shadow-2xs space-y-3">
+                    <div className="lg:col-span-4 bg-white rounded-md p-5 border border-slate-200/80 shadow-2xs space-y-3">
                         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                             <span className="text-sm font-extrabold text-slate-900">Daftar Titik Mitra</span>
                             <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold">
@@ -330,7 +330,7 @@ export default function MonitoringMap() {
                         <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
                             {filteredCompanies.length > 0 ? (
                                 filteredCompanies.map((c) => (
-                                    <div key={c.id} className="p-3 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-emerald-50/20 text-xs space-y-2 transition-all">
+                                    <div key={c.id} className="p-3 rounded-md border border-slate-100 bg-slate-50/50 hover:bg-emerald-50/20 text-xs space-y-2 transition-all">
                                         <div className="flex items-start justify-between gap-2">
                                             <div className="min-w-0">
                                                 <div className="font-bold text-slate-900 truncate">{c.company_name}</div>
@@ -342,7 +342,7 @@ export default function MonitoringMap() {
                                                 c.status === 'scheduled' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                                                 'bg-slate-100 text-slate-500'
                                             }`}>
-                                                {c.status === 'completed' ? '✓ Selesai' : c.status === 'on_the_way' ? '🚚 OTW' : c.status === 'scheduled' ? '⏳ Terjadwal' : 'Tanpa Jadwal'}
+                                                {c.status === 'completed' ? '✓ Selesai' : c.status === 'on_the_way' ? 'OTW' : c.status === 'scheduled' ? 'Terjadwal' : 'Tanpa Jadwal'}
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">

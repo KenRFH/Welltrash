@@ -110,7 +110,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                 </div>
 
                 {(errors as any).general && (
-                    <div className="bg-rose-50 border border-rose-200 rounded-3xl p-5 mb-6 text-sm text-rose-700 font-bold flex items-start gap-3">
+                    <div className="bg-rose-50 border border-rose-200 rounded-md p-5 mb-6 text-sm text-rose-700 font-bold flex items-start gap-3">
                         <span className="text-lg">⚠️</span>
                         <div>
                             <p className="font-extrabold">Gagal Membuat Invoice</p>
@@ -121,7 +121,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Company Selector */}
-                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                    <div className="bg-white rounded-md p-8 shadow-sm border border-gray-100">
                         <h3 className="text-base font-black text-gray-900 mb-6 flex items-center gap-2">
                             <span className="w-6 h-6 bg-green-600 text-white rounded-full text-xs flex items-center justify-center font-black">1</span>
                             Pilih Mitra
@@ -146,7 +146,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
 
                         {/* Company Preview Card */}
                         {selectedCompany && (
-                            <div className="mt-4 p-4 bg-green-50 rounded-2xl border border-green-100">
+                            <div className="mt-4 p-4 bg-green-50 rounded-md border border-green-100">
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <p className="font-black text-green-900">{selectedCompany.company_name}</p>
@@ -163,7 +163,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                     </div>
 
                     {/* Period & Due Date */}
-                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                    <div className="bg-white rounded-md p-8 shadow-sm border border-gray-100">
                         <h3 className="text-base font-black text-gray-900 mb-6 flex items-center gap-2">
                             <span className="w-6 h-6 bg-green-600 text-white rounded-full text-xs flex items-center justify-center font-black">2</span>
                             Periode & Jatuh Tempo
@@ -210,7 +210,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                     </div>
 
                     {/* Amount & Notes */}
-                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                    <div className="bg-white rounded-md p-8 shadow-sm border border-gray-100">
                         <h3 className="text-base font-black text-gray-900 mb-6 flex items-center gap-2">
                             <span className="w-6 h-6 bg-green-600 text-white rounded-full text-xs flex items-center justify-center font-black">3</span>
                             Tagihan & Catatan
@@ -263,7 +263,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                     </div>
 
                     {/* WA Schedule */}
-                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                    <div className="bg-white rounded-md p-8 shadow-sm border border-gray-100">
                         <h3 className="text-base font-black text-gray-900 mb-2 flex items-center gap-2">
                             <span className="w-6 h-6 bg-green-600 text-white rounded-full text-xs flex items-center justify-center font-black">4</span>
                             Jadwal Kirim WhatsApp
@@ -307,7 +307,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                                 </div>
 
                                 {selectedCompany && (
-                                    <div className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-2xl px-4 py-3">
+                                    <div className="flex items-center gap-3 bg-green-50 border border-green-100 rounded-md px-4 py-3">
                                         <span className="text-xl">📱</span>
                                         <div>
                                             <p className="text-xs font-black text-green-800">Akan dikirim ke:</p>
@@ -324,7 +324,7 @@ export default function InvoicesCreate({ companies, selectedCompanyId }: Props) 
                     <div className="flex items-center justify-between gap-4">
                         <Link
                             href={route('admin.invoices.index')}
-                            className="px-6 py-3 rounded-2xl border border-gray-200 text-sm font-black text-gray-600 hover:bg-gray-50 transition-all"
+                            className="px-6 py-3 rounded-md border border-gray-200 text-sm font-black text-gray-600 hover:bg-gray-50 transition-all"
                         >
                             Batal
                         </Link>

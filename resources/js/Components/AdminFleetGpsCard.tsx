@@ -58,12 +58,12 @@ const buildCompanyPopup = (c: CompanyLocation) => {
         badgeColor = '#047857';
         badgeBorder = '#a7f3d0';
     } else if (c.status === 'on_the_way') {
-        badgeText = '🚚 Sedang Dijemput (OTW)';
+        badgeText = 'Sedang Dijemput (OTW)';
         badgeBg = '#fffbeb';
         badgeColor = '#b45309';
         badgeBorder = '#fde68a';
     } else if (c.status === 'scheduled') {
-        badgeText = '⏳ Belum Diambil (Jadwal Hari Ini)';
+        badgeText = 'Belum Diambil (Jadwal Hari Ini)';
         badgeBg = '#eff6ff';
         badgeColor = '#1d4ed8';
         badgeBorder = '#bfdbfe';
@@ -164,7 +164,7 @@ export default function AdminFleetGpsCard() {
                     lat: d.current_lat,
                     lng: d.current_lng,
                     title: `Driver: ${d.name}${vPlate}`,
-                    subtitle: isOtw ? `🚚 OTW ke ${d.active_task?.company_name}` : `Update: ${d.last_location_at || '-'}`,
+                    subtitle: isOtw ? `OTW ke ${d.active_task?.company_name}` : `Update: ${d.last_location_at || '-'}`,
                     type: 'truck',
                     isOnline: d.is_online,
                 });
@@ -195,7 +195,7 @@ export default function AdminFleetGpsCard() {
     const todayScheduledCount = companies.filter((c) => c.status !== 'none').length;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden mb-6">
+        <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden mb-6">
             <div className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
@@ -275,7 +275,7 @@ export default function AdminFleetGpsCard() {
                                         : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
                                 }`}
                             >
-                                🟢 Sudah Diambil ({completedCount})
+                                Sudah Diambil ({completedCount})
                             </button>
                             <button
                                 onClick={() => setMarkerFilter('pending')}
@@ -285,7 +285,7 @@ export default function AdminFleetGpsCard() {
                                         : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                                 }`}
                             >
-                                ⏳ Belum / OTW ({pendingCount})
+                                Belum / OTW ({pendingCount})
                             </button>
                             <button
                                 onClick={() => setMarkerFilter('trucks')}
@@ -295,7 +295,7 @@ export default function AdminFleetGpsCard() {
                                         : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
                                 }`}
                             >
-                                🚚 Armada ({activeCount})
+                                Armada ({activeCount})
                             </button>
                         </div>
 
@@ -325,7 +325,7 @@ export default function AdminFleetGpsCard() {
                             <LiveTrackingMap markers={markers} height="360px" />
                         </div>
                     ) : (
-                        <div className="p-8 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center mb-4">
+                        <div className="p-8 bg-slate-50 rounded-md border border-dashed border-slate-200 text-center mb-4">
                             <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                             <p className="text-xs font-semibold text-slate-600">Tidak ada titik yang sesuai dengan filter</p>
                             <p className="text-[11px] text-slate-400 mt-0.5">Pilih filter "Semua" untuk melihat seluruh titik mitra</p>
@@ -339,7 +339,7 @@ export default function AdminFleetGpsCard() {
                                 return (
                                     <div
                                         key={driver.id}
-                                        className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 ${
+                                        className={`p-3 rounded-md border text-xs flex items-center justify-between gap-2 ${
                                             driver.is_online ? 'bg-emerald-50/40 border-emerald-200' : 'bg-slate-50/60 border-slate-200'
                                         }`}
                                     >

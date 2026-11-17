@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
 import AdminLayout from '@/Layouts/AdminLayout';
 import AdminFleetGpsCard from '@/Components/AdminFleetGpsCard';
 import { Link } from '@inertiajs/react';
@@ -94,75 +95,14 @@ export default function Index({ cleanups }: Props) {
             <div className="space-y-6">
                 {/* 1. Infographic Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Armada</span>
-                            <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-                                <Truck className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">
-                            {totalFleet}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Driver</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span>Rata-rata </span>
-                            <span className="font-bold text-slate-700">{avgPerDriver} trip / driver</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Penjemputan</span>
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <Activity className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-emerald-700 tracking-tight tabular-nums">
-                            {totalPickups}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Trip</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>{totalCompleted} penjemputan selesai</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tingkat Keberhasilan</span>
-                            <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                                <CheckCircle2 className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-teal-700 tracking-tight tabular-nums">
-                            {overallSuccessRate}%
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Sukses</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="text-rose-600 font-semibold">{totalFailed} gagal</span>
-                            <span>dari {totalPickups} trip</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Driver Paling Aktif</span>
-                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                                <Award className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-lg font-extrabold text-slate-900 tracking-tight truncate" title={topPerformer?.name || '-'}>
-                            {topPerformer ? topPerformer.name : 'Belum Ada'}
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            {topPerformer ? (
-                                <span className="font-bold text-amber-600">{topPerformer.completed_pickups} trip sukses</span>
-                            ) : (
-                                <span>Menunggu aktivitas</span>
-                            )}
-                        </div>
-                    </div>
+                    <StatCard index={0} tone="brand" icon={Truck} label="Total armada" value={totalFleet} unit="driver"
+                        note={<><span>Rata-rata</span><span className="font-semibold text-lime">{avgPerDriver} trip / driver</span></>} />
+                    <StatCard index={1} tone="ok" icon={Activity} label="Total penjemputan" value={totalPickups} unit="trip"
+                        note={<span>{totalCompleted} penjemputan selesai</span>} />
+                    <StatCard index={2} tone="info" icon={CheckCircle2} label="Tingkat keberhasilan" value={`${overallSuccessRate}%`} unit="sukses"
+                        note={<><span className="font-semibold text-rose-600">{totalFailed} gagal</span><span>dari {totalPickups} trip</span></>} />
+                    <StatCard index={3} tone="warn" icon={Award} label="Driver paling aktif" value={<span className="block truncate text-xl" title={topPerformer?.name || '-'}>{topPerformer ? topPerformer.name : 'Belum ada'}</span>}
+                        note={topPerformer ? <span className="font-semibold text-amber-700">{topPerformer.completed_pickups} trip sukses</span> : <span>Menunggu aktivitas</span>} />
                 </div>
 
                 {/* 2. Live GPS Fleet Tracking Map */}
@@ -171,7 +111,7 @@ export default function Index({ cleanups }: Props) {
 
                 {/* 2. Visual Trip Distribution & Driver Performance Chart */}
                 {cleanups.length > 0 && totalPickups > 0 && (
-                    <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200/80 shadow-2xs">
+                    <div className="bg-white rounded-md p-5 sm:p-6 border border-slate-200/80 shadow-2xs">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                             <div>
                                 <div className="flex items-center gap-2">
@@ -220,7 +160,7 @@ export default function Index({ cleanups }: Props) {
                 )}
 
                 {/* 3. Search & Sort Bar */}
-                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="relative flex-1 max-w-md">
                         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input
@@ -256,7 +196,7 @@ export default function Index({ cleanups }: Props) {
                 </div>
 
                 {/* 4. Table Container */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                     <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                         <div>
                             <h2 className="text-sm font-bold text-slate-900">
@@ -377,7 +317,7 @@ export default function Index({ cleanups }: Props) {
                                                     <td className="px-5 py-4 text-right">
                                                         <Link
                                                             href={route('admin.cleanups.show', cleanup.id)}
-                                                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-2xs"
+                                                            className="adm-btn adm-btn-outline adm-btn-sm"
                                                         >
                                                             <span>Log Aktivitas</span>
                                                             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -415,7 +355,7 @@ export default function Index({ cleanups }: Props) {
                                                 </span>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-2 text-xs py-2.5 px-3 rounded-lg bg-slate-50 border border-slate-100 mb-3">
+                                            <div className="grid grid-cols-2 gap-2 text-xs py-2.5 px-3 rounded-md bg-slate-50 border border-slate-100 mb-3">
                                                 <div>
                                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ritase Selesai</span>
                                                     <span className="font-semibold text-slate-800 mt-0.5 inline-block">{cleanup.completed_pickups} dari {cleanup.total_pickups} trip</span>

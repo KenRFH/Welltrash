@@ -115,7 +115,7 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
                             { label: 'Ukuran Berkas', value: APK_SIZE, icon: HardDrive, color: 'text-violet-600' },
                             { label: 'Keamanan', value: 'SHA-256', icon: ShieldCheck, color: 'text-amber-600' },
                         ].map(({ label, value, icon: Icon, color }) => (
-                            <div key={label} className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-4 flex items-center gap-3">
+                            <div key={label} className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md p-4 flex items-center gap-3">
                                 <Icon className={`w-5 h-5 shrink-0 ${color}`} />
                                 <div>
                                     <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
@@ -126,9 +126,9 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
                     </div>
 
                     {/* Main download card */}
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md overflow-hidden shadow-sm">
                         <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 px-6 py-5 flex items-center gap-4">
-                            <div className="bg-white/20 rounded-xl p-3">
+                            <div className="bg-white/20 rounded-md p-3">
                                 <Smartphone className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -163,7 +163,7 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
                                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                                     SHA-256 Checksum
                                 </p>
-                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-2.5">
+                                <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-md px-3 py-2.5">
                                     <code className="text-[11px] font-mono text-slate-600 dark:text-zinc-400 flex-1 break-all">{APK_SHA256}</code>
                                     <button
                                         type="button"
@@ -188,7 +188,7 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
                             </button>
 
                             {/* Warning */}
-                            <div className="flex items-start gap-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-xl px-4 py-3">
+                            <div className="flex items-start gap-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-md px-4 py-3">
                                 <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                                 <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
                                     Aplikasi ini ditujukan khusus untuk petugas CleanUP yang terdaftar di sistem WellTrash. Pastikan mengunduh hanya dari halaman resmi ini.
@@ -198,7 +198,7 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
                     </div>
 
                     {/* Panduan instalasi */}
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md p-6 shadow-sm">
                         <h3 className="font-bold text-slate-800 dark:text-zinc-100 text-sm mb-4 flex items-center gap-2">
                             <BookOpen className="w-4 h-4 text-emerald-600" />
                             Panduan Instalasi
@@ -219,7 +219,7 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
                     </div>
 
                     {/* Changelog (collapsible) */}
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden">
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md shadow-sm overflow-hidden">
                         <button
                             type="button"
                             onClick={() => setShowChangelog(!showChangelog)}

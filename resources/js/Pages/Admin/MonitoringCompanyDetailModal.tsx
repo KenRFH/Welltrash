@@ -18,7 +18,7 @@ export default function MonitoringCompanyDetailModal({ company, onClose, onFocus
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-xs">
-            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200">
+            <div className="bg-white rounded-md max-w-md w-full p-5 shadow-2xl border border-slate-200">
                 <div className="flex items-start justify-between pb-3 border-b border-slate-100">
                     <div>
                         <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
@@ -30,7 +30,7 @@ export default function MonitoringCompanyDetailModal({ company, onClose, onFocus
                 </div>
 
                 <div className="py-3 space-y-2.5 text-xs text-slate-700">
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200 flex items-center justify-between">
                         <span className="font-bold flex items-center gap-1.5">
                             {company.status === 'completed' ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : company.status === 'on_the_way' ? <Radio className="w-4 h-4 text-amber-600 animate-pulse" /> : <Clock className="w-4 h-4 text-blue-600" />}
                             <span>{company.status === 'completed' ? 'Sudah Diambil' : company.status === 'on_the_way' ? 'Armada OTW' : company.status === 'scheduled' ? 'Terjadwal' : 'Tanpa Jadwal'}</span>
@@ -38,7 +38,7 @@ export default function MonitoringCompanyDetailModal({ company, onClose, onFocus
                         {company.pickup_time && <span className="font-mono font-bold text-[11px]">{company.pickup_time} WIB</span>}
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <div className="p-2.5 rounded-md bg-slate-50 border border-slate-200">
                         <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Armada & Driver</div>
                         <div className="flex items-center justify-between">
                             <span>Driver: <strong>{company.driver_name || '-'}</strong></span>
@@ -51,7 +51,7 @@ export default function MonitoringCompanyDetailModal({ company, onClose, onFocus
                     </div>
 
                     {company.status === 'completed' && (
-                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <div className="p-2.5 rounded-md bg-emerald-50 border border-emerald-200">
                             <div className="text-[10px] font-bold text-emerald-800 uppercase flex items-center gap-1 mb-1">
                                 <Scale className="w-3.5 h-3.5" /> Timbangan: {company.total_weight || 0} Kg
                             </div>

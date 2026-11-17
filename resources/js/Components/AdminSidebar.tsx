@@ -39,15 +39,16 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
         return (
             <Link
                 href={href}
-                className={`group flex items-center px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                aria-current={isActive ? 'page' : undefined}
+                className={`group flex items-center px-3.5 py-2.5 rounded-md text-[13px] font-semibold transition-[background-color,color,transform] duration-200 active:scale-[.98] ${
                     isActive
-                        ? 'bg-emerald-50 text-emerald-800 shadow-[inset_0_0_0_1px_rgba(5,150,105,0.2)]'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                        ? 'bg-green-deep text-white shadow-[0_6px_14px_-10px_rgba(12,51,37,.8)]'
+                        : 'text-slate-600 hover:text-ink hover:bg-paper'
                 }`}
             >
                 <Icon
                     className={`w-4 h-4 mr-3 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                        isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-emerald-600'
+                        isActive ? 'text-lime' : 'text-slate-400 group-hover:text-green-deep'
                     }`}
                 />
                 <span className="truncate">{label}</span>
@@ -82,9 +83,9 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                             <div>
                                 <span className="font-extrabold text-sm text-slate-900 tracking-tight flex items-center gap-1">
                                     WellTrash
-                                    <Sparkles className="w-3 h-3 text-emerald-600" />
+                                    <Sparkles className="w-3 h-3 text-lime-600" />
                                 </span>
-                                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest block -mt-0.5">
+                                <span className="text-[10px] font-bold text-green-deep uppercase tracking-widest block -mt-0.5">
                                     Admin Console
                                 </span>
                             </div>
@@ -167,9 +168,9 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                                     href={route('logout')}
                                     method="post"
                                     as="button"
-                                    className="group flex items-center w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200/80 hover:border-rose-600 transition-all duration-200 shadow-2xs"
+                                    className="group flex items-center w-full px-3.5 py-2.5 rounded-xl text-[13px] font-semibold text-rose-600 hover:bg-rose-50 transition-colors duration-200"
                                 >
-                                    <LogOut className="w-4 h-4 mr-3 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5 text-rose-500 group-hover:text-white" />
+                                    <LogOut className="w-4 h-4 mr-3 shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" />
                                     <span>Keluar Sistem</span>
                                 </Link>
                             </div>

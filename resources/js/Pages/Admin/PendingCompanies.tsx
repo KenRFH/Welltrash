@@ -1,6 +1,6 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { useForm, Link } from '@inertiajs/react';
 import React, { useState } from 'react';
-import AdminSidebar from '@/Components/AdminSidebar';
+import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Company {
     id: number;
@@ -29,7 +29,6 @@ export default function PendingCompanies({ companies }: Props) {
         rejection_reason: '',
     });
     
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
@@ -60,28 +59,13 @@ export default function PendingCompanies({ companies }: Props) {
     };
 
     return (
-        <div className="flex h-screen bg-[#F8FAFC] font-sans">
-            <Head title="Menunggu Persetujuan | WellTrash Admin" />
-            <AdminSidebar active="pending" isMobileOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="h-20 flex items-center justify-between px-6 sm:px-10 bg-white/70 backdrop-blur-md border-b border-gray-100 z-10 sticky top-0">
-                    <div className="flex items-center gap-4">
-                        <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-gray-500 hover:text-orange-600 md:hidden focus:outline-none">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                        </button>
-                        <div>
-                            <h1 className="text-xl font-extrabold text-gray-900 tracking-tight">Menunggu Persetujuan</h1>
-                            <p className="text-xs text-gray-400 font-medium">Tinjau dan verifikasi pendaftaran baru</p>
-                        </div>
-                    </div>
-                    <div className="bg-yellow-50 text-yellow-700 px-4 py-2 rounded-xl font-bold text-sm border border-yellow-100">
-                        {companies.length} Menunggu
-                    </div>
-                </header>
-
-                <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 sm:px-10 py-8">
-                    <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+        <AdminLayout
+            title="Persetujuan Mitra"
+            subtitle="Tinjau dan verifikasi pendaftaran mitra baru"
+            activeTab="pending"
+            headerAction={<span className="inline-flex h-8 items-center rounded-lg bg-amber-50 px-3 text-xs font-semibold text-amber-700">{companies.length} menunggu</span>}
+        >
+                    <div className="bg-white rounded-md shadow-[0_4px_20px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
                         {companies.length === 0 ? (
                             <div className="p-16 flex flex-col items-center justify-center text-center">
                                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
@@ -99,7 +83,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                 <div className="mb-4 lg:mb-0 lg:pr-6 lg:w-1/2">
                                                     <div className="flex flex-col">
                                                         <h3 className="text-xl font-bold text-gray-900 truncate mb-2">{company.company_name}</h3>
-                                                        <div className="text-sm text-gray-600 space-y-1.5 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                        <div className="text-sm text-gray-600 space-y-1.5 bg-gray-50 p-4 rounded-md border border-gray-100">
                                                             <p className="flex justify-between">
                                                                 <span className="font-semibold text-gray-500">PIC:</span>
                                                                 <span className="text-right text-gray-900">{company.pic_name} ({company.phone})</span>
@@ -141,11 +125,11 @@ export default function PendingCompanies({ companies }: Props) {
                                                     </div>
                                                 </div>
 
-                                                <div className="mb-6 lg:mb-0 flex-shrink-0 lg:mx-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                                <div className="mb-6 lg:mb-0 flex-shrink-0 lg:mx-6 bg-gray-50 p-4 rounded-md border border-gray-100">
                                                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Dokumen Terlampir</h4>
                                                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm font-medium">
                                                         {company.payment_evidence_path ? (
-                                                            <a href={`/storage/${company.payment_evidence_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-orange-600 hover:text-orange-800 border border-orange-100 hover:border-orange-300 hover:shadow-sm rounded-xl transition-all">
+                                                            <a href={`/storage/${company.payment_evidence_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-orange-600 hover:text-orange-800 border border-orange-100 hover:border-orange-300 hover:shadow-sm rounded-md transition-all">
                                                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                                 Lihat Pembayaran
                                                             </a>
@@ -153,7 +137,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                             <span className="flex items-center px-4 py-2 bg-gray-50 text-gray-400 border border-dashed border-gray-200 rounded-xl">Belum Ada Pembayaran</span>
                                                         )}
                                                         {company.signed_mou_path ? (
-                                                            <a href={`/storage/${company.signed_mou_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-green-600 hover:text-green-800 border border-green-100 hover:border-green-300 hover:shadow-sm rounded-xl transition-all">
+                                                            <a href={`/storage/${company.signed_mou_path}`} target="_blank" rel="noopener noreferrer" className="flex items-center px-4 py-2 bg-white text-green-600 hover:text-green-800 border border-green-100 hover:border-green-300 hover:shadow-sm rounded-md transition-all">
                                                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                                                 Lihat MOU
                                                             </a>
@@ -169,7 +153,7 @@ export default function PendingCompanies({ companies }: Props) {
                                                     href={`https://wa.me/${company.phone.startsWith('0') ? '62' + company.phone.slice(1) : company.phone}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="w-full sm:w-auto px-4 py-2.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-xl font-bold text-sm flex items-center justify-center transition-colors"
+                                                    className="w-full sm:w-auto px-4 py-2.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-md font-bold text-sm flex items-center justify-center transition-colors"
                                                     title="Hubungi PIC via WhatsApp"
                                                 >
                                                     <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -194,8 +178,6 @@ export default function PendingCompanies({ companies }: Props) {
                             </ul>
                         )}
                     </div>
-                </main>
-            </div>
 
             {/* Modal Penolakan */}
             {rejectModalOpen && (
@@ -203,7 +185,7 @@ export default function PendingCompanies({ companies }: Props) {
                     <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={closeRejectModal} />
 
-                        <div className="relative inline-block w-full max-w-lg p-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-3xl sm:my-8">
+                        <div className="relative inline-block w-full max-w-lg p-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-md sm:my-8">
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-2xl font-black text-gray-900">Penolakan Mitra</h3>
                                 <button onClick={closeRejectModal} className="p-2 text-gray-400 bg-gray-50 rounded-full hover:text-gray-500 hover:bg-gray-100 transition-colors">
@@ -241,6 +223,6 @@ export default function PendingCompanies({ companies }: Props) {
                     </div>
                 </div>
             )}
-        </div>
+        </AdminLayout>
     );
 }

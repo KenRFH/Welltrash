@@ -66,7 +66,7 @@ class User extends Authenticatable
 
     public function roleLabel(): string
     {
-        return self::ROLE_LABELS[$this->role] ?? $this->role;
+        return self::ROLE_LABELS[$this->role] ?? (string) $this->role;
     }
 
     /** Approved izin/sakit covering $date (default today): that day the person neither clocks in nor works. */

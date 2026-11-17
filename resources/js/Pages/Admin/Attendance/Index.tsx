@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import StatCard from '@/Components/Admin/StatCard';
 import { router, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import {
@@ -233,13 +234,13 @@ export default function AttendanceIndex({
             <div className="space-y-6">
                 {/* Flash Messages */}
                 {flash?.success && (
-                    <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-lg shadow-2xs">
+                    <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-3 rounded-md shadow-2xs">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span>{flash.success}</span>
                     </div>
                 )}
                 {flash?.error && (
-                    <div className="flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold px-4 py-3 rounded-lg shadow-2xs">
+                    <div className="flex items-center gap-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold px-4 py-3 rounded-md shadow-2xs">
                         <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
                         <span>{flash.error}</span>
                     </div>
@@ -247,79 +248,18 @@ export default function AttendanceIndex({
 
                 {/* 1. Infographic Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kehadiran Tercatat</span>
-                            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                <UserCheck className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-slate-900 tracking-tight tabular-nums">
-                            {totalPresent}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Driver</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>Tanggal {formatDate(selectedDate)}</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Memenuhi Standar</span>
-                            <div className="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                                <Clock className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-teal-700 tracking-tight tabular-nums">
-                            {qualifiedCount}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Driver</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span className="font-bold text-emerald-600">{qualifiedRate}%</span>
-                            <span>kerja &ge; {minWorkHours} jam</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Akumulasi Lembur</span>
-                            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                                <Layers className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-indigo-700 tracking-tight tabular-nums">
-                            {totalOvertimeHours}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Jam</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            <span>Total {overtimes.total} sesi lembur</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
-                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Perlu Tindakan</span>
-                            <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                                <AlertCircle className="w-4.5 h-4.5" />
-                            </div>
-                        </div>
-                        <div className="text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
-                            {pendingLeaveCount + pendingOvertimeCount}
-                            <span className="text-xs font-medium text-slate-400 ml-1 font-sans">Permohonan</span>
-                        </div>
-                        <div className="mt-2 text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                            {pendingLeaveCount + pendingOvertimeCount > 0 ? (
-                                <span className="text-amber-700 font-semibold">{pendingLeaveCount} izin &bull; {pendingOvertimeCount} lembur</span>
-                            ) : (
-                                <span>Semua permohonan diproses</span>
-                            )}
-                        </div>
-                    </div>
+                    <StatCard index={0} tone="brand" icon={UserCheck} label="Kehadiran tercatat" value={totalPresent} unit="driver"
+                        note={<span>Tanggal {formatDate(selectedDate)}</span>} />
+                    <StatCard index={1} tone="ok" icon={Clock} label="Memenuhi standar" value={qualifiedCount} unit="driver"
+                        note={<><span className="font-semibold text-emerald-700">{qualifiedRate}%</span><span>kerja &ge; {minWorkHours} jam</span></>} />
+                    <StatCard index={2} tone="info" icon={Layers} label="Akumulasi lembur" value={totalOvertimeHours} unit="jam"
+                        note={<span>Total {overtimes.total} sesi lembur</span>} />
+                    <StatCard index={3} tone="warn" icon={AlertCircle} label="Perlu tindakan" value={pendingLeaveCount + pendingOvertimeCount} unit="permohonan"
+                        note={pendingLeaveCount + pendingOvertimeCount > 0 ? <span className="font-semibold text-amber-700">{pendingLeaveCount} izin &bull; {pendingOvertimeCount} lembur</span> : <span>Semua permohonan diproses</span>} />
                 </div>
 
                 {/* 2. Minimalist Filter Bar */}
-                <div className="bg-white rounded-xl p-4 border border-slate-200/80 shadow-2xs flex flex-wrap gap-3 items-center justify-between">
+                <div className="bg-white rounded-md p-4 border border-slate-200/80 shadow-2xs flex flex-wrap gap-3 items-center justify-between">
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Personel:</span>
@@ -354,85 +294,23 @@ export default function AttendanceIndex({
                 </div>
 
                 {/* 3. Segmented Tab Navigation */}
-                <div className="flex gap-2 flex-wrap">
-                    <button
-                        onClick={() => setActiveTab('absensi')}
-                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                            activeTab === 'absensi'
-                                ? 'bg-slate-900 text-white shadow-2xs'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                    >
-                        <span>Rekap Kehadiran</span>
-                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                            activeTab === 'absensi' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                            {attendances.total}
-                        </span>
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('lembur')}
-                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                            activeTab === 'lembur'
-                                ? 'bg-indigo-600 text-white shadow-2xs'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                    >
-                        <span>Rekap Lembur</span>
-                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                            activeTab === 'lembur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                            {overtimes.total}
-                        </span>
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('izin')}
-                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                            activeTab === 'izin'
-                                ? 'bg-amber-600 text-white shadow-2xs'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                    >
-                        <span>Pengajuan Izin / Sakit</span>
-                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                            activeTab === 'izin' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                            {leaveRequests.length}
-                        </span>
-                        {pendingLeaveCount > 0 && (
-                            <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full animate-pulse">
-                                {pendingLeaveCount}
-                            </span>
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('permohonan-lembur')}
-                        className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                            activeTab === 'permohonan-lembur'
-                                ? 'bg-purple-600 text-white shadow-2xs'
-                                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                    >
-                        <span>Permohonan Lembur</span>
-                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                            activeTab === 'permohonan-lembur' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                            {overtimeRequests.length}
-                        </span>
-                        {pendingOvertimeCount > 0 && (
-                            <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full animate-pulse">
-                                {pendingOvertimeCount}
-                            </span>
-                        )}
-                    </button>
+                <div className="adm-seg" role="group" aria-label="Jenis rekap">
+                    {([
+                        ['absensi', 'Rekap Kehadiran', attendances.total, 0],
+                        ['lembur', 'Rekap Lembur', overtimes.total, 0],
+                        ['izin', 'Pengajuan Izin / Sakit', leaveRequests.length, pendingLeaveCount],
+                        ['permohonan-lembur', 'Permohonan Lembur', overtimeRequests.length, pendingOvertimeCount],
+                    ] as const).map(([key, label, count, pending]) => (
+                        <button key={key} type="button" onClick={() => setActiveTab(key)} aria-pressed={activeTab === key} className="adm-seg-item">
+                            {label} <span className="adm-seg-count">{count}</span>
+                            {pending > 0 && <span className="rounded-full bg-rose-600 px-1.5 text-[11px] font-semibold text-white" aria-label={`${pending} menunggu`}>{pending}</span>}
+                        </button>
+                    ))}
                 </div>
 
                 {/* 4. Tab Contents */}
                 {activeTab === 'absensi' && (
-                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                    <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
                                 <h2 className="text-sm font-bold text-slate-900">Rekap Kehadiran Harian</h2>
@@ -603,7 +481,7 @@ export default function AttendanceIndex({
 
                 {/* Overtime Records Tab */}
                 {activeTab === 'lembur' && (
-                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                    <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
                                 <h2 className="text-sm font-bold text-slate-900">Rekap Jam Lembur</h2>
@@ -727,7 +605,7 @@ export default function AttendanceIndex({
 
                 {/* Leave Requests Tab */}
                 {activeTab === 'izin' && (
-                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                    <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
                                 <h2 className="text-sm font-bold text-slate-900">Pengajuan Izin & Sakit CleanUP</h2>
@@ -856,7 +734,7 @@ export default function AttendanceIndex({
 
                 {/* Overtime Requests Tab */}
                 {activeTab === 'permohonan-lembur' && (
-                    <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
+                    <div className="bg-white rounded-md border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <div>
                                 <h2 className="text-sm font-bold text-slate-900">Permohonan Kerja Lembur CleanUP</h2>
