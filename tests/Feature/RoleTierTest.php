@@ -175,6 +175,23 @@ class RoleTierTest extends TestCase
         Http::assertSent(fn ($req) => str_contains($req->url(), 'include_inactive=1'));
     }
 
+    public function test_sync_keeps_active_employees_without_an_hris_login_active(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'k']);
+        $crew = User::create(['name' => 'TANPA AKUN', 'email' => 'tanpa@welltrash.test', 'password' => Hash::make('x'), 'role' => 'CleanUP', 'employee_code' => 'WT-60']);
+        $blocked = User::create(['name' => 'DIBLOKIR', 'email' => 'blok@welltrash.test', 'password' => Hash::make('x'), 'role' => 'CleanUP', 'employee_code' => 'WT-61']);
+        Http::fake(['hris.test/*' => Http::response(['data' => [
+            ['employee_code' => 'WT-60', 'name' => 'TANPA AKUN', 'email' => 'tanpa@welltrash.test', 'status' => 'active', 'has_user_account' => false, 'is_user_active' => false],
+            ['employee_code' => 'WT-61', 'name' => 'DIBLOKIR', 'email' => 'blok@welltrash.test', 'status' => 'active', 'has_user_account' => true, 'is_user_active' => false],
+        ]])]);
+
+        app(HrisService::class)->syncCrew();
+        app(HrisService::class)->syncCrew(); // hourly: stays the same on every run
+
+        $this->assertTrue($crew->fresh()->is_active);
+        $this->assertFalse($blocked->fresh()->is_active, 'a login blocked in HRIS is still blocked here');
+    }
+
     public function test_scheduled_sync_reports_failure_without_changing_data(): void
     {
         config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'k']);
