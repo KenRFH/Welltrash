@@ -83,10 +83,6 @@ export default function AdminSidebar({ active, isMobileOpen = false, onClose }: 
                             <div>
                                 <span className="font-extrabold text-sm text-slate-900 tracking-tight flex items-center gap-1">
                                     WellTrash
-                                    <Sparkles className="w-3 h-3 text-lime-600" />
-                                </span>
-                                <span className="text-[10px] font-bold text-green-deep uppercase tracking-widest block -mt-0.5">
-                                    Admin Console
                                 </span>
                             </div>
                         </Link>

@@ -203,26 +203,34 @@ export default function Dashboard({ trashStats, totals }: Props) {
             title="Dasbor Analitik"
             subtitle="Ringkasan platform pengolahan limbah & kemitraan industri"
             activeTab="dashboard"
-            headerAction={canReport ? (
-                <div className="flex items-center gap-2">
-                    <label htmlFor="report-month" className="sr-only">Bulan laporan</label>
-                    <input
-                        id="report-month"
-                        type="month"
-                        value={reportMonth}
-                        max={thisMonth}
-                        onChange={(e) => setReportMonth(e.target.value || thisMonth)}
-                        className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                    />
-                    <a
-                        href={route('admin.reports.monthly', { month: reportMonth })}
-                        className="adm-btn adm-btn-primary"
-                    >
-                        <FileDown className="w-4 h-4" />
-                        <span>Laporan Bulanan (PDF)</span>
-                    </a>
-                </div>
-            ) : undefined}
+            headerAction={
+                canReport ? (
+                    <div className="flex items-center gap-2">
+                        <label htmlFor="report-month" className="sr-only">
+                            Bulan laporan
+                        </label>
+                        <input
+                            id="report-month"
+                            type="month"
+                            value={reportMonth}
+                            max={thisMonth}
+                            onChange={(e) =>
+                                setReportMonth(e.target.value || thisMonth)
+                            }
+                            className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                        />
+                        <a
+                            href={route("admin.reports.monthly", {
+                                month: reportMonth,
+                            })}
+                            className="adm-btn adm-btn-primary"
+                        >
+                            <FileDown className="w-4 h-4" />
+                            <span>Laporan Bulanan (PDF)</span>
+                        </a>
+                    </div>
+                ) : undefined
+            }
         >
             <motion.div
                 variants={containerVariants}
@@ -241,7 +249,15 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                 {greeting}, Administrator
                             </h2>
                             <p className="text-sm text-white/75 mt-1 max-w-2xl leading-relaxed">
-                                Memonitor <span className="font-bold text-white">{totals.total_companies} mitra industri</span> di Jember dengan akumulasi <span className="font-bold text-lime">{totalWasteKg.toLocaleString('id-ID')} Kg</span> limbah terkelola secara sirkular.
+                                Memonitor{" "}
+                                <span className="font-bold text-white">
+                                    {totals.total_companies} mitra industri
+                                </span>{" "}
+                                di Jember dengan akumulasi{" "}
+                                <span className="font-bold text-lime">
+                                    {totalWasteKg.toLocaleString("id-ID")} Kg
+                                </span>{" "}
+                                limbah terkelola secara sirkular.
                             </p>
                         </div>
 
@@ -250,15 +266,23 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             <div className="px-3.5 py-2 rounded-md bg-white/[.06] border border-white/10 flex items-center gap-2.5">
                                 <Leaf className="w-4 h-4 text-lime" />
                                 <div>
-                                    <div className="text-[11px] text-white/60 font-medium">Tingkat daur ulang</div>
-                                    <div className="text-xs font-black text-white">{diversionRate}% Teralihkan</div>
+                                    <div className="text-[11px] text-white/60 font-medium">
+                                        Tingkat daur ulang
+                                    </div>
+                                    <div className="text-xs font-black text-white">
+                                        {diversionRate}% Teralihkan
+                                    </div>
                                 </div>
                             </div>
                             <div className="px-3.5 py-2 rounded-md bg-white/[.06] border border-white/10 flex items-center gap-2.5">
                                 <Scale className="w-4 h-4 text-lime" />
                                 <div>
-                                    <div className="text-[11px] text-white/60 font-medium">Reduksi karbon</div>
-                                    <div className="text-xs font-black text-white">{co2eAvoided} Kg CO₂e</div>
+                                    <div className="text-[11px] text-white/60 font-medium">
+                                        Reduksi karbon
+                                    </div>
+                                    <div className="text-xs font-black text-white">
+                                        {co2eAvoided} Kg CO₂e
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -276,7 +300,9 @@ export default function Dashboard({ trashStats, totals }: Props) {
                         color="slate"
                         subtext={
                             <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-emerald-600">{activeRate}%</span>
+                                <span className="font-bold text-emerald-600">
+                                    {activeRate}%
+                                </span>
                                 <span>berlangganan aktif</span>
                             </div>
                         }
@@ -304,13 +330,18 @@ export default function Dashboard({ trashStats, totals }: Props) {
                         label="Persetujuan"
                         value={totals.pending_companies}
                         unit="Permohonan"
-                        badge={totals.pending_companies > 0 ? "Perlu Tindakan" : "Bersih"}
+                        badge={
+                            totals.pending_companies > 0
+                                ? "Perlu Tindakan"
+                                : "Bersih"
+                        }
                         color="amber"
                         href="/admin/companies/pending"
                         subtext={
                             totals.pending_companies > 0 ? (
                                 <span className="text-amber-700 font-semibold inline-flex items-center gap-1">
-                                    Tinjau permohonan <ArrowUpRight className="w-3 h-3" />
+                                    Tinjau permohonan{" "}
+                                    <ArrowUpRight className="w-3 h-3" />
                                 </span>
                             ) : (
                                 <span>Semua permohonan diproses</span>
@@ -324,12 +355,18 @@ export default function Dashboard({ trashStats, totals }: Props) {
                         label="Total Penjemputan"
                         value={totals.total_pickups}
                         unit="Trip"
-                        badge={totals.trash_bags && totals.trash_bags > 0 ? `${totals.trash_bags} Trashbag` : "Terverifikasi"}
+                        badge={
+                            totals.trash_bags && totals.trash_bags > 0
+                                ? `${totals.trash_bags} Trashbag`
+                                : "Terverifikasi"
+                        }
                         color="teal"
                         subtext={
                             <div className="flex items-center gap-1.5">
                                 <span>Rata-rata</span>
-                                <span className="font-bold text-teal-700">{avgPerPickup} Kg / trip</span>
+                                <span className="font-bold text-teal-700">
+                                    {avgPerPickup} Kg / trip
+                                </span>
                             </div>
                         }
                     />
@@ -349,11 +386,15 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                 </h3>
                             </div>
                             <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                Akumulasi penimbangan dari penjemputan armada CleanUP yang telah selesai
+                                Akumulasi penimbangan dari penjemputan armada
+                                CleanUP yang telah selesai
                             </p>
                         </div>
                         <div className="px-3 py-1.5 rounded-md bg-slate-50 border border-slate-200/60 text-xs font-bold text-slate-700 self-start sm:self-auto">
-                            Total: <span className="text-emerald-700 font-extrabold">{totalWasteKg.toLocaleString('id-ID')} Kg</span>
+                            Total:{" "}
+                            <span className="text-emerald-700 font-extrabold">
+                                {totalWasteKg.toLocaleString("id-ID")} Kg
+                            </span>
                         </div>
                     </div>
 
@@ -363,13 +404,32 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             label="Komposisi sampah terkelola menurut kategori"
                             emptyText="Belum ada penimbangan dari penjemputan yang selesai."
                             brackets={[
-                                { from: 0, to: 1, text: `Teralihkan dari TPA · ${fmtShare(((totalOrganic + totalAnorganic) / (totalWasteKg || 1)) * 100)}` },
-                                { from: 2, to: 2, text: 'Ke TPA' },
+                                {
+                                    from: 0,
+                                    to: 1,
+                                    text: `Teralihkan dari TPA · ${fmtShare(((totalOrganic + totalAnorganic) / (totalWasteKg || 1)) * 100)}`,
+                                },
+                                { from: 2, to: 2, text: "Ke TPA" },
                             ]}
                             parts={[
-                                { label: 'Organik', value: totalOrganic, display: `${totalOrganic.toLocaleString('id-ID')} kg`, color: CHART.green },
-                                { label: 'Anorganik', value: totalAnorganic, display: `${totalAnorganic.toLocaleString('id-ID')} kg`, color: CHART.blue },
-                                { label: 'Residu', value: totalResidue, display: `${totalResidue.toLocaleString('id-ID')} kg`, color: CHART.brown },
+                                {
+                                    label: "Organik",
+                                    value: totalOrganic,
+                                    display: `${totalOrganic.toLocaleString("id-ID")} kg`,
+                                    color: CHART.green,
+                                },
+                                {
+                                    label: "Anorganik",
+                                    value: totalAnorganic,
+                                    display: `${totalAnorganic.toLocaleString("id-ID")} kg`,
+                                    color: CHART.blue,
+                                },
+                                {
+                                    label: "Residu",
+                                    value: totalResidue,
+                                    display: `${totalResidue.toLocaleString("id-ID")} kg`,
+                                    color: CHART.gray,
+                                },
                             ]}
                         />
                     </div>
@@ -406,9 +466,9 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             weight={totalResidue}
                             pct={residuePct}
                             desc="Material sisa non-daur ulang diangkut secara terkontrol menuju TPA Pakusari."
-                            bg="bg-orange-50/40"
-                            border="border-orange-100"
-                            iconBg="bg-[#b8652a]"
+                            bg="bg-gray-100"
+                            border="border-black-10"
+                            iconBg="bg-[#7A7A7A]"
                             textColor="text-slate-800"
                         />
                     </div>
@@ -428,7 +488,8 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                 </h3>
                             </div>
                             <p className="text-xs text-slate-400 font-medium mt-0.5">
-                                Catatan volume pemilahan per perusahaan mitra dari penjemputan selesai
+                                Catatan volume pemilahan per perusahaan mitra
+                                dari penjemputan selesai
                             </p>
                         </div>
 
@@ -440,7 +501,9 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                 <input
                                     type="text"
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
                                     placeholder="Cari nama mitra / paket..."
                                     className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50/50"
                                 />
@@ -449,31 +512,31 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             {/* Status Filters */}
                             <div className="inline-flex p-0.5 rounded-md bg-slate-100 border border-slate-200/70 text-xs font-semibold">
                                 <button
-                                    onClick={() => setStatusFilter('all')}
+                                    onClick={() => setStatusFilter("all")}
                                     className={`px-2.5 py-1 rounded-lg transition-all ${
-                                        statusFilter === 'all'
-                                            ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                                            : 'text-slate-500 hover:text-slate-900'
+                                        statusFilter === "all"
+                                            ? "bg-white text-slate-900 shadow-2xs font-bold"
+                                            : "text-slate-500 hover:text-slate-900"
                                     }`}
                                 >
                                     Semua
                                 </button>
                                 <button
-                                    onClick={() => setStatusFilter('active')}
+                                    onClick={() => setStatusFilter("active")}
                                     className={`px-2.5 py-1 rounded-lg transition-all ${
-                                        statusFilter === 'active'
-                                            ? 'bg-white text-emerald-700 shadow-2xs font-bold'
-                                            : 'text-slate-500 hover:text-slate-900'
+                                        statusFilter === "active"
+                                            ? "bg-white text-emerald-700 shadow-2xs font-bold"
+                                            : "text-slate-500 hover:text-slate-900"
                                     }`}
                                 >
                                     Aktif
                                 </button>
                                 <button
-                                    onClick={() => setStatusFilter('pending')}
+                                    onClick={() => setStatusFilter("pending")}
                                     className={`px-2.5 py-1 rounded-lg transition-all ${
-                                        statusFilter === 'pending'
-                                            ? 'bg-white text-amber-700 shadow-2xs font-bold'
-                                            : 'text-slate-500 hover:text-slate-900'
+                                        statusFilter === "pending"
+                                            ? "bg-white text-amber-700 shadow-2xs font-bold"
+                                            : "text-slate-500 hover:text-slate-900"
                                     }`}
                                 >
                                     Menunggu
@@ -483,14 +546,26 @@ export default function Dashboard({ trashStats, totals }: Props) {
                             {/* Sort Selector */}
                             <select
                                 value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value as any)}
+                                onChange={(e) =>
+                                    setSortBy(e.target.value as any)
+                                }
                                 className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-slate-50/50 focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
                             >
-                                <option value="total">Urutkan: Volume Terbanyak</option>
-                                <option value="organic">Urutkan: Organik Terbanyak</option>
-                                <option value="anorganic">Urutkan: Anorganik Terbanyak</option>
-                                <option value="pickups">Urutkan: Pickup Terbanyak</option>
-                                <option value="name">Urutkan: Nama A - Z</option>
+                                <option value="total">
+                                    Urutkan: Volume Terbanyak
+                                </option>
+                                <option value="organic">
+                                    Urutkan: Organik Terbanyak
+                                </option>
+                                <option value="anorganic">
+                                    Urutkan: Anorganik Terbanyak
+                                </option>
+                                <option value="pickups">
+                                    Urutkan: Pickup Terbanyak
+                                </option>
+                                <option value="name">
+                                    Urutkan: Nama A - Z
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -499,65 +574,130 @@ export default function Dashboard({ trashStats, totals }: Props) {
                         <table className="min-w-full divide-y divide-slate-100">
                             <thead>
                                 <tr className="bg-slate-50/70">
-                                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">Perusahaan</th>
-                                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Layanan</th>
-                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Organik</th>
-                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-teal-700 uppercase tracking-wider">Anorganik</th>
-                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Residu</th>
-                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-slate-900 uppercase tracking-wider">Total Sampah</th>
-                                    <th className="px-5 py-3 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pickup</th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Perusahaan
+                                    </th>
+                                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">
+                                        Layanan
+                                    </th>
+                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
+                                        Organik
+                                    </th>
+                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-teal-700 uppercase tracking-wider">
+                                        Anorganik
+                                    </th>
+                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">
+                                        Residu
+                                    </th>
+                                    <th className="px-5 py-3 text-right text-[11px] font-bold text-slate-900 uppercase tracking-wider">
+                                        Total Sampah
+                                    </th>
+                                    <th className="px-5 py-3 text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Pickup
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {filteredStats.length === 0 ? (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                                        <td
+                                            colSpan={7}
+                                            className="px-6 py-12 text-center text-slate-400"
+                                        >
                                             <Search className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                                            <p className="text-xs font-semibold text-slate-600">Tidak ada mitra yang cocok dengan filter</p>
-                                            <p className="text-[11px] text-slate-400 mt-0.5">Coba sesuaikan kata kunci pencarian atau status mitra</p>
+                                            <p className="text-xs font-semibold text-slate-600">
+                                                Tidak ada mitra yang cocok
+                                                dengan filter
+                                            </p>
+                                            <p className="text-[11px] text-slate-400 mt-0.5">
+                                                Coba sesuaikan kata kunci
+                                                pencarian atau status mitra
+                                            </p>
                                         </td>
                                     </tr>
                                 ) : (
                                     filteredStats.map((stat, i) => {
-                                        const companyTotal = stat.organic + stat.anorganic + stat.residue;
+                                        const companyTotal =
+                                            stat.organic +
+                                            stat.anorganic +
+                                            stat.residue;
                                         return (
-                                            <tr key={i} className="hover:bg-slate-50/80 transition-colors group">
+                                            <tr
+                                                key={i}
+                                                className="hover:bg-slate-50/80 transition-colors group"
+                                            >
                                                 <td className="px-5 py-3.5">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-lg bg-emerald-100/70 text-emerald-800 font-extrabold text-xs flex items-center justify-center shrink-0">
-                                                            {stat.company_name.charAt(0).toUpperCase()}
+                                                            {stat.company_name
+                                                                .charAt(0)
+                                                                .toUpperCase()}
                                                         </div>
                                                         <div className="min-w-0">
                                                             <div className="font-bold text-xs text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
-                                                                {stat.company_name}
+                                                                {
+                                                                    stat.company_name
+                                                                }
                                                             </div>
-                                                            <div className="sm:hidden mt-0.5">{getStatusBadge(stat.subscription_status)}</div>
+                                                            <div className="sm:hidden mt-0.5">
+                                                                {getStatusBadge(
+                                                                    stat.subscription_status,
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-3.5 hidden sm:table-cell">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-medium text-slate-600">{stat.subscription_plan}</span>
-                                                        {getStatusBadge(stat.subscription_status)}
+                                                        <span className="text-xs font-medium text-slate-600">
+                                                            {
+                                                                stat.subscription_plan
+                                                            }
+                                                        </span>
+                                                        {getStatusBadge(
+                                                            stat.subscription_status,
+                                                        )}
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-right font-extrabold text-emerald-700 text-xs">
-                                                    {stat.organic.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400 font-normal">Kg</span>
+                                                    {stat.organic.toLocaleString(
+                                                        "id-ID",
+                                                    )}{" "}
+                                                    <span className="text-[10px] text-slate-400 font-normal">
+                                                        Kg
+                                                    </span>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-right font-extrabold text-teal-700 text-xs">
-                                                    {stat.anorganic.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400 font-normal">Kg</span>
+                                                    {stat.anorganic.toLocaleString(
+                                                        "id-ID",
+                                                    )}{" "}
+                                                    <span className="text-[10px] text-slate-400 font-normal">
+                                                        Kg
+                                                    </span>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-right font-medium text-slate-500 text-xs hidden md:table-cell">
-                                                    {stat.residue.toLocaleString('id-ID')} <span className="text-[10px] text-slate-400">Kg</span>
+                                                    {stat.residue.toLocaleString(
+                                                        "id-ID",
+                                                    )}{" "}
+                                                    <span className="text-[10px] text-slate-400">
+                                                        Kg
+                                                    </span>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-right">
                                                     <div className="flex flex-col items-end gap-0.5">
                                                         <span className="font-black text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded-md">
-                                                            {companyTotal.toLocaleString('id-ID')} Kg
+                                                            {companyTotal.toLocaleString(
+                                                                "id-ID",
+                                                            )}{" "}
+                                                            Kg
                                                         </span>
-                                                        {stat.trash_bags && stat.trash_bags > 0 ? (
+                                                        {stat.trash_bags &&
+                                                        stat.trash_bags > 0 ? (
                                                             <span className="text-[10px] text-blue-700 font-bold">
-                                                                {stat.trash_bags} Trashbag
+                                                                {
+                                                                    stat.trash_bags
+                                                                }{" "}
+                                                                Trashbag
                                                             </span>
                                                         ) : null}
                                                     </div>
@@ -580,40 +720,40 @@ export default function Dashboard({ trashStats, totals }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
                         {
-                            label: 'Persetujuan Mitra',
+                            label: "Persetujuan Mitra",
                             sub: `${totals.pending_companies} permohonan baru`,
                             icon: Clock,
-                            color: 'text-amber-700',
-                            bg: 'bg-amber-50',
-                            border: 'border-amber-200/80',
-                            href: '/admin/companies/pending',
+                            color: "text-amber-700",
+                            bg: "bg-amber-50",
+                            border: "border-amber-200/80",
+                            href: "/admin/companies/pending",
                         },
                         {
-                            label: 'Permintaan Batal',
-                            sub: 'Tinjau permohonan berhenti',
+                            label: "Permintaan Batal",
+                            sub: "Tinjau permohonan berhenti",
                             icon: Ban,
-                            color: 'text-rose-700',
-                            bg: 'bg-rose-50',
-                            border: 'border-rose-200/80',
-                            href: '/admin/companies/cancellations/requests',
+                            color: "text-rose-700",
+                            bg: "bg-rose-50",
+                            border: "border-rose-200/80",
+                            href: "/admin/companies/cancellations/requests",
                         },
                         {
-                            label: 'Monitor Armada',
-                            sub: 'Status CleanUP & rute',
+                            label: "Monitor Armada",
+                            sub: "Status CleanUP & rute",
                             icon: Truck,
-                            color: 'text-teal-700',
-                            bg: 'bg-teal-50',
-                            border: 'border-teal-200/80',
-                            href: '/admin/cleanups',
+                            color: "text-teal-700",
+                            bg: "bg-teal-50",
+                            border: "border-teal-200/80",
+                            href: "/admin/cleanups",
                         },
                         {
-                            label: 'Invoice Mitra',
-                            sub: 'Rekapitulasi tagihan bulanan',
+                            label: "Invoice Mitra",
+                            sub: "Rekapitulasi tagihan bulanan",
                             icon: Receipt,
-                            color: 'text-emerald-700',
-                            bg: 'bg-emerald-50',
-                            border: 'border-emerald-200/80',
-                            href: '/admin/invoices',
+                            color: "text-emerald-700",
+                            bg: "bg-emerald-50",
+                            border: "border-emerald-200/80",
+                            href: "/admin/invoices",
                         },
                     ].map((action, i) => {
                         const ActionIcon = action.icon;
@@ -623,7 +763,9 @@ export default function Dashboard({ trashStats, totals }: Props) {
                                 href={action.href}
                                 className={`group bg-white rounded-md p-4 border ${action.border} hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-3.5`}
                             >
-                                <div className={`w-11 h-11 ${action.bg} ${action.color} rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                                <div
+                                    className={`w-11 h-11 ${action.bg} ${action.color} rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}
+                                >
                                     <ActionIcon className="w-5 h-5" />
                                 </div>
                                 <div className="min-w-0">
