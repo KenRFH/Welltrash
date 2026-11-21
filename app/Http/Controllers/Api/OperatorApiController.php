@@ -46,17 +46,39 @@ class OperatorApiController extends Controller
             try {
                 $hrisData = $hrisService->verifyCredentials($identifier, $password);
 
-                if ($hrisData && !empty($hrisData['verified'])) {
-                    $hrisUser = $hrisData['user'];
+                if ($hrisData !== null) {
+                    if (!empty($hrisData['verified'])) {
+                        $hrisUser = $hrisData['user'];
 
-                    if (!($hrisUser['is_active'] ?? true)) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
-                        ], 403);
+                        if (!($hrisUser['is_active'] ?? true)) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
+                            ], 403);
+                        }
+
+                        $user = $hrisService->syncUserFromHrisData($hrisUser, $password);
+                    } else {
+                        // HRIS answered "tidak" (kredensial salah atau akun dinonaktifkan)
+                        $candidate = User::where('email', $identifier)
+                            ->orWhere('employee_code', strtoupper($identifier))
+                            ->first();
+
+                        // Karyawan internal tidak boleh fallback ke password lokal jika HRIS menolak
+                        if ($candidate && $candidate->employee_code) {
+                            $isInactive = !empty($hrisData['message']) && (
+                                str_contains(strtolower($hrisData['message']), 'tidak aktif') ||
+                                str_contains(strtolower($hrisData['message']), 'dinonaktifkan')
+                            );
+
+                            return response()->json([
+                                'success' => false,
+                                'message' => $isInactive
+                                    ? 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.'
+                                    : 'Email/kode karyawan atau password salah.',
+                            ], $isInactive ? 403 : 401);
+                        }
                     }
-
-                    $user = $hrisService->syncUserFromHrisData($hrisUser, $password);
                 }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::warning('HRIS auth connection warning: ' . $e->getMessage());
