@@ -46,19 +46,43 @@ class LoginRequest extends FormRequest
         if ($hrisService->isConfigured()) {
             try {
                 $hrisData = $hrisService->verifyCredentials($loginValue, $password);
-                if ($hrisData && !empty($hrisData['verified'])) {
-                    $hrisUser = $hrisData['user'];
+                if ($hrisData !== null) {
+                    if (!empty($hrisData['verified'])) {
+                        $hrisUser = $hrisData['user'];
 
-                    if (!($hrisUser['is_active'] ?? true)) {
-                        throw ValidationException::withMessages([
-                            'email' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
-                        ]);
+                        if (!($hrisUser['is_active'] ?? true)) {
+                            throw ValidationException::withMessages([
+                                'email' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
+                            ]);
+                        }
+
+                        $user = $hrisService->syncUserFromHrisData($hrisUser, $password);
+                        Auth::login($user, $this->boolean('remember'));
+                        RateLimiter::clear($this->throttleKey());
+                        return;
                     }
 
-                    $user = $hrisService->syncUserFromHrisData($hrisUser, $password);
-                    Auth::login($user, $this->boolean('remember'));
-                    RateLimiter::clear($this->throttleKey());
-                    return;
+                    // HRIS answered "tidak" (kredensial salah atau akun dinonaktifkan)
+                    // Jika akun memiliki employee_code (karyawan HRIS), jangan izinkan fallback ke password lokal
+                    $field = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+                    $localEmployee = User::where($field, $loginValue)
+                        ->orWhere('employee_code', strtoupper($loginValue))
+                        ->first();
+
+                    if ($localEmployee && $localEmployee->employee_code) {
+                        RateLimiter::hit($this->throttleKey());
+
+                        $isInactive = !empty($hrisData['message']) && (
+                            str_contains(strtolower($hrisData['message']), 'tidak aktif') ||
+                            str_contains(strtolower($hrisData['message']), 'dinonaktifkan')
+                        );
+
+                        throw ValidationException::withMessages([
+                            'email' => $isInactive
+                                ? 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.'
+                                : trans('auth.failed'),
+                        ]);
+                    }
                 }
             } catch (ValidationException $ve) {
                 throw $ve;

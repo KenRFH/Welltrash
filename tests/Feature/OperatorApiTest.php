@@ -39,6 +39,37 @@ class OperatorApiTest extends TestCase
             ->assertJson(['success' => false]);
     }
 
+    public function test_login_rejects_inactive_hris_employee_even_if_local_password_matches(): void
+    {
+        config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'secret_key']);
+        \Illuminate\Support\Facades\Http::fake([
+            'https://hris.test/api/v1/internal/verify-credentials' => \Illuminate\Support\Facades\Http::response([
+                'success' => false,
+                'verified' => false,
+                'message' => 'Akun karyawan tidak aktif atau telah dinonaktifkan di HRIS.',
+            ], 403),
+        ]);
+
+        $this->createOperator([
+            'email' => 'inactive@welltrash.test',
+            'employee_code' => 'WT-099',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/operator/login', [
+            'email' => 'inactive@welltrash.test',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Akun karyawan Anda dinonaktifkan di HRIS. Silakan hubungi Direktur/Manajemen.',
+            ]);
+
+        config(['services.hris.api_key' => '']);
+    }
+
     public function test_login_rejects_non_cleanup_role(): void
     {
         User::create([
