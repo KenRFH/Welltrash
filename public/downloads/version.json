@@ -1,11 +1,11 @@
 {
-  "version_name": "1.5.2",
-  "version_code": 12,
-  "title": "Pembaruan Welltrash v1.5.2 Tersedia",
-  "changelog": "• Data penjemputan offline yang ditolak server tidak lagi hilang saat sinkronisasi\n• Alasan penolakan (misalnya belum presensi masuk) tampil di daftar Mitra Belum Tersinkron\n• Setelah presensi, data bisa disinkronkan ulang tanpa input ulang",
+  "version_name": "1.5.3",
+  "version_code": 13,
+  "title": "Pembaruan Wajib Welltrash v1.5.3",
+  "changelog": "• Presensi masuk bisa dilakukan tanpa sinyal, otomatis terkirim saat online\n• Data penjemputan offline tidak lagi hilang: yang belum bisa dikirim tetap tersimpan beserta alasannya\n• Data offline hanya dikirim oleh akun yang mencatatnya, aman saat HP dipakai bergantian\n• Pembaruan ini wajib agar data penjemputan tidak hilang",
   "apk_url": "https://welltrash.com/downloads/welltrash-cleanup-operator.apk",
-  "force_update": false,
+  "force_update": true,
   "release_date": "2026-11-22",
-  "size_bytes": 60839394,
-  "sha256": "275e05da8e2c56a1b8a688eeaa3283fb61db5515443da61a64bddf51293098ee"
+  "size_bytes": 60806626,
+  "sha256": "dc647f09a5d270f7d3bc7353f33411da5fafbe0de2bec2edd6dec3bfbcae191f"
 }

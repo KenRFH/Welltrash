@@ -23,6 +23,7 @@ class Pickup extends Model
 
     protected $casts = [
         'trash_bag_count' => 'integer',
+        'report_emailed_at' => 'datetime',
         'organic_weight' => 'float',
         'anorganic_weight' => 'float',
         'residue_weight' => 'float',
@@ -40,19 +41,35 @@ class Pickup extends Model
                 return;
             }
             $id = $pickup->id;
-            dispatch(function () use ($id) {
-                $pickup = Pickup::with('company.user')->find($id);
-                $email = $pickup?->company?->user?->email;
-                if (! $email) {
-                    return;
-                }
-                try {
-                    \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\PickupReportMail($pickup));
-                } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::warning("Email laporan pickup #{$id} ke {$email} gagal: " . $e->getMessage());
-                }
-            })->afterResponse();
+            dispatch(fn () => Pickup::find($id)?->sendReport())->afterResponse();
         });
+    }
+
+    /**
+     * Email the PDF report to the partner's account and record the outcome on the pickup (admin sees it and can
+     * resend). Returns the error message, or null when sent.
+     */
+    public function sendReport(): ?string
+    {
+        $this->loadMissing('company.user');
+        $email = $this->company?->user?->email;
+        $error = null;
+        if (! $email) {
+            $error = 'Akun mitra tidak memiliki email.';
+        } else {
+            try {
+                \Illuminate\Support\Facades\Mail::to($email)->send(new \App\Mail\PickupReportMail($this));
+            } catch (\Throwable $e) {
+                $error = mb_substr($e->getMessage(), 0, 500);
+                \Illuminate\Support\Facades\Log::warning("Email laporan pickup #{$this->id} ke {$email} gagal: {$error}");
+            }
+        }
+        // Query update: no model events, so this never re-triggers the completion email.
+        static::whereKey($this->id)->update($error
+            ? ['report_email_error' => $error]
+            : ['report_emailed_at' => now(), 'report_email_error' => null]);
+
+        return $error;
     }
 
     /**

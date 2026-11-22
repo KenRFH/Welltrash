@@ -427,7 +427,7 @@ class OperatorApiController extends Controller
         if (! $pickupDate->isToday() && ! $isGraceAllowed) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI atau antrean offline dalam batas toleransi.',
+                'message' => 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI atau antrean offline dalam batas toleransi (48 jam). Minta admin menyelesaikan penjemputan ini secara manual.',
             ], 422);
         }
 
@@ -683,13 +683,29 @@ class OperatorApiController extends Controller
     public function clockIn(Request $request, HrisService $hrisService): JsonResponse
     {
         $request->validate([
-            'photo' => 'nullable|image|max:5120',
-            'lat'   => 'nullable|numeric',
-            'lng'   => 'nullable|numeric',
+            'photo'               => 'nullable|image|max:5120',
+            'lat'                 => 'nullable|numeric',
+            'lng'                 => 'nullable|numeric',
+            'offline_recorded_at' => 'nullable|date',
         ]);
 
-        $user  = $request->user();
-        $today = Carbon::today()->toDateString();
+        $user = $request->user();
+
+        // Clock-in queued on the phone without signal: record it at the time it was tapped, so pickups done
+        // offline that day can sync. shortcut: trusts the phone's clock within 48h (same as offline pickups),
+        // upgrade to a server-signed offline token if backdating becomes a payroll problem.
+        $clockInAt = Carbon::now();
+        if ($request->filled('offline_recorded_at')) {
+            $recordedAt = Carbon::parse($request->offline_recorded_at)->setTimezone(config('app.timezone'));
+            if ($recordedAt->lt(Carbon::now()->subHours(48))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Presensi offline melewati batas toleransi 48 jam. Hubungi admin.',
+                ], 422);
+            }
+            $clockInAt = $recordedAt->min(Carbon::now());
+        }
+        $today = $clockInAt->toDateString();
 
         $existing = Attendance::where('user_id', $user->id)
             ->whereDate('date', $today)
@@ -709,7 +725,7 @@ class OperatorApiController extends Controller
         $attendance = Attendance::create([
             'user_id'        => $user->id,
             'date'           => $today,
-            'clock_in_at'    => Carbon::now(),
+            'clock_in_at'    => $clockInAt,
             'clock_in_photo' => $photoPath,
             'clock_in_lat'   => $request->lat,
             'clock_in_lng'   => $request->lng,
@@ -720,7 +736,7 @@ class OperatorApiController extends Controller
             $user->update([
                 'current_lat'      => (float) $request->lat,
                 'current_lng'      => (float) $request->lng,
-                'last_location_at' => Carbon::now(),
+                'last_location_at' => $clockInAt, // an offline position is as old as the clock-in, not "now"
             ]);
         }
 

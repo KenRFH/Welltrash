@@ -186,6 +186,8 @@ Route::middleware(['auth', 'role:' . implode(',', User::OPS_ROLES)])
 
         Route::get('/companies/{company}', [AdminController::class, 'showCompany'])->name('companies.show');
         Route::patch('/companies/{company}/coordinates', [AdminController::class, 'updateCoordinates'])->name('companies.updateCoordinates');
+        Route::post('/pickups/{pickup}/complete', [AdminController::class, 'completePickup'])->name('pickups.complete');
+        Route::post('/pickups/{pickup}/resend-report', [AdminController::class, 'resendPickupReport'])->name('pickups.resendReport');
         Route::patch('/attendance/salary/{user}', [AdminAttendanceController::class, 'updateSalary'])->name('attendance.updateSalary');
         Route::get('/reports/monthly', \App\Http\Controllers\Admin\MonthlyReportController::class)->name('reports.monthly');
 
