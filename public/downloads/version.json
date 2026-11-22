@@ -1,11 +1,11 @@
 {
-  "version_name": "1.5.1",
-  "version_code": 11,
-  "title": "Pembaruan Welltrash v1.5.1 Tersedia",
-  "changelog": "• Tampilan Agenda baru: tanggal ditampilkan jelas di setiap agenda\n• Kalender lebih ringkas, hari Minggu berwarna merah, dan tombol \"Hari ini\"\n• Form agenda lebih rapi: kolom tanggal dan jam berlabel, tombol Hapus dipisah dari Simpan\n• Tombol \"Coba lagi\" bila agenda gagal dimuat",
+  "version_name": "1.5.2",
+  "version_code": 12,
+  "title": "Pembaruan Welltrash v1.5.2 Tersedia",
+  "changelog": "• Data penjemputan offline yang ditolak server tidak lagi hilang saat sinkronisasi\n• Alasan penolakan (misalnya belum presensi masuk) tampil di daftar Mitra Belum Tersinkron\n• Setelah presensi, data bisa disinkronkan ulang tanpa input ulang",
   "apk_url": "https://welltrash.com/downloads/welltrash-cleanup-operator.apk",
   "force_update": false,
-  "release_date": "2026-11-17",
-  "size_bytes": 60741090,
-  "sha256": "5fcff774af8245b1ffb6c0dfa381433793a0538747b3a79dca549d50cf880f30"
+  "release_date": "2026-11-22",
+  "size_bytes": 60839394,
+  "sha256": "275e05da8e2c56a1b8a688eeaa3283fb61db5515443da61a64bddf51293098ee"
 }
