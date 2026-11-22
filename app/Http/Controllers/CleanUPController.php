@@ -221,7 +221,7 @@ class CleanUPController extends Controller
 
         // STRICT RULE with Grace Period
         if (!$pickupDate->isToday() && !$isGraceAllowed) {
-            $errorMessage = 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI atau antrean offline dalam batas toleransi.';
+            $errorMessage = 'Akses ditolak. Anda hanya dapat mensubmit untuk jadwal HARI INI atau antrean offline dalam batas toleransi (48 jam). Minta admin menyelesaikan penjemputan ini secara manual.';
             if ($request->expectsJson() || $request->header('X-Background-Sync') === 'true') {
                 return response()->json([
                     'success' => false,

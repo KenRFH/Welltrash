@@ -29,15 +29,72 @@ class AdminController extends Controller
         $company->load([
             'user',
             'pickups' => function ($q) {
-                $q->with('cleanup:id,name')->orderByDesc('pickup_date')->take(20);
+                // History only: generated future schedules (a month ahead) would otherwise fill all 20 rows.
+                $q->with('cleanup:id,name')->whereDate('pickup_date', '<=', Carbon::today())->orderByDesc('pickup_date')->take(20);
             }
         ]);
         
         $company->remaining_days = null;
 
         return Inertia::render('Admin/Companies/Show', [
-            'company' => $company
+            'company'   => $company,
+            'operators' => User::where('role', 'CleanUP')->where('is_active', true)->orderBy('name')->get(['id', 'name']),
         ]);
+    }
+
+    /**
+     * Admin fallback when the operator app cannot submit (offline data past the 48h window, lost queue):
+     * record the pickup by hand. Completing it fires the partner report email like any other path.
+     */
+    public function completePickup(Request $request, Pickup $pickup)
+    {
+        if (! in_array($pickup->status, ['scheduled', 'on_the_way'], true)) {
+            return back()->with('error', 'Hanya penjemputan yang belum selesai yang dapat diselesaikan manual.');
+        }
+        if (Carbon::parse($pickup->pickup_date)->isFuture()) {
+            return back()->with('error', 'Jadwal penjemputan ini belum tiba.');
+        }
+
+        $validated = $request->validate([
+            'cleanup_id'           => ['required', \Illuminate\Validation\Rule::exists('users', 'id')->where('role', 'CleanUP')],
+            'trash_bag_count'      => 'nullable|integer|min:0',
+            'organic_weight'       => 'nullable|numeric|min:0',
+            'anorganic_weight'     => 'nullable|numeric|min:0',
+            'residue_weight'       => 'nullable|numeric|min:0',
+            'evidence_pickup_path' => 'nullable|image|max:5120',
+        ]);
+
+        $bags = $request->filled('trash_bag_count') ? (int) $validated['trash_bag_count'] : null;
+        $hasWeight = $request->filled('organic_weight') || $request->filled('anorganic_weight') || $request->filled('residue_weight');
+        if (! ($bags > 0) && ! $hasWeight) {
+            return back()->withErrors(['organic_weight' => 'Isi jumlah trash bag atau minimal satu berat sampah.']);
+        }
+
+        $pickup->update([
+            'cleanup_id'           => (int) $validated['cleanup_id'],
+            'status'               => 'completed',
+            'organic_weight'       => (float) $request->input('organic_weight', 0),
+            'anorganic_weight'     => (float) $request->input('anorganic_weight', 0),
+            'residue_weight'       => (float) $request->input('residue_weight', 0),
+            'trash_bag_count'      => $bags,
+            'evidence_pickup_path' => $request->hasFile('evidence_pickup_path')
+                ? $request->file('evidence_pickup_path')->store('pickups/evidence', 'public')
+                : $pickup->evidence_pickup_path,
+        ]);
+
+        return back()->with('success', 'Penjemputan diselesaikan. Laporan dikirim ke email mitra.');
+    }
+
+    public function resendPickupReport(Pickup $pickup)
+    {
+        if ($pickup->status !== 'completed') {
+            return back()->with('error', 'Laporan hanya tersedia untuk penjemputan yang sudah selesai.');
+        }
+        $error = $pickup->sendReport();
+
+        return $error
+            ? back()->with('error', 'Email laporan gagal dikirim: ' . $error)
+            : back()->with('success', 'Email laporan berhasil dikirim ulang ke ' . $pickup->company->user->email . '.');
     }
 
     public function updateCoordinates(Request $request, Company $company)

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Link, router } from '@inertiajs/react';
+import { Link, router, useForm } from '@inertiajs/react';
 import { MapPin } from 'lucide-react';
 import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
+import Modal from '@/Components/Modal';
 
 interface PickupItem {
     id: number;
@@ -13,6 +14,8 @@ interface PickupItem {
     residue_weight?: number;
     trash_bag_count?: number;
     evidence_pickup_path?: string | null;
+    report_emailed_at?: string | null;
+    report_email_error?: string | null;
     cleanup?: {
         id: number;
         name: string;
@@ -44,10 +47,85 @@ interface Company {
 
 interface Props {
     company: Company;
+    operators: { id: number; name: string }[];
 }
 
-export default function Show({ company }: Props) {
+const fmtDateTime = (iso: string) =>
+    new Date(iso).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+/** Admin fallback when the operator app could not submit: weights, operator and optional photo. */
+function CompletePickupModal({ pickup, operators, onClose }: { pickup: PickupItem; operators: Props['operators']; onClose: () => void }) {
+    const { data, setData, post, processing, errors } = useForm<{
+        cleanup_id: string; trash_bag_count: string; organic_weight: string; anorganic_weight: string; residue_weight: string;
+        evidence_pickup_path: File | null;
+    }>({
+        cleanup_id: pickup.cleanup ? String(pickup.cleanup.id) : '',
+        trash_bag_count: '', organic_weight: '', anorganic_weight: '', residue_weight: '', evidence_pickup_path: null,
+    });
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(`/admin/pickups/${pickup.id}/complete`, { forceFormData: true, preserveScroll: true, onSuccess: onClose });
+    };
+    const input = 'mt-1 w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-emerald-500';
+    const label = 'block text-xs font-bold text-gray-600';
+    const weights: [keyof typeof data, string][] = [
+        ['organic_weight', 'Organik (kg)'], ['anorganic_weight', 'Anorganik (kg)'], ['residue_weight', 'Residu (kg)'], ['trash_bag_count', 'Trash bag'],
+    ];
+
+    return (
+        <Modal show onClose={onClose} maxWidth="md">
+            <form onSubmit={submit} className="p-6 space-y-4">
+                <div>
+                    <h3 className="text-base font-black text-gray-900">Selesaikan Penjemputan Manual</h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                        {new Date(pickup.pickup_date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.
+                        Laporan PDF otomatis dikirim ke email mitra setelah disimpan.
+                    </p>
+                </div>
+                <div>
+                    <label htmlFor="cleanup_id" className={label}>Operator</label>
+                    <select id="cleanup_id" value={data.cleanup_id} onChange={(e) => setData('cleanup_id', e.target.value)} className={input} required>
+                        <option value="">Pilih operator</option>
+                        {operators.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    </select>
+                    {errors.cleanup_id && <p className="text-xs text-rose-600 mt-1">{errors.cleanup_id}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    {weights.map(([key, text]) => (
+                        <div key={key}>
+                            <label htmlFor={key} className={label}>{text}</label>
+                            <input id={key} type="number" min="0" step={key === 'trash_bag_count' ? '1' : '0.1'} inputMode="decimal"
+                                value={data[key] as string} onChange={(e) => setData(key, e.target.value)} className={input} />
+                        </div>
+                    ))}
+                </div>
+                {errors.organic_weight && <p className="text-xs text-rose-600">{errors.organic_weight}</p>}
+                <div>
+                    <label htmlFor="evidence_pickup_path" className={label}>Foto bukti (opsional)</label>
+                    <input id="evidence_pickup_path" type="file" accept="image/*" className="mt-1 block w-full text-xs"
+                        onChange={(e) => setData('evidence_pickup_path', e.target.files?.[0] ?? null)} />
+                    {errors.evidence_pickup_path && <p className="text-xs text-rose-600 mt-1">{errors.evidence_pickup_path}</p>}
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                    <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-bold text-gray-600 rounded-md hover:bg-gray-100">Batal</button>
+                    <button type="submit" disabled={processing} className="px-4 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md disabled:opacity-60">
+                        {processing ? 'Menyimpan...' : 'Simpan & Kirim Laporan'}
+                    </button>
+                </div>
+            </form>
+        </Modal>
+    );
+}
+
+export default function Show({ company, operators }: Props) {
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [completing, setCompleting] = useState<PickupItem | null>(null);
+    const [resendingId, setResendingId] = useState<number | null>(null);
+    const resend = (p: PickupItem) => {
+        setResendingId(p.id);
+        router.post(`/admin/pickups/${p.id}/resend-report`, {}, { preserveScroll: true, onFinish: () => setResendingId(null) });
+    };
+    const todayIso = new Date().toLocaleDateString('en-CA'); // yyyy-mm-dd in local time
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'active':
@@ -225,18 +303,50 @@ export default function Show({ company }: Props) {
                                                             <span className="ml-2 text-emerald-700 font-bold">&bull; {totalWeight} Kg limbah</span>
                                                         )}
                                                     </p>
+                                                    {isCompleted && (
+                                                        <p className={`text-[11px] mt-1 font-semibold ${
+                                                            p.report_emailed_at ? 'text-emerald-700' : p.report_email_error ? 'text-rose-600' : 'text-gray-400'
+                                                        }`}>
+                                                            {p.report_emailed_at
+                                                                ? `Email laporan terkirim ${fmtDateTime(p.report_emailed_at)}`
+                                                                : p.report_email_error
+                                                                    ? `Email laporan gagal: ${p.report_email_error}`
+                                                                    : 'Status email laporan tidak tercatat'}
+                                                        </p>
+                                                    )}
                                                 </div>
 
-                                                {p.evidence_pickup_path && (
-                                                    <a
-                                                        href={`/storage/${p.evidence_pickup_path}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors self-start sm:self-auto"
-                                                    >
-                                                        <span>Foto Bukti</span>
-                                                    </a>
-                                                )}
+                                                <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+                                                    {p.evidence_pickup_path && (
+                                                        <a
+                                                            href={`/storage/${p.evidence_pickup_path}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors"
+                                                        >
+                                                            <span>Foto Bukti</span>
+                                                        </a>
+                                                    )}
+                                                    {isCompleted && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => resend(p)}
+                                                            disabled={resendingId === p.id}
+                                                            className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors disabled:opacity-60"
+                                                        >
+                                                            {resendingId === p.id ? 'Mengirim...' : 'Kirim Ulang Laporan'}
+                                                        </button>
+                                                    )}
+                                                    {(p.status === 'scheduled' || isOtw) && p.pickup_date.slice(0, 10) <= todayIso && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCompleting(p)}
+                                                            className="px-3 py-1.5 text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors"
+                                                        >
+                                                            Selesaikan Manual
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         );
                                     })}
@@ -311,6 +421,7 @@ export default function Show({ company }: Props) {
                     router.reload({ only: ['company'] });
                 }}
             />
+            {completing && <CompletePickupModal pickup={completing} operators={operators} onClose={() => setCompleting(null)} />}
 
         </AdminLayout>
     );
