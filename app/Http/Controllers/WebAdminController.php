@@ -25,4 +25,12 @@ class WebAdminController extends Controller
             'solutionsCount' => $solutionsCount,
         ]);
     }
+
+    /** Image placed inside a News/Activity body by BlogEditor; cleaned up by HasContentImages. */
+    public function uploadContentImage(Request $request)
+    {
+        $request->validate(['image' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120']);
+
+        return response()->json(['url' => '/storage/' . $request->file('image')->store('content', 'public')]);
+    }
 }

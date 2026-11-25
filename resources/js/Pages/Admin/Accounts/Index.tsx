@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
 import { parseCoordinatesOrGoogleMapsUrl } from '@/utils/gmapsParser';
+import { compressImage } from '@/utils/compressImage';
 
 interface CompanyProfile {
     id: number;
@@ -879,7 +880,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                                             <input
                                                 type="file"
                                                 accept=".pdf,.jpg,.jpeg,.png"
-                                                onChange={(e) => setData('signed_mou', e.target.files ? e.target.files[0] : null)}
+                                                onChange={async (e) => setData('signed_mou', e.target.files?.[0] ? await compressImage(e.target.files[0], 1600, 1600, 0.8) : null)}
                                                 className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
                                             />
                                         </div>

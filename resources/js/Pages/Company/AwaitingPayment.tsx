@@ -1,5 +1,6 @@
 import { Head, useForm, Link } from '@inertiajs/react';
 import React from 'react';
+import { compressImage } from '@/utils/compressImage';
 
 interface Props {
     company: {
@@ -65,7 +66,7 @@ export default function AwaitingPayment({ company }: Props) {
                             <input
                                 type="file"
                                 accept="image/*,application/pdf"
-                                onChange={(e) => setData('payment_evidence', e.target.files ? e.target.files[0] : null)}
+                                onChange={async (e) => setData('payment_evidence', e.target.files?.[0] ? await compressImage(e.target.files[0], 1600, 1600, 0.8) : null)}
                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 transition-all focus:ring-2 focus:ring-teal-500"
                                 required
                             />

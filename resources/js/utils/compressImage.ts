@@ -1,91 +1,65 @@
 /**
  * Compress an image file on the client side before upload.
- * Reduces raw camera / mobile captures (3MB - 10MB) to ~150KB - 300KB
- * in tens of milliseconds, drastically improving upload speed.
+ * Defaults (1920px, q0.85) keep public-site content sharp; evidence photos pass smaller values.
+ * Non-images, GIF (animation) and SVG (vector) are returned untouched.
+ * Transparent PNG/WebP stay PNG so logos keep their alpha; everything else becomes JPEG.
  */
 export async function compressImage(
     file: File,
-    maxWidth: number = 1280,
-    maxHeight: number = 1280,
-    quality: number = 0.78
+    maxWidth: number = 1920,
+    maxHeight: number = 1920,
+    quality: number = 0.85
 ): Promise<File> {
-    // Only compress image types
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith('image/') || /gif|svg/.test(file.type)) {
         return file;
     }
 
-    // If file is already smaller than 300KB and not a huge raw format, return directly
-    if (file.size < 300 * 1024 && file.type === 'image/jpeg') {
+    // Already small enough: re-encoding would only lose quality
+    if (file.size < 300 * 1024) {
         return file;
     }
 
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
+    const url = URL.createObjectURL(file);
+    try {
+        const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const el = new Image();
+            el.onload = () => resolve(el);
+            el.onerror = reject;
+            el.src = url;
+        });
 
-        reader.onload = (readerEvent) => {
-            const img = new Image();
-            img.src = readerEvent.target?.result as string;
+        const scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
+        const width = Math.round(img.width * scale);
+        const height = Math.round(img.height * scale);
 
-            img.onload = () => {
-                let width = img.width;
-                let height = img.height;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return file;
 
-                // Scale down while preserving aspect ratio
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = Math.round((width * maxHeight) / height);
-                        maxHeight = height;
-                    }
-                }
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
 
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
+        let keepAlpha = false;
+        if (file.type === 'image/png' || file.type === 'image/webp') {
+            const data = ctx.getImageData(0, 0, width, height).data;
+            for (let i = 3; i < data.length; i += 4) {
+                if (data[i] < 255) { keepAlpha = true; break; }
+            }
+        }
 
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    resolve(file);
-                    return;
-                }
+        const type = keepAlpha ? 'image/png' : 'image/jpeg';
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
 
-                // Render image to canvas
-                ctx.drawImage(img, 0, 0, width, height);
+        // Compression didn't help: keep original
+        if (!blob || blob.size >= file.size) return file;
 
-                canvas.toBlob(
-                    (blob) => {
-                        if (!blob || blob.size >= file.size) {
-                            // If compression somehow didn't reduce size, keep original
-                            resolve(file);
-                            return;
-                        }
-
-                        // Create a new File with the original filename (or jpg extension)
-                        const newFileName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
-                        const compressedFile = new File([blob], newFileName, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-
-                        resolve(compressedFile);
-                    },
-                    'image/jpeg',
-                    quality
-                );
-            };
-
-            img.onerror = () => {
-                resolve(file);
-            };
-        };
-
-        reader.onerror = () => {
-            resolve(file);
-        };
-    });
+        const name = file.name.replace(/\.[^/.]+$/, '') + (keepAlpha ? '.png' : '.jpg');
+        return new File([blob], name, { type, lastModified: Date.now() });
+    } catch {
+        return file;
+    } finally {
+        URL.revokeObjectURL(url);
+    }
 }

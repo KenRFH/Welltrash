@@ -4,6 +4,7 @@ import { Link, router, useForm } from '@inertiajs/react';
 import { MapPin } from 'lucide-react';
 import CompanyLocationPickerModal from '@/Components/CompanyLocationPickerModal';
 import Modal from '@/Components/Modal';
+import { compressImage } from '@/utils/compressImage';
 
 interface PickupItem {
     id: number;
@@ -103,7 +104,7 @@ function CompletePickupModal({ pickup, operators, onClose }: { pickup: PickupIte
                 <div>
                     <label htmlFor="evidence_pickup_path" className={label}>Foto bukti (opsional)</label>
                     <input id="evidence_pickup_path" type="file" accept="image/*" className="mt-1 block w-full text-xs"
-                        onChange={(e) => setData('evidence_pickup_path', e.target.files?.[0] ?? null)} />
+                        onChange={async (e) => setData('evidence_pickup_path', e.target.files?.[0] ? await compressImage(e.target.files[0], 1600, 1600, 0.8) : null)} />
                     {errors.evidence_pickup_path && <p className="text-xs text-rose-600 mt-1">{errors.evidence_pickup_path}</p>}
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
