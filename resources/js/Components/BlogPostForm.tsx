@@ -5,12 +5,8 @@ import WebAdminSidebar from '@/Components/WebAdminSidebar';
 import BlogEditor, { useAutoGrow } from '@/Components/BlogEditor';
 import { compressImage } from '@/utils/compressImage';
 
-/** News and Activity share one write/edit screen; only field and route names differ. */
+/** Write/edit screen for Aktivitas (Berita was merged into it). */
 const CONFIG = {
-    news: {
-        label: 'Berita', active: 'news', routeBase: 'webadmin.news',
-        bodyField: 'content', dateField: 'published_date', bodyRequired: true,
-    },
     activity: {
         label: 'Aktivitas', active: 'activities', routeBase: 'webadmin.activities',
         bodyField: 'description', dateField: 'date', bodyRequired: false,

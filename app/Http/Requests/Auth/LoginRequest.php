@@ -41,9 +41,17 @@ class LoginRequest extends FormRequest
         $loginValue = trim($this->input('email'));
         $password = $this->input('password');
 
-        // 1. Try HRIS authentication first (Single Source of Truth)
+        $field = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        $knownUser = User::where($field, $loginValue)
+            ->orWhere('employee_code', strtoupper($loginValue))
+            ->first();
+
+        // 1. Try HRIS authentication first (Single Source of Truth).
+        // Local-only accounts (mitra/perusahaan, web admin: no employee_code) skip the HRIS round-trip:
+        // HRIS doesn't know them, so asking only made their login wait on a second app.
         $hrisService = app(\App\Services\HrisService::class);
-        if ($hrisService->isConfigured()) {
+        $skipHris = $knownUser && !$knownUser->employee_code;
+        if (!$skipHris && $hrisService->isConfigured()) {
             try {
                 $hrisData = $hrisService->verifyCredentials($loginValue, $password);
                 if ($hrisData !== null) {
@@ -64,12 +72,7 @@ class LoginRequest extends FormRequest
 
                     // HRIS answered "tidak" (kredensial salah atau akun dinonaktifkan)
                     // Jika akun memiliki employee_code (karyawan HRIS), jangan izinkan fallback ke password lokal
-                    $field = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
-                    $localEmployee = User::where($field, $loginValue)
-                        ->orWhere('employee_code', strtoupper($loginValue))
-                        ->first();
-
-                    if ($localEmployee && $localEmployee->employee_code) {
+                    if ($knownUser && $knownUser->employee_code) {
                         RateLimiter::hit($this->throttleKey());
 
                         $isInactive = !empty($hrisData['message']) && (
@@ -92,8 +95,6 @@ class LoginRequest extends FormRequest
         }
 
         // 2. Local authentication fallback (for companies and local accounts)
-        $field = filter_var($loginValue, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
-
         // Auto-seed demo users in local development if demo account is missing
         if (app()->environment('local') && !User::where('email', $loginValue)->exists()) {
             if (in_array($loginValue, ['admin@welltrash.com', 'cleanup@welltrash.com', 'cleanup2@welltrash.com', 'company@welltrash.com', 'webadmin@welltrash.com'])) {

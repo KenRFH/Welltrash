@@ -37,9 +37,6 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                     className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14"
                 >
                     <div>
-                        <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
-                            DOKUMENTASI OPERASIONAL
-                        </span>
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
                             Kegiatan di lapangan.
                         </h2>

@@ -23,18 +23,12 @@ Route::get('/generate-sitemap', function () {
         ->add(Url::create('/tentang-kami'))
         ->add(Url::create('/layanan'))
         ->add(Url::create('/activity'))
-        ->add(Url::create('/news'))
         ->add(Url::create('/katalog'))
         ->add(Url::create('/downloads'));
 
     // Activity detail
     foreach (\App\Models\Activity::all() as $activity) {
         $sitemap->add(Url::create("/activity/{$activity->id}"));
-    }
-
-    // News detail
-    foreach (\App\Models\News::all() as $news) {
-        $sitemap->add(Url::create("/news/{$news->id}"));
     }
 
     $sitemap->writeToFile(public_path('sitemap.xml'));
@@ -45,7 +39,6 @@ Route::get('/generate-sitemap', function () {
 
 Route::get('/', function () {
     $activities = \App\Models\Activity::orderBy('date', 'desc')->take(3)->get();
-    $news       = \App\Models\News::orderBy('published_date', 'desc')->take(3)->get();
     $katalogs   = \App\Models\Katalog::orderBy('created_at', 'desc')->take(3)->get();
     $solutions  = \App\Models\Solution::orderBy('order_num', 'asc')->orderBy('created_at', 'asc')->get();
     $solutionSettings = [
@@ -58,7 +51,6 @@ Route::get('/', function () {
         'canLogin'         => Route::has('login'),
         'canRegister'      => Route::has('register'),
         'activities'       => $activities,
-        'news'             => $news,
         'katalogs'         => $katalogs,
         'solutions'        => $solutions,
         'solutionSettings' => $solutionSettings,
@@ -100,24 +92,8 @@ Route::get('/activity/{id}', function ($id) {
     ]);
 })->name('activity.show');
 
-Route::get('/news', function () {
-    $news = \App\Models\News::orderBy('published_date', 'desc')->get();
-    return Inertia::render('News', [
-        'news' => $news,
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
-})->name('news');
-
-Route::get('/news/{id}', function ($id) {
-    $newsItem = \App\Models\News::findOrFail($id);
-    $newsItem->recordView();
-    return Inertia::render('NewsDetail', [
-        'newsItem' => $newsItem,
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
-})->name('news.show');
+// Berita was merged into Aktivitas (2026-11); keep old /news links from 404ing.
+Route::get('/news/{any?}', fn () => redirect()->route('activity', [], 301))->where('any', '.*');
 
 Route::get('/katalog', function () {
     $katalogs = \App\Models\Katalog::orderBy('created_at', 'desc')->get();
@@ -246,7 +222,6 @@ Route::middleware(['auth', 'role:web_admin,superadmin'])
         Route::resource('solutions', App\Http\Controllers\WebAdmin\SolutionController::class)->except(['show', 'create', 'edit']);
         Route::resource('activities', App\Http\Controllers\WebAdmin\ActivityController::class)->except(['show']);
         Route::resource('katalogs', App\Http\Controllers\WebAdmin\KatalogController::class)->except(['show']);
-        Route::resource('news', App\Http\Controllers\WebAdmin\NewsController::class)->except(['show']);
         Route::resource('teams', App\Http\Controllers\WebAdmin\TeamController::class)->except(['show', 'create', 'edit']);
     });
 

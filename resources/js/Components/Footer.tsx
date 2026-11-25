@@ -42,7 +42,6 @@ const Footer: React.FC<FooterProps> = () => {
                             <li><a href="#kegiatan" className="hover:text-zinc-950 dark:hover:text-white transition-colors">Kegiatan Lapangan</a></li>
                             <li><Link href={route("services")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Paket Layanan</Link></li>
                             <li><Link href={route("about")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Tentang Kami</Link></li>
-                            <li><Link href={route("news")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Berita &amp; Wawasan</Link></li>
                             <li><Link href={route("katalog")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Katalog Daur Ulang</Link></li>
                             <li><Link href={route("downloads")} className="hover:text-zinc-950 dark:hover:text-white transition-colors">Unduh Aplikasi &amp; Dokumen</Link></li>
                         </ul>

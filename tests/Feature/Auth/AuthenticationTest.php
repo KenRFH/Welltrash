@@ -89,3 +89,25 @@ test('web login allows local company login when hris returns unverified', functi
     $this->assertAuthenticated();
     $response->assertRedirect('/company/dashboard');
 });
+
+test('local accounts without employee_code log in without calling HRIS', function () {
+    config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'key']);
+    Http::fake();
+    $user = User::factory()->create(['employee_code' => null]);
+
+    $this->post('/login', ['email' => $user->email, 'password' => 'password']);
+
+    $this->assertAuthenticated();
+    Http::assertNothingSent();
+});
+
+test('HRIS employees are still verified through HRIS', function () {
+    config(['services.hris.url' => 'https://hris.test', 'services.hris.api_key' => 'key']);
+    Http::fake(['hris.test/*' => Http::response(['verified' => false, 'message' => 'salah'])]);
+    $user = User::factory()->create(['employee_code' => 'EMP001']);
+
+    $this->post('/login', ['email' => $user->email, 'password' => 'password']);
+
+    $this->assertGuest(); // HRIS said no, so the local password must not be accepted
+    Http::assertSentCount(1);
+});

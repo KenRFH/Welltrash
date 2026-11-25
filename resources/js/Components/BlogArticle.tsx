@@ -14,7 +14,7 @@ interface Props {
     views?: number;
 }
 
-/** Public News/Activity detail. Hero, meta and body all share one reading column so edges line up. */
+/** Public Activity detail. Hero, meta and body all share one reading column so edges line up. */
 export default function BlogArticle({ label, title, date, image, body, backHref, backLabel, views }: Props) {
     const dateText = date && new Date(date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
     const minutes = Math.max(1, Math.round(blogExcerpt(body).split(' ').length / 200));
@@ -36,11 +36,8 @@ export default function BlogArticle({ label, title, date, image, body, backHref,
     const heading = (
         <div>
             <div className={`flex flex-wrap items-center gap-x-3 gap-y-2 text-sm mb-5 ${onImage ? 'text-white/80' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                    onImage ? 'bg-white/15 text-white backdrop-blur-sm ring-1 ring-white/20' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                }`}>
-                    {label}
-                </span>
+                <span className={`font-semibold ${onImage ? 'text-white' : 'text-emerald-700 dark:text-emerald-400'}`}>{label}</span>
+                <span aria-hidden>·</span>
                 {dateText && <time dateTime={date!}>{dateText}</time>}
                 <span aria-hidden>·</span>
                 <span>{minutes} menit baca</span>

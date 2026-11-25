@@ -6,7 +6,6 @@ import {
     LayoutDashboard,
     Calendar,
     Store,
-    Newspaper,
     Users,
     Layers,
     LogOut,
@@ -16,14 +15,14 @@ import {
 } from 'lucide-react';
 
 interface Props {
-    active: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams' | 'solutions';
+    active: 'dashboard' | 'activities' | 'katalogs' | 'teams' | 'solutions';
     isMobileOpen?: boolean;
     onClose?: () => void;
 }
 
 export default function WebAdminSidebar({ active, isMobileOpen = false, onClose }: Props) {
     const isSuperadmin = usePage<PageProps>().props.auth.user.role === 'superadmin';
-    const navItem = (tab: 'dashboard' | 'activities' | 'katalogs' | 'news' | 'teams' | 'solutions', href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
+    const navItem = (tab: 'dashboard' | 'activities' | 'katalogs' | 'teams' | 'solutions', href: string, label: string, Icon: React.ComponentType<{ className?: string }>) => {
         const isActive = active === tab;
         return (
             <Link
@@ -81,7 +80,6 @@ export default function WebAdminSidebar({ active, isMobileOpen = false, onClose 
                                 {navItem('solutions', route('webadmin.solutions.index'), 'Solusi B2B', Layers)}
                                 {navItem('activities', route('webadmin.activities.index'), 'Aktivitas Publik', Calendar)}
                                 {navItem('katalogs', route('webadmin.katalogs.index'), 'Katalog Produk', Store)}
-                                {navItem('news', route('webadmin.news.index'), 'Berita / Artikel', Newspaper)}
                                 {navItem('teams', route('webadmin.teams.index'), 'Tim & Profil', Users)}
                             </div>
                         </div>

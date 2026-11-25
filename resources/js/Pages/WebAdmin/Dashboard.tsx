@@ -6,7 +6,6 @@ import {
     Menu,
     Calendar,
     Store,
-    Newspaper,
     ArrowRight,
     Sparkles,
     ShieldCheck,
@@ -21,7 +20,6 @@ interface Props {
     };
     activitiesCount: number;
     katalogCount: number;
-    newsCount: number;
     solutionsCount?: number;
 }
 
@@ -82,7 +80,7 @@ const WebStatCard: React.FC<WebStatCardProps> = ({ icon: Icon, title, count, uni
     );
 };
 
-export default function Dashboard({ auth, activitiesCount, katalogCount, newsCount, solutionsCount = 0 }: Props) {
+export default function Dashboard({ auth, activitiesCount, katalogCount, solutionsCount = 0 }: Props) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
@@ -154,7 +152,7 @@ export default function Dashboard({ auth, activitiesCount, katalogCount, newsCou
                         </motion.div>
 
                         {/* Metric Cards Grid */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                             <WebStatCard
                                 icon={Layers}
                                 title="Solusi B2B"
@@ -185,15 +183,6 @@ export default function Dashboard({ auth, activitiesCount, katalogCount, newsCou
                                 color="teal"
                             />
 
-                            <WebStatCard
-                                icon={Newspaper}
-                                title="Artikel & Berita"
-                                count={newsCount}
-                                unit="Artikel Terbit"
-                                href={route('webadmin.news.index')}
-                                cta="Kelola Berita"
-                                color="slate"
-                            />
                         </div>
                     </motion.div>
                 </main>

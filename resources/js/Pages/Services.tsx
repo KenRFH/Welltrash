@@ -280,11 +280,6 @@ const Services = () => {
                                             : "border border-black/10 dark:border-zinc-800 hover:border-black/25 dark:hover:border-zinc-700"
                                     }`}
                                 >
-                                    {isFeatured && (
-                                        <div className="absolute -top-3.5 left-6 bg-green-forest dark:bg-emerald-600 text-lime dark:text-white font-mono text-[10px] uppercase tracking-widest px-3 py-1 rounded-full font-medium">
-                                            ★ PILIHAN UTAMA MITRA
-                                        </div>
-                                    )}
 
                                     <div>
                                         <span className="font-mono text-xs uppercase tracking-wider text-muted dark:text-zinc-400 block mb-1">

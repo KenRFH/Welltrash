@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Blog-style body for News & Activity, stored as plain text:
+ * Blog-style body for Activity, stored as plain text:
  *   ## Subjudul
  *   **tebal**
  *   ![keterangan](/storage/content/foto.jpg)   ← on its own line

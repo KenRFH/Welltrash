@@ -31,7 +31,6 @@ const Navbar: React.FC<NavbarProps> = ({ dark = false }) => {
         { label: "Tentang Kami", route: "about" },
         { label: "Layanan", route: "services" },
         { label: "Aktivitas", route: "activity" },
-        { label: "Berita", route: "news" },
         { label: "Katalog", route: "katalog" }
 
     ];
