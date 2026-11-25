@@ -1,5 +1,5 @@
 import React from "react";
-import { blogExcerpt } from '@/utils/blogContent';
+import { blogExcerpt, coverImage } from '@/utils/blogContent';
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 import Navbar from "@/Components/Navbar";
@@ -70,9 +70,9 @@ export default function ActivityPage({ activities }: Props) {
                                     {/* Image side */}
                                     <div className={`md:col-span-5 ${isEven ? "md:order-1" : "md:order-2"}`}>
                                         <div className="w-full aspect-[16/10] rounded-sm overflow-hidden border border-black/10 dark:border-zinc-800 bg-paper dark:bg-zinc-800 relative">
-                                            {activity.image_path ? (
+                                            {coverImage(activity.image_path, activity.description) ? (
                                                 <img
-                                                    src={`/storage/${activity.image_path}`}
+                                                    src={coverImage(activity.image_path, activity.description)!}
                                                     alt={activity.title}
                                                     loading="lazy"
                                                     decoding="async"

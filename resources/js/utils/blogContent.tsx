@@ -76,3 +76,10 @@ export function BlogContent({ text }: { text: string }) {
         </div>
     );
 }
+
+/** Thumbnail for cards: the cover image, else the first photo inside the post body. */
+export function coverImage(imagePath: string | null | undefined, text: string | null | undefined): string | null {
+    if (imagePath) return `/storage/${imagePath}`;
+    const first = parseBlog(text || '').find((b) => b.type === 'image');
+    return first && first.type === 'image' ? first.src : null;
+}

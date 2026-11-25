@@ -1,5 +1,5 @@
 import React from "react";
-import { blogExcerpt } from '@/utils/blogContent';
+import { blogExcerpt, coverImage } from '@/utils/blogContent';
 import { Link } from "@inertiajs/react";
 import { Calendar, ArrowRight, ArrowUpRight, Camera } from "lucide-react";
 import { motion } from "motion/react";
@@ -73,9 +73,9 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                     className="group relative rounded-2xl overflow-hidden min-h-[380px] lg:min-h-[460px] flex items-end border border-zinc-200/80 bg-zinc-900 shadow-md block h-full"
                                 >
                                     <div className="absolute inset-0">
-                                        {activities[0].image_path ? (
+                                        {coverImage(activities[0].image_path, activities[0].description) ? (
                                             <img
-                                                src={`/storage/${activities[0].image_path}`}
+                                                src={coverImage(activities[0].image_path, activities[0].description)!}
                                                 alt={activities[0].title}
                                                 loading="lazy"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -122,8 +122,20 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                 >
                                     <Link
                                         href={route("activity.show", act.id)}
-                                        className="group bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-6 flex flex-col justify-between h-full hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md transition-all duration-300"
+                                        className="group bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md transition-all duration-300"
                                     >
+                                        {coverImage(act.image_path, act.description) && (
+                                            // Grows to fill the column next to the featured card; shrinks when two cards share it
+                                            <div className="relative flex-1 min-h-[160px] overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                                                <img
+                                                    src={coverImage(act.image_path, act.description)!}
+                                                    alt={act.title}
+                                                    loading="lazy"
+                                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            </div>
+                                        )}
+                                        <div className={`p-6 flex flex-col justify-between gap-4 ${coverImage(act.image_path, act.description) ? 'shrink-0' : 'flex-1'}`}>
                                         <div>
                                             {act.date && (
                                                 <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-mono mb-2">
@@ -138,9 +150,10 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                                 {blogExcerpt(act.description || '')}
                                             </p>
                                         </div>
-                                        <span className="font-sans text-xs font-semibold text-zinc-900 dark:text-zinc-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 mt-4 inline-flex items-center gap-1 group-hover:translate-x-1 transition-all">
+                                        <span className="font-sans text-xs font-semibold text-zinc-900 dark:text-zinc-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 inline-flex items-center gap-1 group-hover:translate-x-1 transition-all">
                                             Baca selengkapnya <ArrowRight className="w-3.5 h-3.5" />
                                         </span>
+                                        </div>
                                     </Link>
                                 </motion.div>
                             ))}
