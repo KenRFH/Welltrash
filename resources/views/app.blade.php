@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash</title>
+        <title inertia>{{ $meta['title'] ?? 'Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash' }}</title>
         <link rel="icon" href="/favicon.ico" type="image/png" sizes="32x32">
         <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
         <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
@@ -25,7 +25,20 @@
         <meta name="google-site-verification" content="7Dv7Uj6fl3SKyiRKsaJ0jVmXNE_O67duJakj-l7Wru8" />
         <meta name="description" content="Layanan jasa pengangkutan dan pengelolaan sampah terjadwal untuk perusahaan dan institusi di Kabupaten Jember dengan pencatatan transparan.">
         <meta name="keywords" content="jasa pengangkutan sampah jember, pengelolaan limbah bisnis jember, b2b waste management jember, welltrash">
-        <link rel="canonical" href="https://welltrash.com/">
+
+        @isset($meta)
+            {{-- Link previews (WhatsApp, Facebook, X, LinkedIn, Telegram) read these from the raw HTML --}}
+            <meta property="og:type" content="article">
+            <meta property="og:site_name" content="Welltrash">
+            <meta property="og:title" content="{{ $meta['title'] }}">
+            <meta property="og:description" content="{{ $meta['description'] }}">
+            <meta property="og:url" content="{{ $meta['url'] }}">
+            @if ($meta['image'])
+                <meta property="og:image" content="{{ $meta['image'] }}">
+            @endif
+            <meta name="twitter:card" content="{{ $meta['image'] ? 'summary_large_image' : 'summary' }}">
+        @endisset
+        <link rel="canonical" href="{{ url()->current() }}">
 
         <!-- Theme Initialization Script (prevents theme flicker) -->
         <script>

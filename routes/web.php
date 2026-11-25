@@ -89,6 +89,14 @@ Route::get('/activity/{id}', function ($id) {
         'activity' => $activity,
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
+    ])->withViewData([
+        // Rendered into <head> server-side: WhatsApp/Facebook previews don't run JavaScript.
+        'meta' => [
+            'title'       => $activity->title . ' | Aktivitas Welltrash',
+            'description' => $activity->excerpt(),
+            'image'       => $activity->image_path ? asset('storage/' . $activity->image_path) : null,
+            'url'         => route('activity.show', $activity->id),
+        ],
     ]);
 })->name('activity.show');
 
