@@ -9,11 +9,14 @@ interface SEOProps {
     type?: string;
 }
 
+// Absolute URLs follow whichever domain is serving the page (welltrash.com in production).
+const ORIGIN = typeof window !== 'undefined' ? window.location.origin : 'https://welltrash.com';
+
 export default function SEO({ 
     title = "Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash", 
     description = "Layanan jasa pengangkutan sampah profesional dan terpercaya di Jember. Solusi kebersihan hemat & cepat untuk rumah tangga hingga bisnis. Pesan WellTrash sekarang!",
-    image = "https://welltrash.id/build/assets/logowelltrash-DkJ1DW_Z.png", // Replace with your actual OG image URL if different
-    url = "https://welltrash.id",
+    image = `${ORIGIN}/apple-touch-icon.png`,
+    url = ORIGIN + (typeof window !== 'undefined' ? window.location.pathname : ''),
     type = "website"
 }: SEOProps) {
     return (

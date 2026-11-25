@@ -26,7 +26,7 @@ export default function ActivityDetail({ activity, canLogin, canRegister }: Prop
             <SEO 
                 title={`${activity.title} | Aktivitas Welltrash`}
                 description={blogExcerpt(activity.description || '', 160)}
-                image={activity.image_path ? `https://welltrash.id/storage/${activity.image_path}` : undefined}
+                image={activity.image_path ? `${window.location.origin}/storage/${activity.image_path}` : undefined}
                 type="article"
             />
             
