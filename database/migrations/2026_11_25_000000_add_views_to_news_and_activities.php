@@ -12,7 +12,9 @@ return new class extends Migration
         foreach (['news', 'activities'] as $table) {
             Schema::table($table, fn (Blueprint $t) => $t->unsignedInteger('views')->default(0));
             // Random starting count per existing post (same range as HasViewCount::creating)
-            DB::table($table)->update(['views' => DB::raw('FLOOR(50 + RAND() * 251)')]);
+            foreach (DB::table($table)->pluck('id') as $id) {
+                DB::table($table)->where('id', $id)->update(['views' => random_int(50, 300)]);
+            }
         }
     }
 

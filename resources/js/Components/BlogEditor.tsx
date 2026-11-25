@@ -20,7 +20,7 @@ export function useAutoGrow(ref: React.RefObject<HTMLTextAreaElement>, value: st
     }, [ref, value]);
 }
 
-/** Writing area for News/Activity bodies, stored in the format of utils/blogContent. */
+/** Writing area for Activity bodies, stored in the format of utils/blogContent. */
 export default function BlogEditor({ value, onChange, required }: Props) {
     const ref = useRef<HTMLTextAreaElement>(null);
     const fileRef = useRef<HTMLInputElement>(null);

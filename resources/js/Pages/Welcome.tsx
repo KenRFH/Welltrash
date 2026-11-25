@@ -6,7 +6,6 @@ import Mitra from "@/Components/Mitra";
 import Why, { SolutionData, SolutionSettingsData } from "@/Components/Why";
 import WasteFlow from "@/Components/WasteFlow";
 import ActivitiesSection, { Activity } from "@/Components/ActivitiesSection";
-import NewsSection, { NewsItem } from "@/Components/NewsSection";
 import FaqSection from "@/Components/FaqSection";
 import Footer from "@/Components/Footer";
 import {
@@ -35,7 +34,6 @@ interface KatalogItem {
 
 interface Props {
     activities: Activity[];
-    news: NewsItem[];
     katalogs: KatalogItem[];
     solutions?: SolutionData[];
     solutionSettings?: SolutionSettingsData;
@@ -64,7 +62,6 @@ const STATS = [
 
 const Welcome: React.FC<Props> = ({
     activities = [],
-    news = [],
     katalogs = [],
     solutions = [],
     solutionSettings,
@@ -200,9 +197,6 @@ const Welcome: React.FC<Props> = ({
                         className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14"
                     >
                         <div>
-                            <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
-                                EKONOMI SIRKULAR
-                            </span>
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
                                 Dari sampah menjadi produk bernilai.
                             </h2>
@@ -341,9 +335,6 @@ const Welcome: React.FC<Props> = ({
 
                             <div className="p-6 sm:p-7 overflow-y-auto space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="font-mono text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                        Material Terverifikasi
-                                    </span>
                                     <span className="font-mono text-base font-bold text-emerald-700 dark:text-emerald-400">
                                         {selectedKatalog.price &&
                                         Number(selectedKatalog.price) > 0
@@ -399,8 +390,6 @@ const Welcome: React.FC<Props> = ({
             {/* Field Activities */}
             <ActivitiesSection activities={activities} />
 
-            {/* News and Insights */}
-            <NewsSection news={news} />
 
             {/* FAQ Accordion with JSON-LD */}
             <FaqSection />
@@ -420,14 +409,6 @@ const Welcome: React.FC<Props> = ({
                         <div className="absolute -bottom-24 -right-16 w-80 h-80 bg-orange-600/15 rounded-full blur-3xl pointer-events-none" />
 
                         <div className="relative z-10">
-                            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700/80 text-zinc-300 text-xs font-mono font-medium mb-6">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                <span>KEMITRAAN OPERASIONAL BISNIS</span>
-                                <span className="text-orange-400 font-bold ml-1">
-                                    • JEMBER
-                                </span>
-                            </span>
-
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-white leading-tight max-w-2xl mx-auto mb-5">
                                 Operasional lebih bersih dimulai dari satu
                                 percakapan.

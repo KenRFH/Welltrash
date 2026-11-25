@@ -63,9 +63,6 @@ const WasteFlow: React.FC = () => {
                     transition={{ duration: 0.5 }}
                     className="max-w-3xl mb-14 lg:mb-16"
                 >
-                    <span className="text-xs font-semibold tracking-wider uppercase text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-3 py-1 rounded-full font-mono mb-4 inline-block">
-                        ALUR SISTEMATIS
-                    </span>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-zinc-900 dark:text-white leading-tight mb-4">
                         Sederhana untuk Anda. Terukur untuk bisnis.
                     </h2>
