@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, Eye } from 'lucide-react';
 import { BlogContent, blogExcerpt } from '@/utils/blogContent';
+import ShareButtons from '@/Components/ShareButtons';
 
 interface Props {
     label: string;
@@ -80,7 +81,11 @@ export default function BlogArticle({ label, title, date, image, body, backHref,
             </article>
 
             <div className={`${column} pb-20`}>
-                <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800 space-y-8">
+                    <div>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-white mb-3">Bagikan tulisan ini</p>
+                        <ShareButtons title={title} />
+                    </div>
                     <Link
                         href={backHref}
                         className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 group"

@@ -18,4 +18,12 @@ class Activity extends Model
         'image_path',
         'date',
     ];
+
+    /** Plain-text summary for link previews (strips the blog markup of utils/blogContent). */
+    public function excerpt(int $limit = 160): string
+    {
+        $text = preg_replace(['/!\[[^\]]*\]\([^)]*\)/', '/^## /m', '/\*\*/'], '', (string) $this->description);
+
+        return \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', $text)), $limit);
+    }
 }
