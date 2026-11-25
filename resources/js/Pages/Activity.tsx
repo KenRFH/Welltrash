@@ -1,4 +1,5 @@
 import React from "react";
+import { blogExcerpt } from '@/utils/blogContent';
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 import Navbar from "@/Components/Navbar";
@@ -106,7 +107,7 @@ export default function ActivityPage({ activities }: Props) {
                                         </h2>
 
                                         <p className="font-sans text-sm text-muted dark:text-zinc-400 leading-relaxed line-clamp-3 mb-6">
-                                            {activity.description}
+                                            {blogExcerpt(activity.description || '')}
                                         </p>
 
                                         <div className="inline-flex items-center gap-2 font-sans font-semibold text-xs uppercase tracking-wider text-green-forest dark:text-emerald-400">

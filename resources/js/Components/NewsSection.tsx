@@ -1,4 +1,5 @@
 import React from "react";
+import { blogExcerpt } from '@/utils/blogContent';
 import { Link } from "@inertiajs/react";
 import { Calendar, ArrowRight, ArrowUpRight, Newspaper } from "lucide-react";
 import { motion } from "motion/react";
@@ -104,7 +105,7 @@ const NewsSection: React.FC<NewsSectionProps> = ({ news }) => {
                                             {item.title}
                                         </h3>
                                         <p className="font-sans text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 line-clamp-3 leading-relaxed">
-                                            {item.content.replace(/<[^>]*>?/gm, "")}
+                                            {blogExcerpt(item.content)}
                                         </p>
                                     </div>
 

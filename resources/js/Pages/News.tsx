@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { blogExcerpt } from '@/utils/blogContent';
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 import Navbar from "@/Components/Navbar";
@@ -93,7 +94,7 @@ export default function NewsPage({ news }: Props) {
                                             {item.title}
                                         </h3>
                                         <p className="font-sans text-xs text-muted dark:text-zinc-400 leading-relaxed line-clamp-2">
-                                            {item.content}
+                                            {blogExcerpt(item.content)}
                                         </p>
                                     </button>
                                 );
@@ -138,7 +139,7 @@ export default function NewsPage({ news }: Props) {
                                         </h2>
 
                                         <p className="font-sans text-sm text-muted dark:text-zinc-400 leading-relaxed line-clamp-4 mb-8">
-                                            {activeArticle.content}
+                                            {blogExcerpt(activeArticle.content)}
                                         </p>
 
                                         <Link

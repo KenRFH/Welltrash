@@ -1,4 +1,5 @@
 import React from "react";
+import { blogExcerpt } from '@/utils/blogContent';
 import { Link } from "@inertiajs/react";
 import { Calendar, ArrowRight, ArrowUpRight, Camera } from "lucide-react";
 import { motion } from "motion/react";
@@ -105,7 +106,7 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                             {activities[0].title}
                                         </h3>
                                         <p className="font-sans text-xs sm:text-sm text-zinc-300 line-clamp-2 leading-relaxed">
-                                            {activities[0].description}
+                                            {blogExcerpt(activities[0].description || '')}
                                         </p>
                                     </div>
                                 </Link>
@@ -137,7 +138,7 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                                 {act.title}
                                             </h3>
                                             <p className="font-sans text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 line-clamp-2 leading-relaxed">
-                                                {act.description}
+                                                {blogExcerpt(act.description || '')}
                                             </p>
                                         </div>
                                         <span className="font-sans text-xs font-semibold text-zinc-900 dark:text-zinc-200 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 mt-4 inline-flex items-center gap-1 group-hover:translate-x-1 transition-all">

@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import WebAdminSidebar from '@/Components/WebAdminSidebar';
+import { compressImage } from '@/utils/compressImage';
 
 interface Katalog {
     id: number;
@@ -101,7 +102,7 @@ export default function Edit({ katalog }: Props) {
                                 <input 
                                     type="file" 
                                     accept="image/*"
-                                    onChange={e => setData('image', e.target.files ? e.target.files[0] : null)}
+                                    onChange={async e => setData('image', e.target.files?.[0] ? await compressImage(e.target.files[0]) : null)}
                                     className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                 />
                                 {errors.image && <span className="text-red-500 text-xs mt-1">{errors.image}</span>}

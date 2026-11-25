@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import React, { useState } from 'react';
 import WebAdminSidebar from '@/Components/WebAdminSidebar';
+import { compressImage } from '@/utils/compressImage';
 
 interface TeamMember {
     id: number;
@@ -313,9 +314,10 @@ export default function Index({ teams, auth, flash }: Props) {
                                 <input 
                                     type="file"
                                     accept="image/*"
-                                    onChange={e => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
+                                    onChange={async e => {
+                                        const picked = e.target.files?.[0];
+                                        if (picked) {
+                                            const file = await compressImage(picked);
                                             setData('image', file);
                                             setPreviewImage(URL.createObjectURL(file));
                                         }

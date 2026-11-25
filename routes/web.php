@@ -92,6 +92,7 @@ Route::get('/activity', function () {
 
 Route::get('/activity/{id}', function ($id) {
     $activity = \App\Models\Activity::findOrFail($id);
+    $activity->recordView();
     return Inertia::render('ActivityDetail', [
         'activity' => $activity,
         'canLogin' => Route::has('login'),
@@ -110,6 +111,7 @@ Route::get('/news', function () {
 
 Route::get('/news/{id}', function ($id) {
     $newsItem = \App\Models\News::findOrFail($id);
+    $newsItem->recordView();
     return Inertia::render('NewsDetail', [
         'newsItem' => $newsItem,
         'canLogin' => Route::has('login'),
@@ -238,6 +240,7 @@ Route::middleware(['auth', 'role:web_admin,superadmin'])
     ->name('webadmin.')
     ->group(function () {
         Route::get('/dashboard', [WebAdminController::class, 'dashboard'])->name('dashboard');
+        Route::post('/content-images', [WebAdminController::class, 'uploadContentImage'])->name('content-images.store');
         Route::put('/solutions/settings', [App\Http\Controllers\WebAdmin\SolutionController::class, 'updateSettings'])->name('solutions.settings');
         Route::post('/solutions/toggle-visibility', [App\Http\Controllers\WebAdmin\SolutionController::class, 'toggleVisibility'])->name('solutions.toggle-visibility');
         Route::resource('solutions', App\Http\Controllers\WebAdmin\SolutionController::class)->except(['show', 'create', 'edit']);

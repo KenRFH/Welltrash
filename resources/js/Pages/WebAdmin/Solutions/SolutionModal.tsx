@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { compressImage } from '@/utils/compressImage';
 
 interface Props {
     isOpen: boolean;
@@ -143,8 +144,9 @@ export default function SolutionModal({
                         <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0] || null;
+                            onChange={async (e) => {
+                                const picked = e.target.files?.[0];
+                                const file = picked ? await compressImage(picked) : null;
                                 cardForm.setData('image', file);
                                 if (file) setPreviewImage(URL.createObjectURL(file));
                             }}
