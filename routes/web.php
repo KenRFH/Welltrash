@@ -8,33 +8,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\Admin\AttendanceController as AdminAttendanceController;
-use Spatie\Sitemap\Sitemap;
-use Spatie\Sitemap\Tags\Url;
-use Spatie\Sitemap\SitemapGenerator;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/generate-sitemap', function () {
-
-    $sitemap = Sitemap::create()
-        ->add(Url::create('/'))
-        ->add(Url::create('/tentang-kami'))
-        ->add(Url::create('/layanan'))
-        ->add(Url::create('/activity'))
-        ->add(Url::create('/katalog'))
-        ->add(Url::create('/downloads'));
-
-    // Activity detail
-    foreach (\App\Models\Activity::all() as $activity) {
-        $sitemap->add(Url::create("/activity/{$activity->id}"));
-    }
-
-    $sitemap->writeToFile(public_path('sitemap.xml'));
-
-    return 'Sitemap generated!';
-});
 
 
 Route::get('/', function () {
@@ -47,6 +25,10 @@ Route::get('/', function () {
         'subtitle'   => \App\Models\SiteSetting::get('solution_subtitle', 'Pengelolaan sampah komersial membutuhkan keandalan logistik, kepatuhan regulasi lingkungan hidup, dan transparansi data yang dapat dipertanggungjawabkan.'),
         'is_visible' => \App\Models\SiteSetting::get('solution_visible', '1') !== '0',
     ];
+    $meta = [
+        'title'       => 'Jasa Angkut Sampah Jember Terjadwal untuk Bisnis | WellTrash',
+        'description' => 'Jasa angkut & pengelolaan sampah terjadwal di Jember untuk bisnis, institusi, hotel, rumah sakit, dan perumahan. Armada resmi dan laporan tonase transparan.',
+    ];
     return Inertia::render('Welcome', [
         'canLogin'         => Route::has('login'),
         'canRegister'      => Route::has('register'),
@@ -54,50 +36,69 @@ Route::get('/', function () {
         'katalogs'         => $katalogs,
         'solutions'        => $solutions,
         'solutionSettings' => $solutionSettings,
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('beranda');
 
 Route::get('/tentang-kami', function () {
     $teams = \App\Models\Team::orderBy('order_num', 'asc')->orderBy('created_at', 'desc')->get();
+    $meta = [
+        'title'       => 'Tentang WellTrash – Perusahaan Pengelola Sampah di Jember',
+        'description' => 'Mengenal WellTrash, perusahaan pengelola sampah swasta di Jember: visi, tim, armada, dan fasilitas daur ulang WellTrash Farm.',
+    ];
     return Inertia::render('About', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'teams' => $teams,
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('about');
 
 Route::get('/layanan', function () {
+    $meta = [
+        'title'       => 'Harga & Paket Jasa Angkut Sampah Jember | WellTrash',
+        'description' => 'Paket jasa angkut sampah di Jember mulai Rp500.000 per penjemputan: on-demand, klaster perumahan, hingga paket rutin bisnis dan industri dengan MOU resmi.',
+    ];
     return Inertia::render('Services', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('services');
 
 Route::get('/activity', function () {
     $activities = \App\Models\Activity::orderBy('date', 'desc')->get();
+    $meta = [
+        'title'       => 'Aktivitas & Jurnal Lapangan | WellTrash Jember',
+        'description' => 'Dokumentasi kegiatan operasional, aksi pemilahan sampah, dan edukasi keberlanjutan bersama komunitas di Kabupaten Jember.',
+    ];
     return Inertia::render('Activity', [
         'activities' => $activities,
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('activity');
 
-Route::get('/activity/{id}', function ($id) {
+Route::get('/activity/{id}/{slug?}', function ($id, $slug = null) {
     $activity = \App\Models\Activity::findOrFail($id);
+    // One URL per activity: old /activity/{id} links and renamed titles 301 to the current slug.
+    if ($slug !== $activity->slug) {
+        return redirect()->route('activity.show', [$activity->id, $activity->slug], 301);
+    }
     $activity->recordView();
+    $meta = [
+        'title'       => $activity->title . ' | Aktivitas WellTrash',
+        'description' => $activity->excerpt(),
+        'image'       => $activity->image_path ? asset('storage/' . $activity->image_path) : null,
+        'type'        => 'article',
+    ];
     return Inertia::render('ActivityDetail', [
         'activity' => $activity,
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-    ])->withViewData([
-        // Rendered into <head> server-side: WhatsApp/Facebook previews don't run JavaScript.
-        'meta' => [
-            'title'       => $activity->title . ' | Aktivitas Welltrash',
-            'description' => $activity->excerpt(),
-            'image'       => $activity->image_path ? asset('storage/' . $activity->image_path) : null,
-            'url'         => route('activity.show', $activity->id),
-        ],
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('activity.show');
 
 // Berita was merged into Aktivitas (2026-11); keep old /news links from 404ing.
@@ -105,25 +106,40 @@ Route::get('/news/{any?}', fn () => redirect()->route('activity', [], 301))->whe
 
 Route::get('/katalog', function () {
     $katalogs = \App\Models\Katalog::orderBy('created_at', 'desc')->get();
+    $meta = [
+        'title'       => 'Katalog Produk Daur Ulang & Material Sirkular | WellTrash',
+        'description' => 'Katalog material daur ulang, kompos organik, pakan protein BSF, dan cacahan plastik dari WellTrash Farm Jember.',
+    ];
     return Inertia::render('Katalog', [
         'katalogs' => $katalogs,
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('katalog');
 
 Route::get('/downloads', function () {
+    $meta = [
+        'title'       => 'Unduh Aplikasi & Dokumen Resmi | WellTrash',
+        'description' => 'Unduh APK resmi WellTrash CleanUP Operator, akses Partner Portal mitra, dan dokumen legalitas operasional pengelolaan sampah di Kabupaten Jember.',
+    ];
     return Inertia::render('Downloads', [
         'apk' => json_decode(@file_get_contents(public_path('downloads/version.json')), true),
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('downloads');
 
 Route::get('/download', function () {
+    $meta = [
+        'title'       => 'Unduh Aplikasi WellTrash CleanUP Operator',
+        'description' => 'Unduh APK resmi WellTrash CleanUP Operator untuk petugas pengangkutan sampah armada WellTrash, lengkap dengan panduan instalasi.',
+    ];
     return Inertia::render('Admin/Download', [
         'apk' => json_decode(@file_get_contents(public_path('downloads/version.json')), true),
-    ]);
+        'meta' => $meta,
+    ])->withViewData(['meta' => $meta]);
 })->name('app.download');
 
 use App\Http\Controllers\AdminController;

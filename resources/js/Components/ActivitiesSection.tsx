@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 
 export interface Activity {
     id: number;
+    slug: string;
     title: string;
     description: string;
     image_path: string | null;
@@ -69,7 +70,7 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                 className="lg:col-span-7"
                             >
                                 <Link
-                                    href={route("activity.show", activities[0].id)}
+                                    href={route("activity.show", [activities[0].id, activities[0].slug])}
                                     className="group relative rounded-2xl overflow-hidden min-h-[380px] lg:min-h-[460px] flex items-end border border-zinc-200/80 bg-zinc-900 shadow-md block h-full"
                                 >
                                     <div className="absolute inset-0">
@@ -121,7 +122,7 @@ const ActivitiesSection: React.FC<ActivitiesSectionProps> = ({ activities }) => 
                                     className="flex-1"
                                 >
                                     <Link
-                                        href={route("activity.show", act.id)}
+                                        href={route("activity.show", [act.id, act.slug])}
                                         className="group bg-zinc-50/60 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl overflow-hidden flex flex-col h-full hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md transition-all duration-300"
                                     >
                                         {coverImage(act.image_path, act.description) && (

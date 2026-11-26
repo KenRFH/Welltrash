@@ -5,6 +5,7 @@ import Footer from "@/Components/Footer";
 import { Link } from "@inertiajs/react";
 import { CatalogEmptyIllustration } from "@/Components/Illustrations/CatalogEmptyIllustration";
 import { CtaBackgroundIllustration } from "@/Components/Illustrations/CtaBackgroundIllustration";
+import { CtaWasteAnimation } from "@/Components/Illustrations/CtaWasteAnimation";
 
 interface KatalogItem {
     id: number;
@@ -66,10 +67,7 @@ export default function KatalogPage({ katalogs }: Props) {
 
     return (
         <div className="min-h-screen bg-[#F8FAF8] dark:bg-zinc-950 font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
-            <SEO
-                title="Katalog Produk Daur Ulang & Material Sirkular - WellTrash"
-                description="Katalog material daur ulang berkualitas industri, kompos organik, pakan protein BSF, dan cacahan plastik daur ulang dari WellTrash Farm Jember."
-            />
+            <SEO />
             <Navbar />
 
             {/* Editorial Page Header */}
@@ -210,6 +208,7 @@ export default function KatalogPage({ katalogs }: Props) {
             {/* Final CTA Section - Lime Background */}
             <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
+                <CtaWasteAnimation />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Pasokan Material Daur Ulang untuk Industri Anda

@@ -76,10 +76,7 @@ export default function AppDownload({ apk }: { apk: ApkInfo | null }) {
 
     return (
         <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100">
-            <SEO
-                title="Unduh Aplikasi WellTrash CleanUP Operator"
-                description="Unduh APK resmi WellTrash CleanUP Operator untuk petugas pengangkutan sampah armada WellTrash. Versi terbaru dengan panduan instalasi lengkap."
-            />
+            <SEO />
             <Navbar />
 
             {/* Page Header */}

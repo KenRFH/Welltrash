@@ -38,10 +38,7 @@ export default function Downloads({ apk }: { apk: ApkInfo | null }) {
 
     return (
         <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
-            <SEO
-                title="Pusat Unduhan Resmi Aplikasi & Dokumen Operasional | WellTrash"
-                description="Portal unduh berkas APK resmi WellTrash CleanUP Operator, akses Partner Portal B2B, dan dokumen legalitas operasional pengelolaan limbah Kabupaten Jember."
-            />
+            <SEO />
             <Navbar />
             {/* Editorial Page Header */}
             <section className="pt-32 sm:pt-40 pb-12 sm:pb-16 px-6 lg:px-12 border-b border-black/10 dark:border-zinc-800 bg-white dark:bg-zinc-950">

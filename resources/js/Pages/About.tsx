@@ -4,6 +4,7 @@ import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import SEO from "@/Components/SEO";
 import { CtaBackgroundIllustration } from "@/Components/Illustrations/CtaBackgroundIllustration";
+import { CtaWasteAnimation } from "@/Components/Illustrations/CtaWasteAnimation";
 import videoHero from "@/assets/img/header_main_welltrash.mp4";
 
 interface TeamMember {
@@ -71,10 +72,7 @@ const About: React.FC<Props> = () => {
 
     return (
         <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
-            <SEO 
-                title="Tentang Kami - WellTrash" 
-                description="Pelajari visi, misi, dan operasional WellTrash, pelopor manajemen limbah komersial dan ekonomi sirkular terpadu di Kabupaten Jember." 
-            />
+            <SEO />
             <Navbar />
 
             {/* Editorial Page Header */}
@@ -257,6 +255,7 @@ const About: React.FC<Props> = () => {
             {/* Final CTA Section - Lime Background as per design.md */}
             <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
+                <CtaWasteAnimation />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Mulai Transformasi Pengelolaan Limbah Bisnis Anda

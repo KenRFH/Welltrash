@@ -5,6 +5,11 @@ import pemkab from "@/assets/icon/mitra/pemkab.png";
 import siloam from "@/assets/icon/mitra/rs_siloam.png";
 import rskaliwates from "@/assets/icon/mitra/logo_rsu_kaliwates.png";
 import subandi from "@/assets/icon/mitra/logo_rsu_subandi.jpg";
+import rsPerkebunan from "@/assets/icon/mitra/logo_rs_perkebunan_ihc.png";
+import rsuUnmuh from "@/assets/icon/mitra/logo_rsu_unmuh.jpg";
+import villiger from "@/assets/icon/mitra/logo_villiger.png";
+import aston from "@/assets/icon/mitra/logo_aston.jpg";
+import lippo from "@/assets/icon/mitra/logo_lippo_malls.svg";
 import {
     Hotel,
     Factory,
@@ -80,6 +85,51 @@ const partners: Partner[] = [
         badge: "Mitra Komersial BGN",
         verifiedYear: "Kemitraan Aktif",
     },
+    {
+        id: "rs-perkebunan",
+        name: "RS Perkebunan Jember Klinik",
+        sector: "Fasilitas Kesehatan",
+        category: "kesehatan",
+        icon: rsPerkebunan,
+        badge: "Mitra Fasilitas Kesehatan",
+        verifiedYear: "Kemitraan Aktif",
+    },
+    {
+        id: "rsu-unmuh",
+        name: "RSU Universitas Muhammadiyah Jember",
+        sector: "Fasilitas Kesehatan",
+        category: "kesehatan",
+        icon: rsuUnmuh,
+        badge: "Mitra Fasilitas Kesehatan",
+        verifiedYear: "Kemitraan Aktif",
+    },
+    {
+        id: "villiger",
+        name: "Villiger",
+        sector: "Industri Manufaktur",
+        category: "komersial",
+        icon: villiger,
+        badge: "Mitra Industri",
+        verifiedYear: "Kemitraan Aktif",
+    },
+    {
+        id: "aston",
+        name: "Aston Jember",
+        sector: "Hotel & Hospitality",
+        category: "komersial",
+        icon: aston,
+        badge: "Mitra Perhotelan",
+        verifiedYear: "Kemitraan Aktif",
+    },
+    {
+        id: "lippo",
+        name: "Lippo Plaza Jember",
+        sector: "Pusat Perbelanjaan",
+        category: "komersial",
+        icon: lippo,
+        badge: "Mitra Pusat Perbelanjaan",
+        verifiedYear: "Kemitraan Aktif",
+    },
 ];
 
 const industries = [
@@ -99,6 +149,11 @@ const row1Partners = [
     partners[2], // Pemkab Jember
     partners[4], // RS Kaliwates (Rolang)
     partners[5], // SPPG (BGN) Jember
+    partners[6], // RS Perkebunan Jember Klinik
+    partners[8], // Villiger
+    partners[7], // RSU Universitas Muhammadiyah Jember
+    partners[9], // Aston Jember
+    partners[10], // Lippo Plaza Jember
 ];
 
 const row2Partners = [
@@ -108,6 +163,11 @@ const row2Partners = [
     partners[0], // RSUD dr. Soebandi Jember
     partners[3], // RS Siloam Jember
     partners[1], // DLH Kab. Jember
+    partners[7], // RSU Universitas Muhammadiyah Jember
+    partners[8], // Villiger
+    partners[6], // RS Perkebunan Jember Klinik
+    partners[10], // Lippo Plaza Jember
+    partners[9], // Aston Jember
 ];
 
 // Diulang 3x agar total lebar konten per child melampaui lebar layar monitor ultra-wide
@@ -153,10 +213,10 @@ const Mitra: React.FC = () => {
                     100% { transform: translateX(0%); }
                 }
                 .animate-marquee-left {
-                    animation: marqueeLeft 35s linear infinite;
+                    animation: marqueeLeft 100s linear infinite;
                 }
                 .animate-marquee-right {
-                    animation: marqueeRight 35s linear infinite;
+                    animation: marqueeRight 100s linear infinite;
                 }
                 .marquee-row:hover .animate-marquee-left,
                 .marquee-row:hover .animate-marquee-right {
@@ -164,10 +224,10 @@ const Mitra: React.FC = () => {
                 }
                 @media (max-width: 640px) {
                     .animate-marquee-left {
-                        animation-duration: 25s;
+                        animation-duration: 75s;
                     }
                     .animate-marquee-right {
-                        animation-duration: 25s;
+                        animation-duration: 75s;
                     }
                 }
                 @media (prefers-reduced-motion: reduce) {

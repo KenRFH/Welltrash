@@ -9,6 +9,23 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Public pages + every activity; absolute URLs come from APP_URL.
+Artisan::command('sitemap:generate', function () {
+    $urls = array_map(fn ($r) => ['loc' => route($r)], ['beranda', 'about', 'services', 'activity', 'katalog', 'downloads']);
+    foreach (\App\Models\Activity::all() as $activity) {
+        $urls[] = ['loc' => route('activity.show', [$activity->id, $activity->slug]), 'lastmod' => $activity->updated_at?->toAtomString()];
+    }
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    foreach ($urls as $u) {
+        $xml .= '  <url><loc>' . htmlspecialchars($u['loc'], ENT_XML1) . '</loc>'
+            . (empty($u['lastmod']) ? '' : '<lastmod>' . $u['lastmod'] . '</lastmod>') . "</url>\n";
+    }
+    file_put_contents(public_path('sitemap.xml'), $xml . "</urlset>\n");
+    $this->info(count($urls) . ' URL ditulis ke public/sitemap.xml');
+})->purpose('Generate public/sitemap.xml');
+
+Schedule::command('sitemap:generate')->daily();
+
 Schedule::command('pickups:generate')->daily();
 
 // Jaring pengaman: kirim ulang absensi hari ini ke HRIS bila push realtime sempat gagal

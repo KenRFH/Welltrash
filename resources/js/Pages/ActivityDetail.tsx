@@ -1,6 +1,5 @@
 import BlogArticle from '@/Components/BlogArticle';
 import SEO from '@/Components/SEO';
-import { blogExcerpt } from '@/utils/blogContent';
 import React from 'react';
 import Navbar from '@/Components/Navbar';
 import Footer from '@/Components/Footer';
@@ -23,12 +22,7 @@ interface Props {
 export default function ActivityDetail({ activity, canLogin, canRegister }: Props) {
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 flex flex-col justify-between">
-            <SEO 
-                title={`${activity.title} | Aktivitas Welltrash`}
-                description={blogExcerpt(activity.description || '', 160)}
-                image={activity.image_path ? `${window.location.origin}/storage/${activity.image_path}` : undefined}
-                type="article"
-            />
+            <SEO />
             
             <Navbar />
 
