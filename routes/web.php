@@ -362,9 +362,8 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::fallback(function () {
-    return Inertia::render('NotFound');
-});
+// Real 404 status: a 200 here makes Google index every mistyped URL as a page ("soft 404").
+Route::fallback(fn () => Inertia::render('NotFound')->toResponse(request())->setStatusCode(404));
 
 /*
 |--------------------------------------------------------------------------
