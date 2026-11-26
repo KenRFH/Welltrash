@@ -9,6 +9,14 @@ interface FaqItem {
 
 const faqData: FaqItem[] = [
     {
+        q: "Berapa harga jasa angkut sampah WellTrash di Jember?",
+        a: "Paket Request (on-demand) mulai Rp500.000 per penjemputan, Paket Klaster Residensial mulai Rp1.000.000 per bulan, dan paket rutin bisnis mulai Rp2.500.000 per bulan (Reguler), Rp3.200.000 (Prime), hingga Rp5.200.000 (Industri Premium+). Harga akhir menyesuaikan volume sampah dan jarak lokasi setelah asesmen.",
+    },
+    {
+        q: "Apakah WellTrash melayani pengangkutan sampah rumah tangga atau perumahan?",
+        a: "Ya. Untuk kawasan perumahan dan klaster hunian tersedia Paket Klaster Residensial dengan penjemputan rutin, sedangkan kebutuhan sesekali atau mendadak dapat memakai Paket Request (on-demand). Hubungi tim kami via WhatsApp untuk cek jangkauan lokasi Anda.",
+    },
+    {
         q: "Apa model kemitraan pengelolaan limbah yang disediakan WellTrash?",
         a: "WellTrash menyediakan perjanjian kerja sama (MOU) resmi untuk pengangkutan sampah terjadwal dan terpadu bagi perkantoran, perhotelan, sentra komersial, hingga sektor industri. Kami menyediakan jadwal rutin, armada khusus, dan dokumentasi penanganan terpadu.",
     },

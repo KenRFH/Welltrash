@@ -6,9 +6,11 @@ import Navbar from "@/Components/Navbar";
 import Footer from "@/Components/Footer";
 import { EditorialPlaceholderIllustration } from "@/Components/Illustrations/EditorialPlaceholderIllustration";
 import { CtaBackgroundIllustration } from "@/Components/Illustrations/CtaBackgroundIllustration";
+import { CtaWasteAnimation } from "@/Components/Illustrations/CtaWasteAnimation";
 
 interface Activity {
     id: number;
+    slug: string;
     title: string;
     description: string;
     image_path: string | null;
@@ -29,10 +31,7 @@ function formatDate(d: string | null) {
 export default function ActivityPage({ activities }: Props) {
     return (
         <div className="min-h-screen bg-[#F8FAF8] dark:bg-zinc-950 font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
-            <SEO 
-                title="Aktivitas & Jurnal Lapangan - WellTrash" 
-                description="Dokumentasi kegiatan operasional, aksi nyata pemilahan sampah, dan edukasi keberlanjutan bersama komunitas di Kabupaten Jember." 
-            />
+            <SEO />
             <Navbar />
 
             {/* Editorial Page Header */}
@@ -64,7 +63,7 @@ export default function ActivityPage({ activities }: Props) {
                             return (
                                 <Link
                                     key={activity.id}
-                                    href={route("activity.show", activity.id)}
+                                    href={route("activity.show", [activity.id, activity.slug])}
                                     className="group grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center py-10 md:py-14 px-6 md:px-10 hover:bg-[#F4F6EF]/60 dark:hover:bg-zinc-850/60 transition-colors"
                                 >
                                     {/* Image side */}
@@ -133,6 +132,7 @@ export default function ActivityPage({ activities }: Props) {
             {/* Final CTA Section - Lime Background per design.md */}
             <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
+                <CtaWasteAnimation />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Bermitra untuk Aksi Keberlanjutan Nyata

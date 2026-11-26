@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 import Navbar from "@/Components/Navbar";
 import Mitra from "@/Components/Mitra";
 import Why, { SolutionData, SolutionSettingsData } from "@/Components/Why";
 import WasteFlow from "@/Components/WasteFlow";
+import RotatingText from "@/Components/RotatingText";
+import PartnerRegistrationFlow from "@/Components/PartnerRegistrationFlow";
 import ActivitiesSection, { Activity } from "@/Components/ActivitiesSection";
 import FaqSection from "@/Components/FaqSection";
 import Footer from "@/Components/Footer";
@@ -39,6 +41,29 @@ interface Props {
     solutionSettings?: SolutionSettingsData;
 }
 
+// 20.000 kg at this moment (2026-11-26), +1 kg every second after; time-anchored so reloads don't reset it.
+const WASTE_BASE_KG = 20000;
+const WASTE_BASE_AT = 1795672751000;
+const wasteKgNow = () =>
+    WASTE_BASE_KG + Math.max(0, Math.floor((Date.now() - WASTE_BASE_AT) / 1000));
+
+const LiveWasteKg: React.FC = () => {
+    const [kg, setKg] = useState(wasteKgNow);
+    useEffect(() => {
+        const id = setInterval(() => setKg(wasteKgNow()), 1000);
+        return () => clearInterval(id);
+    }, []);
+    return <>{kg.toLocaleString("id-ID")} kg+</>;
+};
+
+const HERO_AUDIENCES = [
+    "bisnis & institusi",
+    "rumah sakit",
+    "hotel",
+    "pusat perbelanjaan",
+    "instansi pemerintah",
+];
+
 const STATS = [
     {
         number: "30+",
@@ -47,7 +72,7 @@ const STATS = [
         color: "text-emerald-700 bg-emerald-50",
     },
     {
-        number: "8.000 kg+",
+        number: <LiveWasteKg />,
         label: "Sampah Teralihkan",
         icon: Scale,
         color: "text-orange-600 bg-orange-50",
@@ -71,10 +96,7 @@ const Welcome: React.FC<Props> = ({
     );
     return (
         <div className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 min-h-screen font-sans selection:bg-emerald-100 dark:selection:bg-emerald-900/60 selection:text-emerald-900 dark:selection:text-emerald-100">
-            <SEO
-                title="Pengelolaan Sampah Terjadwal untuk Bisnis di Jember"
-                description="Layanan jasa pengangkutan dan pengelolaan sampah komersial B2B di Jember. Terjadwal, bertanggung jawab, dan terukur untuk mendukung pelaporan ESG bisnis Anda."
-            />
+            <SEO />
             <Navbar />
 
             {/* Modern Minimalist Hero Section */}
@@ -100,10 +122,16 @@ const Welcome: React.FC<Props> = ({
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold tracking-tight text-zinc-900 dark:text-white leading-[1.08] mb-6"
                         >
-                            Pengelolaan sampah terjadwal untuk bisnis &amp;{" "}
-                            <span className="font-serif italic text-emerald-800 dark:text-emerald-400 font-normal">
-                                institusi di Jember.
-                            </span>
+                            Pengelolaan sampah terjadwal untuk{" "}
+                            <RotatingText
+                                texts={HERO_AUDIENCES}
+                                mainClassName="inline-flex align-bottom font-serif italic text-lime-500 dark:text-emerald-400 font-normal"
+                                splitLevelClassName="overflow-hidden pb-[0.12em] pr-[0.06em]"
+                                staggerFrom="last"
+                                staggerDuration={0.025}
+                                rotationInterval={2800}
+                            />{" "}
+                            di Jember.
                         </motion.h1>
 
                         <motion.p
@@ -112,9 +140,10 @@ const Welcome: React.FC<Props> = ({
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="text-zinc-600 dark:text-zinc-300 font-sans text-base sm:text-lg lg:text-xl leading-relaxed mb-10 max-w-2xl mx-auto font-normal"
                         >
-                            Layanan penjemputan berkala terstandarisasi,
-                            pemilahan bertanggung jawab di fasilitas WellTrash
-                            Farm, dan pelaporan kepatuhan ESG yang transparan.
+                            Jasa angkut sampah terjadwal di Jember: penjemputan
+                            berkala terstandarisasi, pemilahan bertanggung jawab
+                            di fasilitas WellTrash Farm, dan pelaporan kepatuhan
+                            ESG yang transparan.
                         </motion.p>
 
                         {/* CTA Buttons */}
@@ -185,6 +214,9 @@ const Welcome: React.FC<Props> = ({
 
             {/* 4-Step Operational Flow */}
             <WasteFlow />
+
+            {/* Partner registration: two entry paths, one shared form */}
+            <PartnerRegistrationFlow />
 
             {/* Circular Economy Catalog */}
             <section className="bg-white dark:bg-zinc-950 py-20 lg:py-28 border-b border-zinc-100 dark:border-zinc-800">

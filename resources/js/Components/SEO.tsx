@@ -1,43 +1,17 @@
 import React from 'react';
+import { usePage } from '@inertiajs/react';
 import { Helmet } from 'react-helmet-async';
+import { PageProps } from '@/types';
 
-interface SEOProps {
-    title?: string;
-    description?: string;
-    image?: string;
-    url?: string;
-    type?: string;
-}
-
-// Absolute URLs follow whichever domain is serving the page (welltrash.com in production).
-const ORIGIN = typeof window !== 'undefined' ? window.location.origin : 'https://welltrash.com';
-
-export default function SEO({ 
-    title = "Jasa Penjemputan & Pengelolaan Sampah se Jember | Welltrash", 
-    description = "Layanan jasa pengangkutan sampah profesional dan terpercaya di Jember. Solusi kebersihan hemat & cepat untuk rumah tangga hingga bisnis. Pesan WellTrash sekarang!",
-    image = `${ORIGIN}/apple-touch-icon.png`,
-    url = ORIGIN + (typeof window !== 'undefined' ? window.location.pathname : ''),
-    type = "website"
-}: SEOProps) {
-    return (
+/**
+ * Description, canonical, Open Graph and structured data are rendered server-side in app.blade.php
+ * from the route's `meta`. This only keeps the tab title right on client-side (Inertia) navigation.
+ */
+export default function SEO() {
+    const { meta } = usePage<PageProps<{ meta?: { title: string } }>>().props;
+    return meta ? (
         <Helmet>
-            {/* Standard metadata tags */}
-            <title>{title}</title>
-            <meta name="description" content={description} />
-            
-            {/* Open Graph / Facebook */}
-            <meta property="og:type" content={type} />
-            <meta property="og:url" content={url} />
-            <meta property="og:title" content={title} />
-            <meta property="og:description" content={description} />
-            <meta property="og:image" content={image} />
-
-            {/* Twitter */}
-            <meta property="twitter:card" content="summary_large_image" />
-            <meta property="twitter:url" content={url} />
-            <meta property="twitter:title" content={title} />
-            <meta property="twitter:description" content={description} />
-            <meta property="twitter:image" content={image} />
+            <title>{meta.title}</title>
         </Helmet>
-    );
+    ) : null;
 }

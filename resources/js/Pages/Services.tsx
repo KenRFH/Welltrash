@@ -4,6 +4,7 @@ import Footer from "@/Components/Footer";
 import { Link } from "@inertiajs/react";
 import SEO from "@/Components/SEO";
 import { CtaBackgroundIllustration } from "@/Components/Illustrations/CtaBackgroundIllustration";
+import { CtaWasteAnimation } from "@/Components/Illustrations/CtaWasteAnimation";
 import videoDemo from "@/assets/img/mini_demo.mp4";
 
 const DAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
@@ -173,10 +174,7 @@ const Services = () => {
 
     return (
         <div className="bg-[#F8FAF8] dark:bg-zinc-950 min-h-screen font-sans text-ink dark:text-zinc-100 selection:bg-lime selection:text-ink">
-            <SEO
-                title="Layanan & Paket Pengelolaan Sampah - WellTrash"
-                description="Pilihan skema jasa pengangkutan limbah komersial terjadwal, legalitas resmi, dan pelaporan ESG transparan untuk bisnis di Kabupaten Jember."
-            />
+            <SEO />
             <Navbar />
 
             {/* Hero Section: Green Deep Editorial Background per design.md */}
@@ -417,6 +415,7 @@ const Services = () => {
             {/* Final CTA Section - Lime Background */}
             <section className="bg-lime dark:bg-zinc-900 text-green-deep dark:text-white py-20 md:py-28 px-6 lg:px-12 relative overflow-hidden border-t border-black/5 dark:border-zinc-800">
                 <CtaBackgroundIllustration />
+                <CtaWasteAnimation />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-bold text-green-deep dark:text-white tracking-tight leading-tight mb-6">
                         Dapatkan Asesmen Volume & Penawaran Resmi

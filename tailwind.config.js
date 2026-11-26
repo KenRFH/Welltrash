@@ -48,6 +48,7 @@ export default {
             animation: {
                 marquee: 'marquee 25s linear infinite',
                 marqueeReverse: 'marqueeReverse 25s linear infinite',
+                'waste-rise': 'wasteRise 14s ease-in-out infinite',
             },
             keyframes: {
                 marquee: {
@@ -57,6 +58,13 @@ export default {
                 marqueeReverse: {
                     '0%': { transform: 'translateX(-100%)' },
                     '100%': { transform: 'translateX(0%)' },
+                },
+                wasteRise: {
+                    '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '0' },
+                    '15%': { opacity: '0.28' },
+                    '50%': { transform: 'translateY(-260px) translateX(14px) rotate(calc(var(--waste-rot) / 2))' },
+                    '85%': { opacity: '0.28' },
+                    '100%': { transform: 'translateY(-560px) rotate(var(--waste-rot))', opacity: '0' },
                 },
             },
         },

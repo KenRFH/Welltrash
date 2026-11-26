@@ -19,7 +19,7 @@ interface Step {
 const steps: Step[] = [
     {
         num: "01",
-        title: "Waste Assessment",
+        title: "Asesmen Sampah",
         desc: "Memetakan volume timbulan, proporsi material organik & anorganik, dan ritme operasional perusahaan Anda.",
         icon: ClipboardCheck,
         accentColor: "green",
@@ -27,7 +27,7 @@ const steps: Step[] = [
     },
     {
         num: "02",
-        title: "Tailored Plan",
+        title: "Rencana Khusus",
         desc: "Menentukan frekuensi penjemputan armada logistik, penyediaan wadah pemilahan, dan kontrak kemitraan resmi.",
         icon: CalendarClock,
         accentColor: "orange",
@@ -35,15 +35,15 @@ const steps: Step[] = [
     },
     {
         num: "03",
-        title: "Reliable Collection",
+        title: "Penjemputan Andal",
         desc: "Pengangkutan tepat waktu dan higienis oleh petugas terlatih berstandar APD lengkap serta timbangan digital.",
         icon: Truck,
         accentColor: "green",
-        points: ["Petugas berseragam & APD standar", "Protokol zero-spill higienis", "Pencatatan timbangan di lokasi"],
+        points: ["Petugas berseragam & APD standar", "Protokol anti-tumpah higienis", "Pencatatan timbangan di lokasi"],
     },
     {
         num: "04",
-        title: "Impact Reporting",
+        title: "Laporan Dampak",
         desc: "Laporan rekapitulasi manifest tonase bulanan transparan untuk audit kepatuhan DLH dan pelaporan ESG.",
         icon: FileSpreadsheet,
         accentColor: "orange",

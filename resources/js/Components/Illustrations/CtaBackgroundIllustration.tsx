@@ -1,6 +1,6 @@
 import React from "react";
 
-export const CtaBackgroundIllustration: React.FC<{ className?: string }> = ({ className = "w-full h-full" }) => {
+export const CtaBackgroundIllustration: React.FC<{ className?: string }> = ({ className = "absolute inset-0 w-full h-full" }) => {
     return (
         <svg
             viewBox="0 0 1440 400"

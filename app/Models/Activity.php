@@ -19,6 +19,14 @@ class Activity extends Model
         'date',
     ];
 
+    protected $appends = ['slug'];
+
+    /** URL segment for /activity/{id}/{slug}; derived from the title so it never needs a migration. */
+    public function getSlugAttribute(): string
+    {
+        return \Illuminate\Support\Str::slug((string) $this->title) ?: 'aktivitas';
+    }
+
     /** Plain-text summary for link previews (strips the blog markup of utils/blogContent). */
     public function excerpt(int $limit = 160): string
     {
