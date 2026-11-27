@@ -35,6 +35,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; bo
     failed:     { label: 'Dibatalkan',    bg: 'bg-red-50',     text: 'text-red-700',    border: 'border-red-200' },
     on_the_way: { label: 'Menuju Lokasi', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
     scheduled:  { label: 'Terjadwal',    bg: 'bg-gray-100',   text: 'text-gray-700',   border: 'border-gray-200' },
+    missed:     { label: 'Tidak Terambil', bg: 'bg-rose-50',  text: 'text-rose-700',   border: 'border-rose-200' },
 };
 
 export default function CleanUPShow({ cleanup, pickups = [] }: Props) {

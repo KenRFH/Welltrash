@@ -84,7 +84,7 @@ class MonthlyReportService
         return [
             'pickups'   => (int) $row->c,
             'scheduled' => (clone $scheduled)->count(),
-            'failed'    => (clone $scheduled)->where('status', 'failed')->count(),
+            'failed'    => (clone $scheduled)->whereIn('status', ['failed', 'missed'])->count(),
             'organic'   => round((float) $row->org, 2),
             'anorganic' => round((float) $row->anorg, 2),
             'residue'   => round((float) $row->res, 2),

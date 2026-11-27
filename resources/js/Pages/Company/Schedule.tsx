@@ -18,7 +18,7 @@ import {
 interface Pickup {
     id: number;
     pickup_date: string;
-    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
+    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed' | 'missed';
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
@@ -281,6 +281,10 @@ export default function Schedule({ company, pickups }: Props) {
                                                 ) : isFailed ? (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                                                         Batal / Gagal
+                                                    </span>
+                                                ) : pickup.status === 'missed' ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Tidak Terambil
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">

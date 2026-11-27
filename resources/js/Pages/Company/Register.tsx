@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { MapPin, Navigation, Search, CheckCircle2 } from 'lucide-react';
 import CompanySidebar from '@/Components/CompanySidebar';
 
+const DAYS_OF_WEEK = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
 export default function Register({ auth }: any) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isLocating, setIsLocating] = useState(false);
@@ -17,11 +19,11 @@ export default function Register({ auth }: any) {
         phone: '',
         business_category: '', // NEW Field
         subscription_plan: 'Reguler',
-        pickup_schedule: [] as string[],
+        pickup_schedule: DAYS_OF_WEEK.slice(0, 5), // default plan Reguler: every day it allows
         signed_mou: null as File | null,
     });
 
-    const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    const daysOfWeek = DAYS_OF_WEEK;
     const predefinedCategories = ['Hotel', 'Restoran', 'Cafe', 'SPPG', 'Gudang'];
     const [isCustomCategory, setIsCustomCategory] = React.useState(false);
 
@@ -82,8 +84,8 @@ export default function Register({ auth }: any) {
     };
 
     const getMaxDays = (plan: string) => {
-        if (plan === 'Rumah Tangga (> 10km)' || plan === 'Reguler') return 4;
-        if (plan === 'Prime' || plan === 'Premium+') return 6;
+        if (plan === 'Rumah Tangga (> 10km)' || plan === 'Reguler') return 5;
+        if (plan === 'Prime' || plan === 'Premium+') return 7;
         return 0;
     };
 
@@ -373,11 +375,8 @@ export default function Register({ auth }: any) {
                                                 key={pkg.id}
                                                 onClick={() => {
                                                     setData((prevData) => {
-                                                        const maxDays = pkg.maxDays ?? 0;
-                                                        let newSchedule = prevData.pickup_schedule;
-                                                        if (maxDays > 0 && newSchedule.length > maxDays) {
-                                                            newSchedule = newSchedule.slice(0, maxDays);
-                                                        }
+                                                        // Most partners are collected daily: preselect every day the plan allows.
+                                                        const newSchedule = daysOfWeek.slice(0, pkg.maxDays ?? 0);
                                                         return { ...prevData, subscription_plan: pkg.id, pickup_schedule: newSchedule };
                                                     });
                                                 }}

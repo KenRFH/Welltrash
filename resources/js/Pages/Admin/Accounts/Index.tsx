@@ -199,7 +199,8 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
             role: activeSubTab === 'internal' ? 'CleanUP' : activeSubTab,
             latitude: '',
             longitude: '',
-            pickup_schedule: []
+            // Most partners are collected daily: preselect every day the default plan (Reguler) allows.
+            pickup_schedule: daysOfWeek.slice(0, getScheduleLimit('Reguler'))
         }));
         setIsModalOpen(true);
     };
@@ -759,7 +760,7 @@ export default function Index({ cleanups, webAdmins, companies, internals, roleL
                                                 <label className="text-xs font-bold text-slate-600 block mb-1">Paket Berlangganan</label>
                                                 <select
                                                     value={data.subscription_plan}
-                                                    onChange={(e) => setData('subscription_plan', e.target.value)}
+                                                    onChange={(e) => { const plan = e.target.value; setData(d => ({ ...d, subscription_plan: plan, pickup_schedule: isEditing ? d.pickup_schedule : daysOfWeek.slice(0, getScheduleLimit(plan)) })); }}
                                                     className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                                                 >
                                                     <option value="Reguler">Reguler (Maks. 5 hari)</option>

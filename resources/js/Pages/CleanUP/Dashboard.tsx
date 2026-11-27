@@ -14,7 +14,7 @@ const GalleryIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentCo
 
 interface Pickup {
     id: number;
-    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
+    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed' | 'missed';
     organic_weight: number | null;
     anorganic_weight?: number | null;
     residue_weight?: number | null;
@@ -619,6 +619,7 @@ export default function Dashboard({ daysOfWeek, selectedDay, targetDate, isToday
                                                     <>
                                                         {status === 'completed' && <span className="text-[10px] font-bold tracking-wider uppercase text-green-700 bg-green-100 px-2.5 py-1 rounded-md">Selesai</span>}
                                                         {status === 'failed' && <span className="text-[10px] font-bold tracking-wider uppercase text-red-700 bg-red-100 px-2.5 py-1 rounded-md">Gagal</span>}
+                                                        {status === 'missed' && <span className="text-[10px] font-bold tracking-wider uppercase text-red-700 bg-red-100 px-2.5 py-1 rounded-md">Tidak Terambil</span>}
                                                         {status === 'scheduled' && <span className="text-[10px] font-bold tracking-wider uppercase text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200">Terjadwal</span>}
                                                         {status === 'on_the_way' && <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> OTW</span>}
                                                     </>

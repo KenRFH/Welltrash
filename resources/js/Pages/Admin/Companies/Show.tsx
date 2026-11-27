@@ -9,7 +9,7 @@ import { compressImage } from '@/utils/compressImage';
 interface PickupItem {
     id: number;
     pickup_date: string;
-    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
+    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed' | 'missed';
     organic_weight?: number;
     anorganic_weight?: number;
     residue_weight?: number;
@@ -280,6 +280,7 @@ export default function Show({ company, operators }: Props) {
                                         const isCompleted = p.status === 'completed';
                                         const isOtw = p.status === 'on_the_way';
                                         const isFailed = p.status === 'failed';
+                                        const isMissed = p.status === 'missed';
                                         const totalWeight = ((p.organic_weight || 0) + (p.anorganic_weight || 0) + (p.residue_weight || 0)).toFixed(1);
 
                                         return (
@@ -292,10 +293,10 @@ export default function Show({ company, operators }: Props) {
                                                         <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
                                                             isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                                                             isOtw ? 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse' :
-                                                            isFailed ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                                                            isFailed || isMissed ? 'bg-rose-50 text-rose-700 border border-rose-200' :
                                                             'bg-blue-50 text-blue-700 border border-blue-200'
                                                         }`}>
-                                                            {isCompleted ? 'Selesai' : isOtw ? 'OTW' : isFailed ? 'Gagal' : 'Terjadwal'}
+                                                            {isCompleted ? 'Selesai' : isOtw ? 'OTW' : isFailed ? 'Gagal' : isMissed ? 'Tidak Terambil' : 'Terjadwal'}
                                                         </span>
                                                     </div>
                                                     <p className="text-xs text-gray-500 mt-1 font-medium">
@@ -338,7 +339,7 @@ export default function Show({ company, operators }: Props) {
                                                             {resendingId === p.id ? 'Mengirim...' : 'Kirim Ulang Laporan'}
                                                         </button>
                                                     )}
-                                                    {(p.status === 'scheduled' || isOtw) && p.pickup_date.slice(0, 10) <= todayIso && (
+                                                    {(p.status === 'scheduled' || isOtw || isMissed) && p.pickup_date.slice(0, 10) <= todayIso && (
                                                         <button
                                                             type="button"
                                                             onClick={() => setCompleting(p)}
