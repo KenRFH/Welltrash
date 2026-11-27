@@ -124,7 +124,7 @@
         }
         .summary-card {
             display: table-cell;
-            width: 25%;
+            width: 20%;
             padding: 12px 14px;
             border-radius: 8px;
             vertical-align: top;
@@ -134,6 +134,7 @@
         .card-anorganic { background: #eff6ff; border: 1px solid #bfdbfe; }
         .card-residue   { background: #fef3c7; border: 1px solid #fde68a; }
         .card-total     { background: #111827; border: 1px solid #374151; }
+        .card-bags      { background: #f3f4f6; border: 1px solid #d1d5db; }
 
         .card-label {
             font-size: 8px;
@@ -146,6 +147,7 @@
         .card-anorganic .card-label { color: #1d4ed8; }
         .card-residue .card-label   { color: #92400e; }
         .card-total .card-label     { color: #9ca3af; }
+        .card-bags .card-label      { color: #374151; }
 
         .card-value {
             font-size: 18px;
@@ -155,6 +157,7 @@
         .card-anorganic .card-value { color: #1d4ed8; }
         .card-residue .card-value   { color: #92400e; }
         .card-total .card-value     { color: #ffffff; }
+        .card-bags .card-value      { color: #111827; }
 
         .card-unit {
             font-size: 9px;
@@ -164,6 +167,7 @@
         .card-anorganic .card-unit { color: #60a5fa; }
         .card-residue .card-unit   { color: #fbbf24; }
         .card-total .card-unit     { color: #6b7280; }
+        .card-bags .card-unit      { color: #6b7280; }
 
         /* ── TABLE ── */
         .section-title {
@@ -363,9 +367,10 @@
         <div class="summary-card card-total">
             <div class="card-label">Total Sampah</div>
             <div class="card-value">{{ number_format($totalSemua, 1) }} <span class="card-unit">kg</span></div>
-            @if($totalTrashBags > 0)
-                <div style="font-size: 8px; color: #9ca3af; margin-top: 2px; font-weight: bold;">📦 {{ $totalTrashBags }} Trashbag</div>
-            @endif
+        </div>
+        <div class="summary-card card-bags">
+            <div class="card-label">Trashbag</div>
+            <div class="card-value">{{ number_format($totalTrashBags, 0, ',', '.') }} <span class="card-unit">kantong</span></div>
         </div>
     </div>
 

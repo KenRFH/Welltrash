@@ -48,6 +48,7 @@
         <tr><td class="k">Diselesaikan</td><td>{{ $p->updated_at?->timezone(config('app.timezone'))->format('d/m/Y H.i') }} WIB</td></tr>
         <tr><td class="k">Petugas CleanUP</td><td>{{ $p->cleanup?->name ?: '—' }}</td></tr>
         <tr><td class="k">Armada</td><td>{{ $p->vehicle ? $p->vehicle->name . ' (' . $p->vehicle->license_plate . ')' : '—' }}</td></tr>
+        <tr><td class="k">Jumlah trashbag</td><td><strong>{{ $p->trash_bag_count ? $p->trash_bag_count . ' kantong' : 'Tidak ada' }}</strong></td></tr>
     </table>
 
     <table class="w">
@@ -56,7 +57,7 @@
             <tr><td>Organik</td><td class="n">{{ $kg($p->organic_weight) }}</td></tr>
             <tr><td>Anorganik</td><td class="n">{{ $kg($p->anorganic_weight) }}</td></tr>
             <tr><td>Residu</td><td class="n">{{ $kg($p->residue_weight) }}</td></tr>
-            <tr class="t"><td>Total{{ $p->trash_bag_count ? ' · ' . $p->trash_bag_count . ' trashbag' : '' }}</td><td class="n">{{ $total > 0 ? $kg($total) : 'Tidak ditimbang' }}</td></tr>
+            <tr class="t"><td>Total</td><td class="n">{{ $total > 0 ? $kg($total) : 'Tidak ditimbang' }}</td></tr>
         </tbody>
     </table>
 
