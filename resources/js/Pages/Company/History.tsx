@@ -18,7 +18,7 @@ import {
 
 interface Pickup {
     id: number;
-    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed';
+    status: 'scheduled' | 'on_the_way' | 'completed' | 'failed' | 'missed';
     organic_weight: number | null;
     anorganic_weight: number | null;
     residue_weight: number | null;
@@ -178,6 +178,7 @@ export default function History({ auth, company, pickups }: Props) {
                         {pickups.data.map((pickup) => {
                             const isCompleted = pickup.status === 'completed';
                             const isFailed = pickup.status === 'failed';
+                            const isMissed = pickup.status === 'missed';
                             const totalWeight =
                                 Number(pickup.organic_weight || 0) +
                                 Number(pickup.anorganic_weight || 0) +
@@ -193,7 +194,7 @@ export default function History({ auth, company, pickups }: Props) {
                                             className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                                                 isCompleted
                                                     ? 'bg-emerald-50 text-emerald-600'
-                                                    : isFailed
+                                                    : isFailed || isMissed
                                                     ? 'bg-rose-50 text-rose-600'
                                                     : 'bg-amber-50 text-amber-600'
                                             }`}
@@ -215,6 +216,11 @@ export default function History({ auth, company, pickups }: Props) {
                                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
                                                         <XCircle className="w-3 h-3 text-rose-600" />
                                                         Batal / Gagal
+                                                    </span>
+                                                ) : isMissed ? (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                        <XCircle className="w-3 h-3 text-rose-600" />
+                                                        Tidak Terambil
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">

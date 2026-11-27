@@ -4,24 +4,28 @@ namespace App\Console\Commands;
 
 use App\Models\Agenda;
 use App\Models\Invoice;
+use App\Models\Pickup;
 use App\Models\User;
 use App\Services\FcmService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
-/** Scheduled push reminders for the admin app: invoices due (daily), crew gone silent (every 15 min), agenda (every minute). */
+/** Scheduled push reminders for the admin app: invoices due (daily), crew gone silent (every 15 min), agenda (every minute), partners not yet collected (afternoon). */
 class PushRemindersCommand extends Command
 {
-    protected $signature = 'push:reminders {type : invoices|fleet|agendas} {--offline-minutes=30}';
+    protected $signature = 'push:reminders {type : invoices|fleet|agendas|pickups} {--offline-minutes=30}';
 
     protected $description = 'Kirim notifikasi pengingat (invoice jatuh tempo / armada offline) ke admin';
 
     public function handle(FcmService $fcm): int
     {
-        // Agenda reminders also live in the bell, so they run even without Firebase.
+        // Agenda and pickup reminders also live in the bell, so they run even without Firebase.
         if ($this->argument('type') === 'agendas') {
             return $this->agendas($fcm);
+        }
+        if ($this->argument('type') === 'pickups') {
+            return $this->pickups($fcm);
         }
 
         if (!$fcm->isConfigured()) {
@@ -101,9 +105,26 @@ class PushRemindersCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function pickups(FcmService $fcm): int
+    {
+        $today = Pickup::with('company:id,company_name')->whereDate('pickup_date', Carbon::today())->get();
+        $left = $today->whereIn('status', ['scheduled', 'on_the_way']);
+        if ($left->isEmpty()) {
+            $this->info('Semua penjemputan hari ini sudah ditangani.');
+            return Command::SUCCESS;
+        }
+
+        $names = $left->take(5)->map(fn (Pickup $p) => $p->company?->company_name)->filter()->implode(', ');
+        $more = $left->count() > 5 ? ' dan ' . ($left->count() - 5) . ' lainnya' : '';
+        $n = $fcm->toRoles(User::OPS_ROLES, "{$left->count()} dari {$today->count()} mitra belum dijemput", "{$names}{$more}. Cek di Monitoring.", ['type' => 'pickups']);
+        $this->info("Belum dijemput: {$left->count()}/{$today->count()}. Terkirim ke {$n} perangkat.");
+
+        return Command::SUCCESS;
+    }
+
     private function invalid(): int
     {
-        $this->error('Jenis harus invoices, fleet, atau agendas.');
+        $this->error('Jenis harus invoices, fleet, agendas, atau pickups.');
         return Command::INVALID;
     }
 }

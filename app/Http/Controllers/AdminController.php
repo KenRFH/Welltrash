@@ -48,7 +48,7 @@ class AdminController extends Controller
      */
     public function completePickup(Request $request, Pickup $pickup)
     {
-        if (! in_array($pickup->status, ['scheduled', 'on_the_way'], true)) {
+        if (! in_array($pickup->status, ['scheduled', 'on_the_way', 'missed'], true)) {
             return back()->with('error', 'Hanya penjemputan yang belum selesai yang dapat diselesaikan manual.');
         }
         if (Carbon::parse($pickup->pickup_date)->isFuture()) {

@@ -28,6 +28,9 @@ Schedule::command('sitemap:generate')->daily();
 
 Schedule::command('pickups:generate')->daily();
 
+// Close yesterday's unfinished pickups as "Tidak terambil" (see MarkMissedPickups)
+Schedule::command('pickups:mark-missed')->dailyAt('00:05');
+
 // Jaring pengaman: kirim ulang absensi hari ini ke HRIS bila push realtime sempat gagal
 Schedule::command('hris:push-attendance')->dailyAt('23:50');
 
@@ -44,6 +47,7 @@ Schedule::command('hris:sync-crew')->hourly()->withoutOverlapping();
 Schedule::command('push:reminders invoices')->dailyAt('08:00');
 Schedule::command('push:reminders fleet')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('push:reminders agendas')->everyMinute()->withoutOverlapping();
+Schedule::command('push:reminders pickups')->dailyAt('15:00');
 
 // Bell history: keep 90 days
 Schedule::call(fn () => \Illuminate\Support\Facades\DB::table('notifications')->where('created_at', '<', now()->subDays(90))->delete())
